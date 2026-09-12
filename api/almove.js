@@ -10,15 +10,17 @@ export default async function handler(req, res) {
     let respostaGoogle;
 
     if (req.method === 'GET') {
-      const params = new URLSearchParams(req.query).toString();
-      respostaGoogle = await fetch(`${APPS_SCRIPT_URL}?${params}`);
+      const params = new URLSearchParams(req.query);
+      params.set('api', '1'); // <-- isto é que faltava: diz ao doGet para entrar no modo API
+      respostaGoogle = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
     } else if (req.method === 'POST') {
       // Enviamos como texto simples de propósito — evita que o browser peça
       // autorização prévia (preflight) ao Apps Script, que não sabe responder a isso.
+      const corpo = Object.assign({}, req.body, { api: '1' });
       respostaGoogle = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(req.body),
+        body: JSON.stringify(corpo),
       });
     } else {
       res.status(405).json({ ok: false, erro: 'Método não suportado' });
