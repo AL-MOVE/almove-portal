@@ -188,11 +188,16 @@
       background:rgba(6,11,20,.96);border:1px solid rgba(255,255,255,.14);color:var(--text);
       font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.4);
       display:flex;justify-content:space-between;align-items:center;gap:12px;
+      animation:toast-entrar .32s cubic-bezier(.22,1,.36,1) both;
     }
     .toast button{
       padding:8px 14px;border-radius:8px;border:0;
       background:linear-gradient(135deg, var(--accent-old), var(--blue-dark));color:#fff;font-weight:700;font-size:13px;
+      box-shadow:0 6px 14px rgba(11,92,194,.28);
+      transition:transform .16s ease,filter .16s ease,box-shadow .16s ease;
     }
+    .toast button:active{transform:scale(.94);filter:brightness(1.12);box-shadow:0 2px 7px rgba(11,92,194,.22);}
+    @keyframes toast-entrar{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 
     /* ---------- Navegação inferior ---------- */
     .tabs-nav{
