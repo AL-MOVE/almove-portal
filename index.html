@@ -393,6 +393,73 @@
     .marco-check{flex-shrink:0;color:#4ade80;font-size:18px;font-weight:900;}
     .marco-cadeado{flex-shrink:0;color:var(--text-dim);font-size:15px;}
 
+    /* ---------- Opções ---------- */
+    .perfil-topo{display:flex;align-items:center;gap:14px;}
+    .perfil-avatar{
+      flex-shrink:0;width:52px;height:52px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg, var(--accent-old), var(--blue-dark));
+      color:#fff;font-size:19px;font-weight:850;
+    }
+    .perfil-corpo{flex:1;min-width:0;}
+    .perfil-nome{font-size:16px;font-weight:850;color:#fff;line-height:1.3;}
+    .perfil-estado-pill{
+      display:inline-flex;align-items:center;gap:6px;margin-top:6px;
+      padding:4px 11px;border-radius:999px;font-size:11px;font-weight:800;
+    }
+    .perfil-estado-pill.ativo{background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.3);color:#4ade80;}
+    .perfil-estado-pill.pausado{background:rgba(234,179,8,.14);border:1px solid rgba(234,179,8,.3);color:#facc15;}
+    .perfil-estado-pill.cancelado{background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.3);color:#f87171;}
+
+    .plano-linha{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--border-soft);}
+    .plano-linha:last-child{border-bottom:0;}
+    .plano-linha-label{font-size:12px;color:var(--text-muted);}
+    .plano-linha-valor{font-size:13px;font-weight:750;color:#fff;text-align:right;}
+
+    .opcoes-lista{display:flex;flex-direction:column;}
+    .opcoes-item{
+      display:flex;align-items:center;gap:12px;padding:14px 4px;
+      border-bottom:1px solid var(--border-soft);
+    }
+    .opcoes-item:last-child{border-bottom:0;}
+    .opcoes-item-icone{
+      flex-shrink:0;width:34px;height:34px;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;font-size:16px;
+      background:var(--bg-soft);
+    }
+    .opcoes-item-corpo{flex:1;min-width:0;}
+    .opcoes-item-titulo{font-size:13px;font-weight:750;color:#fff;}
+    .opcoes-item-sub{margin-top:1px;font-size:11px;color:var(--text-dim);}
+    .opcoes-item-seta{flex-shrink:0;color:var(--text-dim);}
+    .opcoes-item-seta svg{width:16px;height:16px;}
+    .opcoes-item.desativado{opacity:.5;}
+    .opcoes-item.desativado .opcoes-item-seta{display:none;}
+
+    .btn-contacto-pt{
+      display:flex;align-items:center;gap:12px;width:100%;
+      padding:14px 16px;border:0;border-radius:16px;text-align:left;
+      background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.28);
+      color:#fff;
+    }
+    .btn-contacto-pt:active{transform:scale(.98);}
+    .btn-contacto-pt-icone{
+      flex-shrink:0;width:38px;height:38px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;font-size:18px;
+      background:rgba(37,211,102,.2);color:#4ade80;
+    }
+    .btn-contacto-pt-corpo{flex:1;min-width:0;display:flex;flex-direction:column;}
+    .btn-contacto-pt-titulo{display:block;font-size:13px;font-weight:800;}
+    .btn-contacto-pt-sub{display:block;margin-top:1px;font-size:11px;color:var(--text-muted);}
+
+    .btn-logout{
+      width:100%;padding:14px;margin-top:4px;border-radius:12px;
+      border:1px solid rgba(239,68,68,.28);background:rgba(239,68,68,.08);
+      color:#f87171;font-size:13px;font-weight:750;
+    }
+    .btn-logout:active{transform:scale(.98);}
+
+    .versao-app{text-align:center;margin-top:6px;color:var(--text-dim);font-size:11px;}
+
     .btn-secundario{
       width:100%;padding:14px;margin-top:10px;
       border:1px solid var(--card-border);border-radius:12px;
@@ -910,12 +977,82 @@
 
   </div>
 
-  <!-- ============ TAB: PLANOS ============ -->
+  <!-- ============ TAB: OPÇÕES ============ -->
   <div id="tabPlanos" class="tab-conteudo oculto">
+
     <div class="card">
-      <div class="card-title">Em breve</div>
-      <div class="card-sub">Os teus planos de treino completos vão aparecer aqui em breve.</div>
+      <div class="perfil-topo">
+        <div class="perfil-avatar" id="opcoesAvatarInicial">A</div>
+        <div class="perfil-corpo">
+          <div class="perfil-nome" id="opcoesNomeCliente">A carregar…</div>
+          <span class="perfil-estado-pill oculto" id="opcoesEstadoPill"></span>
+        </div>
+      </div>
     </div>
+
+    <div class="card">
+      <div class="card-title">O teu plano</div>
+      <div id="opcoesPlanoConteudo">
+        <div class="plano-linha"><span class="plano-linha-label">Serviço</span><span class="plano-linha-valor" id="opcoesPlanoServico">—</span></div>
+        <div class="plano-linha oculto" id="opcoesPlanoValidadeLinha"><span class="plano-linha-label">Válido até</span><span class="plano-linha-valor" id="opcoesPlanoValidade">—</span></div>
+        <div class="plano-linha oculto" id="opcoesPlanoSessoesLinha"><span class="plano-linha-label">Sessões restantes</span><span class="plano-linha-valor" id="opcoesPlanoSessoes">—</span></div>
+      </div>
+    </div>
+
+    <button type="button" class="btn-contacto-pt" id="opcoesBtnContactoPT">
+      <span class="btn-contacto-pt-icone">💬</span>
+      <span class="btn-contacto-pt-corpo">
+        <span class="btn-contacto-pt-titulo" id="opcoesContactoPTTitulo">Falar com o André</span>
+        <span class="btn-contacto-pt-sub" id="opcoesContactoPTSub">Dúvidas, faltas ou remarcações</span>
+      </span>
+    </button>
+
+    <div class="card">
+      <div class="card-title">Documentos e faturação<span class="selo-exemplo">Exemplo</span></div>
+      <div class="opcoes-lista">
+        <div class="opcoes-item">
+          <div class="opcoes-item-icone">📄</div>
+          <div class="opcoes-item-corpo">
+            <div class="opcoes-item-titulo">Contrato</div>
+            <div class="opcoes-item-sub">Ver o teu contrato assinado</div>
+          </div>
+          <div class="opcoes-item-seta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
+        </div>
+        <div class="opcoes-item">
+          <div class="opcoes-item-icone">🧾</div>
+          <div class="opcoes-item-corpo">
+            <div class="opcoes-item-titulo">Faturas</div>
+            <div class="opcoes-item-sub">Histórico de pagamentos</div>
+          </div>
+          <div class="opcoes-item-seta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Preferências<span class="selo-exemplo">Exemplo</span></div>
+      <div class="opcoes-lista">
+        <div class="opcoes-item">
+          <div class="opcoes-item-icone">🔔</div>
+          <div class="opcoes-item-corpo">
+            <div class="opcoes-item-titulo">Notificações</div>
+            <div class="opcoes-item-sub">Lembretes de treino e mensagens</div>
+          </div>
+          <div class="opcoes-item-seta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
+        </div>
+        <div class="opcoes-item">
+          <div class="opcoes-item-icone">🔒</div>
+          <div class="opcoes-item-corpo">
+            <div class="opcoes-item-titulo">Privacidade e dados</div>
+            <div class="opcoes-item-sub">Como os teus dados são tratados</div>
+          </div>
+          <div class="opcoes-item-seta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="versao-app">AL MOVE — Portal do cliente</div>
+
   </div>
 
   <!-- ============ NAVEGAÇÃO INFERIOR ============ -->
@@ -933,8 +1070,8 @@
       Conquistas
     </div>
     <div class="tab-btn" id="tabBtnPlanos" data-tab="planos">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
-      Planos
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Opções
     </div>
   </div>
 
@@ -1133,6 +1270,77 @@
     })
     .catch(function () {
       // Sem ligação — os marcos ficam a zero até haver rede.
+    });
+
+  // ---------- Opções ----------
+  const ESTADO_PILL_CLASSE = { Ativo: "ativo", Pausado: "pausado", Cancelado: "cancelado" };
+  const opcoesAvatarInicialEl = document.getElementById("opcoesAvatarInicial");
+  const opcoesNomeClienteEl = document.getElementById("opcoesNomeCliente");
+  const opcoesEstadoPillEl = document.getElementById("opcoesEstadoPill");
+  const opcoesPlanoServicoEl = document.getElementById("opcoesPlanoServico");
+  const opcoesPlanoValidadeLinhaEl = document.getElementById("opcoesPlanoValidadeLinha");
+  const opcoesPlanoValidadeEl = document.getElementById("opcoesPlanoValidade");
+  const opcoesPlanoSessoesLinhaEl = document.getElementById("opcoesPlanoSessoesLinha");
+  const opcoesPlanoSessoesEl = document.getElementById("opcoesPlanoSessoes");
+  const opcoesBtnContactoPTEl = document.getElementById("opcoesBtnContactoPT");
+  const opcoesContactoPTTituloEl = document.getElementById("opcoesContactoPTTitulo");
+  const opcoesContactoPTSubEl = document.getElementById("opcoesContactoPTSub");
+
+  var opcoesContactoPTNumero = "";
+
+  function renderOpcoes(dados) {
+    const nome = String(dados.nome || "").trim();
+    if (nome) {
+      opcoesNomeClienteEl.textContent = nome;
+      opcoesAvatarInicialEl.textContent = nome.charAt(0).toUpperCase();
+    }
+
+    if (dados.estado) {
+      const classe = ESTADO_PILL_CLASSE[dados.estado] || "ativo";
+      opcoesEstadoPillEl.textContent = dados.estado;
+      opcoesEstadoPillEl.className = "perfil-estado-pill " + classe;
+      opcoesEstadoPillEl.classList.remove("oculto");
+    }
+
+    opcoesPlanoServicoEl.textContent = dados.servicoAtual || "A combinar com o André";
+
+    if (dados.validadeAte) {
+      opcoesPlanoValidadeEl.textContent = dados.validadeAte;
+      opcoesPlanoValidadeLinhaEl.classList.remove("oculto");
+    }
+
+    if (dados.sessoesRestantes !== null && dados.sessoesRestantes !== undefined) {
+      opcoesPlanoSessoesEl.textContent = dados.sessoesRestantes;
+      opcoesPlanoSessoesLinhaEl.classList.remove("oculto");
+    }
+
+    if (dados.contactoPTNome) {
+      opcoesContactoPTTituloEl.textContent = "Falar com " + dados.contactoPTNome;
+    }
+    if (dados.contactoPTNumero) {
+      // Aceita o número guardado com ou sem indicativo de país (ex.: "915707627"
+      // ou "351915707627") e normaliza sempre para o formato internacional.
+      let digitos = String(dados.contactoPTNumero).replace(/\D/g, "");
+      if (digitos.length === 9) digitos = "351" + digitos;
+      opcoesContactoPTNumero = digitos;
+      opcoesContactoPTSubEl.textContent = "Dúvidas, faltas ou remarcações";
+    } else {
+      opcoesContactoPTSubEl.textContent = "Contacto ainda não disponível";
+    }
+  }
+
+  opcoesBtnContactoPTEl.addEventListener("click", function () {
+    if (opcoesContactoPTNumero) {
+      window.open("https://wa.me/" + opcoesContactoPTNumero, "_blank");
+    }
+  });
+
+  chamarApi("getResumoOpcoesPortal", {})
+    .then(function (resp) {
+      if (resp && resp.ok && resp.dados) renderOpcoes(resp.dados);
+    })
+    .catch(function () {
+      // Sem ligação — o ecrã Opções fica com os valores por omissão até haver rede.
     });
 
   // ---------- Barra "O teu percurso de hoje" ----------
