@@ -721,6 +721,9 @@
     .plano-linha { border-color:var(--border-soft); }.plano-linha-valor{color:#fff;}
     .contacto-pt-card{padding:16px;margin:20px 0;background:linear-gradient(135deg,rgba(0,169,157,.25),rgba(5,48,57,.80));border-color:rgba(45,212,191,.35);}
     .contacto-pt-resumo{display:flex;align-items:center;gap:12px;}.btn-contacto-pt{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:13px 15px;border:0;border-radius:14px;background:linear-gradient(135deg,#0b5cc2,#00a99d 55%,#2dd4bf);color:#03201d;font:inherit;font-size:13px;font-weight:900;}.btn-contacto-pt:active{transform:scale(.985);}.btn-contacto-pt svg{width:18px;height:18px;}.btn-contacto-pt-icone{background:rgba(45,212,191,.18);}.btn-contacto-pt-icone svg{width:20px;height:20px;}.opcoes-item{border-color:var(--border-soft);}.opcoes-item-icone svg{width:17px;height:17px;color:var(--accent);}
+    .marco-icone svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}.marco-cadeado svg{width:15px;height:15px;vertical-align:middle;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .treino-card-icone svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .confirmar-treino{position:fixed;z-index:100;inset:0;display:flex;align-items:flex-end;justify-content:center;padding:20px max(16px,calc((100vw - 608px)/2)) calc(20px + env(safe-area-inset-bottom));background:rgba(2,6,14,.68);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}.confirmar-treino.oculto{display:none;}.confirmar-treino-painel{width:100%;padding:22px;border:1px solid rgba(45,212,191,.32);border-radius:25px;background:linear-gradient(155deg,rgba(13,34,54,.98),rgba(5,11,21,.98));box-shadow:0 -12px 45px rgba(0,0,0,.45);animation:subir-painel .24s ease-out;}.confirmar-treino-puxador{width:38px;height:4px;margin:0 auto 20px;border-radius:999px;background:rgba(255,255,255,.2);}.confirmar-treino-icone{width:44px;height:44px;display:grid;place-items:center;margin-bottom:14px;border-radius:15px;color:var(--accent);background:rgba(45,212,191,.12);border:1px solid rgba(45,212,191,.28);}.confirmar-treino-icone svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}.confirmar-treino-titulo{font-size:21px;font-weight:900;letter-spacing:-.03em;color:#fff;}.confirmar-treino-texto{margin-top:8px;color:var(--text-soft);font-size:13px;line-height:1.48;}.confirmar-treino-acoes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px;}.confirmar-treino-acoes button{min-height:49px;padding:10px;border-radius:14px;font:inherit;font-size:13px;font-weight:850;}.btn-voltar-treino{border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--text);}.btn-confirmar-termino{border:0;background:linear-gradient(135deg,var(--blue),var(--accent-old),var(--accent));color:#03201d;box-shadow:0 8px 20px rgba(45,212,191,.18);}.confirmar-treino-acoes button:active{transform:scale(.98);}@keyframes subir-painel{from{transform:translateY(28px);opacity:0}to{transform:translateY(0);opacity:1}}@media(max-width:380px){.confirmar-treino-acoes{grid-template-columns:1fr;}.btn-confirmar-termino{order:-1;}}
     .tabs-nav { width:min(calc(100% - 32px),608px); left:50%; bottom:max(12px,env(safe-area-inset-bottom)); transform:translateX(-50%); border:1px solid rgba(255,255,255,.14); border-radius:25px; padding:7px; background:rgba(5,15,25,.88); box-shadow:0 14px 38px rgba(0,0,0,.42); backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px); }
     .tab-btn { min-height:57px; border-radius:18px; color:var(--text-muted); font-size:10px; font-weight:800; }.tab-btn svg{width:20px;height:20px;}.tab-btn.ativo{color:var(--accent);background:rgba(45,212,191,.13);box-shadow:inset 0 0 0 1px rgba(45,212,191,.14);}
     @media (min-width:641px){.topo{border-left:0;border-right:0}.tab-conteudo{padding-top:28px}body{background-attachment:fixed;}}
@@ -909,6 +912,19 @@
     <div id="execucaoExerciciosLista"></div>
     <button type="button" class="botao" id="btnTerminarTreino">Terminar treino</button>
     <p class="erro" id="execucaoErro"></p>
+  </div>
+
+  <div class="confirmar-treino oculto" id="confirmarTerminoTreino" aria-hidden="true">
+    <div class="confirmar-treino-painel" role="dialog" aria-modal="true" aria-labelledby="confirmarTerminoTitulo">
+      <div class="confirmar-treino-puxador" aria-hidden="true"></div>
+      <div class="confirmar-treino-icone" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 12 11 14 15 10"/><circle cx="12" cy="12" r="9"/></svg></div>
+      <div class="confirmar-treino-titulo" id="confirmarTerminoTitulo">Terminar treino?</div>
+      <p class="confirmar-treino-texto">Confirma apenas quando tiveres registado todas as séries. Podes voltar ao treino e continuar a editar.</p>
+      <div class="confirmar-treino-acoes">
+        <button type="button" class="btn-voltar-treino" id="btnCancelarTermino">← Voltar ao treino</button>
+        <button type="button" class="btn-confirmar-termino" id="btnConfirmarTermino">Sim, terminar</button>
+      </div>
+    </div>
   </div>
 
   <div id="cardPosTreino" class="card oculto">
@@ -1276,7 +1292,7 @@
     } else if (marco.emProgresso) {
       lado = "";
     } else {
-      lado = '<span class="marco-cadeado">🔒</span>';
+      lado = '<span class="marco-cadeado" aria-label="Bloqueado"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>';
     }
     let progresso = "";
     if (!marco.concluido && marco.meta) {
@@ -1287,7 +1303,7 @@
     }
     return (
       '<div class="marco-item ' + estado + '">' +
-        '<div class="marco-icone">' + marco.icone + '</div>' +
+        '<div class="marco-icone" aria-hidden="true">' + iconeMarcoSvg(marco.icone) + '</div>' +
         '<div class="marco-corpo">' +
           '<div class="marco-titulo">' + marco.titulo + '</div>' +
           '<div class="marco-desc">' + marco.desc + '</div>' +
@@ -1296,6 +1312,11 @@
         lado +
       '</div>'
     );
+  }
+
+  function iconeMarcoSvg(tipo) {
+    if (tipo === "consistencia") return '<svg viewBox="0 0 24 24"><path d="M12 22c4.4 0 7-2.9 7-6.8 0-3-1.7-5.6-4.4-7.4.2 2.3-1 3.8-2.2 4.7.1-3.3-1.6-6.7-4.4-8.5.2 3.3-2 5.4-3.2 7.5C3.7 13.2 4 16.2 5.7 18.3 7.2 20.4 9.3 22 12 22Z"/></svg>';
+    return '<svg viewBox="0 0 24 24"><path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12"/></svg>';
   }
 
   function renderConquistas(dados) {
@@ -1309,7 +1330,7 @@
 
     const marcosStreak = [1, 4, 8, 12].map(function (meta) {
       return {
-        icone: "🔥",
+        icone: "consistencia",
         titulo: meta === 1 ? "Primeira semana" : meta + " semanas seguidas",
         desc: meta === 1
           ? "Completa pelo menos 1 treino esta semana."
@@ -1323,7 +1344,7 @@
 
     const marcosVolume = [10, 25, 50, 100].map(function (meta) {
       return {
-        icone: "💪",
+        icone: "treino",
         titulo: meta + " treinos concluídos",
         desc: "Regista um total de " + meta + " treinos.",
         atual: totalTreinos,
@@ -1810,6 +1831,9 @@
   const execucaoExerciciosLista = document.getElementById("execucaoExerciciosLista");
   const execucaoErro = document.getElementById("execucaoErro");
   const btnTerminarTreino = document.getElementById("btnTerminarTreino");
+  const confirmarTerminoTreinoEl = document.getElementById("confirmarTerminoTreino");
+  const btnCancelarTermino = document.getElementById("btnCancelarTermino");
+  const btnConfirmarTermino = document.getElementById("btnConfirmarTermino");
   const workoutTimerEl = document.getElementById("workoutTimer");
   const workoutSaveStateEl = document.getElementById("workoutSaveState");
   const cardPosTreino = document.getElementById("cardPosTreino");
@@ -1938,7 +1962,7 @@
         : "";
       html +=
         '<div class="treino-card' + (treino.feitoAntes ? " feito-hoje" : "") + '">' +
-        '<div class="treino-card-icone">🏋️</div>' +
+        '<div class="treino-card-icone" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 7v10M18 7v10M3 9v6M21 9v6M6 12h12"/></svg></div>' +
         '<div class="treino-card-corpo">' + badge +
         '<div class="nome">' + treino.nome + '</div>' +
         '<div class="sub">' + numExercicios + ' exercício' + (numExercicios === 1 ? "" : "s") + '</div>' +
@@ -2333,6 +2357,26 @@
   });
 
   // ---------- Terminar treino ----------
+  function abrirConfirmacaoTermino() {
+    if (!TREINO_ATUAL_EXECUCAO) return;
+    execucaoErro.style.display = "none";
+    const payload = criarPayloadTreino();
+    if (!payload.exercicios.length) {
+      execucaoErro.textContent = "Regista pelo menos uma série antes de terminares.";
+      execucaoErro.style.display = "block";
+      return;
+    }
+    confirmarTerminoTreinoEl.classList.remove("oculto");
+    confirmarTerminoTreinoEl.setAttribute("aria-hidden", "false");
+    btnCancelarTermino.focus();
+  }
+
+  function fecharConfirmacaoTermino() {
+    confirmarTerminoTreinoEl.classList.add("oculto");
+    confirmarTerminoTreinoEl.setAttribute("aria-hidden", "true");
+    btnTerminarTreino.focus();
+  }
+
   function criarPayloadTreino() {
     const rascunho = guardarTreinoAtual();
     const exercicios = rascunho.exercises
@@ -2423,7 +2467,19 @@
         showToastTreino(mensagemErroLigacao());
       });
   }
-  btnTerminarTreino.addEventListener("click", terminarTreino);
+  btnTerminarTreino.addEventListener("click", abrirConfirmacaoTermino);
+  btnCancelarTermino.addEventListener("click", fecharConfirmacaoTermino);
+  btnConfirmarTermino.addEventListener("click", function () {
+    confirmarTerminoTreinoEl.classList.add("oculto");
+    confirmarTerminoTreinoEl.setAttribute("aria-hidden", "true");
+    terminarTreino();
+  });
+  confirmarTerminoTreinoEl.addEventListener("click", function (evento) {
+    if (evento.target === confirmarTerminoTreinoEl) fecharConfirmacaoTermino();
+  });
+  document.addEventListener("keydown", function (evento) {
+    if (evento.key === "Escape" && !confirmarTerminoTreinoEl.classList.contains("oculto")) fecharConfirmacaoTermino();
+  });
 
   function showToastTreino(texto) {
     const aviso = document.createElement("div");
@@ -2520,160 +2576,4 @@
     if (minutos < 60) return minutos + " min";
     const h = Math.floor(minutos / 60);
     const m = minutos % 60;
-    return h + "h " + m + "m";
-  }
-
-  function mostrarTreinoConcluido(workout) {
-    document.getElementById("treinoConcluidoNome").textContent = workout.nomeTreino || "";
-    document.getElementById("treinoConcluidoVolume").textContent = (workout.volume || 0) + " kg";
-    document.getElementById("treinoConcluidoDuracao").textContent = formatarDuracao(workout.duracaoSegundos || 0);
-    cardTreinoConcluido.classList.remove("oculto");
-    renderFluxoHoje();
-  }
-
-  document.getElementById("btnRegistarOutroTreino").addEventListener("click", function () {
-    TREINO_ATUAL_EXECUCAO = null;
-    TREINO_ATUAL_INDEX = null;
-    cardTreinoConcluido.classList.add("oculto");
-    mostrarCardEscolherTreino();
-  });
-
-  // ---------- Restauro automático ao reabrir a app ----------
-  function restaurarEstadoTreino() {
-    const estado = lerEstadoDiario();
-    const workout = estado.workout;
-    if (!workout) return;
-
-    if (workout.status === "active") {
-      const idx = PLANO_ATIVO ? PLANO_ATIVO.treinos.findIndex(function (t) { return t.nome === workout.nomeTreino; }) : -1;
-      if (idx === -1) return;
-      escolherTreino(idx, true);
-      return;
-    }
-
-    if ((workout.status === "post-workout" || workout.status === "completed") && !workout.endedAt) {
-      // Estado incompleto/corrompido — limpa em vez de deixar a app presa.
-      estado.workout = null;
-      estado.postWorkout = null;
-      guardarEstadoDiario(estado);
-      return;
-    }
-
-    if (workout.status === "post-workout") {
-      mostrarCardPosTreino();
-      return;
-    }
-
-    if (workout.status === "completed") {
-      mostrarTreinoConcluido(workout);
-    }
-  }
-
-  // ---------- Arranque: pergunta ao servidor o estado de hoje ----------
-  renderFluxoHoje();
-  chamarApi("getEstadoPortalHoje", {})
-    .then(function (resp) {
-      ecraCarregando.classList.add("oculto");
-      cardCheckin.classList.remove("oculto");
-
-      if (!resp || !resp.ok) {
-        checkinErro.textContent = (resp && resp.erro) || "Não foi possível ligar ao servidor.";
-        checkinErro.style.display = "block";
-        return;
-      }
-
-      const dados = resp.dados || {};
-
-      if (dados.testeProntidaoHoje) {
-        PRONTIDAO_HOJE_INICIAL = dados.testeProntidaoHoje;
-      }
-
-      let temCheckinHoje = false;
-
-      if (dados.jaFezCheckinHoje && dados.checkinHoje) {
-        mostrarResumo(dados.checkinHoje);
-        mostrarCardProntidao();
-        temCheckinHoje = true;
-        CHECKIN_HOJE_CONFIRMADO = true;
-      } else {
-        // Sem check-in no servidor — verifica se há um rascunho local por
-        // sincronizar (ex.: enviou offline e voltou à app antes de haver rede).
-        const estadoLocal = lerEstadoDiario();
-        if (estadoLocal.checkin && estadoLocal.checkin.submitted && !estadoLocal.checkin.synced) {
-          preencherRespostas(estadoLocal.checkin.values);
-          mostrarResumo(estadoLocal.checkin.values);
-          mostrarCardProntidao();
-          temCheckinHoje = true;
-          CHECKIN_HOJE_CONFIRMADO = true;
-          if (navigator.onLine) {
-            chamarApi("registarCheckin", Object.assign({}, estadoLocal.checkin.values, { eventId: estadoLocal.checkin.eventId }))
-              .then(function (resp2) {
-                if (resp2 && resp2.ok) {
-                  estadoLocal.checkin.synced = true;
-                  guardarEstadoDiario(estadoLocal);
-                }
-              })
-              .catch(function () {});
-          }
-          sincronizarProntidaoPendente();
-        }
-      }
-
-      if (!temCheckinHoje) return;
-
-      // Carrega o plano ativo e os treinos, e decide que ecrã do passo 3 mostrar.
-      carregarPlanoAtivoSeNecessario()
-        .then(function () {
-          const estadoAgora = lerEstadoDiario();
-          if (estadoAgora.workout && estadoAgora.workout.status) {
-            restaurarEstadoTreino();
-          } else {
-            mostrarCardEscolherTreino();
-          }
-        })
-        .catch(function () {
-          // Sem plano carregado — o cliente continua a ver check-in/prontidão normalmente.
-        });
-    })
-    .catch(function () {
-      ecraCarregando.classList.add("oculto");
-      cardCheckin.classList.remove("oculto");
-      checkinErro.textContent = "Sem ligação. Tenta novamente quando tiveres rede.";
-      checkinErro.style.display = "block";
-    });
-
-  // ---------- Service worker ----------
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", function () {
-      navigator.serviceWorker.register("/sw.js").then(function (registo) {
-        registo.addEventListener("updatefound", function () {
-          const novoWorker = registo.installing;
-          novoWorker.addEventListener("statechange", function () {
-            if (novoWorker.state === "installed" && navigator.serviceWorker.controller) {
-              mostrarAvisoAtualizacao(novoWorker);
-            }
-          });
-        });
-      }).catch(function () {
-        // Ambientes sem suporte a service worker (ex.: teste local via file://)
-        // não devem impedir o resto da app de funcionar.
-      });
-    });
-  }
-
-  function mostrarAvisoAtualizacao(novoWorker) {
-    const aviso = document.createElement("div");
-    aviso.className = "toast";
-    aviso.innerHTML = '<span>Há uma versão nova da app.</span><button>Atualizar</button>';
-    aviso.querySelector("button").onclick = function () {
-      novoWorker.postMessage("SKIP_WAITING");
-      novoWorker.addEventListener("statechange", function () {
-        if (novoWorker.state === "activated") window.location.reload();
-      });
-    };
-    document.body.appendChild(aviso);
-  }
-})();
-</script>
-</body>
-</html>
+  
