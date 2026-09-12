@@ -1,58 +1,47 @@
-// Service worker do Portal AL MOVE.
-// A versão sobe com esta atualização visual para que instalações existentes
-// recebam o novo index.html em vez de manterem a versão anterior em cache.
+const VERSAO_CACHE = 'almove-portal-v4';
+const CACHE_APP = VERSAO_CACHE;
 
-const VERSAO_CACHE = 'almove-portal-v3';
-
-const FICHEIROS_ESSENCIAIS = [
-  '/',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-any-512.png',
+const FICHEIROS_CACHE = [
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './sw.js',
+  './icons/icon-192.png',
+  './icons/icon-512.png'
 ];
 
 self.addEventListener('install', (evento) => {
   evento.waitUntil(
-    caches.open(VERSAO_CACHE).then((cache) => cache.addAll(FICHEIROS_ESSENCIAIS))
+    caches.open(CACHE_APP)
+      .then((cache) => cache.addAll(FICHEIROS_CACHE))
+      .then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
 self.addEventListener('activate', (evento) => {
   evento.waitUntil(
-    caches.keys().then((nomes) =>
-      Promise.all(
-        nomes
-          .filter((nome) => nome !== VERSAO_CACHE)
-          .map((nome) => caches.delete(nome))
+    caches.keys()
+      .then((nomes) =>
+        Promise.all(
+          nomes
+            .filter((nome) => nome.startsWith('almove-portal-') && nome !== CACHE_APP)
+            .map((nome) => caches.delete(nome))
+        )
       )
-    )
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (evento) => {
-  if (!evento.request.url.startsWith('http')) return;
-
-  // Dados do Portal nunca são servidos de cache.
-  if (evento.request.url.includes('/api/')) return;
+  if (evento.request.method !== 'GET') return;
 
   evento.respondWith(
-    caches.match(evento.request).then((respostaCache) => (
-      respostaCache ||
-      fetch(evento.request).then((respostaRede) => {
-        const clone = respostaRede.clone();
-        caches.open(VERSAO_CACHE).then((cache) => {
-          if (respostaRede && respostaRede.status === 200 && respostaRede.type === 'basic') {
-            cache.put(evento.request, clone);
-          }
-        });
-        return respostaRede;
+    fetch(evento.request)
+      .then((resposta) => {
+        const copia = resposta.clone();
+        caches.open(CACHE_APP).then((cache) => cache.put(evento.request, copia));
+        return resposta;
       })
-    ))
+      .catch(() => caches.match(evento.request))
   );
-});
-
-self.addEventListener('message', (evento) => {
-  if (evento.data === 'SKIP_WAITING') self.skipWaiting();
 });
