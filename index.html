@@ -734,6 +734,70 @@
     .tab-btn { min-height:57px; border-radius:18px; color:var(--text-muted); font-size:10px; font-weight:800; }.tab-btn svg{width:20px;height:20px;}.tab-btn.ativo{color:var(--accent);background:rgba(45,212,191,.13);box-shadow:inset 0 0 0 1px rgba(45,212,191,.14);}
     @media (min-width:641px){.topo{border-left:0;border-right:0}.tab-conteudo{padding-top:28px}body{background-attachment:fixed;}}
   </style>
+
+  <style id="treinos-exercicios-design">
+    /* Treinos: biblioteca primeiro, registo focado por exercício. */
+    #cardExecucaoTreino { padding:18px; }
+    .execucao-cabecalho { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin:4px 0 14px; }
+    .execucao-cabecalho .card-title { max-width:72%; line-height:1.16; }
+    .execucao-contagem { flex:0 0 auto; padding:7px 10px; border:1px solid rgba(45,212,191,.26); border-radius:999px; color:var(--accent); background:rgba(45,212,191,.09); font-size:10px; font-weight:850; letter-spacing:.04em; }
+    .execucao-biblioteca { animation:exercicioEntrar .24s cubic-bezier(.22,1,.36,1) both; }
+    .execucao-biblioteca.oculto { display:none; }
+    .execucao-biblioteca-intro { margin:0 0 14px; color:var(--text-soft); font-size:12px; line-height:1.45; }
+    .execucao-lista { display:grid; gap:9px; }
+    .execucao-exercicio-item { width:100%; min-height:82px; display:grid; grid-template-columns:38px 1fr auto; align-items:center; gap:11px; padding:13px; text-align:left; border:1px solid var(--border-soft); border-radius:16px; background:rgba(255,255,255,.045); color:var(--text); font:inherit; cursor:pointer; transition:transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease; }
+    .execucao-exercicio-item:hover { border-color:rgba(45,212,191,.46); background:rgba(45,212,191,.07); }
+    .execucao-exercicio-item:active { transform:scale(.985); }
+    .execucao-exercicio-item.parcial { border-color:rgba(234,179,8,.42); }
+    .execucao-exercicio-item.completo { border-color:rgba(45,212,191,.48); background:rgba(45,212,191,.075); }
+    .execucao-exercicio-numero { display:grid; place-items:center; width:38px; height:38px; border-radius:12px; background:rgba(11,92,194,.18); color:#b9d9ff; font-size:12px; font-weight:900; }
+    .execucao-exercicio-item.completo .execucao-exercicio-numero { color:#05241f; background:var(--accent); }
+    .execucao-exercicio-nome { display:block; overflow:hidden; color:#fff; font-size:14px; font-weight:850; letter-spacing:-.015em; text-overflow:ellipsis; white-space:nowrap; }
+    .execucao-exercicio-meta { display:block; margin-top:4px; color:var(--text-muted); font-size:11px; }
+    .execucao-exercicio-estado { display:grid; place-items:center; width:25px; height:25px; color:var(--text-dim); }
+    .execucao-exercicio-estado svg { width:18px; height:18px; }
+    .execucao-exercicio-item.completo .execucao-exercicio-estado { color:var(--accent); }
+    .execucao-exercicio-item.parcial .execucao-exercicio-estado { color:#facc15; }
+    .execucao-detalhe { display:none; }
+    .execucao-detalhe.player-ativo { display:block; animation:exercicioEntrar .25s cubic-bezier(.22,1,.36,1) both; }
+    .exec-detalhe-topo { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
+    .btn-voltar-exercicios, .exec-historico-btn { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border); background:rgba(255,255,255,.045); color:var(--text-soft); font:inherit; font-size:11px; font-weight:800; cursor:pointer; }
+    .btn-voltar-exercicios { min-height:36px; padding:0 10px; border-radius:10px; }
+    .btn-voltar-exercicios:active, .exec-historico-btn:active { transform:scale(.97); }
+    .btn-voltar-exercicios svg, .exec-historico-btn svg { width:15px; height:15px; }
+    .exec-detalhe-indicador { color:var(--text-muted); font-size:11px; font-weight:750; }
+    .exec-detalhe-media { position:relative; min-height:72px; display:flex; align-items:center; gap:11px; margin-bottom:14px; padding:13px; overflow:hidden; border:1px solid rgba(11,92,194,.34); border-radius:16px; background:linear-gradient(108deg,rgba(11,92,194,.17),rgba(45,212,191,.08)); }
+    .exec-detalhe-media:after { content:""; position:absolute; width:100px; height:100px; right:-40px; top:-44px; border:1px solid rgba(45,212,191,.2); border-radius:50%; }
+    .exec-detalhe-media-icone { display:grid; place-items:center; width:39px; height:39px; border-radius:12px; color:var(--accent); background:rgba(45,212,191,.13); }
+    .exec-detalhe-media-icone svg { width:21px; height:21px; }
+    .exec-detalhe-media strong { display:block; color:#fff; font-size:13px; }
+    .exec-detalhe-media span { display:block; margin-top:3px; color:var(--text-muted); font-size:10px; }
+    .exec-exercicio { display:none; padding:0; margin:0; border:0; background:transparent; }
+    .exec-exercicio.player-ativo { display:block; }
+    .exec-exercicio.exec-parcial, .exec-exercicio.exec-completo { background:transparent; border-color:transparent; }
+    .exec-header { align-items:flex-start; margin:0 0 10px; }
+    .exec-exercicio-titulo { font-size:21px; line-height:1.12; letter-spacing:-.035em; }
+    .exec-progress { display:inline-block; margin-top:5px; color:var(--accent); font-size:11px; font-weight:800; }
+    .exec-exercicio-prescrito { margin:0 0 11px; padding:10px 11px; border-left:2px solid var(--accent); background:rgba(255,255,255,.045); color:var(--text-soft); font-size:11px; line-height:1.5; }
+    .exec-descanso { margin-bottom:14px; }
+    .exec-descanso button { display:inline-flex; align-items:center; gap:5px; }
+    .exec-descanso button svg { width:14px; height:14px; }
+    .exec-serie { padding:11px; margin-bottom:8px; }
+    .exec-detalhe-nav { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:16px; }
+    .exec-detalhe-nav button { min-height:45px; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:0 10px; border:1px solid var(--border); border-radius:13px; background:rgba(255,255,255,.06); color:var(--text); font:inherit; font-size:12px; font-weight:850; cursor:pointer; transition:transform .18s ease, background .18s ease, border-color .18s ease; }
+    .exec-detalhe-nav button:last-child { border-color:rgba(45,212,191,.38); background:rgba(45,212,191,.10); color:var(--accent); }
+    .exec-detalhe-nav button:active { transform:scale(.975); }
+    .exec-detalhe-nav button:disabled { opacity:.34; cursor:default; }
+    .exec-detalhe-nav svg { width:16px; height:16px; }
+    #btnTerminarTreino.oculto { display:none; }
+    @keyframes exercicioEntrar { from { opacity:0; transform:translateY(9px); } to { opacity:1; transform:translateY(0); } }
+    @media (min-width:760px) {
+      .execucao-lista { grid-template-columns:1fr 1fr; }
+      .execucao-exercicio-item { min-height:96px; }
+      .execucao-detalhe { max-width:560px; margin:0 auto; }
+    }
+    @media (prefers-reduced-motion:reduce) { .execucao-biblioteca, .execucao-detalhe.player-ativo { animation:none; } .execucao-exercicio-item, .exec-detalhe-nav button { transition:none; } }
+  </style>
 </head>
 <body>
 
@@ -2129,58 +2193,68 @@
   document.getElementById("btnVoltarTreinos").addEventListener("click", voltarEscolherTreino);
 
   // ---------- Construir a interface de execução ----------
-  function construirInterfaceTreino(treino, rascunho) {
-    let html = "";
+  function textoPrescricaoExercicio(ex) {
+    const porTempo = ex.tipoPrescricao === "TEMPO" || /(?:seg|sec|min|tempo|\d\s*s\b|:)/i.test(String(ex.repsMin || "") + " " + String(ex.repsMax || ""));
+    const unidade = porTempo ? "seg" : "reps";
+    return (ex.series || "-") + " séries · " + (ex.repsMin || "-") + "–" + (ex.repsMax || "-") + " " + unidade + " · RIR " + (ex.rir || "-");
+  }
 
-    html += '<div class="exec-player-rail">' +
-      '<button type="button" id="execPlayerAnterior">' + iconeNativoSvg("setaEsquerda") + ' Anterior</button>' +
-      '<div class="exec-player-current" id="execPlayerAtual"></div>' +
-      '<button type="button" id="execPlayerSeguinte">Seguinte ' + iconeNativoSvg("setaDireita") + '</button>' +
-      '</div>' +
-      '<button type="button" class="btn-escolher-exercicio" id="btnAlternarPicker">Escolher exercício</button>' +
-      '<div class="exec-player-picker" id="execPlayerPicker"></div>';
+  function construirInterfaceTreino(treino, rascunho) {
+    let html = '<section class="execucao-biblioteca" id="execucaoBiblioteca">' +
+      '<p class="execucao-biblioteca-intro">Escolhe um exercício para registares as séries. Podes voltar a esta lista a qualquer momento.</p>' +
+      '<div class="execucao-lista">';
+
+    treino.exercicios.forEach(function (ex, exIdx) {
+      html += '<button type="button" class="execucao-exercicio-item" data-abrir-exercicio="' + exIdx + '">' +
+        '<span class="execucao-exercicio-numero" id="exec-list-numero-' + exIdx + '">' + (exIdx + 1) + '</span>' +
+        '<span><span class="execucao-exercicio-nome">' + ex.exercicio + '</span><span class="execucao-exercicio-meta">' + textoPrescricaoExercicio(ex) + '</span></span>' +
+        '<span class="execucao-exercicio-estado" id="exec-list-estado-' + exIdx + '">' + iconeNativoSvg("setaDireita") + '</span>' +
+        '</button>';
+    });
+    html += '</div></section>';
 
     treino.exercicios.forEach(function (ex, exIdx) {
       const numSeries = parseInt(ex.series, 10) || 3;
       const porTempo = ex.tipoPrescricao === "TEMPO" || /(?:seg|sec|min|tempo|\d\s*s\b|:)/i.test(String(ex.repsMin || "") + " " + String(ex.repsMax || ""));
       const descansoSegundos = Math.max(0, Number(ex.descansoSegundos || 60));
-
-      html += '<div class="exec-exercicio" data-exec-player-index="' + exIdx + '" id="exec-card-' + exIdx + '">' +
-        '<div class="exec-header">' +
-        '<div class="exec-header-info">' +
-        '<div class="exec-exercicio-titulo">' + ex.exercicio + '</div>' +
-        '<span class="exec-progress" id="exec-progress-' + exIdx + '">0/' + numSeries + ' séries</span>' +
+      html += '<section class="execucao-detalhe exec-exercicio" data-exec-player-index="' + exIdx + '" id="exec-card-' + exIdx + '">' +
+        '<div class="exec-detalhe-topo">' +
+          '<button type="button" class="btn-voltar-exercicios" data-voltar-exercicios>' + iconeNativoSvg("setaEsquerda") + ' Exercícios</button>' +
+          '<span class="exec-detalhe-indicador">' + (exIdx + 1) + ' de ' + treino.exercicios.length + '</span>' +
         '</div>' +
-        '<button type="button" class="exec-historico-btn" data-historico-idx="' + exIdx + '">' + iconeNativoSvg("grafico") + ' Histórico</button>' +
+        '<div class="exec-detalhe-media" data-media-exercicio="' + exIdx + '">' +
+          '<span class="exec-detalhe-media-icone">' + iconeAlMove("halter") + '</span>' +
+          '<span><strong>Técnica do exercício</strong><span>Imagem ou vídeo será mostrado aqui.</span></span>' +
         '</div>' +
-        '<div class="exec-exercicio-prescrito">Prescrito: ' + (ex.series || "-") + '×' + (ex.repsMin || "-") + '-' + (ex.repsMax || "-") + (porTempo ? " seg" : " reps") + ' · RIR ' + (ex.rir || "-") + '</div>' +
+        '<div class="exec-header"><div class="exec-header-info">' +
+          '<div class="exec-exercicio-titulo">' + ex.exercicio + '</div>' +
+          '<span class="exec-progress" id="exec-progress-' + exIdx + '">0/' + numSeries + ' séries</span>' +
+        '</div>' +
+        '<button type="button" class="exec-historico-btn" data-historico-idx="' + exIdx + '">' + iconeNativoSvg("grafico") + ' Histórico</button></div>' +
+        '<div class="exec-exercicio-prescrito">Prescrito: ' + textoPrescricaoExercicio(ex) + '</div>' +
         '<div class="exec-descanso">Descanso: <button type="button" data-descanso-idx="' + exIdx + '" data-descanso-seg="' + descansoSegundos + '">' + iconeNativoSvg("relogio") + ' ' + descansoSegundos + ' s</button> <span class="exec-descanso-tempo" id="exec-descanso-' + exIdx + '"></span></div>' +
         '<div class="exec-historico-lista" id="exec-historico-' + exIdx + '"></div>';
 
       for (let s = 0; s < numSeries; s++) {
-        html += '<div class="exec-serie">' +
-          '<div class="exec-serie-linha">' +
+        html += '<div class="exec-serie"><div class="exec-serie-linha">' +
           '<span class="exec-serie-numero">S' + (s + 1) + '</span>' +
           '<input type="text" inputmode="numeric" placeholder="' + (porTempo ? "tempo (seg)" : "reps") + '" id="exec-' + exIdx + '-' + s + '-reps" data-ex="' + exIdx + '" data-s="' + s + '">' +
           '<input type="text" inputmode="decimal" placeholder="kg" id="exec-' + exIdx + '-' + s + '-carga" data-ex="' + exIdx + '" data-s="' + s + '">' +
-          '</div>' +
-          '<div class="velocidade-wrap">' +
-          '<div class="velocidade-label">Como saiu a série?</div>' +
-          '<div class="velocidade-opcoes">' +
+          '</div><div class="velocidade-wrap"><div class="velocidade-label">Como saiu a série?</div><div class="velocidade-opcoes">' +
           '<button type="button" class="velocidade-btn" data-vel-ex="' + exIdx + '" data-vel-s="' + s + '" data-vel="rapida">' + iconeNativoSvg("raio") + ' Rápida</button>' +
           '<button type="button" class="velocidade-btn" data-vel-ex="' + exIdx + '" data-vel-s="' + s + '" data-vel="controlada">' + iconeNativoSvg("check") + ' Controlada</button>' +
           '<button type="button" class="velocidade-btn" data-vel-ex="' + exIdx + '" data-vel-s="' + s + '" data-vel="lenta">' + iconeNativoSvg("lento") + ' Lenta</button>' +
           '<button type="button" class="velocidade-btn falha" data-vel-ex="' + exIdx + '" data-vel-s="' + s + '" data-vel="falha">' + iconeNativoSvg("parar") + ' Falha</button>' +
           '</div></div></div>';
       }
-
       html += '<textarea class="exec-nota" id="exec-' + exIdx + '-notas" placeholder="Notas (opcional)" data-ex-notas="' + exIdx + '"></textarea>' +
-        '</div>';
+        '<div class="exec-detalhe-nav">' +
+          '<button type="button" data-exec-nav="anterior" data-exec-index="' + exIdx + '">' + iconeNativoSvg("setaEsquerda") + ' Anterior</button>' +
+          '<button type="button" data-exec-nav="seguinte" data-exec-index="' + exIdx + '">Seguinte ' + iconeNativoSvg("setaDireita") + '</button>' +
+        '</div></section>';
     });
-
     execucaoExerciciosLista.innerHTML = html;
 
-    // Preenche a partir do rascunho.
     rascunho.exercises.forEach(function (exData, exIdx) {
       exData.series.forEach(function (serieData, s) {
         const repsInput = document.getElementById("exec-" + exIdx + "-" + s + "-reps");
@@ -2191,10 +2265,8 @@
       });
       const notaEl = document.getElementById("exec-" + exIdx + "-notas");
       if (notaEl) notaEl.value = exData.notas || "";
-      atualizarEstadoExercicio(exIdx);
     });
 
-    // Listeners.
     execucaoExerciciosLista.querySelectorAll('input[data-ex]').forEach(function (input) {
       input.addEventListener("input", function () { onWorkoutInput(Number(input.getAttribute("data-ex"))); });
     });
@@ -2202,41 +2274,36 @@
       textarea.addEventListener("input", function () { onWorkoutInput(Number(textarea.getAttribute("data-ex-notas"))); });
     });
     execucaoExerciciosLista.querySelectorAll('.velocidade-btn').forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        selecionarVelocidade(Number(btn.getAttribute("data-vel-ex")), Number(btn.getAttribute("data-vel-s")), btn.getAttribute("data-vel"));
-      });
+      btn.addEventListener("click", function () { selecionarVelocidade(Number(btn.getAttribute("data-vel-ex")), Number(btn.getAttribute("data-vel-s")), btn.getAttribute("data-vel")); });
     });
     execucaoExerciciosLista.querySelectorAll('[data-historico-idx]').forEach(function (btn) {
       btn.addEventListener("click", function () { toggleHistoricoExercicio(Number(btn.getAttribute("data-historico-idx"))); });
     });
     execucaoExerciciosLista.querySelectorAll('[data-descanso-idx]').forEach(function (btn) {
-      btn.addEventListener("click", function () {
-        iniciarDescansoExercicio(Number(btn.getAttribute("data-descanso-idx")), Number(btn.getAttribute("data-descanso-seg")));
-      });
+      btn.addEventListener("click", function () { iniciarDescansoExercicio(Number(btn.getAttribute("data-descanso-idx")), Number(btn.getAttribute("data-descanso-seg"))); });
+    });
+    execucaoExerciciosLista.querySelectorAll('[data-abrir-exercicio]').forEach(function (btn) {
+      btn.addEventListener("click", function () { escolherExercicioExecucao(Number(btn.getAttribute("data-abrir-exercicio"))); });
+    });
+    execucaoExerciciosLista.querySelectorAll('[data-voltar-exercicios]').forEach(function (btn) {
+      btn.addEventListener("click", mostrarListaExerciciosExecucao);
+    });
+    execucaoExerciciosLista.querySelectorAll('[data-exec-nav]').forEach(function (btn) {
+      btn.addEventListener("click", function () { navegarExercicioExecucao(btn.getAttribute("data-exec-nav") === "anterior" ? -1 : 1); });
     });
 
-    document.getElementById("execPlayerAnterior").addEventListener("click", function () { navegarExercicioExecucao(-1); });
-    document.getElementById("execPlayerSeguinte").addEventListener("click", function () { navegarExercicioExecucao(1); });
-    document.getElementById("btnAlternarPicker").addEventListener("click", alternarListaExerciciosExecucao);
-
-    montarPickerExercicios(treino);
-    atualizarPlayerExercicioExecucao();
+    atualizarEstadoTodosExercicios();
+    mostrarListaExerciciosExecucao(false);
   }
 
-  function montarPickerExercicios(treino) {
-    const picker = document.getElementById("execPlayerPicker");
-    let html = "";
-    treino.exercicios.forEach(function (ex, idx) {
-      html += '<button type="button" class="exec-player-choice" data-escolha-idx="' + idx + '">' + (idx + 1) + '. ' + ex.exercicio + '</button>';
-    });
-    picker.innerHTML = html;
-    picker.querySelectorAll("[data-escolha-idx]").forEach(function (btn) {
-      btn.addEventListener("click", function () { escolherExercicioExecucao(Number(btn.getAttribute("data-escolha-idx"))); });
-    });
-  }
-
-  function alternarListaExerciciosExecucao() {
-    document.getElementById("execPlayerPicker").classList.toggle("aberto");
+  function mostrarListaExerciciosExecucao(scroll) {
+    if (!TREINO_ATUAL_EXECUCAO) return;
+    guardarTreinoAtual();
+    const biblioteca = document.getElementById("execucaoBiblioteca");
+    if (biblioteca) biblioteca.classList.remove("oculto");
+    execucaoExerciciosLista.querySelectorAll(".execucao-detalhe").forEach(function (detalhe) { detalhe.classList.remove("player-ativo"); });
+    btnTerminarTreino.classList.remove("oculto");
+    if (scroll !== false) window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function navegarExercicioExecucao(direcao) {
@@ -2248,35 +2315,31 @@
     if (indice < 0 || indice >= total) return;
     guardarTreinoAtual();
     EXERCICIO_ATUAL_EXECUCAO = indice;
-    document.getElementById("execPlayerPicker").classList.remove("aberto");
-    atualizarPlayerExercicioExecucao();
-    const card = document.getElementById("exec-card-" + indice);
-    if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
+    const biblioteca = document.getElementById("execucaoBiblioteca");
+    if (biblioteca) biblioteca.classList.add("oculto");
+    execucaoExerciciosLista.querySelectorAll(".execucao-detalhe").forEach(function (detalhe) {
+      detalhe.classList.toggle("player-ativo", Number(detalhe.getAttribute("data-exec-player-index")) === indice);
+    });
+    btnTerminarTreino.classList.add("oculto");
+    atualizarNavegacaoExercicio();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  function atualizarPlayerExercicioExecucao() {
+  function atualizarNavegacaoExercicio() {
+    if (!TREINO_ATUAL_EXECUCAO) return;
     const total = TREINO_ATUAL_EXECUCAO.exercicios.length;
-    EXERCICIO_ATUAL_EXECUCAO = Math.max(0, Math.min(EXERCICIO_ATUAL_EXECUCAO, total - 1));
-
-    execucaoExerciciosLista.querySelectorAll(".exec-exercicio").forEach(function (card) {
-      const idx = Number(card.getAttribute("data-exec-player-index"));
-      card.classList.toggle("player-ativo", idx === EXERCICIO_ATUAL_EXECUCAO);
+    execucaoExerciciosLista.querySelectorAll('[data-exec-nav]').forEach(function (btn) {
+      const idx = Number(btn.getAttribute("data-exec-index"));
+      const anterior = btn.getAttribute("data-exec-nav") === "anterior";
+      btn.disabled = anterior ? idx === 0 : idx === total - 1;
+      if (!anterior && idx === total - 1) btn.innerHTML = 'Último exercício ' + iconeNativoSvg("concluido");
     });
+  }
 
-    const nomeAtual = TREINO_ATUAL_EXECUCAO.exercicios[EXERCICIO_ATUAL_EXECUCAO].exercicio;
-    document.getElementById("execPlayerAtual").innerHTML = "Exercício " + (EXERCICIO_ATUAL_EXECUCAO + 1) + " de " + total + "<strong>" + nomeAtual + "</strong>";
-
-    document.getElementById("execPlayerAnterior").disabled = EXERCICIO_ATUAL_EXECUCAO === 0;
-    const btnSeguinte = document.getElementById("execPlayerSeguinte");
-    btnSeguinte.innerHTML = EXERCICIO_ATUAL_EXECUCAO === total - 1 ? "Último exercício" : "Seguinte " + iconeNativoSvg("setaDireita");
-    btnSeguinte.disabled = EXERCICIO_ATUAL_EXECUCAO === total - 1;
-
-    document.querySelectorAll(".exec-player-choice").forEach(function (btn) {
-      const idx = Number(btn.getAttribute("data-escolha-idx"));
-      btn.classList.toggle("ativo", idx === EXERCICIO_ATUAL_EXECUCAO);
-      const card = document.getElementById("exec-card-" + idx);
-      btn.classList.toggle("concluido", !!(card && card.classList.contains("exec-completo")));
-    });
+  function atualizarEstadoTodosExercicios() {
+    if (!TREINO_ATUAL_EXECUCAO) return;
+    TREINO_ATUAL_EXECUCAO.exercicios.forEach(function (_, exIdx) { atualizarEstadoExercicio(exIdx, true); });
+    atualizarNavegacaoExercicio();
   }
 
   // ---------- Registo de séries ----------
@@ -2287,21 +2350,29 @@
     debounceWorkoutInput = setTimeout(guardarTreinoAtual, 180);
   }
 
-  function atualizarEstadoExercicio(exIdx) {
+  function atualizarEstadoExercicio(exIdx, semNavegacao) {
     const card = document.getElementById("exec-card-" + exIdx);
-    if (!card) return;
+    const item = document.querySelector('[data-abrir-exercicio="' + exIdx + '"]');
+    if (!card || !item) return;
     const numSeries = parseInt(TREINO_ATUAL_EXECUCAO.exercicios[exIdx].series, 10) || 3;
     let completas = 0;
     for (let s = 0; s < numSeries; s++) {
       const repsInput = document.getElementById("exec-" + exIdx + "-" + s + "-reps");
       if (repsInput && String(repsInput.value || "").trim() !== "") completas++;
     }
+    const concluido = completas === numSeries && numSeries > 0;
+    const parcial = completas > 0 && !concluido;
     const progressoEl = document.getElementById("exec-progress-" + exIdx);
     if (progressoEl) progressoEl.textContent = completas + "/" + numSeries + " séries";
-    card.classList.remove("exec-parcial", "exec-completo");
-    if (completas === numSeries && numSeries > 0) card.classList.add("exec-completo");
-    else if (completas > 0) card.classList.add("exec-parcial");
-    atualizarPlayerExercicioExecucao();
+    card.classList.toggle("exec-completo", concluido);
+    card.classList.toggle("exec-parcial", parcial);
+    item.classList.toggle("completo", concluido);
+    item.classList.toggle("parcial", parcial);
+    const estadoEl = document.getElementById("exec-list-estado-" + exIdx);
+    const numeroEl = document.getElementById("exec-list-numero-" + exIdx);
+    if (estadoEl) estadoEl.innerHTML = concluido ? iconeNativoSvg("check") : (parcial ? (completas + "/" + numSeries) : iconeNativoSvg("setaDireita"));
+    if (numeroEl) numeroEl.innerHTML = concluido ? iconeNativoSvg("check") : (exIdx + 1);
+    if (!semNavegacao) atualizarNavegacaoExercicio();
   }
 
   function marcarVelocidadeVisual(exIdx, s, valor) {
