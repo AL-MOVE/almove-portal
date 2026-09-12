@@ -14,14 +14,11 @@
 </style>
 </head>
 <body>
-  <h1>Teste de ligação ao Apps Script</h1>
-  <p>Isto testa, a partir daqui (fora da Google), se conseguimos falar com o teu Web App em JSON — exactamente o que a PWA vai precisar de fazer.</p>
-
-  <label for="url">URL do Web App (/exec)</label>
-  <input id="url" value="https://script.google.com/macros/s/AKfycbyiOl7KkXMYSFv9lKKVb2sMspvwER2P5IMlpNQcr9csLyEDnzJqvVqisE-XVuAHgeUV/exec">
+  <h1>Teste de ligação (via estafeta)</h1>
+  <p>Agora o browser só fala com este site — quem fala com a Google é o ficheiro <code>api/almove.js</code>, por trás.</p>
 
   <label for="token">Token de um cliente (o mesmo do link ?portal=TOKEN de um cliente real)</label>
-  <input id="token" placeholder="cola aqui o token de um cliente de teste">
+  <input id="token" placeholder="cola aqui só o código, ex: 1a114892-3840-4175-952c-f694cb92542d">
 
   <button onclick="testar()">Testar ligação</button>
 
@@ -30,7 +27,6 @@
 
 <script>
 async function testar() {
-  const url = document.getElementById('url').value.trim();
   const token = document.getElementById('token').value.trim();
   const statusEl = document.getElementById('status');
   const resultadoEl = document.getElementById('resultado');
@@ -44,7 +40,7 @@ async function testar() {
     return;
   }
 
-  const pedido = url + '?api=1&fn=getEstadoPortalHoje&token=' + encodeURIComponent(token);
+  const pedido = '/api/almove?fn=getEstadoPortalHoje&token=' + encodeURIComponent(token);
 
   try {
     const resposta = await fetch(pedido);
@@ -53,18 +49,18 @@ async function testar() {
     try { json = JSON.parse(texto); } catch (e) { json = null; }
 
     if (json && json.ok) {
-      statusEl.textContent = '✓ Funcionou! O browser conseguiu ler a resposta em JSON.';
+      statusEl.textContent = '✓ Funcionou! O estafeta e a ligação ao Apps Script estão a funcionar.';
       statusEl.className = 'ok';
     } else if (json) {
-      statusEl.textContent = 'Respondeu, mas com erro do lado do Apps Script (ver abaixo) — o código foi adicionado?';
+      statusEl.textContent = 'Respondeu, mas com erro do lado do Apps Script (ver abaixo).';
       statusEl.className = 'erro';
     } else {
-      statusEl.textContent = 'Respondeu, mas não veio em JSON — provavelmente o código novo ainda não está deployado.';
+      statusEl.textContent = 'Resposta estranha, não veio em JSON — manda-me o texto abaixo.';
       statusEl.className = 'erro';
     }
     resultadoEl.textContent = texto;
   } catch (erro) {
-    statusEl.textContent = '✗ Falhou antes de chegar resposta nenhuma — provavelmente bloqueado pelo browser (CORS). Copia o erro da consola (F12) e envia-mo.';
+    statusEl.textContent = '✗ Falhou antes de chegar resposta — copia o erro da consola (F12) e envia-mo.';
     statusEl.className = 'erro';
     resultadoEl.textContent = String(erro);
   }
