@@ -670,8 +670,8 @@
       color:var(--text); padding:0 0 calc(108px + env(safe-area-inset-bottom));
     }
     .topo {
-      position:sticky; top:0; z-index:20; min-height:76px; max-width:640px;
-      margin:0 auto; padding:calc(12px + env(safe-area-inset-top)) 20px 12px;
+      position:sticky; top:0; z-index:20; min-height:76px; max-width:none;
+      margin:0; padding:calc(12px + env(safe-area-inset-top)) max(20px,calc((100vw - 640px) / 2)) 12px;
       background:rgba(5,8,16,.67); border-bottom:1px solid rgba(255,255,255,.06);
       backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
       display:flex; align-items:center; gap:10px;
@@ -708,6 +708,7 @@
     .inicio-cta { margin:16px 0; padding:17px; border:1px solid rgba(45,212,191,.35); border-radius:21px; background:linear-gradient(135deg,rgba(11,92,194,.80),rgba(0,169,157,.76),rgba(45,212,191,.90)); box-shadow:0 12px 30px rgba(0,169,157,.20); }
     .inicio-cta-play { color:var(--accent); background:rgba(4,19,29,.55); }.inicio-cta-titulo{font-size:16px;}.inicio-cta-sub{color:rgba(255,255,255,.76);}.inicio-cta-seta{color:#05241f;}
     .metricas-grid { gap:10px; }.metrica-card { background:rgba(255,255,255,.045); border:1px solid var(--border-soft); border-radius:15px; }.metrica-valor{color:#fff;}.metrica-meta{color:var(--text-muted);}
+    .metrica-icone,.streak-icone { display:grid; place-items:center; color:var(--accent); }.metrica-icone svg{width:19px;height:19px;}.streak-icone svg{width:15px;height:15px;}
     .coach-msg { padding:13px; border-radius:15px; background:rgba(255,255,255,.045); }.coach-avatar{background:linear-gradient(135deg,var(--blue),var(--accent-old));}.coach-nome{color:#fff;}.coach-frase{color:var(--text-soft);}
     #tabHoje .card, #tabConquistas .card, #tabPlanos .card { border-radius:22px; }
     .fluxo-hoje { border:1px solid rgba(45,212,191,.25); background:rgba(5,10,18,.74); }.fluxo-titulo,.fluxo-status{color:var(--text);}.fluxo-passo.ativo .fluxo-passo-circulo{background:var(--accent);color:#04201d;box-shadow:0 0 16px rgba(45,212,191,.42);}
@@ -717,10 +718,12 @@
     .exec-serie { border:1px solid var(--border-soft); background:rgba(255,255,255,.035); }.exec-serie-linha input:focus, textarea:focus { border-color:var(--accent); outline:0; box-shadow:0 0 0 2px rgba(45,212,191,.14); }
     .gauge-wrap, .hist-card { background:rgba(255,255,255,.035); border-color:var(--border-soft); }.marco-item{background:rgba(255,255,255,.035);border-color:var(--border-soft);}.marco-item.conquistado{border-color:rgba(45,212,191,.35);}.marco-progresso-fill{background:linear-gradient(90deg,var(--blue),var(--accent));}
     .perfil-avatar { background:linear-gradient(135deg,var(--blue),var(--accent-old)); box-shadow:0 0 0 4px rgba(45,212,191,.08); }.perfil-nome{color:#fff;}.perfil-estado-pill.ativo{background:rgba(34,197,94,.14);color:#86efac;}
-    .plano-linha { border-color:var(--border-soft); }.plano-linha-valor{color:#fff;}.btn-contacto-pt{border-radius:20px;background:linear-gradient(135deg,rgba(0,169,157,.30),rgba(5,65,62,.62));border-color:rgba(45,212,191,.34);}.btn-contacto-pt-icone{background:rgba(45,212,191,.18);}.opcoes-item{border-color:var(--border-soft);}
+    .plano-linha { border-color:var(--border-soft); }.plano-linha-valor{color:#fff;}
+    .contacto-pt-card{padding:16px;margin:20px 0;background:linear-gradient(135deg,rgba(0,169,157,.25),rgba(5,48,57,.80));border-color:rgba(45,212,191,.35);}
+    .contacto-pt-resumo{display:flex;align-items:center;gap:12px;}.btn-contacto-pt{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:13px 15px;border:0;border-radius:14px;background:linear-gradient(135deg,#0b5cc2,#00a99d 55%,#2dd4bf);color:#03201d;font:inherit;font-size:13px;font-weight:900;}.btn-contacto-pt:active{transform:scale(.985);}.btn-contacto-pt svg{width:18px;height:18px;}.btn-contacto-pt-icone{background:rgba(45,212,191,.18);}.btn-contacto-pt-icone svg{width:20px;height:20px;}.opcoes-item{border-color:var(--border-soft);}.opcoes-item-icone svg{width:17px;height:17px;color:var(--accent);}
     .tabs-nav { width:min(calc(100% - 32px),608px); left:50%; bottom:max(12px,env(safe-area-inset-bottom)); transform:translateX(-50%); border:1px solid rgba(255,255,255,.14); border-radius:25px; padding:7px; background:rgba(5,15,25,.88); box-shadow:0 14px 38px rgba(0,0,0,.42); backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px); }
     .tab-btn { min-height:57px; border-radius:18px; color:var(--text-muted); font-size:10px; font-weight:800; }.tab-btn svg{width:20px;height:20px;}.tab-btn.ativo{color:var(--accent);background:rgba(45,212,191,.13);box-shadow:inset 0 0 0 1px rgba(45,212,191,.14);}
-    @media (min-width:641px){.topo{border-left:1px solid rgba(255,255,255,.06);border-right:1px solid rgba(255,255,255,.06)}body{background-attachment:fixed;}}
+    @media (min-width:641px){.topo{border-left:0;border-right:0}.tab-conteudo{padding-top:28px}body{background-attachment:fixed;}}
   </style>
 </head>
 <body>
@@ -752,7 +755,8 @@
         </div>
       </div>
       <div class="streak-badge oculto" id="inicioStreakBadge">
-        🔥 <span id="inicioStreakTexto">0 semanas seguidas</span>
+        <span class="streak-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4.4 0 7-2.9 7-6.8 0-3-1.7-5.6-4.4-7.4.2 2.3-1 3.8-2.2 4.7.1-3.3-1.6-6.7-4.4-8.5.2 3.3-2 5.4-3.2 7.5C3.7 13.2 4 16.2 5.7 18.3 7.2 20.4 9.3 22 12 22Z"/></svg></span>
+        <span id="inicioStreakTexto">0 semanas seguidas</span>
       </div>
       <div class="inicio-citacao">"Pequenos progressos continuam a ser progresso."</div>
 
@@ -777,44 +781,6 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
       </span>
     </button>
-
-    <div class="card">
-      <div class="card-title">Métricas de hoje<span class="selo-exemplo">Exemplo</span></div>
-      <div class="metricas-grid">
-        <div class="metrica-card">
-          <div class="metrica-icone">🦶</div>
-          <div class="metrica-valor">6.420</div>
-          <div class="metrica-meta">/ 10k passos</div>
-          <div class="metrica-barra"><div class="metrica-barra-fill" style="width:64%;background:var(--accent);"></div></div>
-        </div>
-        <div class="metrica-card">
-          <div class="metrica-icone">🔥</div>
-          <div class="metrica-valor">480</div>
-          <div class="metrica-meta">kcal ativas</div>
-          <div class="metrica-barra"><div class="metrica-barra-fill" style="width:55%;background:var(--yellow);"></div></div>
-        </div>
-        <div class="metrica-card">
-          <div class="metrica-icone">💧</div>
-          <div class="metrica-valor">1.8L</div>
-          <div class="metrica-meta">meta 2.5L</div>
-          <div class="metrica-barra"><div class="metrica-barra-fill" style="width:72%;background:#38bdf8;"></div></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Mensagem do treinador<span class="selo-exemplo">Exemplo</span></div>
-      <div class="coach-msg">
-        <div class="coach-avatar">A</div>
-        <div class="coach-texto">
-          <div class="coach-nome-linha">
-            <span class="coach-nome">Coach André</span>
-            <span class="coach-quando">Há 25 min</span>
-          </div>
-          <div class="coach-frase">"Excelente descanso ontem! Foco nos agachamentos hoje."</div>
-        </div>
-      </div>
-    </div>
 
   </div>
 
@@ -1085,19 +1051,25 @@
       </div>
     </div>
 
-    <button type="button" class="btn-contacto-pt" id="opcoesBtnContactoPT">
-      <span class="btn-contacto-pt-icone">💬</span>
-      <span class="btn-contacto-pt-corpo">
-        <span class="btn-contacto-pt-titulo" id="opcoesContactoPTTitulo">Falar com o André</span>
-        <span class="btn-contacto-pt-sub" id="opcoesContactoPTSub">Dúvidas, faltas ou remarcações</span>
-      </span>
-    </button>
+    <div class="card contacto-pt-card">
+      <div class="contacto-pt-resumo">
+        <span class="btn-contacto-pt-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.4 9.4 0 0 1-3.8-.9L3 21l1.7-4.7A8.4 8.4 0 1 1 21 11.5Z"/><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01"/></svg></span>
+        <span class="btn-contacto-pt-corpo">
+          <span class="btn-contacto-pt-titulo" id="opcoesContactoPTTitulo">Falar com o André</span>
+          <span class="btn-contacto-pt-sub" id="opcoesContactoPTSub">Dúvidas, faltas ou remarcações</span>
+        </span>
+      </div>
+      <button type="button" class="btn-contacto-pt" id="opcoesBtnContactoPT">
+        Abrir mensagem direta
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
 
     <div class="card">
       <div class="card-title">Documentos e faturação<span class="selo-exemplo">Exemplo</span></div>
       <div class="opcoes-lista">
         <div class="opcoes-item">
-          <div class="opcoes-item-icone">📄</div>
+          <div class="opcoes-item-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg></div>
           <div class="opcoes-item-corpo">
             <div class="opcoes-item-titulo">Contrato</div>
             <div class="opcoes-item-sub">Ver o teu contrato assinado</div>
@@ -1105,7 +1077,7 @@
           <div class="opcoes-item-seta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
         </div>
         <div class="opcoes-item">
-          <div class="opcoes-item-icone">🧾</div>
+          <div class="opcoes-item-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3Z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></div>
           <div class="opcoes-item-corpo">
             <div class="opcoes-item-titulo">Faturas</div>
             <div class="opcoes-item-sub">Histórico de pagamentos</div>
@@ -1119,7 +1091,7 @@
       <div class="card-title">Preferências<span class="selo-exemplo">Exemplo</span></div>
       <div class="opcoes-lista">
         <div class="opcoes-item">
-          <div class="opcoes-item-icone">🔔</div>
+          <div class="opcoes-item-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></div>
           <div class="opcoes-item-corpo">
             <div class="opcoes-item-titulo">Notificações</div>
             <div class="opcoes-item-sub">Lembretes de treino e mensagens</div>
@@ -1127,7 +1099,7 @@
           <div class="opcoes-item-seta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
         </div>
         <div class="opcoes-item">
-          <div class="opcoes-item-icone">🔒</div>
+          <div class="opcoes-item-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
           <div class="opcoes-item-corpo">
             <div class="opcoes-item-titulo">Privacidade e dados</div>
             <div class="opcoes-item-sub">Como os teus dados são tratados</div>
