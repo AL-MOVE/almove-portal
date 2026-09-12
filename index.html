@@ -735,7 +735,7 @@
   <section class="ecra-boas-vindas" id="ecraBoasVindas" aria-labelledby="boasVindasTitulo">
     <div class="boas-vindas-conteudo">
       <img class="boas-vindas-logo" src="/icons/icon-any-512.png" alt="AL MOVE">
-      <h1 class="boas-vindas-saudacao" id="boasVindasTitulo"><span>Olá,</span><strong id="boasVindasNome">bem-vindo</strong></h1>
+      <h1 class="boas-vindas-saudacao" id="boasVindasTitulo"><span id="boasVindasPrefixo">Olá</span><strong id="boasVindasNome" class="oculto"></strong></h1>
       <p class="boas-vindas-sub">O teu caminho começa aqui.</p>
       <button type="button" class="btn-comecar" id="btnComecarPortal">Começar</button>
     </div>
@@ -1168,6 +1168,7 @@
   const TOKEN = params.get("token") || params.get("portal");
 
   const ecraBoasVindas = document.getElementById("ecraBoasVindas");
+  const boasVindasPrefixoEl = document.getElementById("boasVindasPrefixo");
   const boasVindasNomeEl = document.getElementById("boasVindasNome");
   const btnComecarPortal = document.getElementById("btnComecarPortal");
   const ecraCarregando = document.getElementById("ecraCarregando");
@@ -1236,7 +1237,11 @@
       ? obterSaudacaoAtual() + ", " + nome
       : "Olá";
     if (nome) topoAvatarEl.textContent = nome.charAt(0).toUpperCase();
-    if (nome) boasVindasNomeEl.textContent = nome;
+    if (nome) {
+      boasVindasPrefixoEl.textContent = "Olá,";
+      boasVindasNomeEl.textContent = nome;
+      boasVindasNomeEl.classList.remove("oculto");
+    }
   }
 
   function renderInicio(dados) {
