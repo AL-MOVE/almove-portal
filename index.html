@@ -153,6 +153,50 @@
       padding:8px 14px;border-radius:8px;border:0;
       background:var(--azul);color:#fff;font-weight:700;font-size:13px;
     }
+
+    .fluxo-passo{
+      font-size:11px;font-weight:800;letter-spacing:.4px;
+      color:var(--azul-claro);text-transform:uppercase;
+      display:block;margin-bottom:8px;
+    }
+
+    .btn-secundario{
+      width:100%;padding:14px;margin-top:10px;
+      border:1px solid var(--card-border);border-radius:12px;
+      background:transparent;color:var(--texto-suave);
+      font-size:14px;font-weight:700;
+    }
+    .btn-secundario:active{transform:scale(.98);}
+
+    .prontidao-intro{
+      color:var(--texto-suave);font-size:13px;line-height:1.5;margin-bottom:16px;
+    }
+
+    .prontidao-area{
+      min-height:200px;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;gap:13px;
+    }
+    .prontidao-circulo{
+      width:104px;height:104px;border-radius:50%;border:0;
+      display:flex;align-items:center;justify-content:center;
+      background:var(--vermelho);color:#fff;font-weight:800;font-size:14px;
+      transition:background .15s,box-shadow .15s;
+    }
+    .prontidao-circulo:active{transform:scale(.94);}
+    .prontidao-circulo.verde{
+      background:#16a34a;
+      box-shadow:0 0 0 8px rgba(34,197,94,.15),0 0 28px rgba(34,197,94,.42);
+    }
+    .prontidao-indicacao{color:var(--texto-suave);font-size:13px;font-weight:700;}
+    .prontidao-tentativas{color:#5b6f8f;font-size:11px;}
+
+    .prontidao-resultado{
+      padding:16px;border:1px solid rgba(45,212,191,.22);
+      border-radius:16px;background:rgba(45,212,191,.07);text-align:center;
+    }
+    .prontidao-ms{margin:4px 0;color:#fff;font-size:32px;font-weight:900;line-height:1;}
+    .prontidao-ms small{color:var(--texto-suave);font-size:13px;font-weight:700;}
+    .prontidao-nota{margin-top:10px;color:var(--texto-suave);font-size:12px;line-height:1.48;}
   </style>
 </head>
 <body>
@@ -255,6 +299,11 @@
         <span id="estadoSyncTexto"></span>
       </div>
     </div>
+  </div>
+
+  <div id="cardProntidao" class="card oculto">
+    <div class="card-title">Teste de prontidão</div>
+    <div id="prontidaoConteudo"></div>
   </div>
 
 <script>
@@ -437,9 +486,167 @@
         btnSubmit.disabled = false;
         mostrarEstadoSync("offline", "Sem ligação. Os teus dados ficaram guardados neste dispositivo.");
       });
+
+    mostrarCardProntidao();
   }
 
   btnSubmit.addEventListener("click", submeterCheckin);
+
+  // ==========================================================
+  // TESTE DE PRONTIDÃO (passo 2 de 3)
+  // ==========================================================
+  const cardProntidao = document.getElementById("cardProntidao");
+  const prontidaoConteudo = document.getElementById("prontidaoConteudo");
+
+  var prontidaoEmCurso = false;
+  var prontidaoVerde = false;
+  var prontidaoInicio = 0;
+  var prontidaoTemporizador = null;
+  var prontidaoTempos = [];
+  var PRONTIDAO_HOJE_INICIAL = null; // preenchido a partir de getEstadoPortalHoje
+
+  function obterProntidaoAtual() {
+    return lerEstadoDiario().testeProntidao || PRONTIDAO_HOJE_INICIAL || null;
+  }
+
+  function notaProntidao(teste) {
+    if (!teste || !teste.referenciaMs) return "Estamos a criar a tua referência pessoal. Faz o teste antes de cada treino.";
+    if (teste.estado === "abaixo-do-habitual") return "Hoje estás abaixo do teu ritmo habitual. Dá prioridade à técnica e deixa 1–2 repetições na reserva nos exercícios principais.";
+    if (teste.estado === "acima-do-habitual") return "Boa prontidão face ao teu habitual. Mantém a execução controlada e aproveita o treino.";
+    return "Estás dentro do teu padrão habitual de prontidão.";
+  }
+
+  function mostrarCardProntidao() {
+    cardProntidao.classList.remove("oculto");
+    renderProntidao();
+  }
+
+  function renderProntidao() {
+    if (!cardProntidao || cardProntidao.classList.contains("oculto")) return;
+
+    const teste = obterProntidaoAtual();
+
+    if (teste && teste.ignorado) {
+      cardProntidao.classList.add("oculto");
+      return;
+    }
+
+    if (teste && teste.medianaMs) {
+      const referencia = teste.referenciaMs ? "Referência pessoal: " + teste.referenciaMs + " ms" : "Referência pessoal em construção";
+      prontidaoConteudo.innerHTML =
+        '<div class="prontidao-resultado"><span class="fluxo-passo">Passo 2 de 3 · Teste concluído</span>' +
+        '<div class="prontidao-ms">' + teste.medianaMs + ' <small>ms</small></div>' +
+        '<div class="prontidao-tentativas">Mediana de ' + (teste.tentativas || 5) + ' toques · ' + referencia + '</div>' +
+        '<p class="prontidao-nota">' + notaProntidao(teste) + '</p></div>';
+      return;
+    }
+
+    prontidaoConteudo.innerHTML =
+      '<span class="fluxo-passo">Passo 2 de 3</span>' +
+      '<p class="prontidao-intro">Avalia a tua rapidez de reação em cerca de 20 segundos. É opcional e é comparado apenas contigo próprio.</p>' +
+      '<button type="button" class="botao" id="btnIniciarProntidao">Fazer teste de prontidão</button>' +
+      '<button type="button" class="btn-secundario" id="btnSemProntidao">Continuar sem teste</button>';
+
+    document.getElementById("btnIniciarProntidao").addEventListener("click", iniciarProntidao);
+    document.getElementById("btnSemProntidao").addEventListener("click", continuarSemProntidao);
+  }
+
+  function continuarSemProntidao() {
+    const teste = { ignorado: true, libertouTreino: true, synced: true };
+    const estado = lerEstadoDiario();
+    estado.testeProntidao = teste;
+    guardarEstadoDiario(estado);
+    PRONTIDAO_HOJE_INICIAL = teste;
+    cardProntidao.classList.add("oculto");
+  }
+
+  function iniciarProntidao() {
+    prontidaoEmCurso = true;
+    prontidaoTempos = [];
+    mostrarTentativaProntidao();
+  }
+
+  function mostrarTentativaProntidao(mensagem) {
+    if (!prontidaoEmCurso) return;
+    prontidaoVerde = false;
+    clearTimeout(prontidaoTemporizador);
+    prontidaoConteudo.innerHTML =
+      '<div class="prontidao-area"><button type="button" class="prontidao-circulo" id="prontidaoCirculo">ESPERA</button>' +
+      '<div class="prontidao-indicacao" id="prontidaoIndicacao">' + (mensagem || "Toca apenas quando ficar verde") + '</div>' +
+      '<div class="prontidao-tentativas">Tentativa ' + (prontidaoTempos.length + 1) + ' de 5</div></div>';
+
+    document.getElementById("prontidaoCirculo").addEventListener("click", registarToqueProntidao);
+
+    prontidaoTemporizador = setTimeout(function () {
+      const circulo = document.getElementById("prontidaoCirculo");
+      const indicacao = document.getElementById("prontidaoIndicacao");
+      if (!prontidaoEmCurso || !circulo) return;
+      prontidaoVerde = true;
+      prontidaoInicio = performance.now();
+      circulo.classList.add("verde");
+      circulo.textContent = "TOCA!";
+      if (indicacao) indicacao.textContent = "Agora!";
+    }, 2000 + Math.floor(Math.random() * 3001));
+  }
+
+  function registarToqueProntidao() {
+    if (!prontidaoEmCurso) return;
+    if (!prontidaoVerde) {
+      clearTimeout(prontidaoTemporizador);
+      setTimeout(function () { mostrarTentativaProntidao("Ainda não — espera pelo verde"); }, 650);
+      return;
+    }
+    const tempo = Math.round(performance.now() - prontidaoInicio);
+    prontidaoVerde = false;
+    if (tempo < 120 || tempo > 1500) {
+      setTimeout(function () { mostrarTentativaProntidao("Vamos repetir esta tentativa"); }, 650);
+      return;
+    }
+    prontidaoTempos.push(tempo);
+    if (prontidaoTempos.length < 5) {
+      setTimeout(function () { mostrarTentativaProntidao("Boa. Prepara-te para a próxima."); }, 650);
+      return;
+    }
+    concluirProntidao();
+  }
+
+  function medianaLocal(numeros) {
+    const ordenados = numeros.slice().sort(function (a, b) { return a - b; });
+    const meio = Math.floor(ordenados.length / 2);
+    return ordenados.length % 2 ? ordenados[meio] : Math.round((ordenados[meio - 1] + ordenados[meio]) / 2);
+  }
+
+  function concluirProntidao() {
+    prontidaoEmCurso = false;
+    const teste = { medianaMs: medianaLocal(prontidaoTempos), tentativas: prontidaoTempos.length, temposMs: prontidaoTempos.slice(), eventId: gerarIdLocal(), synced: false, libertouTreino: false };
+    const estado = lerEstadoDiario();
+    estado.testeProntidao = teste;
+    guardarEstadoDiario(estado);
+    PRONTIDAO_HOJE_INICIAL = teste;
+    renderProntidao();
+    sincronizarProntidaoPendente();
+  }
+
+  function sincronizarProntidaoPendente() {
+    if (!navigator.onLine) return;
+    const teste = lerEstadoDiario().testeProntidao;
+    if (!teste || teste.synced !== false || !teste.temposMs || !teste.temposMs.length) return;
+
+    chamarApi("registarTesteProntidao", { temposMs: teste.temposMs, eventId: teste.eventId, dispositivo: navigator.userAgent || "" })
+      .then(function (resp) {
+        if (!resp || !resp.ok) throw new Error((resp && resp.erro) || "Falha desconhecida");
+        const estado = lerEstadoDiario();
+        if (estado.testeProntidao && estado.testeProntidao.eventId === teste.eventId) {
+          Object.assign(estado.testeProntidao, resp.dados || {}, { synced: true });
+          guardarEstadoDiario(estado);
+        }
+        PRONTIDAO_HOJE_INICIAL = Object.assign({}, teste, resp.dados || {}, { synced: true });
+        renderProntidao();
+      })
+      .catch(function () {
+        // Fica marcado como não sincronizado — tenta-se novamente no próximo arranque.
+      });
+  }
 
   // ---------- Arranque: pergunta ao servidor o estado de hoje ----------
   chamarApi("getEstadoPortalHoje", {})
@@ -454,8 +661,14 @@
       }
 
       const dados = resp.dados || {};
+
+      if (dados.testeProntidaoHoje) {
+        PRONTIDAO_HOJE_INICIAL = dados.testeProntidaoHoje;
+      }
+
       if (dados.jaFezCheckinHoje && dados.checkinHoje) {
         mostrarResumo(dados.checkinHoje);
+        mostrarCardProntidao();
         return;
       }
 
@@ -465,6 +678,7 @@
       if (estadoLocal.checkin && estadoLocal.checkin.submitted && !estadoLocal.checkin.synced) {
         preencherRespostas(estadoLocal.checkin.values);
         mostrarResumo(estadoLocal.checkin.values);
+        mostrarCardProntidao();
         if (navigator.onLine) {
           chamarApi("registarCheckin", Object.assign({}, estadoLocal.checkin.values, { eventId: estadoLocal.checkin.eventId }))
             .then(function (resp2) {
@@ -475,6 +689,7 @@
             })
             .catch(function () {});
         }
+        sincronizarProntidaoPendente();
       }
     })
     .catch(function () {
