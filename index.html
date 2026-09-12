@@ -724,12 +724,22 @@
     .marco-icone svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}.marco-cadeado svg{width:15px;height:15px;vertical-align:middle;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
     .treino-card-icone svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
     .confirmar-treino{position:fixed;z-index:100;inset:0;display:flex;align-items:flex-end;justify-content:center;padding:20px max(16px,calc((100vw - 608px)/2)) calc(20px + env(safe-area-inset-bottom));background:rgba(2,6,14,.68);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}.confirmar-treino.oculto{display:none;}.confirmar-treino-painel{width:100%;padding:22px;border:1px solid rgba(45,212,191,.32);border-radius:25px;background:linear-gradient(155deg,rgba(13,34,54,.98),rgba(5,11,21,.98));box-shadow:0 -12px 45px rgba(0,0,0,.45);animation:subir-painel .24s ease-out;}.confirmar-treino-puxador{width:38px;height:4px;margin:0 auto 20px;border-radius:999px;background:rgba(255,255,255,.2);}.confirmar-treino-icone{width:44px;height:44px;display:grid;place-items:center;margin-bottom:14px;border-radius:15px;color:var(--accent);background:rgba(45,212,191,.12);border:1px solid rgba(45,212,191,.28);}.confirmar-treino-icone svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}.confirmar-treino-titulo{font-size:21px;font-weight:900;letter-spacing:-.03em;color:#fff;}.confirmar-treino-texto{margin-top:8px;color:var(--text-soft);font-size:13px;line-height:1.48;}.confirmar-treino-acoes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px;}.confirmar-treino-acoes button{min-height:49px;padding:10px;border-radius:14px;font:inherit;font-size:13px;font-weight:850;}.btn-voltar-treino{border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--text);}.btn-confirmar-termino{border:0;background:linear-gradient(135deg,var(--blue),var(--accent-old),var(--accent));color:#03201d;box-shadow:0 8px 20px rgba(45,212,191,.18);}.confirmar-treino-acoes button:active{transform:scale(.98);}@keyframes subir-painel{from{transform:translateY(28px);opacity:0}to{transform:translateY(0);opacity:1}}@media(max-width:380px){.confirmar-treino-acoes{grid-template-columns:1fr;}.btn-confirmar-termino{order:-1;}}
+    .ecra-boas-vindas{position:fixed;z-index:300;inset:0;display:grid;place-items:center;overflow:hidden;padding:32px 24px calc(40px + env(safe-area-inset-bottom));background:radial-gradient(ellipse 70% 55% at 50% 12%,rgba(0,169,157,.20),transparent 67%),radial-gradient(ellipse 80% 70% at -6% 100%,rgba(11,92,194,.75),transparent 70%),linear-gradient(155deg,#051221 0%,#03111b 54%,#050810 100%);}.ecra-boas-vindas::before{content:"";position:absolute;width:min(78vw,430px);height:min(78vw,430px);border-radius:50%;border:1px solid rgba(45,212,191,.10);box-shadow:0 0 0 48px rgba(45,212,191,.025),0 0 0 112px rgba(11,92,194,.025);top:-250px;left:50%;transform:translateX(-50%);pointer-events:none;}.boas-vindas-conteudo{position:relative;width:min(100%,430px);text-align:center;animation:boas-entrar .7s cubic-bezier(.22,1,.36,1) both;}.boas-vindas-logo{width:138px;height:138px;object-fit:contain;margin:0 auto 34px;filter:drop-shadow(0 15px 22px rgba(0,0,0,.34));animation:boas-logo-flutuar 4s ease-in-out .7s infinite;}.boas-vindas-saudacao{margin:0;color:#fff;font-size:42px;line-height:.98;font-weight:900;letter-spacing:-.055em;}.boas-vindas-saudacao span,.boas-vindas-saudacao strong{display:block;}.boas-vindas-saudacao strong{margin-top:7px;background:linear-gradient(105deg,#2dd4bf,#27b8e8 55%,#0b5cc2);background-clip:text;-webkit-background-clip:text;color:transparent;}.boas-vindas-sub{margin:19px auto 35px;color:var(--text-muted);font-size:14px;line-height:1.45;}.btn-comecar{width:min(100%,300px);min-height:54px;border:0;border-radius:999px;background:linear-gradient(100deg,#2dd4bf,#15b7c4 53%,#0b5cc2);color:#04211f;font:inherit;font-size:15px;font-weight:900;box-shadow:0 14px 30px rgba(11,92,194,.28);transition:transform .18s ease,filter .18s ease,box-shadow .18s ease;}.btn-comecar:active{transform:scale(.97);filter:brightness(.96);}.ecra-boas-vindas.a-sair{animation:boas-sair .42s cubic-bezier(.4,0,1,1) forwards;pointer-events:none;}.tab-conteudo:not(.oculto){animation:tab-entrar .28s cubic-bezier(.22,1,.36,1) both;}.card:not(.oculto){transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;}.card:not(.oculto):active{transform:scale(.995);}@keyframes boas-entrar{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}@keyframes boas-sair{to{opacity:0;transform:scale(1.035)}}@keyframes boas-logo-flutuar{50%{transform:translateY(-8px)}}@keyframes tab-entrar{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}}
     .tabs-nav { width:min(calc(100% - 32px),608px); left:50%; bottom:max(12px,env(safe-area-inset-bottom)); transform:translateX(-50%); border:1px solid rgba(255,255,255,.14); border-radius:25px; padding:7px; background:rgba(5,15,25,.88); box-shadow:0 14px 38px rgba(0,0,0,.42); backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px); }
     .tab-btn { min-height:57px; border-radius:18px; color:var(--text-muted); font-size:10px; font-weight:800; }.tab-btn svg{width:20px;height:20px;}.tab-btn.ativo{color:var(--accent);background:rgba(45,212,191,.13);box-shadow:inset 0 0 0 1px rgba(45,212,191,.14);}
     @media (min-width:641px){.topo{border-left:0;border-right:0}.tab-conteudo{padding-top:28px}body{background-attachment:fixed;}}
   </style>
 </head>
 <body>
+
+  <section class="ecra-boas-vindas" id="ecraBoasVindas" aria-labelledby="boasVindasTitulo">
+    <div class="boas-vindas-conteudo">
+      <img class="boas-vindas-logo" src="/icons/icon-any-512.png" alt="AL MOVE">
+      <h1 class="boas-vindas-saudacao" id="boasVindasTitulo"><span>Olá,</span><strong id="boasVindasNome">bem-vindo</strong></h1>
+      <p class="boas-vindas-sub">O teu caminho começa aqui.</p>
+      <button type="button" class="btn-comecar" id="btnComecarPortal">Começar</button>
+    </div>
+  </section>
 
   <div class="topo">
     <img src="/icons/icon-any-512.png" alt="AL MOVE">
@@ -1157,6 +1167,9 @@
   const params = new URLSearchParams(window.location.search);
   const TOKEN = params.get("token") || params.get("portal");
 
+  const ecraBoasVindas = document.getElementById("ecraBoasVindas");
+  const boasVindasNomeEl = document.getElementById("boasVindasNome");
+  const btnComecarPortal = document.getElementById("btnComecarPortal");
   const ecraCarregando = document.getElementById("ecraCarregando");
   const ecraSemToken = document.getElementById("ecraSemToken");
   const cardCheckin = document.getElementById("cardCheckin");
@@ -1169,6 +1182,7 @@
   const estadoSyncTexto = document.getElementById("estadoSyncTexto");
 
   if (!TOKEN) {
+    ecraBoasVindas.classList.add("oculto");
     ecraCarregando.classList.add("oculto");
     ecraSemToken.classList.remove("oculto");
     return;
@@ -1185,6 +1199,12 @@
   }
   document.querySelectorAll(".tab-btn").forEach(function (btn) {
     btn.addEventListener("click", function () { mudarTab(btn.getAttribute("data-tab")); });
+  });
+
+  btnComecarPortal.addEventListener("click", function () {
+    mudarTab("inicio");
+    ecraBoasVindas.classList.add("a-sair");
+    window.setTimeout(function () { ecraBoasVindas.remove(); }, 450);
   });
 
   // ---------- Início ----------
@@ -1216,6 +1236,7 @@
       ? obterSaudacaoAtual() + ", " + nome
       : "Olá";
     if (nome) topoAvatarEl.textContent = nome.charAt(0).toUpperCase();
+    if (nome) boasVindasNomeEl.textContent = nome;
   }
 
   function renderInicio(dados) {
@@ -2576,4 +2597,160 @@
     if (minutos < 60) return minutos + " min";
     const h = Math.floor(minutos / 60);
     const m = minutos % 60;
-  
+    return h + "h " + m + "m";
+  }
+
+  function mostrarTreinoConcluido(workout) {
+    document.getElementById("treinoConcluidoNome").textContent = workout.nomeTreino || "";
+    document.getElementById("treinoConcluidoVolume").textContent = (workout.volume || 0) + " kg";
+    document.getElementById("treinoConcluidoDuracao").textContent = formatarDuracao(workout.duracaoSegundos || 0);
+    cardTreinoConcluido.classList.remove("oculto");
+    renderFluxoHoje();
+  }
+
+  document.getElementById("btnRegistarOutroTreino").addEventListener("click", function () {
+    TREINO_ATUAL_EXECUCAO = null;
+    TREINO_ATUAL_INDEX = null;
+    cardTreinoConcluido.classList.add("oculto");
+    mostrarCardEscolherTreino();
+  });
+
+  // ---------- Restauro automático ao reabrir a app ----------
+  function restaurarEstadoTreino() {
+    const estado = lerEstadoDiario();
+    const workout = estado.workout;
+    if (!workout) return;
+
+    if (workout.status === "active") {
+      const idx = PLANO_ATIVO ? PLANO_ATIVO.treinos.findIndex(function (t) { return t.nome === workout.nomeTreino; }) : -1;
+      if (idx === -1) return;
+      escolherTreino(idx, true);
+      return;
+    }
+
+    if ((workout.status === "post-workout" || workout.status === "completed") && !workout.endedAt) {
+      // Estado incompleto/corrompido — limpa em vez de deixar a app presa.
+      estado.workout = null;
+      estado.postWorkout = null;
+      guardarEstadoDiario(estado);
+      return;
+    }
+
+    if (workout.status === "post-workout") {
+      mostrarCardPosTreino();
+      return;
+    }
+
+    if (workout.status === "completed") {
+      mostrarTreinoConcluido(workout);
+    }
+  }
+
+  // ---------- Arranque: pergunta ao servidor o estado de hoje ----------
+  renderFluxoHoje();
+  chamarApi("getEstadoPortalHoje", {})
+    .then(function (resp) {
+      ecraCarregando.classList.add("oculto");
+      cardCheckin.classList.remove("oculto");
+
+      if (!resp || !resp.ok) {
+        checkinErro.textContent = (resp && resp.erro) || "Não foi possível ligar ao servidor.";
+        checkinErro.style.display = "block";
+        return;
+      }
+
+      const dados = resp.dados || {};
+
+      if (dados.testeProntidaoHoje) {
+        PRONTIDAO_HOJE_INICIAL = dados.testeProntidaoHoje;
+      }
+
+      let temCheckinHoje = false;
+
+      if (dados.jaFezCheckinHoje && dados.checkinHoje) {
+        mostrarResumo(dados.checkinHoje);
+        mostrarCardProntidao();
+        temCheckinHoje = true;
+        CHECKIN_HOJE_CONFIRMADO = true;
+      } else {
+        // Sem check-in no servidor — verifica se há um rascunho local por
+        // sincronizar (ex.: enviou offline e voltou à app antes de haver rede).
+        const estadoLocal = lerEstadoDiario();
+        if (estadoLocal.checkin && estadoLocal.checkin.submitted && !estadoLocal.checkin.synced) {
+          preencherRespostas(estadoLocal.checkin.values);
+          mostrarResumo(estadoLocal.checkin.values);
+          mostrarCardProntidao();
+          temCheckinHoje = true;
+          CHECKIN_HOJE_CONFIRMADO = true;
+          if (navigator.onLine) {
+            chamarApi("registarCheckin", Object.assign({}, estadoLocal.checkin.values, { eventId: estadoLocal.checkin.eventId }))
+              .then(function (resp2) {
+                if (resp2 && resp2.ok) {
+                  estadoLocal.checkin.synced = true;
+                  guardarEstadoDiario(estadoLocal);
+                }
+              })
+              .catch(function () {});
+          }
+          sincronizarProntidaoPendente();
+        }
+      }
+
+      if (!temCheckinHoje) return;
+
+      // Carrega o plano ativo e os treinos, e decide que ecrã do passo 3 mostrar.
+      carregarPlanoAtivoSeNecessario()
+        .then(function () {
+          const estadoAgora = lerEstadoDiario();
+          if (estadoAgora.workout && estadoAgora.workout.status) {
+            restaurarEstadoTreino();
+          } else {
+            mostrarCardEscolherTreino();
+          }
+        })
+        .catch(function () {
+          // Sem plano carregado — o cliente continua a ver check-in/prontidão normalmente.
+        });
+    })
+    .catch(function () {
+      ecraCarregando.classList.add("oculto");
+      cardCheckin.classList.remove("oculto");
+      checkinErro.textContent = "Sem ligação. Tenta novamente quando tiveres rede.";
+      checkinErro.style.display = "block";
+    });
+
+  // ---------- Service worker ----------
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("/sw.js").then(function (registo) {
+        registo.addEventListener("updatefound", function () {
+          const novoWorker = registo.installing;
+          novoWorker.addEventListener("statechange", function () {
+            if (novoWorker.state === "installed" && navigator.serviceWorker.controller) {
+              mostrarAvisoAtualizacao(novoWorker);
+            }
+          });
+        });
+      }).catch(function () {
+        // Ambientes sem suporte a service worker (ex.: teste local via file://)
+        // não devem impedir o resto da app de funcionar.
+      });
+    });
+  }
+
+  function mostrarAvisoAtualizacao(novoWorker) {
+    const aviso = document.createElement("div");
+    aviso.className = "toast";
+    aviso.innerHTML = '<span>Há uma versão nova da app.</span><button>Atualizar</button>';
+    aviso.querySelector("button").onclick = function () {
+      novoWorker.postMessage("SKIP_WAITING");
+      novoWorker.addEventListener("statechange", function () {
+        if (novoWorker.state === "activated") window.location.reload();
+      });
+    };
+    document.body.appendChild(aviso);
+  }
+})();
+</script>
+</body>
+</html>
