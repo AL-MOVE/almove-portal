@@ -339,6 +339,60 @@
       text-transform:uppercase;letter-spacing:.05em;vertical-align:middle;
     }
 
+    /* ---------- Conquistas ---------- */
+    .gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+    .gauge-svg{width:180px;height:180px;}
+    .gauge-track{fill:none;stroke:rgba(255,255,255,.08);stroke-width:12;}
+    .gauge-fill{
+      fill:none;stroke:url(#gaugeGradiente);stroke-width:12;stroke-linecap:round;
+      transform-origin:50% 50%;transform:rotate(-90deg);
+      transition:stroke-dashoffset .5s ease;
+    }
+    .gauge-centro{text-align:center;}
+    .gauge-valor{font-size:26px;font-weight:900;color:#fff;line-height:1.05;}
+    .gauge-meta{margin-top:2px;color:var(--text-dim);font-size:11px;font-weight:650;}
+    .gauge-pill{
+      display:inline-flex;align-items:center;gap:6px;margin-top:2px;
+      padding:5px 12px;border-radius:999px;
+      background:rgba(45,212,191,.12);border:1px solid rgba(45,212,191,.28);
+      color:var(--accent);font-size:11px;font-weight:800;
+    }
+
+    .hist-semana{display:flex;align-items:flex-end;justify-content:space-between;gap:6px;height:86px;margin-top:18px;}
+    .hist-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;}
+    .hist-barra-fundo{width:100%;max-width:26px;flex:1;display:flex;align-items:flex-end;border-radius:6px;overflow:hidden;background:rgba(255,255,255,.06);}
+    .hist-barra{width:100%;border-radius:6px;background:linear-gradient(180deg, var(--accent), var(--accent-old));min-height:3px;}
+    .hist-col.hoje .hist-barra{background:linear-gradient(180deg,#5eead4,var(--accent));box-shadow:0 0 12px rgba(45,212,191,.45);}
+    .hist-col-letra{color:var(--text-dim);font-size:10px;font-weight:750;}
+    .hist-col.hoje .hist-col-letra{color:var(--accent);}
+
+    .marcos-resumo{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:4px;}
+    .marco-resumo-card{padding:14px 8px;border-radius:14px;text-align:center;background:var(--bg-soft);border:1px solid var(--border-soft);}
+    .marco-resumo-valor{font-size:20px;font-weight:900;color:#fff;line-height:1.1;}
+    .marco-resumo-label{margin-top:4px;color:var(--text-dim);font-size:10px;font-weight:650;line-height:1.3;}
+
+    .marco-lista{display:flex;flex-direction:column;gap:10px;}
+    .marco-item{
+      display:flex;align-items:center;gap:12px;padding:13px;border-radius:14px;
+      background:var(--bg-soft);border:1px solid var(--border-soft);
+    }
+    .marco-item.conquistado{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06);}
+    .marco-icone{
+      flex-shrink:0;width:38px;height:38px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;font-size:17px;
+      background:rgba(255,255,255,.06);
+    }
+    .marco-item.conquistado .marco-icone{background:rgba(34,197,94,.16);}
+    .marco-item.bloqueado{opacity:.5;}
+    .marco-corpo{flex:1;min-width:0;}
+    .marco-titulo{font-size:13px;font-weight:800;color:#fff;}
+    .marco-desc{margin-top:2px;font-size:11px;color:var(--text-muted);line-height:1.4;}
+    .marco-progresso{margin-top:6px;height:4px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;}
+    .marco-progresso-fill{height:100%;border-radius:999px;background:var(--accent);}
+    .marco-fracao{margin-top:4px;font-size:10px;color:var(--text-dim);font-weight:650;}
+    .marco-check{flex-shrink:0;color:#4ade80;font-size:18px;font-weight:900;}
+    .marco-cadeado{flex-shrink:0;color:var(--text-dim);font-size:15px;}
+
     .btn-secundario{
       width:100%;padding:14px;margin-top:10px;
       border:1px solid var(--card-border);border-radius:12px;
@@ -799,10 +853,61 @@
 
   <!-- ============ TAB: CONQUISTAS ============ -->
   <div id="tabConquistas" class="tab-conteudo oculto">
+
     <div class="card">
-      <div class="card-title">Em breve</div>
-      <div class="card-sub">Os teus marcos e sequências de treino vão aparecer aqui em breve.</div>
+      <div class="card-title">Passos de hoje<span class="selo-exemplo">Exemplo</span></div>
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 160 160">
+          <defs>
+            <linearGradient id="gaugeGradiente" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#5eead4"/>
+              <stop offset="100%" stop-color="#0b5cc2"/>
+            </linearGradient>
+          </defs>
+          <circle class="gauge-track" cx="80" cy="80" r="64"/>
+          <circle class="gauge-fill" cx="80" cy="80" r="64"
+            stroke-dasharray="402.1" stroke-dashoffset="145" id="gaugePassosCirculo"/>
+        </svg>
+        <div class="gauge-centro">
+          <div class="gauge-valor">6.420</div>
+          <div class="gauge-meta">de 10.000 passos</div>
+          <div class="gauge-pill">64% atingido</div>
+        </div>
+      </div>
+
+      <div class="hist-semana" id="histSemanaPassos">
+        <!-- preenchido por JS com dados de exemplo -->
+      </div>
     </div>
+
+    <div class="card">
+      <div class="card-title">Os teus marcos</div>
+      <div class="marcos-resumo">
+        <div class="marco-resumo-card">
+          <div class="marco-resumo-valor" id="marcoTotalTreinos">0</div>
+          <div class="marco-resumo-label">Treinos<br>concluídos</div>
+        </div>
+        <div class="marco-resumo-card">
+          <div class="marco-resumo-valor" id="marcoStreakAtual">0</div>
+          <div class="marco-resumo-label">Semanas<br>seguidas</div>
+        </div>
+        <div class="marco-resumo-card">
+          <div class="marco-resumo-valor" id="marcoMelhorStreak">0</div>
+          <div class="marco-resumo-label">Melhor<br>sequência</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Sequência de treinos</div>
+      <div class="marco-lista" id="marcosListaStreak"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Volume de treinos</div>
+      <div class="marco-lista" id="marcosListaVolume"></div>
+    </div>
+
   </div>
 
   <!-- ============ TAB: PLANOS ============ -->
@@ -925,6 +1030,109 @@
     })
     .catch(function () {
       // Sem ligação — o ecrã Início fica com os valores por omissão até haver rede.
+    });
+
+  // ---------- Conquistas ----------
+  // Passos/histograma continuam como exemplo (sem sensor); os marcos usam
+  // dados reais de treinos (EXECUCOES) assim que a API responder.
+  (function () {
+    const HIST_LETRAS = ["S", "T", "Q", "Q", "S", "S", "D"];
+    const HIST_EXEMPLO = [4200, 7800, 6100, 9200, 5400, 8700, 6420]; // exemplo, hoje = último
+    const histEl = document.getElementById("histSemanaPassos");
+    const maxHist = Math.max.apply(null, HIST_EXEMPLO);
+    HIST_EXEMPLO.forEach(function (valor, idx) {
+      const ehHoje = idx === HIST_EXEMPLO.length - 1;
+      const altura = Math.max(6, Math.round((valor / maxHist) * 100));
+      const col = document.createElement("div");
+      col.className = "hist-col" + (ehHoje ? " hoje" : "");
+      col.innerHTML =
+        '<div class="hist-barra-fundo"><div class="hist-barra" style="height:' + altura + '%"></div></div>' +
+        '<span class="hist-col-letra">' + HIST_LETRAS[idx] + '</span>';
+      histEl.appendChild(col);
+    });
+  })();
+
+  const marcoTotalTreinosEl = document.getElementById("marcoTotalTreinos");
+  const marcoStreakAtualEl = document.getElementById("marcoStreakAtual");
+  const marcoMelhorStreakEl = document.getElementById("marcoMelhorStreak");
+  const marcosListaStreakEl = document.getElementById("marcosListaStreak");
+  const marcosListaVolumeEl = document.getElementById("marcosListaVolume");
+
+  function criarMarcoHtml(marco) {
+    const estado = marco.concluido ? "conquistado" : (marco.emProgresso ? "" : "bloqueado");
+    let lado;
+    if (marco.concluido) {
+      lado = '<span class="marco-check">✓</span>';
+    } else if (marco.emProgresso) {
+      lado = "";
+    } else {
+      lado = '<span class="marco-cadeado">🔒</span>';
+    }
+    let progresso = "";
+    if (!marco.concluido && marco.meta) {
+      const pct = Math.min(100, Math.round((marco.atual / marco.meta) * 100));
+      progresso =
+        '<div class="marco-progresso"><div class="marco-progresso-fill" style="width:' + pct + '%"></div></div>' +
+        '<div class="marco-fracao">' + marco.atual + ' / ' + marco.meta + '</div>';
+    }
+    return (
+      '<div class="marco-item ' + estado + '">' +
+        '<div class="marco-icone">' + marco.icone + '</div>' +
+        '<div class="marco-corpo">' +
+          '<div class="marco-titulo">' + marco.titulo + '</div>' +
+          '<div class="marco-desc">' + marco.desc + '</div>' +
+          progresso +
+        '</div>' +
+        lado +
+      '</div>'
+    );
+  }
+
+  function renderConquistas(dados) {
+    const totalTreinos = dados.totalTreinosConcluidos || 0;
+    const streakAtual = dados.streakSemanas || 0;
+    const melhorStreak = Math.max(dados.melhorStreakSemanas || 0, streakAtual);
+
+    marcoTotalTreinosEl.textContent = totalTreinos;
+    marcoStreakAtualEl.textContent = streakAtual;
+    marcoMelhorStreakEl.textContent = melhorStreak;
+
+    const marcosStreak = [1, 4, 8, 12].map(function (meta) {
+      return {
+        icone: "🔥",
+        titulo: meta === 1 ? "Primeira semana" : meta + " semanas seguidas",
+        desc: meta === 1
+          ? "Completa pelo menos 1 treino esta semana."
+          : "Mantém pelo menos 1 treino por semana durante " + meta + " semanas seguidas.",
+        atual: streakAtual,
+        meta: meta,
+        concluido: melhorStreak >= meta,
+        emProgresso: streakAtual > 0 && streakAtual < meta && melhorStreak < meta
+      };
+    });
+
+    const marcosVolume = [10, 25, 50, 100].map(function (meta) {
+      return {
+        icone: "💪",
+        titulo: meta + " treinos concluídos",
+        desc: "Regista um total de " + meta + " treinos.",
+        atual: totalTreinos,
+        meta: meta,
+        concluido: totalTreinos >= meta,
+        emProgresso: totalTreinos > 0 && totalTreinos < meta
+      };
+    });
+
+    marcosListaStreakEl.innerHTML = marcosStreak.map(criarMarcoHtml).join("");
+    marcosListaVolumeEl.innerHTML = marcosVolume.map(criarMarcoHtml).join("");
+  }
+
+  chamarApi("getResumoConquistasPortal", {})
+    .then(function (resp) {
+      if (resp && resp.ok && resp.dados) renderConquistas(resp.dados);
+    })
+    .catch(function () {
+      // Sem ligação — os marcos ficam a zero até haver rede.
     });
 
   // ---------- Barra "O teu percurso de hoje" ----------
@@ -2164,6 +2372,9 @@
             }
           });
         });
+      }).catch(function () {
+        // Ambientes sem suporte a service worker (ex.: teste local via file://)
+        // não devem impedir o resto da app de funcionar.
       });
     });
   }
