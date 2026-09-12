@@ -900,6 +900,7 @@
   const cardTreinoConcluido = document.getElementById("cardTreinoConcluido");
 
   var PLANO_ATIVO = null;          // { nome, treinos: [...] }
+  var PLANO_ATIVO_CARREGADO = false; // true assim que uma resposta (com ou sem plano) chega do servidor
   var TREINO_ATUAL_INDEX = null;
   var TREINO_ATUAL_EXECUCAO = null;
   var EXERCICIO_ATUAL_EXECUCAO = 0;
@@ -964,6 +965,22 @@
   }
 
   // ---------- Ecrã: escolher treino ----------
+  function carregarPlanoAtivoSeNecessario() {
+    if (PLANO_ATIVO_CARREGADO) return Promise.resolve();
+    return chamarApi("getPlanoAtivoPortal", {})
+      .then(function (respPlano) {
+        PLANO_ATIVO_CARREGADO = true;
+        if (!respPlano || !respPlano.ok) return;
+        const dadosPlano = respPlano.dados || {};
+        if (dadosPlano.temPlanos && dadosPlano.planosCliente && dadosPlano.planosCliente.length) {
+          PLANO_ATIVO = dadosPlano.planosCliente.find(function (p) { return p.nome === dadosPlano.planoAtivoNome; }) || dadosPlano.planosCliente[0];
+        }
+      })
+      .catch(function () {
+        // Não marca como carregado — tenta-se novamente da próxima vez que for preciso.
+      });
+  }
+
   function mostrarCardEscolherTreino() {
     if (!temCheckinFeito()) return;
     const teste = obterProntidaoAtual();
@@ -978,6 +995,13 @@
     }
 
     cardEscolherTreino.classList.remove("oculto");
+
+    if (!PLANO_ATIVO_CARREGADO) {
+      listaTreinosHoje.innerHTML = '<p class="card-sub">A carregar os teus treinos…</p>';
+      carregarPlanoAtivoSeNecessario().then(renderListaTreinosHoje);
+      return;
+    }
+
     renderListaTreinosHoje();
   }
 
@@ -1675,14 +1699,8 @@
       if (!temCheckinHoje) return;
 
       // Carrega o plano ativo e os treinos, e decide que ecrã do passo 3 mostrar.
-      chamarApi("getPlanoAtivoPortal", {})
-        .then(function (respPlano) {
-          if (!respPlano || !respPlano.ok) return;
-          const dadosPlano = respPlano.dados || {};
-          if (dadosPlano.temPlanos && dadosPlano.planosCliente && dadosPlano.planosCliente.length) {
-            PLANO_ATIVO = dadosPlano.planosCliente.find(function (p) { return p.nome === dadosPlano.planoAtivoNome; }) || dadosPlano.planosCliente[0];
-          }
-
+      carregarPlanoAtivoSeNecessario()
+        .then(function () {
           const estadoAgora = lerEstadoDiario();
           if (estadoAgora.workout && estadoAgora.workout.status) {
             restaurarEstadoTreino();
