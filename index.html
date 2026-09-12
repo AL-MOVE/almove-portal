@@ -197,6 +197,146 @@
     .prontidao-ms{margin:4px 0;color:#fff;font-size:32px;font-weight:900;line-height:1;}
     .prontidao-ms small{color:var(--texto-suave);font-size:13px;font-weight:700;}
     .prontidao-nota{margin-top:10px;color:var(--texto-suave);font-size:12px;line-height:1.48;}
+
+    /* ---------- Escolher treino ---------- */
+    .treino-card{
+      padding:15px;border-radius:15px;margin-bottom:10px;
+      border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.055);
+      display:flex;align-items:center;gap:12px;
+    }
+    .treino-card.feito-hoje{
+      border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.08);
+    }
+    .treino-card-icone{
+      width:37px;height:37px;flex-shrink:0;border-radius:50%;
+      background:rgba(45,212,191,.12);color:#2dd4bf;
+      display:flex;align-items:center;justify-content:center;font-size:18px;
+    }
+    .treino-card-corpo{flex:1;min-width:0;}
+    .treino-card-badge{
+      display:block;color:#4ade80;font-size:10px;font-weight:800;
+      text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px;
+    }
+    .treino-card .nome{font-size:16px;font-weight:800;color:#fff;}
+    .treino-card .sub{font-size:12px;color:var(--texto-suave);}
+    .treino-card button{
+      flex-shrink:0;min-height:42px;padding:0 16px;border-radius:10px;border:0;
+      background:rgba(255,255,255,.1);color:#fff;font-weight:700;font-size:13px;
+    }
+    .treino-card.feito-hoje button{
+      background:linear-gradient(135deg,#00a99d,#003da0);
+    }
+    .aviso-repeticao{
+      padding:12px 14px;border-radius:12px;margin-bottom:14px;
+      background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3);
+      color:#fcd34d;font-size:12px;line-height:1.5;
+    }
+
+    /* ---------- Execução ---------- */
+    .voltar-treinos{
+      display:inline-block;font-size:11px;color:var(--texto-suave);
+      margin-bottom:10px;
+    }
+    .workout-top-bar{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:10px 14px;border-radius:12px;margin-bottom:14px;
+      background:rgba(45,212,191,.07);
+    }
+    .workout-timer{font-size:13px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;}
+    .workout-save-state{font-size:10px;color:#2dd4bf;}
+
+    .exec-player-rail{
+      display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;
+      margin-bottom:8px;
+    }
+    .exec-player-rail button{
+      padding:10px 12px;border-radius:10px;border:1px solid var(--card-border);
+      background:#101c33;color:#fff;font-size:12px;font-weight:700;
+    }
+    .exec-player-rail button:disabled{opacity:.38;}
+    .exec-player-current{text-align:center;font-size:11px;color:var(--texto-suave);}
+    .exec-player-current strong{display:block;font-size:12px;color:#fff;font-weight:800;}
+
+    .btn-escolher-exercicio{
+      width:100%;padding:10px;margin-bottom:8px;border-radius:10px;
+      border:1px solid var(--card-border);background:transparent;
+      color:var(--texto-suave);font-size:12px;font-weight:700;
+    }
+
+    .exec-player-picker{
+      display:none;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;
+    }
+    .exec-player-picker.aberto{display:grid;}
+    .exec-player-choice{
+      padding:10px;border-radius:10px;text-align:left;
+      border:1px solid var(--card-border);background:#101c33;
+      color:var(--texto-suave);font-size:12px;
+    }
+    .exec-player-choice.ativo{border-color:#2dd4bf;background:rgba(45,212,191,.12);color:#fff;}
+    .exec-player-choice.concluido::before{content:"✓ ";color:#4ade80;}
+
+    .exec-exercicio{display:none;padding:16px;border-radius:14px;margin-bottom:14px;
+      border:1px solid var(--card-border);background:#0d1526;transition:background .2s,border-color .2s;}
+    .exec-exercicio.player-ativo{display:block;}
+    .exec-exercicio.exec-parcial{border-color:rgba(234,179,8,.4);background:rgba(234,179,8,.06);}
+    .exec-exercicio.exec-completo{border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.06);}
+
+    .exec-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px;}
+    .exec-exercicio-titulo{font-size:15px;font-weight:800;color:#fff;}
+    .exec-progress{font-size:10px;color:var(--texto-suave);}
+    .exec-historico-btn{
+      flex-shrink:0;padding:6px 10px;border-radius:999px;border:1px solid var(--card-border);
+      background:transparent;color:var(--texto-suave);font-size:10px;
+    }
+    .exec-exercicio-prescrito{font-size:11px;color:var(--texto-suave);margin-bottom:10px;}
+
+    .exec-descanso{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:11px;color:var(--texto-suave);}
+    .exec-descanso button{
+      padding:6px 12px;border-radius:999px;border:1px solid rgba(45,212,191,.35);
+      background:rgba(45,212,191,.1);color:#2dd4bf;font-size:11px;font-weight:700;
+    }
+    .exec-descanso-tempo{font-variant-numeric:tabular-nums;color:#2dd4bf;font-weight:700;}
+
+    .exec-historico-lista{display:none;padding:10px;border-radius:10px;margin-bottom:10px;background:rgba(0,0,0,.14);}
+    .exec-historico-lista.aberto{display:block;}
+    .exec-historico-linha{display:flex;justify-content:space-between;font-size:11px;color:var(--texto-suave);padding:4px 0;}
+
+    .exec-serie{padding:10px;border-radius:11px;background:rgba(255,255,255,.03);margin-bottom:8px;}
+    .exec-serie-linha{display:grid;grid-template-columns:30px 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px;}
+    .exec-serie-numero{font-size:11px;font-weight:800;color:var(--texto-suave);}
+    .exec-serie-linha input{
+      font-size:16px;padding:10px;border-radius:9px;border:1px solid var(--card-border);
+      background:rgba(255,255,255,.13);color:#fff;width:100%;
+    }
+    .exec-serie-linha input[id$="-carga"]{order:1;}
+    .exec-serie-linha input[id$="-reps"]{order:2;}
+    .exec-serie-linha input::placeholder{color:#5b6f8f;}
+
+    .velocidade-label{font-size:9px;color:var(--texto-suave);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px;}
+    .velocidade-opcoes{display:flex;gap:6px;}
+    .velocidade-btn{
+      flex:1;min-height:34px;border-radius:9px;border:1px solid var(--card-border);
+      background:#101c33;color:var(--texto-suave);font-size:11px;
+    }
+    .velocidade-btn.selecionada{border-color:#2dd4bf;background:rgba(45,212,191,.15);color:#fff;}
+    .velocidade-btn.falha.selecionada{border-color:var(--vermelho);background:rgba(239,68,68,.15);color:#fff;}
+
+    .exec-nota{margin-top:4px;min-height:50px;}
+
+    .success-hero{text-align:center;margin-bottom:18px;}
+    .success-icon{
+      width:64px;height:64px;border-radius:50%;margin:0 auto 12px;
+      background:#16a34a;color:#fff;font-size:30px;font-weight:900;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .success-hero h2{font-size:18px;font-weight:800;margin-bottom:4px;}
+    .success-hero p{color:var(--texto-suave);font-size:13px;}
+    .success-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+    .success-stat{
+      padding:14px;border-radius:12px;background:#101c33;text-align:center;
+    }
+    .success-stat strong{display:block;font-size:18px;color:#fff;font-weight:800;}
+    .success-stat span{font-size:11px;color:var(--texto-suave);}
   </style>
 </head>
 <body>
@@ -304,6 +444,82 @@
   <div id="cardProntidao" class="card oculto">
     <div class="card-title">Teste de prontidão</div>
     <div id="prontidaoConteudo"></div>
+  </div>
+
+  <div id="cardEscolherTreino" class="card oculto">
+    <span class="fluxo-passo">Passo 3 de 3</span>
+    <div class="card-title">O que vais treinar hoje?</div>
+    <div id="listaTreinosHoje"></div>
+  </div>
+
+  <div id="cardExecucaoTreino" class="card oculto">
+    <a class="voltar-treinos" id="btnVoltarTreinos">← Escolher outro treino</a>
+    <div class="card-title" id="execucaoTreinoTitulo">Treino</div>
+    <div class="workout-top-bar">
+      <div class="workout-timer" id="workoutTimer">00:00</div>
+      <div class="workout-save-state" id="workoutSaveState">Guardado no dispositivo</div>
+    </div>
+    <div id="execucaoAvisoRepeticao"></div>
+    <div id="execucaoExerciciosLista"></div>
+    <button type="button" class="botao" id="btnTerminarTreino">Terminar treino</button>
+    <p class="erro" id="execucaoErro"></p>
+  </div>
+
+  <div id="cardPosTreino" class="card oculto">
+    <span class="fluxo-passo">Um último passo</span>
+    <div class="card-title">Como correu o treino?</div>
+
+    <div class="pergunta">
+      <div class="pergunta-label">Energia no final</div>
+      <div class="opcoes" data-campo-pos="energia">
+        <div class="opcao" data-valor="1">1</div>
+        <div class="opcao" data-valor="2">2</div>
+        <div class="opcao" data-valor="3">3</div>
+        <div class="opcao" data-valor="4">4</div>
+        <div class="opcao" data-valor="5">5</div>
+      </div>
+      <div class="extremos"><span>Esgotada</span><span>Cheia de energia</span></div>
+    </div>
+
+    <div class="pergunta">
+      <div class="pergunta-label">Esforço percebido</div>
+      <div class="opcoes" data-campo-pos="esforco">
+        <div class="opcao" data-valor="1">1</div>
+        <div class="opcao" data-valor="2">2</div>
+        <div class="opcao" data-valor="3">3</div>
+        <div class="opcao" data-valor="4">4</div>
+        <div class="opcao" data-valor="5">5</div>
+      </div>
+      <div class="extremos"><span>Leve</span><span>Ao máximo</span></div>
+    </div>
+
+    <div class="pergunta">
+      <div class="pergunta-label">Dificuldade sentida</div>
+      <div class="opcoes" data-campo-pos="dificuldade">
+        <div class="opcao" data-valor="1">1</div>
+        <div class="opcao" data-valor="2">2</div>
+        <div class="opcao" data-valor="3">3</div>
+        <div class="opcao" data-valor="4">4</div>
+        <div class="opcao" data-valor="5">5</div>
+      </div>
+      <div class="extremos"><span>Fácil</span><span>Muito difícil</span></div>
+    </div>
+
+    <button type="button" class="botao" id="btnConfirmarPosTreino">Confirmar</button>
+    <p class="erro" id="posTreinoErro"></p>
+  </div>
+
+  <div id="cardTreinoConcluido" class="card oculto">
+    <div class="success-hero">
+      <div class="success-icon">✓</div>
+      <h2>Treino concluído</h2>
+      <p id="treinoConcluidoNome"></p>
+    </div>
+    <div class="success-stats">
+      <div class="success-stat"><strong id="treinoConcluidoVolume"></strong><span>Volume registado</span></div>
+      <div class="success-stat"><strong id="treinoConcluidoDuracao"></strong><span>Duração</span></div>
+    </div>
+    <button type="button" class="botao" id="btnRegistarOutroTreino">Registar outro treino</button>
   </div>
 
 <script>
@@ -487,6 +703,7 @@
         mostrarEstadoSync("offline", "Sem ligação. Os teus dados ficaram guardados neste dispositivo.");
       });
 
+    CHECKIN_HOJE_CONFIRMADO = true;
     mostrarCardProntidao();
   }
 
@@ -537,7 +754,9 @@
         '<div class="prontidao-resultado"><span class="fluxo-passo">Passo 2 de 3 · Teste concluído</span>' +
         '<div class="prontidao-ms">' + teste.medianaMs + ' <small>ms</small></div>' +
         '<div class="prontidao-tentativas">Mediana de ' + (teste.tentativas || 5) + ' toques · ' + referencia + '</div>' +
-        '<p class="prontidao-nota">' + notaProntidao(teste) + '</p></div>';
+        '<p class="prontidao-nota">' + notaProntidao(teste) + '</p></div>' +
+        '<button type="button" class="botao" id="btnLibertarTreino" style="margin-top:14px;">Continuar para escolher treino</button>';
+      document.getElementById("btnLibertarTreino").addEventListener("click", libertarEscolhaTreino);
       return;
     }
 
@@ -558,6 +777,20 @@
     guardarEstadoDiario(estado);
     PRONTIDAO_HOJE_INICIAL = teste;
     cardProntidao.classList.add("oculto");
+    mostrarCardEscolherTreino();
+  }
+
+  function libertarEscolhaTreino() {
+    const estado = lerEstadoDiario();
+    const teste = estado.testeProntidao || PRONTIDAO_HOJE_INICIAL || null;
+    if (teste) {
+      teste.libertouTreino = true;
+      estado.testeProntidao = teste;
+      guardarEstadoDiario(estado);
+      PRONTIDAO_HOJE_INICIAL = teste;
+    }
+    cardProntidao.classList.add("oculto");
+    mostrarCardEscolherTreino();
   }
 
   function iniciarProntidao() {
@@ -648,6 +881,748 @@
       });
   }
 
+  // ==========================================================
+  // ESCOLHER E EXECUTAR TREINO (passo 3 de 3)
+  // ==========================================================
+  const cardEscolherTreino = document.getElementById("cardEscolherTreino");
+  const listaTreinosHoje = document.getElementById("listaTreinosHoje");
+  const cardExecucaoTreino = document.getElementById("cardExecucaoTreino");
+  const execucaoTreinoTitulo = document.getElementById("execucaoTreinoTitulo");
+  const execucaoAvisoRepeticao = document.getElementById("execucaoAvisoRepeticao");
+  const execucaoExerciciosLista = document.getElementById("execucaoExerciciosLista");
+  const execucaoErro = document.getElementById("execucaoErro");
+  const btnTerminarTreino = document.getElementById("btnTerminarTreino");
+  const workoutTimerEl = document.getElementById("workoutTimer");
+  const workoutSaveStateEl = document.getElementById("workoutSaveState");
+  const cardPosTreino = document.getElementById("cardPosTreino");
+  const posTreinoErro = document.getElementById("posTreinoErro");
+  const btnConfirmarPosTreino = document.getElementById("btnConfirmarPosTreino");
+  const cardTreinoConcluido = document.getElementById("cardTreinoConcluido");
+
+  var PLANO_ATIVO = null;          // { nome, treinos: [...] }
+  var TREINO_ATUAL_INDEX = null;
+  var TREINO_ATUAL_EXECUCAO = null;
+  var EXERCICIO_ATUAL_EXECUCAO = 0;
+  var timerTreinoInterval = null;
+  var wakeLockAtivo = null;
+  var respostasPosTreino = {};
+  var historicoCarregado = {};
+  var descansoIntervalos = {};
+  var CHECKIN_HOJE_CONFIRMADO = false; // true quando o servidor OU o rascunho local confirmam check-in feito hoje
+
+  function temCheckinFeito() {
+    if (CHECKIN_HOJE_CONFIRMADO) return true;
+    const estado = lerEstadoDiario();
+    return !!(estado.checkin && (estado.checkin.submitted || estado.checkin.values));
+  }
+
+  function chaveRascunhoTreino(nomePlano, nomeTreino) {
+    return "ALMOVE_WORKOUT_" + TOKEN + "_" + dataLocalHoje() + "_" + slugStorage(nomePlano + "|" + nomeTreino);
+  }
+
+  function slugStorage(texto) {
+    return String(texto).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  }
+
+  function lerRascunhoTreino(nomePlano, nomeTreino) {
+    try {
+      const raw = localStorage.getItem(chaveRascunhoTreino(nomePlano, nomeTreino));
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function guardarRascunhoTreino(rascunho) {
+    try {
+      rascunho.updatedAt = new Date().toISOString();
+      localStorage.setItem(chaveRascunhoTreino(rascunho.nomePlano, rascunho.nomeTreino), JSON.stringify(rascunho));
+    } catch (e) { /* localStorage indisponível */ }
+  }
+
+  function limparRascunhoTreino(nomePlano, nomeTreino) {
+    try { localStorage.removeItem(chaveRascunhoTreino(nomePlano, nomeTreino)); } catch (e) {}
+  }
+
+  function novoRascunhoTreino(treino) {
+    return {
+      version: 2,
+      eventId: gerarIdLocal(),
+      nomePlano: PLANO_ATIVO.nome,
+      nomeTreino: treino.nome,
+      startedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      status: "active",
+      exercises: treino.exercicios.map(function (ex) {
+        const numSeries = parseInt(ex.series, 10) || 3;
+        const series = [];
+        for (let i = 0; i < numSeries; i++) series.push({ reps: "", carga: "", velocidade: "" });
+        return { exercicio: ex.exercicio, series: series, notas: "" };
+      })
+    };
+  }
+
+  // ---------- Ecrã: escolher treino ----------
+  function mostrarCardEscolherTreino() {
+    if (!temCheckinFeito()) return;
+    const teste = obterProntidaoAtual();
+    const treinoLibertado = !!(teste && teste.libertouTreino);
+    if (!teste || !(teste.medianaMs || teste.ignorado) || !treinoLibertado) return;
+
+    const estado = lerEstadoDiario();
+    if (estado.workout && ["active", "post-workout", "completed"].indexOf(estado.workout.status) !== -1) {
+      // Já há um treino em curso ou concluído — restaura o ecrã certo em vez de mostrar a escolha.
+      restaurarEstadoTreino();
+      return;
+    }
+
+    cardEscolherTreino.classList.remove("oculto");
+    renderListaTreinosHoje();
+  }
+
+  function renderListaTreinosHoje() {
+    if (!PLANO_ATIVO || !PLANO_ATIVO.treinos || !PLANO_ATIVO.treinos.length) {
+      listaTreinosHoje.innerHTML = '<p class="card-sub">O André ainda não te definiu nenhum treino.</p>';
+      return;
+    }
+
+    let html = "";
+    PLANO_ATIVO.treinos.forEach(function (treino, idx) {
+      const numExercicios = treino.exercicios ? treino.exercicios.length : 0;
+      const badge = treino.feitoAntes
+        ? '<span class="treino-card-badge">✓ Realizado ' + (treino.diasDesde === 0 ? "hoje" : "há " + treino.diasDesde + "d") + '</span>'
+        : "";
+      html +=
+        '<div class="treino-card' + (treino.feitoAntes ? " feito-hoje" : "") + '">' +
+        '<div class="treino-card-icone">🏋️</div>' +
+        '<div class="treino-card-corpo">' + badge +
+        '<div class="nome">' + treino.nome + '</div>' +
+        '<div class="sub">' + numExercicios + ' exercício' + (numExercicios === 1 ? "" : "s") + '</div>' +
+        '</div>' +
+        '<button type="button" data-treino-idx="' + idx + '">' + (treino.feitoAntes ? "Repetir treino" : "Selecionar") + '</button>' +
+        '</div>';
+    });
+    listaTreinosHoje.innerHTML = html;
+
+    listaTreinosHoje.querySelectorAll("button[data-treino-idx]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        escolherTreino(Number(btn.getAttribute("data-treino-idx")));
+      });
+    });
+  }
+
+  // ---------- Escolher um treino ----------
+  function escolherTreino(idx, restaurando) {
+    const treino = PLANO_ATIVO.treinos[idx];
+    if (!treino) return;
+
+    TREINO_ATUAL_INDEX = idx;
+    TREINO_ATUAL_EXECUCAO = treino;
+    EXERCICIO_ATUAL_EXECUCAO = 0;
+
+    cardEscolherTreino.classList.add("oculto");
+    cardProntidao.classList.add("oculto");
+    cardExecucaoTreino.classList.remove("oculto");
+    execucaoTreinoTitulo.textContent = treino.nome;
+
+    const outrosPorFazer = PLANO_ATIVO.treinos
+      .filter(function (t) { return t.nome !== treino.nome && !t.feitoAntes; })
+      .map(function (t) { return t.nome; });
+
+    if (treino.feitoAntes && outrosPorFazer.length) {
+      execucaoAvisoRepeticao.innerHTML = '<div class="aviso-repeticao">Vais repetir este treino. Ainda não fizeste: ' + outrosPorFazer.join(", ") + '.</div>';
+    } else {
+      execucaoAvisoRepeticao.innerHTML = "";
+    }
+
+    let rascunho = lerRascunhoTreino(PLANO_ATIVO.nome, treino.nome);
+    if (!rascunho) {
+      rascunho = novoRascunhoTreino(treino);
+      guardarRascunhoTreino(rascunho);
+    }
+
+    const estado = lerEstadoDiario();
+    estado.workout = {
+      status: "active",
+      nomePlano: PLANO_ATIVO.nome,
+      nomeTreino: treino.nome,
+      treinoIndex: idx,
+      startedAt: rascunho.startedAt,
+      eventId: rascunho.eventId
+    };
+    guardarEstadoDiario(estado);
+
+    construirInterfaceTreino(treino, rascunho);
+    iniciarTimerTreino(rascunho.startedAt);
+    ativarWakeLock();
+
+    if (!restaurando) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+
+  function voltarEscolherTreino() {
+    pararTimerTreino();
+    libertarWakeLock();
+    cardExecucaoTreino.classList.add("oculto");
+    cardEscolherTreino.classList.remove("oculto");
+    renderListaTreinosHoje();
+  }
+  document.getElementById("btnVoltarTreinos").addEventListener("click", voltarEscolherTreino);
+
+  // ---------- Construir a interface de execução ----------
+  function construirInterfaceTreino(treino, rascunho) {
+    let html = "";
+
+    html += '<div class="exec-player-rail">' +
+      '<button type="button" id="execPlayerAnterior">← Anterior</button>' +
+      '<div class="exec-player-current" id="execPlayerAtual"></div>' +
+      '<button type="button" id="execPlayerSeguinte">Seguinte →</button>' +
+      '</div>' +
+      '<button type="button" class="btn-escolher-exercicio" id="btnAlternarPicker">Escolher exercício</button>' +
+      '<div class="exec-player-picker" id="execPlayerPicker"></div>';
+
+    treino.exercicios.forEach(function (ex, exIdx) {
+      const numSeries = parseInt(ex.series, 10) || 3;
+      const porTempo = ex.tipoPrescricao === "TEMPO" || /(?:seg|sec|min|tempo|\d\s*s\b|:)/i.test(String(ex.repsMin || "") + " " + String(ex.repsMax || ""));
+      const descansoSegundos = Math.max(0, Number(ex.descansoSegundos || 60));
+
+      html += '<div class="exec-exercicio" data-exec-player-index="' + exIdx + '" id="exec-card-' + exIdx + '">' +
+        '<div class="exec-header">' +
+        '<div class="exec-header-info">' +
+        '<div class="exec-exercicio-titulo">' + ex.exercicio + '</div>' +
+        '<span class="exec-progress" id="exec-progress-' + exIdx + '">0/' + numSeries + ' séries</span>' +
+        '</div>' +
+        '<button type="button" class="exec-historico-btn" data-historico-idx="' + exIdx + '">📊 Histórico</button>' +
+        '</div>' +
+        '<div class="exec-exercicio-prescrito">Prescrito: ' + (ex.series || "-") + '×' + (ex.repsMin || "-") + '-' + (ex.repsMax || "-") + (porTempo ? " seg" : " reps") + ' · RIR ' + (ex.rir || "-") + '</div>' +
+        '<div class="exec-descanso">Descanso: <button type="button" data-descanso-idx="' + exIdx + '" data-descanso-seg="' + descansoSegundos + '">▶ ' + descansoSegundos + ' s</button> <span class="exec-descanso-tempo" id="exec-descanso-' + exIdx + '"></span></div>' +
+        '<div class="exec-historico-lista" id="exec-historico-' + exIdx + '"></div>';
+
+      for (let s = 0; s < numSeries; s++) {
+        html += '<div class="exec-serie">' +
+          '<div class="exec-serie-linha">' +
+          '<span class="exec-serie-numero">S' + (s + 1) + '</span>' +
+          '<input type="text" inputmode="numeric" placeholder="' + (porTempo ? "tempo (seg)" : "reps") + '" id="exec-' + exIdx + '-' + s + '-reps" data-ex="' + exIdx + '" data-s="' + s + '">' +
+          '<input type="text" inputmode="decimal" placeholder="kg" id="exec-' + exIdx + '-' + s + '-carga" data-ex="' + exIdx + '" data-s="' + s + '">' +
+          '</div>' +
+          '<div class="velocidade-wrap">' +
+          '<div class="velocidade-label">Como saiu a série?</div>' +
+          '<div class="velocidade-opcoes">' +
+          '<button type="button" class="velocidade-btn" data-vel-ex="' + exIdx + '" data-vel-s="' + s + '" data-vel="rapida">⚡ Rápida</button>' +
+          '<button type="button" class="velocidade-btn" data-vel-ex="' + exIdx + '" data-vel-s="' + s + '" data-vel="controlada">✓ Controlada</button>' +
+          '<button type="button" class="velocidade-btn" data-vel-ex="' + exIdx + '" data-vel-s="' + s + '" data-vel="lenta">🐢 Lenta</button>' +
+          '<button type="button" class="velocidade-btn falha" data-vel-ex="' + exIdx + '" data-vel-s="' + s + '" data-vel="falha">🛑 Falha</button>' +
+          '</div></div></div>';
+      }
+
+      html += '<textarea class="exec-nota" id="exec-' + exIdx + '-notas" placeholder="Notas (opcional)" data-ex-notas="' + exIdx + '"></textarea>' +
+        '</div>';
+    });
+
+    execucaoExerciciosLista.innerHTML = html;
+
+    // Preenche a partir do rascunho.
+    rascunho.exercises.forEach(function (exData, exIdx) {
+      exData.series.forEach(function (serieData, s) {
+        const repsInput = document.getElementById("exec-" + exIdx + "-" + s + "-reps");
+        const cargaInput = document.getElementById("exec-" + exIdx + "-" + s + "-carga");
+        if (repsInput) repsInput.value = serieData.reps || "";
+        if (cargaInput) cargaInput.value = serieData.carga || "";
+        if (serieData.velocidade) marcarVelocidadeVisual(exIdx, s, serieData.velocidade);
+      });
+      const notaEl = document.getElementById("exec-" + exIdx + "-notas");
+      if (notaEl) notaEl.value = exData.notas || "";
+      atualizarEstadoExercicio(exIdx);
+    });
+
+    // Listeners.
+    execucaoExerciciosLista.querySelectorAll('input[data-ex]').forEach(function (input) {
+      input.addEventListener("input", function () { onWorkoutInput(Number(input.getAttribute("data-ex"))); });
+    });
+    execucaoExerciciosLista.querySelectorAll('textarea[data-ex-notas]').forEach(function (textarea) {
+      textarea.addEventListener("input", function () { onWorkoutInput(Number(textarea.getAttribute("data-ex-notas"))); });
+    });
+    execucaoExerciciosLista.querySelectorAll('.velocidade-btn').forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        selecionarVelocidade(Number(btn.getAttribute("data-vel-ex")), Number(btn.getAttribute("data-vel-s")), btn.getAttribute("data-vel"));
+      });
+    });
+    execucaoExerciciosLista.querySelectorAll('[data-historico-idx]').forEach(function (btn) {
+      btn.addEventListener("click", function () { toggleHistoricoExercicio(Number(btn.getAttribute("data-historico-idx"))); });
+    });
+    execucaoExerciciosLista.querySelectorAll('[data-descanso-idx]').forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        iniciarDescansoExercicio(Number(btn.getAttribute("data-descanso-idx")), Number(btn.getAttribute("data-descanso-seg")));
+      });
+    });
+
+    document.getElementById("execPlayerAnterior").addEventListener("click", function () { navegarExercicioExecucao(-1); });
+    document.getElementById("execPlayerSeguinte").addEventListener("click", function () { navegarExercicioExecucao(1); });
+    document.getElementById("btnAlternarPicker").addEventListener("click", alternarListaExerciciosExecucao);
+
+    montarPickerExercicios(treino);
+    atualizarPlayerExercicioExecucao();
+  }
+
+  function montarPickerExercicios(treino) {
+    const picker = document.getElementById("execPlayerPicker");
+    let html = "";
+    treino.exercicios.forEach(function (ex, idx) {
+      html += '<button type="button" class="exec-player-choice" data-escolha-idx="' + idx + '">' + (idx + 1) + '. ' + ex.exercicio + '</button>';
+    });
+    picker.innerHTML = html;
+    picker.querySelectorAll("[data-escolha-idx]").forEach(function (btn) {
+      btn.addEventListener("click", function () { escolherExercicioExecucao(Number(btn.getAttribute("data-escolha-idx"))); });
+    });
+  }
+
+  function alternarListaExerciciosExecucao() {
+    document.getElementById("execPlayerPicker").classList.toggle("aberto");
+  }
+
+  function navegarExercicioExecucao(direcao) {
+    escolherExercicioExecucao(EXERCICIO_ATUAL_EXECUCAO + direcao);
+  }
+
+  function escolherExercicioExecucao(indice) {
+    const total = TREINO_ATUAL_EXECUCAO.exercicios.length;
+    if (indice < 0 || indice >= total) return;
+    guardarTreinoAtual();
+    EXERCICIO_ATUAL_EXECUCAO = indice;
+    document.getElementById("execPlayerPicker").classList.remove("aberto");
+    atualizarPlayerExercicioExecucao();
+    const card = document.getElementById("exec-card-" + indice);
+    if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function atualizarPlayerExercicioExecucao() {
+    const total = TREINO_ATUAL_EXECUCAO.exercicios.length;
+    EXERCICIO_ATUAL_EXECUCAO = Math.max(0, Math.min(EXERCICIO_ATUAL_EXECUCAO, total - 1));
+
+    execucaoExerciciosLista.querySelectorAll(".exec-exercicio").forEach(function (card) {
+      const idx = Number(card.getAttribute("data-exec-player-index"));
+      card.classList.toggle("player-ativo", idx === EXERCICIO_ATUAL_EXECUCAO);
+    });
+
+    const nomeAtual = TREINO_ATUAL_EXECUCAO.exercicios[EXERCICIO_ATUAL_EXECUCAO].exercicio;
+    document.getElementById("execPlayerAtual").innerHTML = "Exercício " + (EXERCICIO_ATUAL_EXECUCAO + 1) + " de " + total + "<strong>" + nomeAtual + "</strong>";
+
+    document.getElementById("execPlayerAnterior").disabled = EXERCICIO_ATUAL_EXECUCAO === 0;
+    const btnSeguinte = document.getElementById("execPlayerSeguinte");
+    btnSeguinte.textContent = EXERCICIO_ATUAL_EXECUCAO === total - 1 ? "Último exercício" : "Seguinte →";
+    btnSeguinte.disabled = EXERCICIO_ATUAL_EXECUCAO === total - 1;
+
+    document.querySelectorAll(".exec-player-choice").forEach(function (btn) {
+      const idx = Number(btn.getAttribute("data-escolha-idx"));
+      btn.classList.toggle("ativo", idx === EXERCICIO_ATUAL_EXECUCAO);
+      const card = document.getElementById("exec-card-" + idx);
+      btn.classList.toggle("concluido", !!(card && card.classList.contains("exec-completo")));
+    });
+  }
+
+  // ---------- Registo de séries ----------
+  var debounceWorkoutInput = null;
+  function onWorkoutInput(exIdx) {
+    atualizarEstadoExercicio(exIdx);
+    clearTimeout(debounceWorkoutInput);
+    debounceWorkoutInput = setTimeout(guardarTreinoAtual, 180);
+  }
+
+  function atualizarEstadoExercicio(exIdx) {
+    const card = document.getElementById("exec-card-" + exIdx);
+    if (!card) return;
+    const numSeries = parseInt(TREINO_ATUAL_EXECUCAO.exercicios[exIdx].series, 10) || 3;
+    let completas = 0;
+    for (let s = 0; s < numSeries; s++) {
+      const repsInput = document.getElementById("exec-" + exIdx + "-" + s + "-reps");
+      if (repsInput && String(repsInput.value || "").trim() !== "") completas++;
+    }
+    const progressoEl = document.getElementById("exec-progress-" + exIdx);
+    if (progressoEl) progressoEl.textContent = completas + "/" + numSeries + " séries";
+    card.classList.remove("exec-parcial", "exec-completo");
+    if (completas === numSeries && numSeries > 0) card.classList.add("exec-completo");
+    else if (completas > 0) card.classList.add("exec-parcial");
+    atualizarPlayerExercicioExecucao();
+  }
+
+  function marcarVelocidadeVisual(exIdx, s, valor) {
+    document.querySelectorAll('[data-vel-ex="' + exIdx + '"][data-vel-s="' + s + '"]').forEach(function (btn) {
+      btn.classList.toggle("selecionada", btn.getAttribute("data-vel") === valor);
+    });
+  }
+
+  function selecionarVelocidade(exIdx, s, valor) {
+    marcarVelocidadeVisual(exIdx, s, valor);
+    guardarTreinoAtual();
+  }
+
+  function guardarTreinoAtual() {
+    if (!TREINO_ATUAL_EXECUCAO) return;
+    const rascunho = lerRascunhoTreino(PLANO_ATIVO.nome, TREINO_ATUAL_EXECUCAO.nome) || novoRascunhoTreino(TREINO_ATUAL_EXECUCAO);
+    TREINO_ATUAL_EXECUCAO.exercicios.forEach(function (ex, exIdx) {
+      const numSeries = parseInt(ex.series, 10) || 3;
+      const series = [];
+      for (let s = 0; s < numSeries; s++) {
+        const repsInput = document.getElementById("exec-" + exIdx + "-" + s + "-reps");
+        const cargaInput = document.getElementById("exec-" + exIdx + "-" + s + "-carga");
+        const velBtn = document.querySelector('.velocidade-btn.selecionada[data-vel-ex="' + exIdx + '"][data-vel-s="' + s + '"]');
+        series.push({
+          reps: repsInput ? repsInput.value : "",
+          carga: cargaInput ? cargaInput.value : "",
+          velocidade: velBtn ? velBtn.getAttribute("data-vel") : ""
+        });
+      }
+      const notaEl = document.getElementById("exec-" + exIdx + "-notas");
+      rascunho.exercises[exIdx] = { exercicio: ex.exercicio, series: series, notas: notaEl ? notaEl.value : "" };
+    });
+    guardarRascunhoTreino(rascunho);
+    marcarGuardadoLocalTreino();
+    return rascunho;
+  }
+
+  function marcarGuardadoLocalTreino() {
+    workoutSaveStateEl.textContent = navigator.onLine ? "Guardado no dispositivo" : "Offline · guardado no dispositivo";
+  }
+
+  // ---------- Cronómetro de descanso ----------
+  function iniciarDescansoExercicio(exIdx, segundos) {
+    if (descansoIntervalos[exIdx]) clearInterval(descansoIntervalos[exIdx]);
+    Object.keys(descansoIntervalos).forEach(function (k) { clearInterval(descansoIntervalos[k]); });
+    descansoIntervalos = {};
+
+    let restante = segundos;
+    const el = document.getElementById("exec-descanso-" + exIdx);
+    if (!el) return;
+    el.textContent = "⏱ " + restante + " s";
+    descansoIntervalos[exIdx] = setInterval(function () {
+      restante--;
+      if (restante <= 0) {
+        clearInterval(descansoIntervalos[exIdx]);
+        delete descansoIntervalos[exIdx];
+        el.textContent = "Pronto";
+        if (navigator.vibrate) navigator.vibrate([80, 60, 80]);
+        return;
+      }
+      el.textContent = "⏱ " + restante + " s";
+    }, 1000);
+  }
+
+  // ---------- Histórico por exercício ----------
+  function toggleHistoricoExercicio(exIdx) {
+    const el = document.getElementById("exec-historico-" + exIdx);
+    if (!el) return;
+    const aberto = el.classList.toggle("aberto");
+    if (!aberto) return;
+
+    const nomeExercicio = TREINO_ATUAL_EXECUCAO.exercicios[exIdx].exercicio;
+    if (historicoCarregado[nomeExercicio]) {
+      el.innerHTML = historicoCarregado[nomeExercicio];
+      return;
+    }
+    if (!navigator.onLine) {
+      el.innerHTML = '<div class="exec-historico-linha"><span>O histórico precisa de ligação à internet.</span></div>';
+      return;
+    }
+    el.innerHTML = '<div class="exec-historico-linha"><span>A carregar…</span></div>';
+    chamarApi("getHistoricoExercicio", { nomeExercicio: nomeExercicio, limite: 3 })
+      .then(function (resp) {
+        if (!resp || !resp.ok) throw new Error();
+        const sessoes = (resp.dados && resp.dados.sessoes) || [];
+        let html = "";
+        if (!sessoes.length) {
+          html = '<div class="exec-historico-linha"><span>Ainda não há histórico para este exercício.</span></div>';
+        } else {
+          sessoes.forEach(function (sessao) {
+            html += '<div class="exec-historico-linha"><span>' + sessao.data + '</span><span>' + sessao.resumo + '</span></div>';
+          });
+        }
+        historicoCarregado[nomeExercicio] = html;
+        el.innerHTML = html;
+      })
+      .catch(function () {
+        el.innerHTML = '<div class="exec-historico-linha"><span>Não foi possível carregar o histórico agora.</span></div>';
+      });
+  }
+
+  // ---------- Cronómetro do treino ----------
+  function iniciarTimerTreino(startedAt) {
+    pararTimerTreino();
+    const inicio = new Date(startedAt).getTime();
+    function atualizar() {
+      const segundos = Math.max(0, Math.floor((Date.now() - inicio) / 1000));
+      const h = Math.floor(segundos / 3600);
+      const m = Math.floor((segundos % 3600) / 60);
+      const s = segundos % 60;
+      workoutTimerEl.textContent = (h > 0 ? String(h).padStart(2, "0") + ":" : "") + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+    }
+    atualizar();
+    timerTreinoInterval = setInterval(atualizar, 1000);
+  }
+
+  function pararTimerTreino() {
+    if (timerTreinoInterval) clearInterval(timerTreinoInterval);
+    timerTreinoInterval = null;
+  }
+
+  // ---------- Wake Lock ----------
+  function ativarWakeLock() {
+    if (!("wakeLock" in navigator)) return;
+    navigator.wakeLock.request("screen").then(function (lock) {
+      wakeLockAtivo = lock;
+    }).catch(function () { /* pode falhar em alguns browsers/estados — não é crítico */ });
+  }
+
+  function libertarWakeLock() {
+    if (wakeLockAtivo) {
+      wakeLockAtivo.release().catch(function () {});
+      wakeLockAtivo = null;
+    }
+  }
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible" && !wakeLockAtivo) {
+      const estado = lerEstadoDiario();
+      if (estado.workout && estado.workout.status === "active") ativarWakeLock();
+    }
+  });
+
+  // ---------- Terminar treino ----------
+  function criarPayloadTreino() {
+    const rascunho = guardarTreinoAtual();
+    const exercicios = rascunho.exercises
+      .map(function (ex) {
+        const series = ex.series.filter(function (s) { return String(s.reps || "").trim() !== "" || String(s.carga || "").trim() !== ""; });
+        return { exercicio: ex.exercicio, series: series, notas: ex.notas };
+      })
+      .filter(function (ex) { return ex.series.length > 0; });
+
+    return {
+      nomePlano: rascunho.nomePlano,
+      nomeTreino: rascunho.nomeTreino,
+      eventId: rascunho.eventId,
+      startedAt: rascunho.startedAt,
+      exercicios: exercicios
+    };
+  }
+
+  function calcularResumoTreino(payload) {
+    let volume = 0;
+    payload.exercicios.forEach(function (ex) {
+      ex.series.forEach(function (s) {
+        const reps = Number(String(s.reps || "").replace(",", "."));
+        const carga = Number(String(s.carga || "").replace(",", "."));
+        if (Number.isFinite(reps) && Number.isFinite(carga)) volume += reps * carga;
+      });
+    });
+    const duracaoSegundos = Math.max(0, Math.round((Date.now() - new Date(payload.startedAt).getTime()) / 1000));
+    return { volume: Math.round(volume), duracaoSegundos: duracaoSegundos, endedAt: new Date().toISOString() };
+  }
+
+  function terminarTreino() {
+    if (!TREINO_ATUAL_EXECUCAO) return;
+    execucaoErro.style.display = "none";
+
+    const payload = criarPayloadTreino();
+    if (!payload.exercicios.length) {
+      execucaoErro.textContent = "Regista pelo menos uma série antes de terminares.";
+      execucaoErro.style.display = "block";
+      return;
+    }
+
+    const resumo = calcularResumoTreino(payload);
+
+    btnTerminarTreino.disabled = true;
+    btnTerminarTreino.textContent = "A sincronizar…";
+
+    if (!navigator.onLine) {
+      btnTerminarTreino.disabled = false;
+      btnTerminarTreino.textContent = "Tentar terminar treino";
+      showToastTreino(mensagemErroLigacao());
+      return;
+    }
+
+    workoutSaveStateEl.textContent = "A guardar…";
+
+    chamarApi("registarExecucaoTreino", payload)
+      .then(function (resp) {
+        if (!resp || !resp.ok) throw new Error((resp && resp.erro) || "Falha desconhecida");
+        limparRascunhoTreino(payload.nomePlano, payload.nomeTreino);
+
+        const estado = lerEstadoDiario();
+        estado.workout = {
+          status: "post-workout",
+          nomePlano: payload.nomePlano,
+          nomeTreino: payload.nomeTreino,
+          treinoIndex: TREINO_ATUAL_INDEX,
+          startedAt: payload.startedAt,
+          endedAt: resumo.endedAt,
+          eventId: payload.eventId,
+          volume: resumo.volume,
+          duracaoSegundos: resumo.duracaoSegundos,
+          synced: true
+        };
+        estado.postWorkout = { values: {}, submitted: false, synced: false };
+        guardarEstadoDiario(estado);
+
+        pararTimerTreino();
+        libertarWakeLock();
+
+        cardExecucaoTreino.classList.add("oculto");
+        mostrarCardPosTreino();
+      })
+      .catch(function () {
+        btnTerminarTreino.disabled = false;
+        btnTerminarTreino.textContent = "Tentar terminar treino";
+        marcarGuardadoLocalTreino();
+        showToastTreino(mensagemErroLigacao());
+      });
+  }
+  btnTerminarTreino.addEventListener("click", terminarTreino);
+
+  function showToastTreino(texto) {
+    const aviso = document.createElement("div");
+    aviso.className = "toast";
+    aviso.innerHTML = "<span>" + texto + "</span>";
+    document.body.appendChild(aviso);
+    setTimeout(function () { aviso.remove(); }, 4000);
+  }
+
+  // ---------- Pós-treino ----------
+  document.querySelectorAll('#cardPosTreino .opcoes').forEach(function (grupo) {
+    grupo.addEventListener("click", function (evento) {
+      const opcao = evento.target.closest(".opcao");
+      if (!opcao) return;
+      const campo = grupo.getAttribute("data-campo-pos");
+      respostasPosTreino[campo] = Number(opcao.getAttribute("data-valor"));
+      grupo.querySelectorAll(".opcao").forEach(function (el) {
+        el.classList.toggle("selecionada", el === opcao);
+      });
+      posTreinoErro.style.display = "none";
+
+      const estado = lerEstadoDiario();
+      if (estado.postWorkout) {
+        estado.postWorkout.values = estado.postWorkout.values || {};
+        estado.postWorkout.values[campo] = respostasPosTreino[campo];
+        guardarEstadoDiario(estado);
+      }
+    });
+  });
+
+  function mostrarCardPosTreino() {
+    respostasPosTreino = {};
+    document.querySelectorAll('#cardPosTreino .opcao').forEach(function (el) { el.classList.remove("selecionada"); });
+    cardPosTreino.classList.remove("oculto");
+  }
+
+  function confirmarPosTreino() {
+    const campos = ["energia", "esforco", "dificuldade"];
+    const falta = campos.filter(function (c) { return respostasPosTreino[c] === undefined; });
+    if (falta.length) {
+      posTreinoErro.textContent = "Falta responder a tudo antes de confirmares.";
+      posTreinoErro.style.display = "block";
+      return;
+    }
+
+    const estadoAtual = lerEstadoDiario();
+    const eventId = (estadoAtual.postWorkout && estadoAtual.postWorkout.eventId) || gerarIdLocal();
+    const workout = estadoAtual.workout || {};
+
+    const payload = {
+      nomePlano: workout.nomePlano,
+      nomeTreino: workout.nomeTreino,
+      energia: respostasPosTreino.energia,
+      esforco: respostasPosTreino.esforco,
+      dificuldade: respostasPosTreino.dificuldade,
+      eventId: eventId
+    };
+
+    estadoAtual.postWorkout = { values: respostasPosTreino, submitted: true, synced: false, eventId: eventId };
+    guardarEstadoDiario(estadoAtual);
+
+    if (!navigator.onLine) {
+      showToastTreino(mensagemErroLigacao());
+      return;
+    }
+
+    btnConfirmarPosTreino.disabled = true;
+    btnConfirmarPosTreino.textContent = "A sincronizar…";
+
+    chamarApi("registarPosTreino", payload)
+      .then(function (resp) {
+        if (!resp || !resp.ok) throw new Error((resp && resp.erro) || "Falha desconhecida");
+        const estado = lerEstadoDiario();
+        if (estado.workout) estado.workout.status = "completed";
+        if (estado.postWorkout) estado.postWorkout.synced = true;
+        guardarEstadoDiario(estado);
+
+        cardPosTreino.classList.add("oculto");
+        cardEscolherTreino.classList.add("oculto");
+        mostrarTreinoConcluido(estado.workout);
+      })
+      .catch(function () {
+        btnConfirmarPosTreino.disabled = false;
+        btnConfirmarPosTreino.textContent = "Tentar sincronizar";
+        showToastTreino(mensagemErroLigacao());
+      });
+  }
+  btnConfirmarPosTreino.addEventListener("click", confirmarPosTreino);
+
+  // ---------- Treino concluído ----------
+  function formatarDuracao(segundos) {
+    const minutos = Math.round(segundos / 60);
+    if (minutos < 60) return minutos + " min";
+    const h = Math.floor(minutos / 60);
+    const m = minutos % 60;
+    return h + "h " + m + "m";
+  }
+
+  function mostrarTreinoConcluido(workout) {
+    document.getElementById("treinoConcluidoNome").textContent = workout.nomeTreino || "";
+    document.getElementById("treinoConcluidoVolume").textContent = (workout.volume || 0) + " kg";
+    document.getElementById("treinoConcluidoDuracao").textContent = formatarDuracao(workout.duracaoSegundos || 0);
+    cardTreinoConcluido.classList.remove("oculto");
+  }
+
+  document.getElementById("btnRegistarOutroTreino").addEventListener("click", function () {
+    TREINO_ATUAL_EXECUCAO = null;
+    TREINO_ATUAL_INDEX = null;
+    cardTreinoConcluido.classList.add("oculto");
+    mostrarCardEscolherTreino();
+  });
+
+  // ---------- Restauro automático ao reabrir a app ----------
+  function restaurarEstadoTreino() {
+    const estado = lerEstadoDiario();
+    const workout = estado.workout;
+    if (!workout) return;
+
+    if (workout.status === "active") {
+      const idx = PLANO_ATIVO ? PLANO_ATIVO.treinos.findIndex(function (t) { return t.nome === workout.nomeTreino; }) : -1;
+      if (idx === -1) return;
+      escolherTreino(idx, true);
+      return;
+    }
+
+    if ((workout.status === "post-workout" || workout.status === "completed") && !workout.endedAt) {
+      // Estado incompleto/corrompido — limpa em vez de deixar a app presa.
+      estado.workout = null;
+      estado.postWorkout = null;
+      guardarEstadoDiario(estado);
+      return;
+    }
+
+    if (workout.status === "post-workout") {
+      mostrarCardPosTreino();
+      return;
+    }
+
+    if (workout.status === "completed") {
+      mostrarTreinoConcluido(workout);
+    }
+  }
+
   // ---------- Arranque: pergunta ao servidor o estado de hoje ----------
   chamarApi("getEstadoPortalHoje", {})
     .then(function (resp) {
@@ -666,31 +1641,58 @@
         PRONTIDAO_HOJE_INICIAL = dados.testeProntidaoHoje;
       }
 
+      let temCheckinHoje = false;
+
       if (dados.jaFezCheckinHoje && dados.checkinHoje) {
         mostrarResumo(dados.checkinHoje);
         mostrarCardProntidao();
-        return;
+        temCheckinHoje = true;
+        CHECKIN_HOJE_CONFIRMADO = true;
+      } else {
+        // Sem check-in no servidor — verifica se há um rascunho local por
+        // sincronizar (ex.: enviou offline e voltou à app antes de haver rede).
+        const estadoLocal = lerEstadoDiario();
+        if (estadoLocal.checkin && estadoLocal.checkin.submitted && !estadoLocal.checkin.synced) {
+          preencherRespostas(estadoLocal.checkin.values);
+          mostrarResumo(estadoLocal.checkin.values);
+          mostrarCardProntidao();
+          temCheckinHoje = true;
+          CHECKIN_HOJE_CONFIRMADO = true;
+          if (navigator.onLine) {
+            chamarApi("registarCheckin", Object.assign({}, estadoLocal.checkin.values, { eventId: estadoLocal.checkin.eventId }))
+              .then(function (resp2) {
+                if (resp2 && resp2.ok) {
+                  estadoLocal.checkin.synced = true;
+                  guardarEstadoDiario(estadoLocal);
+                }
+              })
+              .catch(function () {});
+          }
+          sincronizarProntidaoPendente();
+        }
       }
 
-      // Sem check-in no servidor — verifica se há um rascunho local por
-      // sincronizar (ex.: enviou offline e voltou à app antes de haver rede).
-      const estadoLocal = lerEstadoDiario();
-      if (estadoLocal.checkin && estadoLocal.checkin.submitted && !estadoLocal.checkin.synced) {
-        preencherRespostas(estadoLocal.checkin.values);
-        mostrarResumo(estadoLocal.checkin.values);
-        mostrarCardProntidao();
-        if (navigator.onLine) {
-          chamarApi("registarCheckin", Object.assign({}, estadoLocal.checkin.values, { eventId: estadoLocal.checkin.eventId }))
-            .then(function (resp2) {
-              if (resp2 && resp2.ok) {
-                estadoLocal.checkin.synced = true;
-                guardarEstadoDiario(estadoLocal);
-              }
-            })
-            .catch(function () {});
-        }
-        sincronizarProntidaoPendente();
-      }
+      if (!temCheckinHoje) return;
+
+      // Carrega o plano ativo e os treinos, e decide que ecrã do passo 3 mostrar.
+      chamarApi("getPlanoAtivoPortal", {})
+        .then(function (respPlano) {
+          if (!respPlano || !respPlano.ok) return;
+          const dadosPlano = respPlano.dados || {};
+          if (dadosPlano.temPlanos && dadosPlano.planosCliente && dadosPlano.planosCliente.length) {
+            PLANO_ATIVO = dadosPlano.planosCliente.find(function (p) { return p.nome === dadosPlano.planoAtivoNome; }) || dadosPlano.planosCliente[0];
+          }
+
+          const estadoAgora = lerEstadoDiario();
+          if (estadoAgora.workout && estadoAgora.workout.status) {
+            restaurarEstadoTreino();
+          } else {
+            mostrarCardEscolherTreino();
+          }
+        })
+        .catch(function () {
+          // Sem plano carregado — o cliente continua a ver check-in/prontidão normalmente.
+        });
     })
     .catch(function () {
       ecraCarregando.classList.add("oculto");
