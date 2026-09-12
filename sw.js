@@ -1,4 +1,4 @@
-const VERSAO_CACHE = 'almove-portal-v5';
+const VERSAO_CACHE = 'almove-portal-v6';
 const CACHE_APP = VERSAO_CACHE;
 
 const FICHEIROS_CACHE = [
