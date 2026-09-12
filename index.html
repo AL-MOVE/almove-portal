@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>AL MOVE</title>
+
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#050810">
+  <link rel="apple-touch-icon" href="/icons/icon-any-512.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AL MOVE">
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      min-height:100vh;
+      background:#050810;
+      color:#fff;
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      text-align:center;padding:24px;
+    }
+    img{width:120px;margin-bottom:20px;}
+    h1{font-size:22px;font-weight:800;margin-bottom:8px;}
+    p{color:#94a3b8;font-size:14px;max-width:320px;line-height:1.5;}
+  </style>
+</head>
+<body>
+  <img src="/icons/icon-any-512.png" alt="AL MOVE">
+  <h1>AL MOVE</h1>
+  <p>Casco da PWA a funcionar — a instalação já está pronta. Os ecrãs a sério do Portal entram aqui a seguir.</p>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then((registo) => {
+      registo.addEventListener('updatefound', () => {
+        const novoWorker = registo.installing;
+        novoWorker.addEventListener('statechange', () => {
+          if (novoWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            mostrarAvisoAtualizacao(novoWorker);
+          }
+        });
+      });
+    });
+  });
+}
+
+function mostrarAvisoAtualizacao(novoWorker) {
+  const aviso = document.createElement('div');
+  aviso.style.cssText = 'position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;padding:14px 16px;border-radius:12px;background:#141f35;border:1px solid #2b3e60;color:#e7eef9;font-family:system-ui,sans-serif;font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,.4);';
+  aviso.innerHTML = '<span>Há uma versão nova da app.</span><button style="padding:8px 14px;border-radius:8px;border:0;background:#2458a6;color:#fff;font-weight:700;">Atualizar</button>';
+  aviso.querySelector('button').onclick = () => {
+    novoWorker.postMessage('SKIP_WAITING');
+    novoWorker.addEventListener('statechange', () => {
+      if (novoWorker.state === 'activated') window.location.reload();
+    });
+  };
+  document.body.appendChild(aviso);
+}
+</script>
+</body>
+</html>
