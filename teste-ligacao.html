@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<title>Teste de ligação — AL MOVE</title>
+<style>
+  body{font-family:system-ui,sans-serif;max-width:560px;margin:40px auto;padding:0 20px;background:#0e1626;color:#e7eef9;}
+  h1{font-size:20px;}
+  button{padding:12px 20px;font-size:15px;border-radius:8px;border:0;background:#2458a6;color:#fff;cursor:pointer;}
+  pre{background:#141f35;padding:14px;border-radius:8px;white-space:pre-wrap;word-break:break-word;font-size:13px;}
+  .ok{color:#8fd3ae;} .erro{color:#e7b872;}
+  input{width:100%;padding:10px;margin-bottom:10px;border-radius:6px;border:1px solid #2b3e60;background:#0e1626;color:#fff;box-sizing:border-box;}
+  label{font-size:13px;color:#9fb0cb;display:block;margin-bottom:4px;}
+</style>
+</head>
+<body>
+  <h1>Teste de ligação ao Apps Script</h1>
+  <p>Isto testa, a partir daqui (fora da Google), se conseguimos falar com o teu Web App em JSON — exactamente o que a PWA vai precisar de fazer.</p>
+
+  <label for="url">URL do Web App (/exec)</label>
+  <input id="url" value="https://script.google.com/macros/s/AKfycbyiOl7KkXMYSFv9lKKVb2sMspvwER2P5IMlpNQcr9csLyEDnzJqvVqisE-XVuAHgeUV/exec">
+
+  <label for="token">Token de um cliente (o mesmo do link ?portal=TOKEN de um cliente real)</label>
+  <input id="token" placeholder="cola aqui o token de um cliente de teste">
+
+  <button onclick="testar()">Testar ligação</button>
+
+  <p id="status"></p>
+  <pre id="resultado">(o resultado aparece aqui)</pre>
+
+<script>
+async function testar() {
+  const url = document.getElementById('url').value.trim();
+  const token = document.getElementById('token').value.trim();
+  const statusEl = document.getElementById('status');
+  const resultadoEl = document.getElementById('resultado');
+  statusEl.textContent = 'A testar...';
+  statusEl.className = '';
+  resultadoEl.textContent = '';
+
+  if (!token) {
+    statusEl.textContent = 'Cola primeiro o token de um cliente de teste.';
+    statusEl.className = 'erro';
+    return;
+  }
+
+  const pedido = url + '?api=1&fn=getEstadoPortalHoje&token=' + encodeURIComponent(token);
+
+  try {
+    const resposta = await fetch(pedido);
+    const texto = await resposta.text();
+    let json;
+    try { json = JSON.parse(texto); } catch (e) { json = null; }
+
+    if (json && json.ok) {
+      statusEl.textContent = '✓ Funcionou! O browser conseguiu ler a resposta em JSON.';
+      statusEl.className = 'ok';
+    } else if (json) {
+      statusEl.textContent = 'Respondeu, mas com erro do lado do Apps Script (ver abaixo) — o código foi adicionado?';
+      statusEl.className = 'erro';
+    } else {
+      statusEl.textContent = 'Respondeu, mas não veio em JSON — provavelmente o código novo ainda não está deployado.';
+      statusEl.className = 'erro';
+    }
+    resultadoEl.textContent = texto;
+  } catch (erro) {
+    statusEl.textContent = '✗ Falhou antes de chegar resposta nenhuma — provavelmente bloqueado pelo browser (CORS). Copia o erro da consola (F12) e envia-mo.';
+    statusEl.className = 'erro';
+    resultadoEl.textContent = String(erro);
+  }
+}
+</script>
+</body>
+</html>
