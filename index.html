@@ -15,25 +15,52 @@
   <style>
     :root{
       --bg:#050810;
-      --card:#0d1526;
-      --card-border:#1c2b45;
-      --texto:#e7eef9;
-      --texto-suave:#8fa1bd;
-      --azul:#2458a6;
+      --bg-card:rgba(5,10,18,.68);
+      --bg-soft:rgba(255,255,255,.07);
+      --bg-input:rgba(255,255,255,.13);
+
+      --text:#ffffff;
+      --text-soft:#cbd5e1;
+      --text-muted:#94a3b8;
+      --text-dim:#7c8ba1;
+
+      --accent:#2dd4bf;
+      --accent-old:#00a99d;
+      --blue:#0b5cc2;
+      --blue-dark:#003da0;
+
+      --green:#22c55e;
+      --yellow:#eab308;
+      --red:#ef4444;
+
+      --border:rgba(255,255,255,.14);
+      --border-soft:rgba(255,255,255,.09);
+
+      /* aliases usados no resto deste ficheiro */
+      --card:var(--bg-card);
+      --card-border:var(--border);
+      --texto:var(--text);
+      --texto-suave:var(--text-muted);
+      --azul:var(--blue);
       --azul-claro:#3d7bd6;
-      --verde:#1f9d5a;
-      --laranja:#c98a2c;
-      --vermelho:#c9463c;
+      --verde:var(--green);
+      --laranja:var(--yellow);
+      --vermelho:var(--red);
     }
     *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-    html,body{height:100%;}
+    html{background:var(--bg);min-height:100%;}
     body{
-      background:var(--bg);
-      color:var(--texto);
-      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-      padding:20px 16px calc(40px + env(safe-area-inset-bottom));
-      padding-top:calc(20px + env(safe-area-inset-top));
+      background-color:var(--bg);
+      background-image:
+        radial-gradient(ellipse 90% 70% at 15% 20%, rgba(11,92,194,.55) 0%, transparent 55%),
+        radial-gradient(ellipse 90% 80% at 20% 75%, rgba(0,150,120,.42) 0%, transparent 60%),
+        radial-gradient(ellipse 100% 90% at 90% 10%, rgba(0,20,45,.9) 0%, transparent 60%),
+        linear-gradient(135deg, #0a2a5e 0%, #073d52 45%, #0a1220 100%);
+      background-attachment:fixed;
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
       min-height:100vh;
+      padding:max(20px, env(safe-area-inset-top)) 16px calc(130px + env(safe-area-inset-bottom));
     }
 
     .topo{
@@ -42,55 +69,66 @@
     .topo img{width:36px;height:36px;}
     .topo-textos{display:flex;flex-direction:column;}
     .topo-titulo{font-size:15px;font-weight:800;letter-spacing:.3px;}
-    .topo-sub{font-size:12px;color:var(--texto-suave);}
+    .topo-sub{font-size:12px;color:var(--text-muted);}
 
     .card{
-      background:var(--card);
-      border:1px solid var(--card-border);
-      border-radius:16px;
+      width:100%;
+      background:var(--bg-card);
+      backdrop-filter:blur(20px);
+      -webkit-backdrop-filter:blur(20px);
+      border:1px solid var(--border);
+      border-radius:20px;
       padding:20px;
       margin-bottom:16px;
+      box-shadow:0 12px 38px rgba(0,0,0,.32);
     }
-    .card-title{font-size:16px;font-weight:800;margin-bottom:4px;}
-    .card-sub{font-size:13px;color:var(--texto-suave);margin-bottom:16px;line-height:1.4;}
+    .card-title{
+      margin-bottom:14px;
+      color:var(--accent);
+      font-size:11px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    .card-sub{font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.4;}
 
     .pergunta{margin-bottom:22px;}
     .pergunta:last-of-type{margin-bottom:18px;}
-    .pergunta-label{font-size:14px;font-weight:600;margin-bottom:10px;}
+    .pergunta-label{font-size:13px;font-weight:700;color:#fff;margin-bottom:10px;}
 
     .opcoes{display:flex;gap:8px;}
     .opcao{
       flex:1;
       aspect-ratio:1/1;
       display:flex;align-items:center;justify-content:center;
-      background:#101c33;
-      border:1px solid var(--card-border);
-      border-radius:12px;
-      font-size:16px;font-weight:700;
-      color:var(--texto-suave);
-      transition:background .15s,border-color .15s,color .15s,transform .1s;
+      background:rgba(255,255,255,.11);
+      border:1px solid rgba(255,255,255,.22);
+      border-radius:10px;
+      font-size:15px;font-weight:800;
+      color:#fff;
+      transition:transform .12s ease,background .15s ease,border-color .15s ease;
       user-select:none;
     }
-    .opcao:active{transform:scale(.94);}
+    .opcao:active{transform:scale(.96);}
     .opcao.selecionada{
-      background:var(--azul);
-      border-color:var(--azul-claro);
-      color:#fff;
+      background:linear-gradient(135deg, var(--accent-old), var(--blue-dark));
+      border-color:transparent;
+      box-shadow:0 7px 20px rgba(0,0,0,.18);
     }
 
     .extremos{
       display:flex;justify-content:space-between;
-      font-size:11px;color:var(--texto-suave);margin-top:6px;
+      font-size:11px;color:var(--text-muted);margin-top:6px;
     }
 
     textarea{
       width:100%;
-      background:#101c33;
-      border:1px solid var(--card-border);
+      background:var(--bg-input);
+      border:1px solid var(--border);
       border-radius:12px;
       padding:12px;
-      color:var(--texto);
-      font-size:14px;
+      color:var(--text);
+      font-size:16px;
       font-family:inherit;
       resize:vertical;
       min-height:64px;
@@ -99,64 +137,117 @@
 
     .botao{
       width:100%;
-      padding:15px;
+      min-height:48px;
+      padding:13px 16px;
       border:0;border-radius:12px;
-      background:var(--azul);
+      background:linear-gradient(135deg, var(--accent-old) 0%, var(--blue-dark) 100%);
       color:#fff;
-      font-size:15px;font-weight:800;
+      font-size:14px;font-weight:800;
       margin-top:4px;
+      box-shadow:0 10px 24px rgba(0,0,0,.17);
     }
-    .botao:disabled{opacity:.6;}
+    .botao:disabled{opacity:.55;}
     .botao:active{transform:scale(.98);}
 
     .erro{
       display:none;
-      color:var(--vermelho);
+      color:#f87171;
       font-size:13px;margin-top:10px;
     }
 
     .resumo-linha{
       display:flex;justify-content:space-between;
       font-size:14px;padding:8px 0;
-      border-bottom:1px solid var(--card-border);
+      border-bottom:1px solid var(--border-soft);
     }
     .resumo-linha:last-child{border-bottom:0;}
-    .resumo-linha span:first-child{color:var(--texto-suave);}
+    .resumo-linha span:first-child{color:var(--text-muted);}
     .resumo-linha span:last-child{font-weight:700;}
 
     .estado-sync{
       display:flex;align-items:center;gap:8px;
-      font-size:12px;color:var(--texto-suave);
+      font-size:12px;color:var(--text-muted);
       margin-top:14px;
     }
     .estado-sync .ponto{
       width:7px;height:7px;border-radius:50%;
-      background:var(--verde);flex-shrink:0;
+      background:var(--green);flex-shrink:0;
     }
-    .estado-sync.offline .ponto{background:var(--laranja);}
+    .estado-sync.offline .ponto{background:var(--yellow);}
 
     .carregando{
-      text-align:center;color:var(--texto-suave);
+      text-align:center;color:var(--text-muted);
       font-size:13px;padding:30px 0;
     }
 
     .oculto{display:none !important;}
 
     .toast{
-      position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));
+      position:fixed;left:16px;right:16px;bottom:calc(96px + env(safe-area-inset-bottom));
       z-index:9999;padding:13px 16px;border-radius:12px;
-      background:#141f35;border:1px solid #2b3e60;color:var(--texto);
+      background:rgba(6,11,20,.96);border:1px solid rgba(255,255,255,.14);color:var(--text);
       font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.4);
       display:flex;justify-content:space-between;align-items:center;gap:12px;
     }
     .toast button{
       padding:8px 14px;border-radius:8px;border:0;
-      background:var(--azul);color:#fff;font-weight:700;font-size:13px;
+      background:linear-gradient(135deg, var(--accent-old), var(--blue-dark));color:#fff;font-weight:700;font-size:13px;
+    }
+
+    /* ---------- Navegação inferior ---------- */
+    .tabs-nav{
+      position:fixed;left:50%;bottom:max(12px, calc(10px + env(safe-area-inset-bottom, 0px)));
+      width:min(calc(100% - 28px), 452px);
+      transform:translateX(-50%);
+      z-index:100;
+      display:flex;padding:6px;
+      background:linear-gradient(135deg, rgba(28,44,56,.72), rgba(4,12,20,.84));
+      backdrop-filter:blur(28px) saturate(145%);
+      -webkit-backdrop-filter:blur(28px) saturate(145%);
+      border:1px solid rgba(255,255,255,.15);
+      border-radius:24px;
+      box-shadow:0 16px 34px rgba(0,0,0,.44), inset 0 1px 0 rgba(255,255,255,.10);
+    }
+    .tab-btn{
+      flex:1;min-height:52px;
+      display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;
+      border-radius:18px;
+      color:var(--text-muted);
+      font-size:10px;font-weight:750;
+      user-select:none;
+      transition:color .18s ease,background .18s ease,transform .18s ease;
+    }
+    .tab-btn svg{width:20px;height:20px;}
+    .tab-btn.ativo{color:var(--accent);background:rgba(45,212,191,.07);}
+    .tab-btn:active{transform:scale(.96);}
+
+    /* ---------- Barra "O teu percurso de hoje" ---------- */
+    .fluxo-hoje{padding:17px;}
+    .fluxo-hoje-status{
+      margin-bottom:15px;color:var(--text-soft);font-size:13px;font-weight:650;line-height:1.45;
+    }
+    .fluxo-hoje-passos{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;}
+    .fluxo-hoje-etapa{
+      min-width:0;color:var(--text-dim);font-size:9px;font-weight:750;line-height:1.25;text-align:center;
+    }
+    .fluxo-hoje-ponto{
+      width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+      margin:0 auto 6px;border:1px solid rgba(255,255,255,.16);border-radius:50%;
+      background:rgba(255,255,255,.06);color:var(--text-muted);font-size:11px;font-weight:850;
+    }
+    .fluxo-hoje-etapa.concluido,.fluxo-hoje-etapa.ativo{color:#fff;}
+    .fluxo-hoje-etapa.concluido .fluxo-hoje-ponto{
+      border-color:transparent;background:rgba(34,197,94,.18);color:#4ade80;
+    }
+    .fluxo-hoje-etapa.ativo .fluxo-hoje-ponto{
+      border-color:transparent;
+      background:linear-gradient(135deg, var(--accent-old), var(--blue-dark));
+      color:#fff;box-shadow:0 0 0 4px rgba(45,212,191,.10);
     }
 
     .fluxo-passo{
-      font-size:11px;font-weight:800;letter-spacing:.4px;
-      color:var(--azul-claro);text-transform:uppercase;
+      font-size:10px;font-weight:850;letter-spacing:.08em;
+      color:var(--accent);text-transform:uppercase;
       display:block;margin-bottom:8px;
     }
 
@@ -179,8 +270,9 @@
     .prontidao-circulo{
       width:104px;height:104px;border-radius:50%;border:0;
       display:flex;align-items:center;justify-content:center;
-      background:var(--vermelho);color:#fff;font-weight:800;font-size:14px;
-      transition:background .15s,box-shadow .15s;
+      background:#b91c1c;color:#fff;font-weight:850;font-size:14px;
+      box-shadow:0 0 0 8px rgba(239,68,68,.10);
+      transition:background .12s ease,box-shadow .12s ease;
     }
     .prontidao-circulo:active{transform:scale(.94);}
     .prontidao-circulo.verde{
@@ -349,14 +441,38 @@
     </div>
   </div>
 
-  <div id="ecraCarregando" class="card carregando">
-    A carregar o teu check-in de hoje…
-  </div>
-
   <div id="ecraSemToken" class="card oculto">
     <div class="card-title">Link inválido</div>
     <div class="card-sub">Este link não tem um token de acesso válido. Pede ao André o teu link do Portal.</div>
   </div>
+
+  <!-- ============ TAB: INÍCIO ============ -->
+  <div id="tabInicio" class="tab-conteudo oculto">
+    <div class="card">
+      <div class="card-title">Em breve</div>
+      <div class="card-sub">O resumo do teu progresso vai aparecer aqui em breve.</div>
+    </div>
+  </div>
+
+  <!-- ============ TAB: HOJE ============ -->
+  <div id="tabHoje" class="tab-conteudo">
+
+    <div id="ecraCarregando" class="card carregando">
+      A carregar o teu check-in de hoje…
+    </div>
+
+    <div class="card fluxo-hoje oculto" id="fluxoHoje">
+      <div class="card-title">O teu percurso de hoje</div>
+      <p class="fluxo-hoje-status" id="fluxoHojeStatus"></p>
+      <div class="fluxo-hoje-passos">
+        <div class="fluxo-hoje-etapa" id="fluxoHojeEtapa1"><span class="fluxo-hoje-ponto">1</span>Check-in</div>
+        <div class="fluxo-hoje-etapa" id="fluxoHojeEtapa2"><span class="fluxo-hoje-ponto">2</span>Teste</div>
+        <div class="fluxo-hoje-etapa" id="fluxoHojeEtapa3"><span class="fluxo-hoje-ponto">3</span>Escolher</div>
+        <div class="fluxo-hoje-etapa" id="fluxoHojeEtapa4"><span class="fluxo-hoje-ponto">4</span>Treinar</div>
+        <div class="fluxo-hoje-etapa" id="fluxoHojeEtapa5"><span class="fluxo-hoje-ponto">5</span>Feedback</div>
+        <div class="fluxo-hoje-etapa" id="fluxoHojeEtapa6"><span class="fluxo-hoje-ponto">6</span>Concluído</div>
+      </div>
+    </div>
 
   <div id="cardCheckin" class="card oculto">
     <div class="card-title">Check-in de hoje</div>
@@ -522,6 +638,44 @@
     <button type="button" class="botao" id="btnRegistarOutroTreino">Registar outro treino</button>
   </div>
 
+  </div><!-- fim #tabHoje -->
+
+  <!-- ============ TAB: CONQUISTAS ============ -->
+  <div id="tabConquistas" class="tab-conteudo oculto">
+    <div class="card">
+      <div class="card-title">Em breve</div>
+      <div class="card-sub">Os teus marcos e sequências de treino vão aparecer aqui em breve.</div>
+    </div>
+  </div>
+
+  <!-- ============ TAB: PLANOS ============ -->
+  <div id="tabPlanos" class="tab-conteudo oculto">
+    <div class="card">
+      <div class="card-title">Em breve</div>
+      <div class="card-sub">Os teus planos de treino completos vão aparecer aqui em breve.</div>
+    </div>
+  </div>
+
+  <!-- ============ NAVEGAÇÃO INFERIOR ============ -->
+  <div class="tabs-nav">
+    <div class="tab-btn" id="tabBtnInicio" data-tab="inicio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+      Início
+    </div>
+    <div class="tab-btn ativo" id="tabBtnHoje" data-tab="hoje">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="m8.5 15 2.2 2.2 4.8-5"/></svg>
+      Hoje
+    </div>
+    <div class="tab-btn" id="tabBtnConquistas" data-tab="conquistas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h2a2 2 0 0 1 0 4h-1M7 5H5a2 2 0 0 0 0 4h1"/></svg>
+      Conquistas
+    </div>
+    <div class="tab-btn" id="tabBtnPlanos" data-tab="planos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="12" y2="16"/></svg>
+      Planos
+    </div>
+  </div>
+
 <script>
 (function () {
   "use strict";
@@ -545,6 +699,66 @@
     ecraCarregando.classList.add("oculto");
     ecraSemToken.classList.remove("oculto");
     return;
+  }
+
+  // ---------- Navegação por separadores (Início / Hoje / Conquistas / Planos) ----------
+  const TABS = ["inicio", "hoje", "conquistas", "planos"];
+  function mudarTab(nome) {
+    TABS.forEach(function (t) {
+      document.getElementById("tab" + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle("oculto", t !== nome);
+      document.getElementById("tabBtn" + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle("ativo", t === nome);
+    });
+    window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+  }
+  document.querySelectorAll(".tab-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () { mudarTab(btn.getAttribute("data-tab")); });
+  });
+
+  // ---------- Barra "O teu percurso de hoje" ----------
+  const fluxoHojeEl = document.getElementById("fluxoHoje");
+  const fluxoHojeStatusEl = document.getElementById("fluxoHojeStatus");
+
+  function renderFluxoHoje() {
+    fluxoHojeEl.classList.remove("oculto");
+
+    const estado = lerEstadoDiario();
+    let etapaAtual = 1;
+    let mensagem = "Começa pelo check-in para desbloquear o treino de hoje.";
+
+    const temCheckin = CHECKIN_HOJE_CONFIRMADO || !!(estado.checkin && (estado.checkin.submitted || estado.checkin.values));
+    const teste = obterProntidaoAtual();
+
+    if (temCheckin) {
+      etapaAtual = 2;
+      mensagem = "Check-in concluído. Faz agora o teste de prontidão.";
+    }
+
+    if (temCheckin && teste && (teste.medianaMs || teste.ignorado)) {
+      etapaAtual = 3;
+      mensagem = teste.ignorado
+        ? "Pronto. Agora escolhe o treino de hoje."
+        : "Teste concluído. Agora escolhe o treino de hoje.";
+    }
+
+    if (estado.workout && estado.workout.status === "active") {
+      etapaAtual = 4;
+      mensagem = "Estás a treinar. Regista as séries à medida que avanças.";
+    } else if (estado.workout && estado.workout.status === "post-workout") {
+      etapaAtual = 5;
+      mensagem = "Treino terminado. Falta apenas o feedback final.";
+    } else if (estado.workout && estado.workout.status === "completed") {
+      etapaAtual = 6;
+      mensagem = "Dia concluído. Excelente trabalho!";
+    }
+
+    fluxoHojeStatusEl.textContent = mensagem;
+
+    for (let i = 1; i <= 6; i++) {
+      const etapaEl = document.getElementById("fluxoHojeEtapa" + i);
+      etapaEl.classList.remove("concluido", "ativo");
+      if (i < etapaAtual) etapaEl.classList.add("concluido");
+      else if (i === etapaAtual) etapaEl.classList.add("ativo");
+    }
   }
 
   // ---------- Estado local (offline-first) ----------
@@ -736,6 +950,7 @@
   function mostrarCardProntidao() {
     cardProntidao.classList.remove("oculto");
     renderProntidao();
+    renderFluxoHoje();
   }
 
   function renderProntidao() {
@@ -995,6 +1210,7 @@
     }
 
     cardEscolherTreino.classList.remove("oculto");
+    renderFluxoHoje();
 
     if (!PLANO_ATIVO_CARREGADO) {
       listaTreinosHoje.innerHTML = '<p class="card-sub">A carregar os teus treinos…</p>';
@@ -1080,6 +1296,7 @@
     construirInterfaceTreino(treino, rascunho);
     iniciarTimerTreino(rascunho.startedAt);
     ativarWakeLock();
+    renderFluxoHoje();
 
     if (!restaurando) {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1538,6 +1755,7 @@
     respostasPosTreino = {};
     document.querySelectorAll('#cardPosTreino .opcao').forEach(function (el) { el.classList.remove("selecionada"); });
     cardPosTreino.classList.remove("oculto");
+    renderFluxoHoje();
   }
 
   function confirmarPosTreino() {
@@ -1607,6 +1825,7 @@
     document.getElementById("treinoConcluidoVolume").textContent = (workout.volume || 0) + " kg";
     document.getElementById("treinoConcluidoDuracao").textContent = formatarDuracao(workout.duracaoSegundos || 0);
     cardTreinoConcluido.classList.remove("oculto");
+    renderFluxoHoje();
   }
 
   document.getElementById("btnRegistarOutroTreino").addEventListener("click", function () {
@@ -1648,6 +1867,7 @@
   }
 
   // ---------- Arranque: pergunta ao servidor o estado de hoje ----------
+  renderFluxoHoje();
   chamarApi("getEstadoPortalHoje", {})
     .then(function (resp) {
       ecraCarregando.classList.add("oculto");
