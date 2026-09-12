@@ -1,6 +1,6 @@
 // Service worker do Portal AL MOVE.
 
-const VERSAO_CACHE = 'almove-portal-v11';
+const VERSAO_CACHE = 'almove-portal-v12';
 
 const FICHEIROS_ESSENCIAIS = [
   '/',
