@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>AL MOVE</title>
+  <title>AL MOVE — Portal</title>
 
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#050810">
@@ -13,53 +13,506 @@
   <meta name="apple-mobile-web-app-title" content="AL MOVE">
 
   <style>
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{
-      min-height:100vh;
-      background:#050810;
-      color:#fff;
-      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;
-      text-align:center;padding:24px;
+    :root{
+      --bg:#050810;
+      --card:#0d1526;
+      --card-border:#1c2b45;
+      --texto:#e7eef9;
+      --texto-suave:#8fa1bd;
+      --azul:#2458a6;
+      --azul-claro:#3d7bd6;
+      --verde:#1f9d5a;
+      --laranja:#c98a2c;
+      --vermelho:#c9463c;
     }
-    img{width:120px;margin-bottom:20px;}
-    h1{font-size:22px;font-weight:800;margin-bottom:8px;}
-    p{color:#94a3b8;font-size:14px;max-width:320px;line-height:1.5;}
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    html,body{height:100%;}
+    body{
+      background:var(--bg);
+      color:var(--texto);
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+      padding:20px 16px calc(40px + env(safe-area-inset-bottom));
+      padding-top:calc(20px + env(safe-area-inset-top));
+      min-height:100vh;
+    }
+
+    .topo{
+      display:flex;align-items:center;gap:12px;margin-bottom:22px;
+    }
+    .topo img{width:36px;height:36px;}
+    .topo-textos{display:flex;flex-direction:column;}
+    .topo-titulo{font-size:15px;font-weight:800;letter-spacing:.3px;}
+    .topo-sub{font-size:12px;color:var(--texto-suave);}
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--card-border);
+      border-radius:16px;
+      padding:20px;
+      margin-bottom:16px;
+    }
+    .card-title{font-size:16px;font-weight:800;margin-bottom:4px;}
+    .card-sub{font-size:13px;color:var(--texto-suave);margin-bottom:16px;line-height:1.4;}
+
+    .pergunta{margin-bottom:22px;}
+    .pergunta:last-of-type{margin-bottom:18px;}
+    .pergunta-label{font-size:14px;font-weight:600;margin-bottom:10px;}
+
+    .opcoes{display:flex;gap:8px;}
+    .opcao{
+      flex:1;
+      aspect-ratio:1/1;
+      display:flex;align-items:center;justify-content:center;
+      background:#101c33;
+      border:1px solid var(--card-border);
+      border-radius:12px;
+      font-size:16px;font-weight:700;
+      color:var(--texto-suave);
+      transition:background .15s,border-color .15s,color .15s,transform .1s;
+      user-select:none;
+    }
+    .opcao:active{transform:scale(.94);}
+    .opcao.selecionada{
+      background:var(--azul);
+      border-color:var(--azul-claro);
+      color:#fff;
+    }
+
+    .extremos{
+      display:flex;justify-content:space-between;
+      font-size:11px;color:var(--texto-suave);margin-top:6px;
+    }
+
+    textarea{
+      width:100%;
+      background:#101c33;
+      border:1px solid var(--card-border);
+      border-radius:12px;
+      padding:12px;
+      color:var(--texto);
+      font-size:14px;
+      font-family:inherit;
+      resize:vertical;
+      min-height:64px;
+    }
+    textarea::placeholder{color:#5b6f8f;}
+
+    .botao{
+      width:100%;
+      padding:15px;
+      border:0;border-radius:12px;
+      background:var(--azul);
+      color:#fff;
+      font-size:15px;font-weight:800;
+      margin-top:4px;
+    }
+    .botao:disabled{opacity:.6;}
+    .botao:active{transform:scale(.98);}
+
+    .erro{
+      display:none;
+      color:var(--vermelho);
+      font-size:13px;margin-top:10px;
+    }
+
+    .resumo-linha{
+      display:flex;justify-content:space-between;
+      font-size:14px;padding:8px 0;
+      border-bottom:1px solid var(--card-border);
+    }
+    .resumo-linha:last-child{border-bottom:0;}
+    .resumo-linha span:first-child{color:var(--texto-suave);}
+    .resumo-linha span:last-child{font-weight:700;}
+
+    .estado-sync{
+      display:flex;align-items:center;gap:8px;
+      font-size:12px;color:var(--texto-suave);
+      margin-top:14px;
+    }
+    .estado-sync .ponto{
+      width:7px;height:7px;border-radius:50%;
+      background:var(--verde);flex-shrink:0;
+    }
+    .estado-sync.offline .ponto{background:var(--laranja);}
+
+    .carregando{
+      text-align:center;color:var(--texto-suave);
+      font-size:13px;padding:30px 0;
+    }
+
+    .oculto{display:none !important;}
+
+    .toast{
+      position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));
+      z-index:9999;padding:13px 16px;border-radius:12px;
+      background:#141f35;border:1px solid #2b3e60;color:var(--texto);
+      font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.4);
+      display:flex;justify-content:space-between;align-items:center;gap:12px;
+    }
+    .toast button{
+      padding:8px 14px;border-radius:8px;border:0;
+      background:var(--azul);color:#fff;font-weight:700;font-size:13px;
+    }
   </style>
 </head>
 <body>
-  <img src="/icons/icon-any-512.png" alt="AL MOVE">
-  <h1>AL MOVE</h1>
-  <p>Casco da PWA a funcionar — a instalação já está pronta. Os ecrãs a sério do Portal entram aqui a seguir.</p>
+
+  <div class="topo">
+    <img src="/icons/icon-any-512.png" alt="AL MOVE">
+    <div class="topo-textos">
+      <div class="topo-titulo">AL MOVE</div>
+      <div class="topo-sub">Portal do cliente</div>
+    </div>
+  </div>
+
+  <div id="ecraCarregando" class="card carregando">
+    A carregar o teu check-in de hoje…
+  </div>
+
+  <div id="ecraSemToken" class="card oculto">
+    <div class="card-title">Link inválido</div>
+    <div class="card-sub">Este link não tem um token de acesso válido. Pede ao André o teu link do Portal.</div>
+  </div>
+
+  <div id="cardCheckin" class="card oculto">
+    <div class="card-title">Check-in de hoje</div>
+
+    <div id="checkinResumo" class="oculto"></div>
+
+    <div id="checkinForm">
+      <div class="card-sub">Responde a estas perguntas para desbloquear o treino de hoje.</div>
+
+      <div class="pergunta">
+        <div class="pergunta-label">Como dormiste?</div>
+        <div class="opcoes" data-campo="sono">
+          <div class="opcao" data-valor="1">1</div>
+          <div class="opcao" data-valor="2">2</div>
+          <div class="opcao" data-valor="3">3</div>
+          <div class="opcao" data-valor="4">4</div>
+          <div class="opcao" data-valor="5">5</div>
+        </div>
+        <div class="extremos"><span>Muito mal</span><span>Muito bem</span></div>
+      </div>
+
+      <div class="pergunta">
+        <div class="pergunta-label">Nível de stress</div>
+        <div class="opcoes" data-campo="stress">
+          <div class="opcao" data-valor="1">1</div>
+          <div class="opcao" data-valor="2">2</div>
+          <div class="opcao" data-valor="3">3</div>
+          <div class="opcao" data-valor="4">4</div>
+          <div class="opcao" data-valor="5">5</div>
+        </div>
+        <div class="extremos"><span>Baixo</span><span>Muito alto</span></div>
+      </div>
+
+      <div class="pergunta">
+        <div class="pergunta-label">Energia hoje</div>
+        <div class="opcoes" data-campo="cansaco">
+          <div class="opcao" data-valor="1">1</div>
+          <div class="opcao" data-valor="2">2</div>
+          <div class="opcao" data-valor="3">3</div>
+          <div class="opcao" data-valor="4">4</div>
+          <div class="opcao" data-valor="5">5</div>
+        </div>
+        <div class="extremos"><span>Sem energia</span><span>Muita energia</span></div>
+      </div>
+
+      <div class="pergunta">
+        <div class="pergunta-label">Como tens comido</div>
+        <div class="opcoes" data-campo="refeicoes">
+          <div class="opcao" data-valor="1">1</div>
+          <div class="opcao" data-valor="2">2</div>
+          <div class="opcao" data-valor="3">3</div>
+          <div class="opcao" data-valor="4">4</div>
+          <div class="opcao" data-valor="5">5</div>
+        </div>
+        <div class="extremos"><span>Mal</span><span>Muito bem</span></div>
+      </div>
+
+      <div class="pergunta">
+        <div class="pergunta-label">Dor muscular (DOMS)</div>
+        <div class="opcoes" data-campo="doms">
+          <div class="opcao" data-valor="0">0</div>
+          <div class="opcao" data-valor="1">1</div>
+          <div class="opcao" data-valor="2">2</div>
+          <div class="opcao" data-valor="3">3</div>
+          <div class="opcao" data-valor="4">4</div>
+        </div>
+        <div class="extremos"><span>Nenhuma</span><span>Muito intensa</span></div>
+      </div>
+
+      <div class="pergunta">
+        <div class="pergunta-label">Algo que o André deva saber?</div>
+        <textarea id="checkinNota" placeholder="Ex.: dor ligeira no joelho direito"></textarea>
+      </div>
+
+      <button type="button" class="botao" id="btnCheckinSubmit">Enviar check-in</button>
+      <p class="erro" id="checkinErro"></p>
+
+      <div class="estado-sync oculto" id="estadoSync">
+        <div class="ponto"></div>
+        <span id="estadoSyncTexto"></span>
+      </div>
+    </div>
+  </div>
 
 <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then((registo) => {
-      registo.addEventListener('updatefound', () => {
-        const novoWorker = registo.installing;
-        novoWorker.addEventListener('statechange', () => {
-          if (novoWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            mostrarAvisoAtualizacao(novoWorker);
-          }
+(function () {
+  "use strict";
+
+  // ---------- Token do cliente ----------
+  const params = new URLSearchParams(window.location.search);
+  const TOKEN = params.get("token") || params.get("portal");
+
+  const ecraCarregando = document.getElementById("ecraCarregando");
+  const ecraSemToken = document.getElementById("ecraSemToken");
+  const cardCheckin = document.getElementById("cardCheckin");
+  const checkinForm = document.getElementById("checkinForm");
+  const checkinResumo = document.getElementById("checkinResumo");
+  const checkinNota = document.getElementById("checkinNota");
+  const checkinErro = document.getElementById("checkinErro");
+  const btnSubmit = document.getElementById("btnCheckinSubmit");
+  const estadoSync = document.getElementById("estadoSync");
+  const estadoSyncTexto = document.getElementById("estadoSyncTexto");
+
+  if (!TOKEN) {
+    ecraCarregando.classList.add("oculto");
+    ecraSemToken.classList.remove("oculto");
+    return;
+  }
+
+  // ---------- Estado local (offline-first) ----------
+  // Mesmo padrão do Portal.html actual: guarda um rascunho do dia por
+  // token+data, para nunca se perder uma resposta por falta de rede.
+  function dataLocalHoje() {
+    const agora = new Date();
+    return agora.getFullYear() + "-" + String(agora.getMonth() + 1).padStart(2, "0") + "-" + String(agora.getDate()).padStart(2, "0");
+  }
+
+  function chaveEstadoDiario() {
+    return "ALMOVE_DAILY_" + TOKEN + "_" + dataLocalHoje();
+  }
+
+  function lerEstadoDiario() {
+    const base = { date: dataLocalHoje(), checkin: null };
+    try {
+      const raw = localStorage.getItem(chaveEstadoDiario());
+      if (!raw) return base;
+      return Object.assign(base, JSON.parse(raw) || {});
+    } catch (e) {
+      return base;
+    }
+  }
+
+  function guardarEstadoDiario(estado) {
+    try {
+      localStorage.setItem(chaveEstadoDiario(), JSON.stringify(estado));
+    } catch (e) {
+      // localStorage indisponível — segue sem rascunho local.
+    }
+  }
+
+  function gerarIdLocal() {
+    return "ck_" + Date.now() + "_" + Math.random().toString(36).slice(2, 9);
+  }
+
+  // ---------- Chamadas à API (via o estafeta /api/almove) ----------
+  function chamarApi(fn, dados) {
+    const corpo = Object.assign({ fn: fn, token: TOKEN }, dados || {});
+    return fetch("/api/almove", {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(corpo)
+    }).then(function (resposta) {
+      return resposta.json();
+    });
+  }
+
+  // ---------- Selecção de respostas (1-5 / 0-4) ----------
+  const respostas = {};
+
+  document.querySelectorAll(".opcoes").forEach(function (grupo) {
+    grupo.addEventListener("click", function (evento) {
+      const opcao = evento.target.closest(".opcao");
+      if (!opcao) return;
+      const campo = grupo.getAttribute("data-campo");
+      respostas[campo] = Number(opcao.getAttribute("data-valor"));
+      grupo.querySelectorAll(".opcao").forEach(function (el) {
+        el.classList.toggle("selecionada", el === opcao);
+      });
+      checkinErro.style.display = "none";
+    });
+  });
+
+  function preencherRespostas(valores) {
+    Object.keys(valores || {}).forEach(function (campo) {
+      const valor = valores[campo];
+      if (valor === undefined || valor === null) return;
+      respostas[campo] = valor;
+      const grupo = document.querySelector('.opcoes[data-campo="' + campo + '"]');
+      if (!grupo) return;
+      grupo.querySelectorAll(".opcao").forEach(function (el) {
+        el.classList.toggle("selecionada", Number(el.getAttribute("data-valor")) === Number(valor));
+      });
+    });
+    if (valores && valores.nota) checkinNota.value = valores.nota;
+  }
+
+  function mostrarEstadoSync(tipo, texto) {
+    estadoSync.classList.remove("oculto");
+    estadoSync.classList.toggle("offline", tipo === "offline");
+    estadoSyncTexto.textContent = texto;
+  }
+
+  function mostrarResumo(valores) {
+    const linhas = [
+      ["Sono", valores.sono],
+      ["Stress", valores.stress],
+      ["Energia", valores.cansaco],
+      ["Alimentação", valores.refeicoes],
+      ["Dor muscular", valores.doms]
+    ];
+    let html = "";
+    linhas.forEach(function (linha) {
+      html += '<div class="resumo-linha"><span>' + linha[0] + "</span><span>" + linha[1] + "</span></div>";
+    });
+    if (valores.nota) {
+      html += '<div class="resumo-linha"><span>Nota</span><span>' + valores.nota + "</span></div>";
+    }
+    checkinResumo.innerHTML = html;
+    checkinResumo.classList.remove("oculto");
+    checkinForm.classList.add("oculto");
+  }
+
+  // ---------- Envio ----------
+  function submeterCheckin() {
+    const campos = ["sono", "stress", "cansaco", "refeicoes", "doms"];
+    const falta = campos.filter(function (campo) { return respostas[campo] === undefined; });
+
+    if (falta.length) {
+      checkinErro.textContent = "Falta responder a tudo antes de enviares.";
+      checkinErro.style.display = "block";
+      return;
+    }
+
+    const payload = {
+      sono: respostas.sono,
+      stress: respostas.stress,
+      cansaco: respostas.cansaco,
+      refeicoes: respostas.refeicoes,
+      doms: respostas.doms,
+      nota: checkinNota.value || "",
+      eventId: gerarIdLocal()
+    };
+
+    // Guarda localmente antes de tentar o servidor — nunca se perde a resposta.
+    const estado = lerEstadoDiario();
+    estado.checkin = { values: payload, submitted: true, synced: false, eventId: payload.eventId };
+    guardarEstadoDiario(estado);
+
+    mostrarResumo(payload);
+
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = "A sincronizar…";
+    mostrarEstadoSync("saving", "A guardar…");
+
+    if (!navigator.onLine) {
+      btnSubmit.textContent = "Tentar sincronizar";
+      btnSubmit.disabled = false;
+      mostrarEstadoSync("offline", "Sem ligação · dados guardados neste dispositivo");
+      return;
+    }
+
+    chamarApi("registarCheckin", payload)
+      .then(function (resp) {
+        if (!resp || !resp.ok) throw new Error((resp && resp.erro) || "Falha desconhecida");
+        const estadoAtual = lerEstadoDiario();
+        if (estadoAtual.checkin) estadoAtual.checkin.synced = true;
+        guardarEstadoDiario(estadoAtual);
+        mostrarEstadoSync("ok", "Sincronizado");
+      })
+      .catch(function () {
+        btnSubmit.textContent = "Tentar sincronizar";
+        btnSubmit.disabled = false;
+        mostrarEstadoSync("offline", "Sem ligação. Os teus dados ficaram guardados neste dispositivo.");
+      });
+  }
+
+  btnSubmit.addEventListener("click", submeterCheckin);
+
+  // ---------- Arranque: pergunta ao servidor o estado de hoje ----------
+  chamarApi("getEstadoPortalHoje", {})
+    .then(function (resp) {
+      ecraCarregando.classList.add("oculto");
+      cardCheckin.classList.remove("oculto");
+
+      if (!resp || !resp.ok) {
+        checkinErro.textContent = (resp && resp.erro) || "Não foi possível ligar ao servidor.";
+        checkinErro.style.display = "block";
+        return;
+      }
+
+      const dados = resp.dados || {};
+      if (dados.jaFezCheckinHoje && dados.checkinHoje) {
+        mostrarResumo(dados.checkinHoje);
+        return;
+      }
+
+      // Sem check-in no servidor — verifica se há um rascunho local por
+      // sincronizar (ex.: enviou offline e voltou à app antes de haver rede).
+      const estadoLocal = lerEstadoDiario();
+      if (estadoLocal.checkin && estadoLocal.checkin.submitted && !estadoLocal.checkin.synced) {
+        preencherRespostas(estadoLocal.checkin.values);
+        mostrarResumo(estadoLocal.checkin.values);
+        if (navigator.onLine) {
+          chamarApi("registarCheckin", Object.assign({}, estadoLocal.checkin.values, { eventId: estadoLocal.checkin.eventId }))
+            .then(function (resp2) {
+              if (resp2 && resp2.ok) {
+                estadoLocal.checkin.synced = true;
+                guardarEstadoDiario(estadoLocal);
+              }
+            })
+            .catch(function () {});
+        }
+      }
+    })
+    .catch(function () {
+      ecraCarregando.classList.add("oculto");
+      cardCheckin.classList.remove("oculto");
+      checkinErro.textContent = "Sem ligação. Tenta novamente quando tiveres rede.";
+      checkinErro.style.display = "block";
+    });
+
+  // ---------- Service worker ----------
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("/sw.js").then(function (registo) {
+        registo.addEventListener("updatefound", function () {
+          const novoWorker = registo.installing;
+          novoWorker.addEventListener("statechange", function () {
+            if (novoWorker.state === "installed" && navigator.serviceWorker.controller) {
+              mostrarAvisoAtualizacao(novoWorker);
+            }
+          });
         });
       });
     });
-  });
-}
+  }
 
-function mostrarAvisoAtualizacao(novoWorker) {
-  const aviso = document.createElement('div');
-  aviso.style.cssText = 'position:fixed;left:16px;right:16px;bottom:16px;z-index:9999;padding:14px 16px;border-radius:12px;background:#141f35;border:1px solid #2b3e60;color:#e7eef9;font-family:system-ui,sans-serif;font-size:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,.4);';
-  aviso.innerHTML = '<span>Há uma versão nova da app.</span><button style="padding:8px 14px;border-radius:8px;border:0;background:#2458a6;color:#fff;font-weight:700;">Atualizar</button>';
-  aviso.querySelector('button').onclick = () => {
-    novoWorker.postMessage('SKIP_WAITING');
-    novoWorker.addEventListener('statechange', () => {
-      if (novoWorker.state === 'activated') window.location.reload();
-    });
-  };
-  document.body.appendChild(aviso);
-}
+  function mostrarAvisoAtualizacao(novoWorker) {
+    const aviso = document.createElement("div");
+    aviso.className = "toast";
+    aviso.innerHTML = '<span>Há uma versão nova da app.</span><button>Atualizar</button>';
+    aviso.querySelector("button").onclick = function () {
+      novoWorker.postMessage("SKIP_WAITING");
+      novoWorker.addEventListener("statechange", function () {
+        if (novoWorker.state === "activated") window.location.reload();
+      });
+    };
+    document.body.appendChild(aviso);
+  }
+})();
 </script>
 </body>
 </html>
