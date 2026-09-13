@@ -854,6 +854,43 @@
     @media (min-width:680px) { .marco-grade { grid-template-columns:repeat(4,minmax(0,1fr)); } .marco-item { min-height:166px; } }
     @media (max-width:360px) { .conquistas-metrica { padding:9px 8px; } .conquistas-metrica strong { font-size:22px; } .conquistas-sequencia-corpo { gap:10px; padding:11px; } .conquistas-sequencia-numero { flex-basis:66px; min-height:66px; } }
   </style>
+
+  <style id="detalhes-exercicio-design">
+    .exec-acoes-exercicio { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; }
+    .btn-detalhes-exercicio { display:inline-flex; align-items:center; gap:5px; min-height:30px; padding:5px 9px; border:1px solid rgba(45,212,191,.34); border-radius:999px; background:rgba(45,212,191,.11); color:var(--accent); font:inherit; font-size:10px; font-weight:850; cursor:pointer; }
+    .btn-detalhes-exercicio svg { width:13px; height:13px; }
+    .btn-detalhes-exercicio:active { transform:scale(.96); }
+    .exec-info-pagina { display:none; max-width:560px; margin:0 auto; }
+    .exec-info-pagina.player-ativo { display:block; animation:exercicioEntrar .25s cubic-bezier(.22,1,.36,1) both; }
+    .exec-info-titulo { display:flex; align-items:center; gap:11px; margin:8px 0 16px; }
+    .exec-info-titulo > span { display:grid; place-items:center; width:42px; height:42px; border:1px solid rgba(56,189,248,.36); border-radius:14px; background:rgba(14,165,233,.13); color:#7dd3fc; }
+    .exec-info-titulo > span svg { width:22px; height:22px; }
+    .exec-info-titulo small { display:block; margin-bottom:3px; color:var(--accent); font-size:9px; font-weight:900; letter-spacing:.1em; }
+    .exec-info-titulo h2 { margin:0; color:#fff; font-size:21px; line-height:1.12; letter-spacing:-.035em; }
+    .exec-info-imagem { display:block; width:100%; max-height:280px; margin:0 0 12px; object-fit:cover; border:1px solid var(--border); border-radius:17px; background:#091426; }
+    .exec-info-link { display:grid; grid-template-columns:35px 1fr 16px; align-items:center; gap:10px; min-height:62px; margin-bottom:10px; padding:12px; border:1px solid rgba(56,189,248,.30); border-radius:15px; background:rgba(11,92,194,.10); color:#9bd8ff; text-decoration:none; transition:transform .18s ease,border-color .18s ease; }
+    .exec-info-link:active { transform:scale(.985); }
+    .exec-info-link > svg:first-child { width:35px; height:35px; padding:8px; border-radius:11px; background:rgba(14,165,233,.15); }
+    .exec-info-link > svg:last-child { width:16px; height:16px; }
+    .exec-info-link strong { display:block; color:#fff; font-size:12px; }
+    .exec-info-link small { display:block; margin-top:3px; color:var(--text-muted); font-size:10px; }
+    .exec-info-bloco { display:flex; align-items:flex-start; gap:10px; margin-top:10px; padding:13px; border:1px solid var(--border-soft); border-radius:15px; background:rgba(255,255,255,.04); }
+    .exec-info-bloco-icone { display:grid; place-items:center; flex:0 0 auto; width:32px; height:32px; border-radius:10px; }
+    .exec-info-bloco-icone svg { width:18px; height:18px; }
+    .exec-info-notas .exec-info-bloco-icone { color:#7dd3fc; background:rgba(14,165,233,.14); }
+    .exec-info-dicas .exec-info-bloco-icone { color:#fbbf24; background:rgba(245,158,11,.14); }
+    .exec-info-bloco h3 { margin:1px 0 4px; color:#fff; font-size:12px; }
+    .exec-info-bloco p { margin:0; color:var(--text-soft); font-size:11px; line-height:1.45; }
+    .exec-info-vazio { display:grid; place-items:center; min-height:190px; padding:22px; border:1px dashed rgba(255,255,255,.18); border-radius:17px; color:var(--text-muted); text-align:center; }
+    .exec-info-vazio > span { display:grid; place-items:center; width:44px; height:44px; margin-bottom:10px; border-radius:14px; color:#7dd3fc; background:rgba(14,165,233,.13); }
+    .exec-info-vazio svg { width:23px; height:23px; }
+    .exec-info-vazio strong { color:#fff; font-size:13px; }
+    .exec-info-vazio p { max-width:250px; margin:6px 0 0; color:var(--text-muted); font-size:11px; line-height:1.45; }
+    .exec-info-voltar { width:100%; min-height:46px; display:inline-flex; align-items:center; justify-content:center; gap:7px; margin-top:15px; border:1px solid var(--border); border-radius:13px; background:rgba(255,255,255,.055); color:var(--text); font:inherit; font-size:12px; font-weight:850; cursor:pointer; }
+    .exec-info-voltar svg { width:16px; height:16px; }
+    .exec-info-voltar:active { transform:scale(.98); }
+    @media (max-width:390px) { .exec-header { gap:8px; } .exec-acoes-exercicio { gap:4px; } .exec-historico-btn, .btn-detalhes-exercicio { padding:5px 7px; font-size:9px; } }
+  </style>
 </head>
 <body>
 
@@ -1321,7 +1358,11 @@
     grafico: '<path d="M4 19V5M4 19h16"/><path d="m7 15 3-3 3 2 5-6"/>',
     relogio: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/>',
     raio: '<path d="m13 2-8 12h6l-1 8 9-13h-6z"/>',
-    parar: '<circle cx="12" cy="12" r="8"/><rect x="9" y="9" width="6" height="6" rx="1"/>'
+    parar: '<circle cx="12" cy="12" r="8"/><rect x="9" y="9" width="6" height="6" rx="1"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path d="M12 10v6M12 7h.01"/>',
+    imagem: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="m4 17 5-5 3.5 3.5 2.5-2.5 5 5"/>',
+    link: '<path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.1-1.1"/>',
+    dica: '<path d="M9 18h6M10 22h4M8.6 15.5C7 14.3 6 12.4 6 10.3A6 6 0 0 1 18 10.3c0 2.1-1 4-2.6 5.2-.7.6-1.1 1.3-1.1 2.1h-4.6c0-.8-.4-1.5-1.1-2.1Z"/>'
   };
 
   function iconeAlMove(nome, classe) {
@@ -2259,6 +2300,66 @@
     return (ex.series || "-") + " séries · " + (ex.repsMin || "-") + "–" + (ex.repsMax || "-") + " " + unidade + " · RIR " + (ex.rir || "-");
   }
 
+  function escaparTextoExercicio(valor) {
+    return String(valor || "").replace(/[&<>"']/g, function (caractere) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[caractere];
+    });
+  }
+
+  function obterCampoExercicio(exercicio, nomes) {
+    for (let i = 0; i < nomes.length; i++) {
+      const valor = exercicio && exercicio[nomes[i]];
+      if (valor !== undefined && valor !== null && String(valor).trim()) return String(valor).trim();
+    }
+    return "";
+  }
+
+  function obterLinkSeguroExercicio(valor) {
+    if (!valor) return "";
+    try {
+      const url = new URL(valor, window.location.origin);
+      return /^https?:$/.test(url.protocol) ? url.href : "";
+    } catch (erro) {
+      return "";
+    }
+  }
+
+  function obterDetalhesExercicio(exercicio) {
+    return {
+      imagem: obterLinkSeguroExercicio(obterCampoExercicio(exercicio, ["imagemUrl", "imageUrl", "imagem", "image", "fotoUrl", "foto"])),
+      link: obterLinkSeguroExercicio(obterCampoExercicio(exercicio, ["linkVideo", "videoUrl", "urlVideo", "link", "url", "video"])),
+      notas: obterCampoExercicio(exercicio, ["notasTreinador", "notasExercicio", "instrucoes", "execucao", "descricao"]),
+      dicas: obterCampoExercicio(exercicio, ["dicas", "dica", "cuidados", "errosEvitar"])
+    };
+  }
+
+  function construirPaginaDetalhesExercicio(exercicio, indice, total) {
+    const detalhes = obterDetalhesExercicio(exercicio);
+    const temConteudo = detalhes.imagem || detalhes.link || detalhes.notas || detalhes.dicas;
+    let conteudo = '';
+    if (detalhes.imagem) {
+      conteudo += '<img class="exec-info-imagem" src="' + escaparTextoExercicio(detalhes.imagem) + '" alt="Demonstração de ' + escaparTextoExercicio(exercicio.exercicio) + '">';
+    }
+    if (detalhes.link) {
+      conteudo += '<a class="exec-info-link" href="' + escaparTextoExercicio(detalhes.link) + '" target="_blank" rel="noopener noreferrer">' + iconeAlMove("link") + '<span><strong>Abrir vídeo ou ligação</strong><small>Ver técnica do exercício</small></span>' + iconeNativoSvg("setaDireita") + '</a>';
+    }
+    if (detalhes.notas) {
+      conteudo += '<section class="exec-info-bloco exec-info-notas"><div class="exec-info-bloco-icone">' + iconeAlMove("info") + '</div><div><h3>Notas de execução</h3><p>' + escaparTextoExercicio(detalhes.notas).replace(/\n/g, '<br>') + '</p></div></section>';
+    }
+    if (detalhes.dicas) {
+      conteudo += '<section class="exec-info-bloco exec-info-dicas"><div class="exec-info-bloco-icone">' + iconeAlMove("dica") + '</div><div><h3>Dicas do treinador</h3><p>' + escaparTextoExercicio(detalhes.dicas).replace(/\n/g, '<br>') + '</p></div></section>';
+    }
+    if (!temConteudo) {
+      conteudo = '<div class="exec-info-vazio"><span>' + iconeAlMove("info") + '</span><strong>Detalhes em breve</strong><p>O André ainda não adicionou imagem, ligação ou notas para este exercício.</p></div>';
+    }
+    return '<section class="exec-info-pagina" data-exec-info-index="' + indice + '">' +
+      '<div class="exec-detalhe-topo"><button type="button" class="btn-voltar-exercicios" data-voltar-registo="' + indice + '">' + iconeNativoSvg("setaEsquerda") + ' Voltar ao registo</button><span class="exec-detalhe-indicador">' + (indice + 1) + ' de ' + total + '</span></div>' +
+      '<div class="exec-info-titulo"><span>' + iconeAlMove("info") + '</span><div><small>DETALHES DO EXERCÍCIO</small><h2>' + escaparTextoExercicio(exercicio.exercicio) + '</h2></div></div>' +
+      conteudo +
+      '<button type="button" class="exec-info-voltar" data-voltar-registo="' + indice + '">' + iconeNativoSvg("setaEsquerda") + ' Voltar ao registo</button>' +
+      '</section>';
+  }
+
   function construirInterfaceTreino(treino, rascunho) {
     let html = '<section class="execucao-biblioteca" id="execucaoBiblioteca">' +
       '<p class="execucao-biblioteca-intro">Escolhe um exercício para registares as séries. Podes voltar a esta lista a qualquer momento.</p>' +
@@ -2286,7 +2387,7 @@
           '<div class="exec-exercicio-titulo">' + ex.exercicio + '</div>' +
           '<span class="exec-progress" id="exec-progress-' + exIdx + '">0/' + numSeries + ' séries</span>' +
         '</div>' +
-        '<button type="button" class="exec-historico-btn" data-historico-idx="' + exIdx + '">' + iconeNativoSvg("grafico") + ' Histórico</button></div>' +
+        '<div class="exec-acoes-exercicio"><button type="button" class="btn-detalhes-exercicio" data-detalhes-exercicio="' + exIdx + '">' + iconeAlMove("info") + ' Detalhes</button><button type="button" class="exec-historico-btn" data-historico-idx="' + exIdx + '">' + iconeNativoSvg("grafico") + ' Histórico</button></div></div>' +
         '<div class="exec-exercicio-prescrito">Prescrito: ' + textoPrescricaoExercicio(ex) + '</div>' +
         '<div class="exec-descanso">Descanso: <button type="button" data-descanso-idx="' + exIdx + '" data-descanso-seg="' + descansoSegundos + '">' + iconeNativoSvg("relogio") + ' ' + descansoSegundos + ' s</button> <span class="exec-descanso-tempo" id="exec-descanso-' + exIdx + '"></span></div>' +
         '<div class="exec-historico-lista" id="exec-historico-' + exIdx + '"></div>';
@@ -2307,7 +2408,7 @@
         '<div class="exec-detalhe-nav">' +
           '<button type="button" data-exec-nav="anterior" data-exec-index="' + exIdx + '">' + iconeNativoSvg("setaEsquerda") + ' Anterior</button>' +
           '<button type="button" data-exec-nav="seguinte" data-exec-index="' + exIdx + '">Seguinte ' + iconeNativoSvg("setaDireita") + '</button>' +
-        '</div></section>';
+        '</div></section>' + construirPaginaDetalhesExercicio(ex, exIdx, treino.exercicios.length);
     });
     execucaoExerciciosLista.innerHTML = html;
 
@@ -2344,6 +2445,12 @@
     execucaoExerciciosLista.querySelectorAll('[data-voltar-exercicios]').forEach(function (btn) {
       btn.addEventListener("click", mostrarListaExerciciosExecucao);
     });
+    execucaoExerciciosLista.querySelectorAll('[data-detalhes-exercicio]').forEach(function (btn) {
+      btn.addEventListener("click", function () { abrirDetalhesExercicio(Number(btn.getAttribute("data-detalhes-exercicio"))); });
+    });
+    execucaoExerciciosLista.querySelectorAll('[data-voltar-registo]').forEach(function (btn) {
+      btn.addEventListener("click", function () { escolherExercicioExecucao(Number(btn.getAttribute("data-voltar-registo"))); });
+    });
     execucaoExerciciosLista.querySelectorAll('[data-exec-nav]').forEach(function (btn) {
       btn.addEventListener("click", function () { navegarExercicioExecucao(btn.getAttribute("data-exec-nav") === "anterior" ? -1 : 1); });
     });
@@ -2357,9 +2464,20 @@
     guardarTreinoAtual();
     const biblioteca = document.getElementById("execucaoBiblioteca");
     if (biblioteca) biblioteca.classList.remove("oculto");
-    execucaoExerciciosLista.querySelectorAll(".execucao-detalhe").forEach(function (detalhe) { detalhe.classList.remove("player-ativo"); });
+    execucaoExerciciosLista.querySelectorAll(".execucao-detalhe, .exec-info-pagina").forEach(function (detalhe) { detalhe.classList.remove("player-ativo"); });
     btnTerminarTreino.classList.remove("oculto");
     if (scroll !== false) window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function abrirDetalhesExercicio(indice) {
+    if (!TREINO_ATUAL_EXECUCAO) return;
+    guardarTreinoAtual();
+    execucaoExerciciosLista.querySelectorAll(".execucao-detalhe").forEach(function (detalhe) { detalhe.classList.remove("player-ativo"); });
+    execucaoExerciciosLista.querySelectorAll(".exec-info-pagina").forEach(function (pagina) {
+      pagina.classList.toggle("player-ativo", Number(pagina.getAttribute("data-exec-info-index")) === indice);
+    });
+    btnTerminarTreino.classList.add("oculto");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function navegarExercicioExecucao(direcao) {
@@ -2376,6 +2494,7 @@
     execucaoExerciciosLista.querySelectorAll(".execucao-detalhe").forEach(function (detalhe) {
       detalhe.classList.toggle("player-ativo", Number(detalhe.getAttribute("data-exec-player-index")) === indice);
     });
+    execucaoExerciciosLista.querySelectorAll(".exec-info-pagina").forEach(function (pagina) { pagina.classList.remove("player-ativo"); });
     btnTerminarTreino.classList.add("oculto");
     atualizarNavegacaoExercicio();
     window.scrollTo({ top: 0, behavior: "smooth" });
