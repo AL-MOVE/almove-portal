@@ -1,12 +1,13 @@
 // Service worker do Portal AL MOVE.
 
-const VERSAO_CACHE = 'almove-portal-v18';
+const VERSAO_CACHE = 'almove-portal-v19';
 
 const FICHEIROS_ESSENCIAIS = [
   '/',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-any-512.png',
+  '/al-move-mark.png',
 ];
 
 self.addEventListener('install', (evento) => {
