@@ -990,8 +990,10 @@
     .metricas-sync { min-height:14px; color:var(--accent); }
     .metricas-guardar { width:100%; margin-top:14px; }
     /* Cartões e ícones têm uma resposta luminosa discreta ao passar/carregar. */
-    .conquistas-metrica-icone > .icone-almove { display:block !important; width:16px !important; height:16px !important; stroke-width:2.1; }
-    .conquistas-metrica-icone { flex:0 0 27px; }
+    .conquistas-metrica-topo { align-items:center; }
+    .conquistas-metrica-icone { display:flex !important; align-items:center !important; justify-content:center !important; flex:0 0 30px; width:30px !important; height:30px !important; min-width:30px; min-height:30px; margin:0 !important; padding:0 !important; overflow:hidden; line-height:0; }
+    .conquistas-metrica-icone > .icone-almove { display:block !important; width:17px !important; height:17px !important; min-width:17px; min-height:17px; margin:0 !important; padding:0 !important; transform:none !important; stroke-width:2.05; }
+    .conquistas-metrica-icone > .icone-almove * { vector-effect:non-scaling-stroke; }
     .fluxo-hoje-editavel { width:100%; min-height:54px; touch-action:manipulation; }
     .fluxo-hoje-editavel.concluido, .fluxo-hoje-editavel.ativo { pointer-events:auto; }
     .inicio-passos-diarios { margin-top:15px; padding-top:13px; border-top:1px solid rgba(255,255,255,.09); }
