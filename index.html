@@ -891,6 +891,20 @@
     .exec-info-voltar:active { transform:scale(.98); }
     @media (max-width:390px) { .exec-header { gap:8px; } .exec-acoes-exercicio { gap:4px; } .exec-historico-btn, .btn-detalhes-exercicio { padding:5px 7px; font-size:9px; } }
   </style>
+
+  <style id="correcoes-treino-escalas">
+    /* Cores aparecem apenas depois de escolher um valor. */
+    .opcao.selecionada.escala-muito-mau { border-color:#fb7185; background:rgba(225,29,72,.26); color:#fff; box-shadow:0 0 0 2px rgba(251,113,133,.14),0 7px 16px rgba(225,29,72,.12); }
+    .opcao.selecionada.escala-mau { border-color:#fb923c; background:rgba(234,88,12,.24); color:#fff; box-shadow:0 0 0 2px rgba(251,146,60,.13),0 7px 16px rgba(234,88,12,.10); }
+    .opcao.selecionada.escala-medio { border-color:#facc15; background:rgba(202,138,4,.22); color:#fff; box-shadow:0 0 0 2px rgba(250,204,21,.12),0 7px 16px rgba(202,138,4,.10); }
+    .opcao.selecionada.escala-bom { border-color:#4ade80; background:rgba(22,163,74,.23); color:#fff; box-shadow:0 0 0 2px rgba(74,222,128,.12),0 7px 16px rgba(22,163,74,.10); }
+    .opcao.selecionada.escala-muito-bom { border-color:#38bdf8; background:rgba(2,132,199,.25); color:#fff; box-shadow:0 0 0 2px rgba(56,189,248,.15),0 7px 16px rgba(2,132,199,.12); }
+    .fluxo-hoje-ponto { box-sizing:border-box; display:grid; place-items:center; flex:0 0 28px; aspect-ratio:1 / 1; border-radius:50% !important; overflow:hidden; }
+    .fluxo-hoje-etapa.ativo .fluxo-hoje-ponto { background:#0b83bd; box-shadow:0 0 0 4px rgba(14,165,233,.12),0 0 18px rgba(14,165,233,.32); }
+    .confirmar-treino-acoes button { display:inline-flex; align-items:center; justify-content:center; gap:7px; }
+    .confirmar-treino-acoes .btn-voltar-treino svg, .confirmar-treino-acoes .btn-confirmar-termino svg, .icone-almove { width:1em; height:1em; flex:0 0 auto; }
+    .confirmar-treino-acoes .btn-voltar-treino svg { width:17px; height:17px; }
+  </style>
 </head>
 <body>
 
@@ -1153,7 +1167,7 @@
       <div class="success-stat"><strong id="treinoConcluidoVolume"></strong><span>Volume registado</span></div>
       <div class="success-stat"><strong id="treinoConcluidoDuracao"></strong><span>Duração</span></div>
     </div>
-    <button type="button" class="botao" id="btnRegistarOutroTreino">Voltar a Treinos</button>
+    <button type="button" class="botao" id="btnRegistarOutroTreino">Editar registo</button>
   </div>
 
   </div><!-- fim #tabHoje -->
@@ -1782,6 +1796,38 @@
   }
 
   // ---------- Selecção de respostas (1-5 / 0-4) ----------
+  // Cada pergunta declara o sentido da sua escala: crescente = 5 é melhor;
+  // decrescente = o menor valor é melhor (stress, dor, esforço e dificuldade).
+  const CONFIGURACAO_ESCALAS = {
+    sono: { min: 1, max: 5, sentido: "crescente" },
+    stress: { min: 1, max: 5, sentido: "decrescente" },
+    cansaco: { min: 1, max: 5, sentido: "crescente" },
+    refeicoes: { min: 1, max: 5, sentido: "crescente" },
+    doms: { min: 0, max: 4, sentido: "decrescente" },
+    energia: { min: 1, max: 5, sentido: "crescente" },
+    esforco: { min: 1, max: 5, sentido: "decrescente" },
+    dificuldade: { min: 1, max: 5, sentido: "decrescente" }
+  };
+  const CLASSES_ESCALA = ["escala-muito-mau", "escala-mau", "escala-medio", "escala-bom", "escala-muito-bom"];
+
+  function classeQualidadeEscala(campo, valor) {
+    const config = CONFIGURACAO_ESCALAS[campo] || { min: 1, max: 5, sentido: "crescente" };
+    const intervalo = Math.max(1, config.max - config.min);
+    let qualidade = (Number(valor) - config.min) / intervalo;
+    if (config.sentido === "decrescente") qualidade = 1 - qualidade;
+    const indice = Math.max(0, Math.min(4, Math.round(qualidade * 4)));
+    return CLASSES_ESCALA[indice];
+  }
+
+  function selecionarOpcaoEscala(grupo, opcao, campo) {
+    grupo.querySelectorAll(".opcao").forEach(function (el) {
+      el.classList.remove("selecionada");
+      CLASSES_ESCALA.forEach(function (classe) { el.classList.remove(classe); });
+    });
+    if (!opcao) return;
+    opcao.classList.add("selecionada", classeQualidadeEscala(campo, Number(opcao.getAttribute("data-valor"))));
+  }
+
   const respostas = {};
 
   document.querySelectorAll(".opcoes").forEach(function (grupo) {
@@ -1790,9 +1836,7 @@
       if (!opcao) return;
       const campo = grupo.getAttribute("data-campo");
       respostas[campo] = Number(opcao.getAttribute("data-valor"));
-      grupo.querySelectorAll(".opcao").forEach(function (el) {
-        el.classList.toggle("selecionada", el === opcao);
-      });
+      selecionarOpcaoEscala(grupo, opcao, campo);
       checkinErro.style.display = "none";
     });
   });
@@ -1804,9 +1848,8 @@
       respostas[campo] = valor;
       const grupo = document.querySelector('.opcoes[data-campo="' + campo + '"]');
       if (!grupo) return;
-      grupo.querySelectorAll(".opcao").forEach(function (el) {
-        el.classList.toggle("selecionada", Number(el.getAttribute("data-valor")) === Number(valor));
-      });
+      const opcaoSelecionada = Array.from(grupo.querySelectorAll(".opcao")).find(function (el) { return Number(el.getAttribute("data-valor")) === Number(valor); });
+      selecionarOpcaoEscala(grupo, opcaoSelecionada, campo);
     });
     if (valores && valores.nota) checkinNota.value = valores.nota;
   }
@@ -2104,6 +2147,7 @@
   var historicoCarregado = {};
   var descansoIntervalos = {};
   var CHECKIN_HOJE_CONFIRMADO = false; // true quando o servidor OU o rascunho local confirmam check-in feito hoje
+  var MODO_EDICAO_TREINO_CONCLUIDO = false;
 
   function temCheckinFeito() {
     if (CHECKIN_HOJE_CONFIRMADO) return true;
@@ -2203,6 +2247,7 @@
   }
 
   function renderListaTreinosHoje() {
+    const workoutHoje = lerEstadoDiario().workout;
     if (!PLANO_ATIVO || !PLANO_ATIVO.treinos || !PLANO_ATIVO.treinos.length) {
       listaTreinosHoje.innerHTML = '<p class="card-sub">O André ainda não te definiu nenhum treino.</p>';
       return;
@@ -2221,7 +2266,12 @@
         '<div class="nome">' + treino.nome + '</div>' +
         '<div class="sub">' + numExercicios + ' exercício' + (numExercicios === 1 ? "" : "s") + '</div>' +
         '</div>' +
-        '<button type="button" data-treino-idx="' + idx + '">' + (treino.feitoAntes ? "Repetir treino" : "Selecionar") + '</button>' +
+        '<button type="button" data-treino-idx="' + idx + '"' +
+          (workoutHoje && workoutHoje.status === "active" && workoutHoje.nomeTreino !== treino.nome ? " disabled" : "") + '>' +
+          (workoutHoje && workoutHoje.status === "active" && workoutHoje.nomeTreino === treino.nome ? "Continuar" :
+            (workoutHoje && (workoutHoje.status === "post-workout" || workoutHoje.status === "completed") ? "Concluído hoje" :
+              (treino.feitoAntes ? "Selecionar" : "Selecionar"))) +
+        '</button>' +
         '</div>';
     });
     listaTreinosHoje.innerHTML = html;
@@ -2237,6 +2287,19 @@
   function escolherTreino(idx, restaurando) {
     const treino = PLANO_ATIVO.treinos[idx];
     if (!treino) return;
+    const estadoExistente = lerEstadoDiario();
+    const treinoExistente = estadoExistente.workout;
+    if (treinoExistente && treinoExistente.status === "active" && treinoExistente.nomeTreino !== treino.nome) {
+      showToastTreino("Tens o treino “" + treinoExistente.nomeTreino + "” em curso. Termina-o antes de iniciares outro.");
+      restaurarEstadoTreino();
+      return;
+    }
+    if (treinoExistente && (treinoExistente.status === "post-workout" || treinoExistente.status === "completed")) {
+      showToastTreino("O treino de hoje já foi concluído. Podes apenas editar o registo.");
+      restaurarEstadoTreino();
+      return;
+    }
+    MODO_EDICAO_TREINO_CONCLUIDO = false;
 
     TREINO_ATUAL_INDEX = idx;
     TREINO_ATUAL_EXECUCAO = treino;
@@ -2264,18 +2327,22 @@
     }
 
     const estado = lerEstadoDiario();
+    const terminouEmPendente = estado.workout && estado.workout.status === "active" && estado.workout.nomeTreino === treino.nome
+      ? estado.workout.endedAt || null
+      : null;
     estado.workout = {
       status: "active",
       nomePlano: PLANO_ATIVO.nome,
       nomeTreino: treino.nome,
       treinoIndex: idx,
       startedAt: rascunho.startedAt,
+      endedAt: terminouEmPendente,
       eventId: rascunho.eventId
     };
     guardarEstadoDiario(estado);
 
     construirInterfaceTreino(treino, rascunho);
-    iniciarTimerTreino(rascunho.startedAt);
+    iniciarTimerTreino(rascunho.startedAt, terminouEmPendente);
     ativarWakeLock();
     renderFluxoHoje();
 
@@ -2285,7 +2352,14 @@
   }
 
   function voltarEscolherTreino() {
-    pararTimerTreino();
+    if (MODO_EDICAO_TREINO_CONCLUIDO) {
+      cardExecucaoTreino.classList.add("oculto");
+      MODO_EDICAO_TREINO_CONCLUIDO = false;
+      mostrarTreinoConcluido(lerEstadoDiario().workout || {});
+      return;
+    }
+    // O treino continua ativo mesmo quando o cliente consulta a lista ou o Início.
+    // O cronómetro só é parado quando o treino é realmente terminado.
     libertarWakeLock();
     cardExecucaoTreino.classList.add("oculto");
     cardEscolherTreino.classList.remove("oculto");
@@ -2650,18 +2724,25 @@
   }
 
   // ---------- Cronómetro do treino ----------
-  function iniciarTimerTreino(startedAt) {
+  function formatarCronometroTreino(segundos) {
+    const total = Math.max(0, Math.floor(segundos || 0));
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    return (h > 0 ? String(h).padStart(2, "0") + ":" : "") + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+  }
+
+  function iniciarTimerTreino(startedAt, endedAt) {
     pararTimerTreino();
     const inicio = new Date(startedAt).getTime();
+    const fim = endedAt ? new Date(endedAt).getTime() : null;
     function atualizar() {
-      const segundos = Math.max(0, Math.floor((Date.now() - inicio) / 1000));
-      const h = Math.floor(segundos / 3600);
-      const m = Math.floor((segundos % 3600) / 60);
-      const s = segundos % 60;
-      workoutTimerEl.textContent = (h > 0 ? String(h).padStart(2, "0") + ":" : "") + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+      const referencia = Number.isFinite(fim) ? fim : Date.now();
+      const segundos = Math.max(0, Math.floor((referencia - inicio) / 1000));
+      workoutTimerEl.textContent = formatarCronometroTreino(segundos);
     }
     atualizar();
-    timerTreinoInterval = setInterval(atualizar, 1000);
+    if (!Number.isFinite(fim)) timerTreinoInterval = setInterval(atualizar, 1000);
   }
 
   function pararTimerTreino() {
@@ -2694,6 +2775,14 @@
   // ---------- Terminar treino ----------
   function abrirConfirmacaoTermino() {
     if (!TREINO_ATUAL_EXECUCAO) return;
+    if (MODO_EDICAO_TREINO_CONCLUIDO) {
+      guardarTreinoAtual();
+      cardExecucaoTreino.classList.add("oculto");
+      MODO_EDICAO_TREINO_CONCLUIDO = false;
+      showToastTreino("Alterações guardadas neste dispositivo.");
+      mostrarTreinoConcluido(lerEstadoDiario().workout || {});
+      return;
+    }
     execucaoErro.style.display = "none";
     const payload = criarPayloadTreino();
     if (!payload.exercicios.length) {
@@ -2730,7 +2819,7 @@
     };
   }
 
-  function calcularResumoTreino(payload) {
+  function calcularResumoTreino(payload, endedAt) {
     let volume = 0;
     payload.exercicios.forEach(function (ex) {
       ex.series.forEach(function (s) {
@@ -2739,8 +2828,9 @@
         if (Number.isFinite(reps) && Number.isFinite(carga)) volume += reps * carga;
       });
     });
-    const duracaoSegundos = Math.max(0, Math.round((Date.now() - new Date(payload.startedAt).getTime()) / 1000));
-    return { volume: Math.round(volume), duracaoSegundos: duracaoSegundos, endedAt: new Date().toISOString() };
+    const fim = endedAt ? new Date(endedAt) : new Date();
+    const duracaoSegundos = Math.max(0, Math.round((fim.getTime() - new Date(payload.startedAt).getTime()) / 1000));
+    return { volume: Math.round(volume), duracaoSegundos: duracaoSegundos, endedAt: fim.toISOString() };
   }
 
   function terminarTreino() {
@@ -2754,7 +2844,16 @@
       return;
     }
 
-    const resumo = calcularResumoTreino(payload);
+    const estadoAntesDeGuardar = lerEstadoDiario();
+    const fimConfirmado = (estadoAntesDeGuardar.workout && estadoAntesDeGuardar.workout.endedAt) || new Date().toISOString();
+    if (estadoAntesDeGuardar.workout && !estadoAntesDeGuardar.workout.endedAt) {
+      estadoAntesDeGuardar.workout.endedAt = fimConfirmado;
+      guardarEstadoDiario(estadoAntesDeGuardar);
+    }
+    const resumo = calcularResumoTreino(payload, fimConfirmado);
+    // A confirmação termina o tempo imediatamente; a sincronização não pode deixá-lo a contar.
+    pararTimerTreino();
+    libertarWakeLock();
 
     btnTerminarTreino.disabled = true;
     btnTerminarTreino.textContent = "A sincronizar…";
@@ -2771,7 +2870,12 @@
     chamarApi("registarExecucaoTreino", payload)
       .then(function (resp) {
         if (!resp || !resp.ok) throw new Error((resp && resp.erro) || "Falha desconhecida");
-        limparRascunhoTreino(payload.nomePlano, payload.nomeTreino);
+        const rascunhoConcluido = lerRascunhoTreino(payload.nomePlano, payload.nomeTreino);
+        if (rascunhoConcluido) {
+          rascunhoConcluido.status = "completed";
+          rascunhoConcluido.endedAt = resumo.endedAt;
+          guardarRascunhoTreino(rascunhoConcluido);
+        }
 
         const estado = lerEstadoDiario();
         estado.workout = {
@@ -2831,9 +2935,7 @@
       if (!opcao) return;
       const campo = grupo.getAttribute("data-campo-pos");
       respostasPosTreino[campo] = Number(opcao.getAttribute("data-valor"));
-      grupo.querySelectorAll(".opcao").forEach(function (el) {
-        el.classList.toggle("selecionada", el === opcao);
-      });
+      selecionarOpcaoEscala(grupo, opcao, campo);
       posTreinoErro.style.display = "none";
 
       const estado = lerEstadoDiario();
@@ -2847,7 +2949,7 @@
 
   function mostrarCardPosTreino() {
     respostasPosTreino = {};
-    document.querySelectorAll('#cardPosTreino .opcao').forEach(function (el) { el.classList.remove("selecionada"); });
+    document.querySelectorAll('#cardPosTreino .opcao').forEach(function (el) { el.classList.remove("selecionada"); CLASSES_ESCALA.forEach(function (classe) { el.classList.remove(classe); }); });
     cardPosTreino.classList.remove("oculto");
     renderFluxoHoje();
   }
@@ -2926,20 +3028,37 @@
     renderFluxoHoje();
   }
 
-  document.getElementById("btnRegistarOutroTreino").addEventListener("click", function () {
-    TREINO_ATUAL_EXECUCAO = null;
-    TREINO_ATUAL_INDEX = null;
-    cardTreinoConcluido.classList.add("oculto");
-    cardEscolherTreino.classList.remove("oculto");
-    mudarTab("hoje");
-    if (!PLANO_ATIVO_CARREGADO) {
-      listaTreinosHoje.innerHTML = '<p class="card-sub">A carregar os teus treinos…</p>';
-      carregarPlanoAtivoSeNecessario().then(renderListaTreinosHoje);
-    } else {
-      renderListaTreinosHoje();
+  function editarTreinoConcluido() {
+    const estado = lerEstadoDiario();
+    const workout = estado.workout;
+    if (!workout || workout.status !== "completed" || !PLANO_ATIVO) return;
+    const idx = PLANO_ATIVO.treinos.findIndex(function (treino) { return treino.nome === workout.nomeTreino; });
+    if (idx < 0) return;
+    const treino = PLANO_ATIVO.treinos[idx];
+    const rascunho = lerRascunhoTreino(workout.nomePlano, workout.nomeTreino);
+    if (!rascunho) {
+      showToastTreino("Não foi possível abrir este registo para edição.");
+      return;
     }
+    TREINO_ATUAL_INDEX = idx;
+    TREINO_ATUAL_EXECUCAO = treino;
+    EXERCICIO_ATUAL_EXECUCAO = 0;
+    MODO_EDICAO_TREINO_CONCLUIDO = true;
+    cardTreinoConcluido.classList.add("oculto");
+    cardEscolherTreino.classList.add("oculto");
+    cardExecucaoTreino.classList.remove("oculto");
+    execucaoTreinoTitulo.textContent = treino.nome + " · edição";
+    construirInterfaceTreino(treino, rascunho);
+    const tempoCongelado = Number(workout.duracaoSegundos || 0);
+    workoutTimerEl.textContent = formatarCronometroTreino(tempoCongelado);
+    workoutSaveStateEl.textContent = "Treino concluído · edição local";
+    btnTerminarTreino.classList.remove("oculto");
+    btnTerminarTreino.disabled = false;
+    btnTerminarTreino.textContent = "Guardar alterações";
     window.scrollTo({ top: 0, behavior: "smooth" });
-  });
+  }
+
+  document.getElementById("btnRegistarOutroTreino").addEventListener("click", editarTreinoConcluido);
 
   // ---------- Restauro automático ao reabrir a app ----------
   function restaurarEstadoTreino() {
