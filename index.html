@@ -798,6 +798,62 @@
     }
     @media (prefers-reduced-motion:reduce) { .execucao-biblioteca, .execucao-detalhe.player-ativo { animation:none; } .execucao-exercicio-item, .exec-detalhe-nav button { transition:none; } }
   </style>
+
+  <style id="conquistas-design-almove">
+    /* Conquistas: referência visual do protótipo, alimentada apenas por dados reais. */
+    #tabConquistas { display:grid; gap:14px; }
+    #tabConquistas .card { margin:0; padding:17px; }
+    .conquistas-cabecalho { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px; }
+    .conquistas-eyebrow { margin-bottom:4px; color:var(--accent); font-size:10px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
+    .conquistas-periodo, .conquistas-meta-pill { flex:0 0 auto; padding:6px 9px; border:1px solid rgba(45,212,191,.26); border-radius:999px; background:rgba(45,212,191,.08); color:#a7f3e8; font-size:10px; font-weight:800; }
+    .conquistas-metricas { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+    .conquistas-metrica { min-height:116px; padding:11px 10px; border:1px solid var(--border-soft); border-radius:15px; background:rgba(255,255,255,.04); }
+    .conquistas-metrica-topo { display:flex; align-items:flex-start; justify-content:space-between; gap:5px; }
+    .conquistas-metrica strong { color:#fff; font-size:25px; font-weight:900; line-height:1; letter-spacing:-.05em; }
+    .conquistas-metrica span:not(.conquistas-metrica-icone) { display:block; margin-top:12px; color:#f8fafc; font-size:10px; font-weight:800; line-height:1.2; }
+    .conquistas-metrica small { display:block; margin-top:4px; color:var(--text-dim); font-size:9px; line-height:1.22; }
+    .conquistas-metrica-icone { display:grid; place-items:center; width:27px; height:27px; border-radius:9px; }
+    .conquistas-metrica-icone svg { width:16px; height:16px; stroke-width:2.15; }
+    .metrica-treinos .conquistas-metrica-icone { color:#7dd3fc; border:1px solid rgba(56,189,248,.35); background:rgba(14,165,233,.14); }
+    .metrica-sequencia .conquistas-metrica-icone { color:#fbbf24; border:1px solid rgba(251,191,36,.35); background:rgba(245,158,11,.13); }
+    .metrica-recorde .conquistas-metrica-icone { color:#d8b4fe; border:1px solid rgba(192,132,252,.35); background:rgba(168,85,247,.13); }
+    .conquistas-sequencia-card { overflow:hidden; }
+    .conquistas-sequencia-corpo { display:flex; align-items:center; gap:14px; padding:14px; border:1px solid rgba(45,212,191,.20); border-radius:17px; background:linear-gradient(110deg,rgba(11,92,194,.16),rgba(45,212,191,.065)); }
+    .conquistas-sequencia-numero { flex:0 0 76px; min-height:76px; display:grid; place-content:center; border:2px solid rgba(45,212,191,.7); border-radius:50%; color:#fff; text-align:center; box-shadow:0 0 20px rgba(45,212,191,.13); }
+    .conquistas-sequencia-numero strong { display:block; font-size:25px; line-height:1; letter-spacing:-.05em; }
+    .conquistas-sequencia-numero span { margin-top:3px; color:var(--text-muted); font-size:9px; font-weight:800; text-transform:uppercase; }
+    .conquistas-sequencia-info { min-width:0; flex:1; }
+    .conquistas-sequencia-info strong { display:block; color:#fff; font-size:14px; }
+    .conquistas-sequencia-info p { margin:5px 0 10px; color:var(--text-muted); font-size:11px; line-height:1.35; }
+    .conquistas-progresso { height:6px; overflow:hidden; border-radius:999px; background:rgba(255,255,255,.10); }
+    .conquistas-progresso div { height:100%; min-width:0; border-radius:inherit; background:linear-gradient(90deg,var(--blue),var(--accent)); box-shadow:0 0 12px rgba(45,212,191,.38); transition:width .42s cubic-bezier(.22,1,.36,1); }
+    .conquistas-estado-legenda { display:flex; align-items:center; gap:5px; color:var(--text-muted); font-size:10px; font-weight:700; }
+    .conquistas-estado-legenda i { width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px rgba(45,212,191,.65); }
+    .marco-grade { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+    .marco-item { min-height:157px; display:flex; flex-direction:column; align-items:flex-start; gap:10px; padding:12px; border-radius:15px; background:rgba(255,255,255,.04); border:1px solid var(--border-soft); opacity:1; }
+    .marco-item.conquistado { border-color:rgba(45,212,191,.42); background:linear-gradient(145deg,rgba(45,212,191,.115),rgba(11,92,194,.065)); }
+    .marco-item.em-progresso { border-color:rgba(56,189,248,.36); }
+    .marco-item.bloqueado { opacity:.54; background:rgba(255,255,255,.025); }
+    .marco-icone { width:36px; height:36px; display:grid; place-items:center; border-radius:12px; }
+    .marco-icone svg { width:20px; height:20px; stroke-width:2.2; }
+    .marco-icone-consistencia { color:#fbbf24; background:rgba(245,158,11,.14); border:1px solid rgba(251,191,36,.26); }
+    .marco-icone-treino { color:#7dd3fc; background:rgba(14,165,233,.14); border:1px solid rgba(56,189,248,.26); }
+    .marco-corpo { width:100%; min-width:0; }
+    .marco-topo { min-height:19px; margin-bottom:5px; }
+    .marco-etiqueta { display:inline-flex; align-items:center; gap:4px; min-height:18px; padding:2px 6px; border-radius:999px; font-size:9px; font-weight:850; }
+    .marco-etiqueta svg { width:11px; height:11px; }
+    .marco-etiqueta-concluido { color:#a7f3d0; background:rgba(34,197,94,.13); border:1px solid rgba(34,197,94,.28); }
+    .marco-etiqueta-progresso { color:#7dd3fc; background:rgba(14,165,233,.12); border:1px solid rgba(56,189,248,.25); }
+    .marco-etiqueta-bloqueado { color:var(--text-dim); background:rgba(255,255,255,.05); }
+    .marco-etiqueta-bloqueado svg { width:12px; height:12px; }
+    .marco-titulo { color:#fff; font-size:12px; font-weight:850; line-height:1.22; }
+    .marco-desc { margin-top:4px; color:var(--text-muted); font-size:10px; line-height:1.32; }
+    .marco-progresso { height:4px; margin-top:9px; background:rgba(255,255,255,.09); }
+    .marco-progresso-fill { background:linear-gradient(90deg,var(--blue),var(--accent)); }
+    .marco-fracao { margin-top:4px; color:var(--text-dim); font-size:9px; font-weight:750; }
+    @media (min-width:680px) { .marco-grade { grid-template-columns:repeat(4,minmax(0,1fr)); } .marco-item { min-height:166px; } }
+    @media (max-width:360px) { .conquistas-metrica { padding:9px 8px; } .conquistas-metrica strong { font-size:22px; } .conquistas-sequencia-corpo { gap:10px; padding:11px; } .conquistas-sequencia-numero { flex-basis:66px; min-height:66px; } }
+  </style>
 </head>
 <body>
 
@@ -1068,59 +1124,72 @@
   <!-- ============ TAB: CONQUISTAS ============ -->
   <div id="tabConquistas" class="tab-conteudo oculto">
 
-    <div class="card">
-      <div class="card-title">Passos de hoje<span class="selo-exemplo">Exemplo</span></div>
-      <div class="gauge-wrap">
-        <svg class="gauge-svg" viewBox="0 0 160 160">
-          <defs>
-            <linearGradient id="gaugeGradiente" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#5eead4"/>
-              <stop offset="100%" stop-color="#0b5cc2"/>
-            </linearGradient>
-          </defs>
-          <circle class="gauge-track" cx="80" cy="80" r="64"/>
-          <circle class="gauge-fill" cx="80" cy="80" r="64"
-            stroke-dasharray="402.1" stroke-dashoffset="145" id="gaugePassosCirculo"/>
-        </svg>
-        <div class="gauge-centro">
-          <div class="gauge-valor">6.420</div>
-          <div class="gauge-meta">de 10.000 passos</div>
-          <div class="gauge-pill">64% atingido</div>
+    <section class="card conquistas-atividade">
+      <div class="conquistas-cabecalho">
+        <div>
+          <div class="conquistas-eyebrow">O teu percurso</div>
+          <div class="card-title">A tua atividade</div>
+        </div>
+        <span class="conquistas-periodo">Dados reais</span>
+      </div>
+      <div class="conquistas-metricas">
+        <div class="conquistas-metrica metrica-treinos">
+          <div class="conquistas-metrica-topo"><strong id="marcoTotalTreinos">0</strong><span class="conquistas-metrica-icone" aria-hidden="true"><span data-conquistas-icone="halter"></span></span></div>
+          <span>Treinos concluídos</span>
+          <small>Total registado</small>
+        </div>
+        <div class="conquistas-metrica metrica-sequencia">
+          <div class="conquistas-metrica-topo"><strong id="marcoStreakAtual">0</strong><span class="conquistas-metrica-icone" aria-hidden="true"><span data-conquistas-icone="chama"></span></span></div>
+          <span>Semanas ativas</span>
+          <small>Sequência atual</small>
+        </div>
+        <div class="conquistas-metrica metrica-recorde">
+          <div class="conquistas-metrica-topo"><strong id="marcoMelhorStreak">0</strong><span class="conquistas-metrica-icone" aria-hidden="true"><span data-conquistas-icone="conquistas"></span></span></div>
+          <span>Melhor sequência</span>
+          <small>Recorde pessoal</small>
         </div>
       </div>
+    </section>
 
-      <div class="hist-semana" id="histSemanaPassos">
-        <!-- preenchido por JS com dados de exemplo -->
+    <section class="card conquistas-sequencia-card">
+      <div class="conquistas-cabecalho">
+        <div>
+          <div class="conquistas-eyebrow">Consistência</div>
+          <div class="card-title">A tua sequência</div>
+        </div>
+        <span class="conquistas-meta-pill" id="conquistasMetaPill">Próximo marco</span>
       </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Os teus marcos</div>
-      <div class="marcos-resumo">
-        <div class="marco-resumo-card">
-          <div class="marco-resumo-valor" id="marcoTotalTreinos">0</div>
-          <div class="marco-resumo-label">Treinos<br>concluídos</div>
-        </div>
-        <div class="marco-resumo-card">
-          <div class="marco-resumo-valor" id="marcoStreakAtual">0</div>
-          <div class="marco-resumo-label">Semanas<br>seguidas</div>
-        </div>
-        <div class="marco-resumo-card">
-          <div class="marco-resumo-valor" id="marcoMelhorStreak">0</div>
-          <div class="marco-resumo-label">Melhor<br>sequência</div>
+      <div class="conquistas-sequencia-corpo">
+        <div class="conquistas-sequencia-numero"><strong id="conquistasSequenciaValor">0</strong><span>semanas</span></div>
+        <div class="conquistas-sequencia-info">
+          <strong id="conquistasSequenciaTitulo">Começa a tua sequência</strong>
+          <p id="conquistasSequenciaTexto">Regista um treino para desbloquear o primeiro marco.</p>
+          <div class="conquistas-progresso"><div id="conquistasSequenciaBarra"></div></div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="card">
-      <div class="card-title">Sequência de treinos</div>
-      <div class="marco-lista" id="marcosListaStreak"></div>
-    </div>
+    <section class="card conquistas-trofeus-card">
+      <div class="conquistas-cabecalho">
+        <div>
+          <div class="conquistas-eyebrow">Troféus</div>
+          <div class="card-title">Consistência</div>
+        </div>
+        <span class="conquistas-estado-legenda"><i></i> Desbloqueado</span>
+      </div>
+      <div class="marco-lista marco-grade" id="marcosListaStreak"></div>
+    </section>
 
-    <div class="card">
-      <div class="card-title">Volume de treinos</div>
-      <div class="marco-lista" id="marcosListaVolume"></div>
-    </div>
+    <section class="card conquistas-trofeus-card">
+      <div class="conquistas-cabecalho">
+        <div>
+          <div class="conquistas-eyebrow">Troféus</div>
+          <div class="card-title">Treinos concluídos</div>
+        </div>
+        <span class="conquistas-estado-legenda"><i></i> Desbloqueado</span>
+      </div>
+      <div class="marco-lista marco-grade" id="marcosListaVolume"></div>
+    </section>
 
   </div>
 
@@ -1278,6 +1347,7 @@
     trocarIconeDentro(document.getElementById("btnVoltarTreinos"), "esquerda");
     trocarIconeDentro(document.getElementById("btnCancelarTermino"), "esquerda");
     trocarIconeDentro(document.querySelector(".btn-contacto-pt > svg"), "direita");
+    document.querySelectorAll("[data-conquistas-icone]").forEach(function (el) { trocarIconeDentro(el, el.getAttribute("data-conquistas-icone")); });
   }
 
   // ---------- Token do cliente ----------
@@ -1403,86 +1473,75 @@
     });
 
   // ---------- Conquistas ----------
-  // Passos/histograma continuam como exemplo (sem sensor); os marcos usam
-  // dados reais de treinos (EXECUCOES) assim que a API responder.
-  (function () {
-    const HIST_LETRAS = ["S", "T", "Q", "Q", "S", "S", "D"];
-    const HIST_EXEMPLO = [4200, 7800, 6100, 9200, 5400, 8700, 6420]; // exemplo, hoje = último
-    const histEl = document.getElementById("histSemanaPassos");
-    const maxHist = Math.max.apply(null, HIST_EXEMPLO);
-    HIST_EXEMPLO.forEach(function (valor, idx) {
-      const ehHoje = idx === HIST_EXEMPLO.length - 1;
-      const altura = Math.max(6, Math.round((valor / maxHist) * 100));
-      const col = document.createElement("div");
-      col.className = "hist-col" + (ehHoje ? " hoje" : "");
-      col.innerHTML =
-        '<div class="hist-barra-fundo"><div class="hist-barra" style="height:' + altura + '%"></div></div>' +
-        '<span class="hist-col-letra">' + HIST_LETRAS[idx] + '</span>';
-      histEl.appendChild(col);
-    });
-  })();
-
+  // Só mostra métricas recebidas pelo portal; não há passos ou dados de exemplo.
   const marcoTotalTreinosEl = document.getElementById("marcoTotalTreinos");
   const marcoStreakAtualEl = document.getElementById("marcoStreakAtual");
   const marcoMelhorStreakEl = document.getElementById("marcoMelhorStreak");
   const marcosListaStreakEl = document.getElementById("marcosListaStreak");
   const marcosListaVolumeEl = document.getElementById("marcosListaVolume");
+  const conquistasSequenciaValorEl = document.getElementById("conquistasSequenciaValor");
+  const conquistasSequenciaTituloEl = document.getElementById("conquistasSequenciaTitulo");
+  const conquistasSequenciaTextoEl = document.getElementById("conquistasSequenciaTexto");
+  const conquistasSequenciaBarraEl = document.getElementById("conquistasSequenciaBarra");
+  const conquistasMetaPillEl = document.getElementById("conquistasMetaPill");
 
   function iconeNativoSvg(tipo) {
     const nomes = { check: "concluido", setaEsquerda: "esquerda", setaDireita: "direita", relogio: "relogio", grafico: "grafico", pausa: "parar", raio: "raio", lento: "relogio", parar: "parar", halter: "halter" };
     return iconeAlMove(nomes[tipo] || "concluido", "icone-nativo");
   }
 
-  function criarMarcoHtml(marco) {
-    const estado = marco.concluido ? "conquistado" : (marco.emProgresso ? "" : "bloqueado");
-    let lado;
-    if (marco.concluido) {
-      lado = '<span class="marco-check">' + iconeNativoSvg("check") + '</span>';
-    } else if (marco.emProgresso) {
-      lado = "";
-    } else {
-      lado = '<span class="marco-cadeado" aria-label="Bloqueado">' + iconeAlMove("bloqueado") + '</span>';
-    }
-    let progresso = "";
-    if (!marco.concluido && marco.meta) {
-      const pct = Math.min(100, Math.round((marco.atual / marco.meta) * 100));
-      progresso =
-        '<div class="marco-progresso"><div class="marco-progresso-fill" style="width:' + pct + '%"></div></div>' +
-        '<div class="marco-fracao">' + marco.atual + ' / ' + marco.meta + '</div>';
-    }
-    return (
-      '<div class="marco-item ' + estado + '">' +
-        '<div class="marco-icone" aria-hidden="true">' + iconeMarcoSvg(marco.icone) + '</div>' +
-        '<div class="marco-corpo">' +
-          '<div class="marco-titulo">' + marco.titulo + '</div>' +
-          '<div class="marco-desc">' + marco.desc + '</div>' +
-          progresso +
-        '</div>' +
-        lado +
-      '</div>'
-    );
+  function iconeMarcoSvg(tipo) {
+    if (tipo === "consistencia") return iconeAlMove("chama");
+    return iconeAlMove("halter");
   }
 
-  function iconeMarcoSvg(tipo) {
-    return iconeAlMove(tipo === "consistencia" ? "chama" : "halter");
+  function criarMarcoHtml(marco) {
+    const estado = marco.concluido ? "conquistado" : (marco.emProgresso ? "em-progresso" : "bloqueado");
+    const percentagem = marco.meta ? Math.min(100, Math.round((marco.atual / marco.meta) * 100)) : 0;
+    let etiqueta = "";
+    if (marco.concluido) etiqueta = '<span class="marco-etiqueta marco-etiqueta-concluido">' + iconeNativoSvg("check") + ' Obtido</span>';
+    else if (marco.emProgresso) etiqueta = '<span class="marco-etiqueta marco-etiqueta-progresso">' + percentagem + '%</span>';
+    else etiqueta = '<span class="marco-etiqueta marco-etiqueta-bloqueado">' + iconeAlMove("bloqueado") + '</span>';
+    const progresso = !marco.concluido && marco.meta
+      ? '<div class="marco-progresso"><div class="marco-progresso-fill" style="width:' + percentagem + '%"></div></div><div class="marco-fracao">' + marco.atual + ' / ' + marco.meta + '</div>'
+      : '';
+    return '<article class="marco-item ' + estado + '">' +
+      '<div class="marco-icone marco-icone-' + marco.icone + '" aria-hidden="true">' + iconeMarcoSvg(marco.icone) + '</div>' +
+      '<div class="marco-corpo"><div class="marco-topo">' + etiqueta + '</div>' +
+      '<div class="marco-titulo">' + marco.titulo + '</div><div class="marco-desc">' + marco.desc + '</div>' + progresso + '</div></article>';
   }
 
   function renderConquistas(dados) {
-    const totalTreinos = dados.totalTreinosConcluidos || 0;
-    const streakAtual = dados.streakSemanas || 0;
-    const melhorStreak = Math.max(dados.melhorStreakSemanas || 0, streakAtual);
+    const totalTreinos = Number(dados.totalTreinosConcluidos || 0);
+    const streakAtual = Number(dados.streakSemanas || 0);
+    const melhorStreak = Math.max(Number(dados.melhorStreakSemanas || 0), streakAtual);
+    const metasStreak = [1, 4, 8, 12];
+    const proximaMeta = metasStreak.find(function (meta) { return streakAtual < meta; }) || 12;
+    const percentagemSequencia = Math.min(100, Math.round((streakAtual / proximaMeta) * 100));
 
     marcoTotalTreinosEl.textContent = totalTreinos;
     marcoStreakAtualEl.textContent = streakAtual;
     marcoMelhorStreakEl.textContent = melhorStreak;
+    conquistasSequenciaValorEl.textContent = streakAtual;
+    conquistasMetaPillEl.textContent = streakAtual >= 12 ? "Marco máximo" : "Meta: " + proximaMeta + " semanas";
+    conquistasSequenciaBarraEl.style.width = percentagemSequencia + "%";
+    if (streakAtual === 0) {
+      conquistasSequenciaTituloEl.textContent = "Começa a tua sequência";
+      conquistasSequenciaTextoEl.textContent = "Regista um treino para desbloquear o primeiro marco.";
+    } else if (streakAtual >= 12) {
+      conquistasSequenciaTituloEl.textContent = "Sequência de elite";
+      conquistasSequenciaTextoEl.textContent = "Já alcançaste o marco máximo de consistência.";
+    } else {
+      const faltam = proximaMeta - streakAtual;
+      conquistasSequenciaTituloEl.textContent = "Estás em ritmo";
+      conquistasSequenciaTextoEl.textContent = "Falta" + (faltam === 1 ? "" : "m") + " " + faltam + " semana" + (faltam === 1 ? "" : "s") + " para o próximo marco.";
+    }
 
-    const marcosStreak = [1, 4, 8, 12].map(function (meta) {
+    const marcosStreak = metasStreak.map(function (meta) {
       return {
         icone: "consistencia",
-        titulo: meta === 1 ? "Primeira semana" : meta + " semanas seguidas",
-        desc: meta === 1
-          ? "Completa pelo menos 1 treino esta semana."
-          : "Mantém pelo menos 1 treino por semana durante " + meta + " semanas seguidas.",
+        titulo: meta === 1 ? "Primeira semana" : meta === 4 ? "Mês consistente" : meta === 8 ? "Hábito criado" : "Trimestre forte",
+        desc: meta === 1 ? "Completa pelo menos 1 treino esta semana." : meta + " semanas seguidas de treino.",
         atual: streakAtual,
         meta: meta,
         concluido: melhorStreak >= meta,
@@ -1493,8 +1552,8 @@
     const marcosVolume = [10, 25, 50, 100].map(function (meta) {
       return {
         icone: "treino",
-        titulo: meta + " treinos concluídos",
-        desc: "Regista um total de " + meta + " treinos.",
+        titulo: meta + " treinos",
+        desc: meta === 10 ? "Primeiro ciclo de treino." : meta === 25 ? "Rotina consolidada." : meta === 50 ? "Meio caminho para 100." : "Cem treinos concluídos.",
         atual: totalTreinos,
         meta: meta,
         concluido: totalTreinos >= meta,
@@ -1506,12 +1565,13 @@
     marcosListaVolumeEl.innerHTML = marcosVolume.map(criarMarcoHtml).join("");
   }
 
+  renderConquistas({});
   chamarApi("getResumoConquistasPortal", {})
     .then(function (resp) {
       if (resp && resp.ok && resp.dados) renderConquistas(resp.dados);
     })
     .catch(function () {
-      // Sem ligação — os marcos ficam a zero até haver rede.
+      // Mantém a estrutura a zero até a ligação voltar.
     });
 
   // ---------- Opções ----------
@@ -2905,3 +2965,4 @@
 </script>
 </body>
 </html>
+
