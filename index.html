@@ -989,6 +989,39 @@
     .metricas-nota, .metricas-sync { margin:10px 0 0; color:var(--text-muted); font-size:10px; line-height:1.4; }
     .metricas-sync { min-height:14px; color:var(--accent); }
     .metricas-guardar { width:100%; margin-top:14px; }
+    /* Cartões e ícones têm uma resposta luminosa discreta ao passar/carregar. */
+    .conquistas-metrica-icone > .icone-almove { display:block !important; width:16px !important; height:16px !important; stroke-width:2.1; }
+    .conquistas-metrica-icone { flex:0 0 27px; }
+    .fluxo-hoje-editavel { width:100%; min-height:54px; touch-action:manipulation; }
+    .fluxo-hoje-editavel.concluido, .fluxo-hoje-editavel.ativo { pointer-events:auto; }
+    .inicio-passos-diarios { margin-top:15px; padding-top:13px; border-top:1px solid rgba(255,255,255,.09); }
+    .inicio-passos-hoje { display:flex; align-items:baseline; gap:7px; }
+    .inicio-passos-hoje strong { color:#fff; font-size:19px; font-weight:900; letter-spacing:-.045em; }
+    .inicio-passos-hoje span { color:var(--text-muted); font-size:10px; font-weight:750; }
+    .inicio-metricas-diarias { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-top:11px; }
+    .inicio-metricas-diarias > div { padding:9px 6px; border:1px solid rgba(45,212,191,.16); border-radius:11px; background:rgba(0,0,0,.13); text-align:center; }
+    .inicio-metricas-diarias strong { display:block; color:#dffcf7; font-size:13px; font-weight:900; letter-spacing:-.035em; }
+    .inicio-metricas-diarias span { display:block; margin-top:3px; color:var(--text-muted); font-size:9px; font-weight:750; }
+    .perfil-acessos { display:grid; gap:8px; margin-top:15px; }
+    .perfil-acesso { display:grid; grid-template-columns:38px 1fr 16px; align-items:center; gap:10px; width:100%; padding:11px; border:1px solid var(--border-soft); border-radius:15px; background:rgba(255,255,255,.035); color:var(--text); text-align:left; font:inherit; cursor:pointer; transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease; }
+    .perfil-acesso-icone { display:grid; place-items:center; width:38px; height:38px; color:#8be9db; border:1px solid rgba(45,212,191,.25); border-radius:12px; background:rgba(45,212,191,.10); }
+    .perfil-acesso-icone.corrida { color:#8cd3ff; border-color:rgba(56,189,248,.28); background:rgba(14,165,233,.10); }
+    .perfil-acesso-icone .icone-almove { width:19px; height:19px; }
+    .perfil-acesso strong, .perfil-acesso small { display:block; }
+    .perfil-acesso strong { color:#fff; font-size:12px; font-weight:850; }
+    .perfil-acesso small { margin-top:3px; color:var(--text-muted); font-size:10px; font-weight:650; }
+    .perfil-acesso-seta { width:9px; height:9px; border-top:2px solid var(--text-muted); border-right:2px solid var(--text-muted); transform:rotate(45deg); }
+    .perfil-voltar { display:inline-flex; align-items:center; gap:8px; padding:0; margin-bottom:14px; border:0; background:transparent; color:var(--text-soft); font:inherit; font-size:12px; font-weight:850; cursor:pointer; }
+    .perfil-voltar span { width:9px; height:9px; border-left:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(45deg); }
+    body.perfil-detalhe-aberto #tabPlanos > :not(#perfilMetricas) { display:none; }
+    .metricas-corrida-campos { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:13px; }
+    .metricas-corrida-campos label { display:grid; gap:5px; color:var(--text-soft); font-size:10px; font-weight:800; }
+    .metricas-corrida-campos input { width:100%; min-height:42px; padding:0 11px; border:1px solid var(--border); border-radius:11px; outline:0; background:rgba(255,255,255,.055); color:#fff; font:inherit; font-size:13px; }
+    @media (hover:hover) {
+      .conquistas-metrica:hover, .perfil-acesso:hover, .fluxo-hoje-editavel:hover { border-color:rgba(45,212,191,.42); background-color:rgba(45,212,191,.055); box-shadow:0 0 18px rgba(45,212,191,.10); }
+      .conquistas-metrica:hover .conquistas-metrica-icone, .perfil-acesso:hover .perfil-acesso-icone { box-shadow:0 0 15px rgba(45,212,191,.22); }
+    }
+    .perfil-acesso:active, .fluxo-hoje-editavel:active { transform:scale(.985); }
   </style>
 </head>
 <body>
@@ -1054,6 +1087,14 @@
       </div>
       <div class="inicio-passos-valor"><strong id="inicioPassosSemana">0</strong><span>/ 56 000 passos</span></div>
       <div class="semana-barra"><div class="semana-barra-fill" id="inicioPassosSemanaBarra" style="width:0%"></div></div>
+      <div class="inicio-passos-diarios">
+        <div class="inicio-passos-hoje"><strong id="inicioPassosHoje">0</strong><span>passos hoje</span></div>
+        <div class="inicio-metricas-diarias" aria-label="Métricas diárias">
+          <div><strong id="inicioDistanciaDiaria">—</strong><span>distância</span></div>
+          <div><strong id="inicioDuracaoDiaria">—</strong><span>duração</span></div>
+          <div><strong id="inicioCaloriasDiarias">—</strong><span>calorias</span></div>
+        </div>
+      </div>
     </section>
 
     <button type="button" class="inicio-cta" id="inicioBtnContinuarTreino">
@@ -1395,7 +1436,7 @@
   <!-- ============ TAB: OPÇÕES ============ -->
   <div id="tabPlanos" class="tab-conteudo oculto">
 
-    <div class="card">
+    <div class="card" data-perfil-raiz>
       <div class="perfil-topo">
         <div class="perfil-avatar" id="opcoesAvatarInicial">A</div>
         <div class="perfil-corpo">
@@ -1403,9 +1444,14 @@
           <span class="perfil-estado-pill oculto" id="opcoesEstadoPill"></span>
         </div>
       </div>
+      <div class="perfil-acessos">
+        <button type="button" class="perfil-acesso" data-abrir-perfil="caminhada"><span class="perfil-acesso-icone" data-perfil-icone="caminhar"></span><span><strong>Métricas de caminhada</strong><small>Passos, distância, duração e calorias</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="corrida"><span class="perfil-acesso-icone corrida" data-perfil-icone="foguetao"></span><span><strong>Calculadora de corrida</strong><small>Estimativa por distância e velocidade</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+      </div>
     </div>
 
-    <section class="card metricas-atividade-card" aria-labelledby="metricasAtividadeTitulo">
+    <section class="card metricas-atividade-card oculto" id="perfilMetricas" aria-labelledby="metricasAtividadeTitulo">
+      <button type="button" class="perfil-voltar" id="btnVoltarPerfil"><span aria-hidden="true"></span> Perfil</button>
       <div class="metricas-cabecalho">
         <div><span class="metricas-eyebrow">Movimento diário</span><div class="card-title" id="metricasAtividadeTitulo">Métricas de atividade</div><p>Estimativas pessoais a partir dos teus passos.</p></div>
         <span class="metricas-icone" data-metricas-icone="caminhar"></span>
@@ -1422,8 +1468,12 @@
         <label>Passada a correr (cm)<input id="metricasPassadaCorrida" type="number" inputmode="numeric" min="50" max="300" placeholder="Ex.: 110"></label>
       </div>
       <div class="metricas-velocidade-wrap"><span id="metricasVelocidadeTitulo">Ritmo de caminhada</span><div class="metricas-velocidade" id="metricasVelocidade"></div></div>
+      <div class="metricas-corrida-campos oculto" id="metricasCorridaCampos">
+        <label>Distância (km)<input id="metricasCorridaDistancia" type="number" inputmode="decimal" min="0" step="0.1" placeholder="Ex.: 5"></label>
+        <label>Velocidade (km/h)<input id="metricasCorridaVelocidade" type="number" inputmode="decimal" min="5" max="25" step="0.1" placeholder="Ex.: 9,5"></label>
+      </div>
       <div class="metricas-resultado" id="metricasResultado" aria-live="polite"></div>
-      <p class="metricas-nota">O género fica apenas no teu perfil; esta estimativa usa peso, distância e ritmo.</p>
+      <p class="metricas-nota" id="metricasNota">Estes dados servem para estimar as métricas diárias dos teus passos no Início.</p>
       <button type="button" class="btn-secundario metricas-guardar" id="btnGuardarMetricas">Guardar métricas</button>
       <p class="metricas-sync" id="metricasSync"></p>
     </section>
@@ -1928,7 +1978,7 @@
 
   // ---------- Perfil: métricas pessoais de caminhada e corrida ----------
   const CHAVE_METRICAS_ATIVIDADE = "ALMOVE_METRICAS_" + TOKEN;
-  const METRICAS_PADRAO = { pesoKg: "", alturaCm: "", genero: "", passadaCaminhadaCm: "", passadaCorridaCm: "", atividade: "caminhada", velocidadeCaminhada: 4.8, velocidadeCorrida: 8 };
+  const METRICAS_PADRAO = { pesoKg: "", alturaCm: "", genero: "", passadaCaminhadaCm: "", passadaCorridaCm: "", atividade: "caminhada", velocidadeCaminhada: 4.8, velocidadeCorrida: 8, corridaDistanciaKm: "", corridaVelocidadeKmh: "" };
   let metricasAtividade = lerMetricasAtividade();
 
   function lerMetricasAtividade() {
@@ -1937,43 +1987,49 @@
   }
   function guardarMetricasLocais() { try { localStorage.setItem(CHAVE_METRICAS_ATIVIDADE, JSON.stringify(metricasAtividade)); } catch (e) {} }
   function numeroMetrica(valor) { return Math.max(0, Number(String(valor || "").replace(",", ".")) || 0); }
-  function opcoesVelocidade() {
-    return metricasAtividade.atividade === "corrida"
-      ? [{ valor: 8, nome: "Leve", meta: "8 km/h" }, { valor: 10, nome: "Média", meta: "10 km/h" }, { valor: 12, nome: "Rápida", meta: "12 km/h" }]
-      : [{ valor: 3.2, nome: "Lenta", meta: "3,2 km/h" }, { valor: 4.8, nome: "Média", meta: "4,8 km/h" }, { valor: 6.4, nome: "Rápida", meta: "6,4 km/h" }];
-  }
+  function opcoesVelocidade() { return [{ valor: 3.2, nome: "Lenta", meta: "3,2 km/h" }, { valor: 4.8, nome: "Média", meta: "4,8 km/h" }, { valor: 6.4, nome: "Rápida", meta: "6,4 km/h" }]; }
   function metEstimado(atividade, velocidade) {
     if (atividade === "corrida") return velocidade <= 8 ? 8.3 : velocidade <= 10 ? 9.8 : 11.5;
     return velocidade <= 3.2 ? 2.8 : velocidade <= 4.8 ? 3.5 : 5.0;
   }
   function lerCamposMetricas() {
-    const campos = { pesoKg: "metricasPeso", alturaCm: "metricasAltura", passadaCaminhadaCm: "metricasPassadaCaminhada", passadaCorridaCm: "metricasPassadaCorrida" };
+    const campos = { pesoKg: "metricasPeso", alturaCm: "metricasAltura", passadaCaminhadaCm: "metricasPassadaCaminhada", passadaCorridaCm: "metricasPassadaCorrida", corridaDistanciaKm: "metricasCorridaDistancia", corridaVelocidadeKmh: "metricasCorridaVelocidade" };
     Object.keys(campos).forEach(function (campo) { const el = document.getElementById(campos[campo]); if (el) metricasAtividade[campo] = el.value; });
     const genero = document.getElementById("metricasGenero"); if (genero) metricasAtividade.genero = genero.value;
   }
+  function atualizarMetricasDiariasInicio() {
+    const passos = obterPassosHoje(), peso = numeroMetrica(metricasAtividade.pesoKg), passada = numeroMetrica(metricasAtividade.passadaCaminhadaCm), velocidade = Number(metricasAtividade.velocidadeCaminhada || 4.8);
+    const passosEl = document.getElementById("inicioPassosHoje"), distanciaEl = document.getElementById("inicioDistanciaDiaria"), duracaoEl = document.getElementById("inicioDuracaoDiaria"), caloriasEl = document.getElementById("inicioCaloriasDiarias");
+    if (passosEl) passosEl.textContent = formatarPassos(passos);
+    if (!passada || !peso) { if (distanciaEl) distanciaEl.textContent = "—"; if (duracaoEl) duracaoEl.textContent = "—"; if (caloriasEl) caloriasEl.textContent = "—"; return; }
+    const metros = passos * passada / 100, minutos = velocidade ? metros / 1000 / velocidade * 60 : 0, kcal = metEstimado("caminhada", velocidade) * 3.5 * peso / 200 * minutos;
+    if (distanciaEl) distanciaEl.textContent = Math.round(metros).toLocaleString("pt-PT") + " m";
+    if (duracaoEl) duracaoEl.textContent = Math.round(minutos) + " min";
+    if (caloriasEl) caloriasEl.textContent = Math.round(kcal) + " kcal";
+  }
   function atualizarResultadoMetricas() {
     const resultado = document.getElementById("metricasResultado"); if (!resultado) return;
-    const peso = numeroMetrica(metricasAtividade.pesoKg);
-    const passada = numeroMetrica(metricasAtividade.atividade === "corrida" ? metricasAtividade.passadaCorridaCm : metricasAtividade.passadaCaminhadaCm);
-    const velocidade = metricasAtividade.atividade === "corrida" ? Number(metricasAtividade.velocidadeCorrida) : Number(metricasAtividade.velocidadeCaminhada);
-    const passos = obterPassosHoje();
-    if (!peso || !passada) { resultado.innerHTML = '<div class="metricas-vazio">Indica o teu peso e comprimento de passada para estimar a distância, duração e calorias dos teus passos de hoje.</div>'; return; }
-    const distanciaMetros = passos * passada / 100;
-    const minutos = velocidade ? (distanciaMetros / 1000) / velocidade * 60 : 0;
-    const calorias = metEstimado(metricasAtividade.atividade, velocidade) * 3.5 * peso / 200 * minutos;
-    resultado.innerHTML = '<div class="metricas-resultado-item"><strong>' + Math.round(distanciaMetros).toLocaleString("pt-PT") + ' m</strong><span>Distância</span></div><div class="metricas-resultado-item"><strong>' + Math.round(minutos) + ' min</strong><span>Duração aprox.</span></div><div class="metricas-resultado-item"><strong>' + Math.round(calorias) + ' kcal</strong><span>Energia aprox.</span></div>';
+    if (metricasAtividade.atividade !== "corrida") { resultado.innerHTML = ""; atualizarMetricasDiariasInicio(); return; }
+    const peso = numeroMetrica(metricasAtividade.pesoKg), distancia = numeroMetrica(metricasAtividade.corridaDistanciaKm), velocidade = numeroMetrica(metricasAtividade.corridaVelocidadeKmh);
+    if (!peso || !distancia || !velocidade) { resultado.innerHTML = '<div class="metricas-vazio">Indica peso, distância e velocidade para calcular a corrida.</div>'; return; }
+    const minutos = distancia / velocidade * 60, calorias = metEstimado("corrida", velocidade) * 3.5 * peso / 200 * minutos;
+    resultado.innerHTML = '<div class="metricas-resultado-item"><strong>' + Math.round(minutos) + ' min</strong><span>Duração aprox.</span></div><div class="metricas-resultado-item"><strong>' + Math.round(calorias) + ' kcal</strong><span>Energia aprox.</span></div><div class="metricas-resultado-item"><strong>' + velocidade.toLocaleString("pt-PT") + ' km/h</strong><span>Velocidade</span></div>';
   }
   function renderMetricasAtividade() {
-    const campos = { pesoKg: "metricasPeso", alturaCm: "metricasAltura", passadaCaminhadaCm: "metricasPassadaCaminhada", passadaCorridaCm: "metricasPassadaCorrida" };
+    const campos = { pesoKg: "metricasPeso", alturaCm: "metricasAltura", passadaCaminhadaCm: "metricasPassadaCaminhada", passadaCorridaCm: "metricasPassadaCorrida", corridaDistanciaKm: "metricasCorridaDistancia", corridaVelocidadeKmh: "metricasCorridaVelocidade" };
     Object.keys(campos).forEach(function (campo) { const el = document.getElementById(campos[campo]); if (el && document.activeElement !== el) el.value = metricasAtividade[campo] || ""; });
     const genero = document.getElementById("metricasGenero"); if (genero && document.activeElement !== genero) genero.value = metricasAtividade.genero || "";
     document.querySelectorAll(".metricas-modo-btn").forEach(function (btn) { btn.classList.toggle("ativo", btn.dataset.atividade === metricasAtividade.atividade); });
-    const titulo = document.getElementById("metricasVelocidadeTitulo"); if (titulo) titulo.textContent = metricasAtividade.atividade === "corrida" ? "Ritmo de corrida" : "Ritmo de caminhada";
-    const velocidadeAtual = metricasAtividade.atividade === "corrida" ? Number(metricasAtividade.velocidadeCorrida) : Number(metricasAtividade.velocidadeCaminhada);
+    const corrida = metricasAtividade.atividade === "corrida";
+    document.getElementById("metricasCorridaCampos").classList.toggle("oculto", !corrida);
+    document.getElementById("metricasVelocidade").parentElement.classList.toggle("oculto", corrida);
+    const nota = document.getElementById("metricasNota"); if (nota) nota.textContent = corrida ? "Calculadora aproximada: usa a distância e a velocidade que indicares." : "Estes dados servem para estimar as métricas diárias dos teus passos no Início.";
+    const titulo = document.getElementById("metricasVelocidadeTitulo"); if (titulo) titulo.textContent = "Ritmo de caminhada";
+    const velocidadeAtual = Number(metricasAtividade.velocidadeCaminhada);
     const velocidades = document.getElementById("metricasVelocidade");
     if (velocidades) {
       velocidades.innerHTML = opcoesVelocidade().map(function (opcao) { return '<button type="button" data-velocidade="' + opcao.valor + '" class="' + (Number(opcao.valor) === velocidadeAtual ? "ativo" : "") + '">' + opcao.nome + '<small>' + opcao.meta + '</small></button>'; }).join("");
-      velocidades.querySelectorAll("button").forEach(function (btn) { btn.addEventListener("click", function () { if (metricasAtividade.atividade === "corrida") metricasAtividade.velocidadeCorrida = Number(btn.dataset.velocidade); else metricasAtividade.velocidadeCaminhada = Number(btn.dataset.velocidade); guardarMetricasLocais(); renderMetricasAtividade(); }); });
+      velocidades.querySelectorAll("button").forEach(function (btn) { btn.addEventListener("click", function () { metricasAtividade.velocidadeCaminhada = Number(btn.dataset.velocidade); guardarMetricasLocais(); renderMetricasAtividade(); }); });
     }
     atualizarResultadoMetricas();
   }
@@ -1987,9 +2043,26 @@
       .catch(function () { if (sync) sync.textContent = "Guardado neste dispositivo. A sincronização fica pendente."; });
   }
   document.querySelectorAll(".metricas-modo-btn").forEach(function (btn) { btn.addEventListener("click", function () { metricasAtividade.atividade = btn.dataset.atividade; guardarMetricasLocais(); renderMetricasAtividade(); }); });
-  ["metricasPeso", "metricasAltura", "metricasPassadaCaminhada", "metricasPassadaCorrida", "metricasGenero"].forEach(function (id) { const el = document.getElementById(id); if (el) el.addEventListener("input", function () { lerCamposMetricas(); guardarMetricasLocais(); atualizarResultadoMetricas(); }); });
+  ["metricasPeso", "metricasAltura", "metricasPassadaCaminhada", "metricasPassadaCorrida", "metricasGenero", "metricasCorridaDistancia", "metricasCorridaVelocidade"].forEach(function (id) { const el = document.getElementById(id); if (el) el.addEventListener("input", function () { lerCamposMetricas(); guardarMetricasLocais(); atualizarResultadoMetricas(); }); });
   document.getElementById("btnGuardarMetricas").addEventListener("click", guardarMetricasAtividade);
   document.querySelectorAll("[data-metricas-icone]").forEach(function (el) { trocarIconeDentro(el, el.getAttribute("data-metricas-icone")); });
+  document.querySelectorAll("[data-perfil-icone]").forEach(function (el) { trocarIconeDentro(el, el.getAttribute("data-perfil-icone")); });
+  const perfilMetricasEl = document.getElementById("perfilMetricas");
+  function abrirPerfilMetricas(tipo) {
+    metricasAtividade.atividade = tipo === "corrida" ? "corrida" : "caminhada";
+    guardarMetricasLocais();
+    document.body.classList.add("perfil-detalhe-aberto");
+    perfilMetricasEl.classList.remove("oculto");
+    renderMetricasAtividade();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function fecharPerfilMetricas() {
+    document.body.classList.remove("perfil-detalhe-aberto");
+    perfilMetricasEl.classList.add("oculto");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  document.querySelectorAll("[data-abrir-perfil]").forEach(function (btn) { btn.addEventListener("click", function () { abrirPerfilMetricas(btn.dataset.abrirPerfil); }); });
+  document.getElementById("btnVoltarPerfil").addEventListener("click", fecharPerfilMetricas);
 
   // ---------- Barra "O teu percurso de hoje" ----------
   const fluxoHojeEl = document.getElementById("fluxoHoje");
@@ -2042,6 +2115,8 @@
     const estado = lerEstadoDiario();
     if (etapa === "checkin") {
       if (!(estado.checkin && estado.checkin.values) && !CHECKIN_HOJE_CONFIRMADO) return;
+      const tentativas = Number((estado.checkin && estado.checkin.tentativasHoje) || (CHECKIN_HOJE_CONFIRMADO ? 1 : 0));
+      if (tentativas >= 2) { showToastTreino("Já fizeste os dois check-ins permitidos para hoje."); return; }
       preencherRespostas((estado.checkin && estado.checkin.values) || {});
       checkinResumo.classList.add("oculto");
       checkinForm.classList.remove("oculto");
@@ -2066,8 +2141,9 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }
-  document.querySelectorAll("[data-fluxo-etapa]").forEach(function (btn) {
-    btn.addEventListener("click", function () { abrirEtapaEditavel(btn.dataset.fluxoEtapa); });
+  fluxoHojeEl.addEventListener("click", function (evento) {
+    const botao = evento.target.closest("[data-fluxo-etapa]");
+    if (botao) abrirEtapaEditavel(botao.dataset.fluxoEtapa);
   });
 
   // ---------- Estado local (offline-first) ----------
@@ -2385,6 +2461,14 @@
       return;
     }
 
+    const estadoAnterior = lerEstadoDiario();
+    const tentativasAnteriores = Number((estadoAnterior.checkin && estadoAnterior.checkin.tentativasHoje) || (CHECKIN_HOJE_CONFIRMADO ? 1 : 0));
+    if (tentativasAnteriores >= 2) {
+      checkinErro.textContent = "Já fizeste os dois check-ins permitidos para hoje.";
+      checkinErro.style.display = "block";
+      return;
+    }
+
     const payload = {
       sono: respostas.sono,
       stress: respostas.stress,
@@ -2397,7 +2481,7 @@
 
     // Guarda localmente antes de tentar o servidor — nunca se perde a resposta.
     const estado = lerEstadoDiario();
-    estado.checkin = { values: payload, submitted: true, synced: false, eventId: payload.eventId };
+    estado.checkin = { values: payload, submitted: true, synced: false, eventId: payload.eventId, tentativasHoje: tentativasAnteriores + 1 };
     guardarEstadoDiario(estado);
 
     mostrarResumo(payload);
@@ -2428,7 +2512,8 @@
       });
 
     CHECKIN_HOJE_CONFIRMADO = true;
-    mostrarCardProntidao();
+    if (estado.workout && estado.workout.status === "active") restaurarEstadoTreino();
+    else mostrarCardProntidao();
   }
 
   btnSubmit.addEventListener("click", submeterCheckin);
@@ -3690,6 +3775,11 @@
       let temCheckinHoje = false;
 
       if (dados.jaFezCheckinHoje && dados.checkinHoje) {
+        const estadoCheckinRemoto = lerEstadoDiario();
+        if (!estadoCheckinRemoto.checkin || !estadoCheckinRemoto.checkin.values) {
+          estadoCheckinRemoto.checkin = { values: dados.checkinHoje, submitted: true, synced: true, tentativasHoje: 1 };
+          guardarEstadoDiario(estadoCheckinRemoto);
+        }
         mostrarResumo(dados.checkinHoje);
         mostrarCardProntidao();
         temCheckinHoje = true;
