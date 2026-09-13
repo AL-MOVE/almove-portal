@@ -904,6 +904,19 @@
     .confirmar-treino-acoes button { display:inline-flex; align-items:center; justify-content:center; gap:7px; }
     .confirmar-treino-acoes .btn-voltar-treino svg, .confirmar-treino-acoes .btn-confirmar-termino svg, .icone-almove { width:1em; height:1em; flex:0 0 auto; }
     .confirmar-treino-acoes .btn-voltar-treino svg { width:17px; height:17px; }
+    .execucao-acoes-finais { display:grid; gap:9px; margin:28px 0 5px; padding:15px; border:1px solid var(--border-soft); border-radius:18px; background:rgba(255,255,255,.025); }
+    .execucao-acoes-finais .botao { margin:0; }
+    .btn-abandonar-treino { width:100%; min-height:42px; border:1px solid rgba(251,113,133,.38); border-radius:12px; background:rgba(225,29,72,.11); color:#fda4af; font:inherit; font-size:12px; font-weight:850; cursor:pointer; transition:transform .16s ease,background .16s ease; }
+    .btn-abandonar-treino:active { transform:scale(.98); background:rgba(225,29,72,.18); }
+    .confirmar-abandono .confirmar-treino-painel { border-color:rgba(251,113,133,.38); }
+    .confirmar-abandono-icone { color:#fda4af; border-color:rgba(251,113,133,.36); background:rgba(225,29,72,.14); }
+    .btn-confirmar-abandono { border:0; background:linear-gradient(135deg,#e11d48,#fb7185); color:#fff; box-shadow:0 8px 20px rgba(225,29,72,.18); }
+    .marco-icone-semente { color:#86efac; background:rgba(34,197,94,.13); border:1px solid rgba(74,222,128,.26); }
+    .marco-icone-chama { color:#fbbf24; background:rgba(245,158,11,.14); border:1px solid rgba(251,191,36,.26); }
+    .marco-icone-trofeu { color:#d8b4fe; background:rgba(168,85,247,.13); border:1px solid rgba(192,132,252,.26); }
+    .marco-icone-diamante { color:#7dd3fc; background:rgba(14,165,233,.14); border:1px solid rgba(56,189,248,.26); }
+    .marco-icone-medalha { color:#fda4af; background:rgba(225,29,72,.12); border:1px solid rgba(251,113,133,.25); }
+    .marco-icone-estrela { color:#fde68a; background:rgba(202,138,4,.13); border:1px solid rgba(250,204,21,.26); }
   </style>
 </head>
 <body>
@@ -1096,7 +1109,10 @@
     </div>
     <div id="execucaoAvisoRepeticao"></div>
     <div id="execucaoExerciciosLista"></div>
-    <button type="button" class="botao" id="btnTerminarTreino">Terminar treino</button>
+    <div class="execucao-acoes-finais" id="execucaoAcoesFinais">
+      <button type="button" class="botao" id="btnTerminarTreino">Terminar treino</button>
+      <button type="button" class="btn-abandonar-treino" id="btnAbandonarTreino">Abandonar treino</button>
+    </div>
     <p class="erro" id="execucaoErro"></p>
   </div>
 
@@ -1109,6 +1125,19 @@
       <div class="confirmar-treino-acoes">
         <button type="button" class="btn-voltar-treino" id="btnCancelarTermino"><svg class="icone-nativo" viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg> Voltar ao treino</button>
         <button type="button" class="btn-confirmar-termino" id="btnConfirmarTermino">Sim, terminar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="confirmar-treino confirmar-abandono oculto" id="confirmarAbandonoTreino" aria-hidden="true">
+    <div class="confirmar-treino-painel" role="dialog" aria-modal="true" aria-labelledby="confirmarAbandonoTitulo">
+      <div class="confirmar-treino-puxador" aria-hidden="true"></div>
+      <div class="confirmar-treino-icone confirmar-abandono-icone" aria-hidden="true"><span data-abandono-icone></span></div>
+      <div class="confirmar-treino-titulo" id="confirmarAbandonoTitulo">Abandonar treino?</div>
+      <p class="confirmar-treino-texto">Os valores registados neste treino serão apagados deste dispositivo e não serão enviados.</p>
+      <div class="confirmar-treino-acoes">
+        <button type="button" class="btn-voltar-treino" id="btnCancelarAbandono">Continuar treino</button>
+        <button type="button" class="btn-confirmar-abandono" id="btnConfirmarAbandono">Sim, abandonar</button>
       </div>
     </div>
   </div>
@@ -1376,7 +1405,12 @@
     info: '<circle cx="12" cy="12" r="9"/><path d="M12 10v6M12 7h.01"/>',
     imagem: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="m4 17 5-5 3.5 3.5 2.5-2.5 5 5"/>',
     link: '<path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.1-1.1"/>',
-    dica: '<path d="M9 18h6M10 22h4M8.6 15.5C7 14.3 6 12.4 6 10.3A6 6 0 0 1 18 10.3c0 2.1-1 4-2.6 5.2-.7.6-1.1 1.3-1.1 2.1h-4.6c0-.8-.4-1.5-1.1-2.1Z"/>'
+    dica: '<path d="M9 18h6M10 22h4M8.6 15.5C7 14.3 6 12.4 6 10.3A6 6 0 0 1 18 10.3c0 2.1-1 4-2.6 5.2-.7.6-1.1 1.3-1.1 2.1h-4.6c0-.8-.4-1.5-1.1-2.1Z"/>',
+    semente: '<path d="M12 21V11"/><path d="M12 15c-4.5 0-6-3.1-6-6 4.5 0 6 3.1 6 6Z"/><path d="M12 12c0-4.5 3.1-6 6-6 0 4.5-3.1 6-6 6Z"/>',
+    trofeu: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z"/><path d="M17 5h2a2 2 0 0 1 0 4h-1M7 5H5a2 2 0 0 0 0 4h1"/>',
+    diamante: '<path d="m12 3 7 8-7 10L5 11l7-8Z"/><path d="M5 11h14M9 3l3 8 3-8"/>',
+    medalha: '<circle cx="12" cy="15" r="5"/><path d="m8.5 11-2-8h4l1.5 5M15.5 11l2-8h-4l-1.5 5"/><path d="m12 12 1 2 2.2.3-1.6 1.6.4 2.2-2-1.1-2 1.1.4-2.2-1.6-1.6 2.2-.3Z"/>',
+    estrela: '<path d="m12 3 2.8 5.8 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.7l6.2-.9L12 3Z"/>'
   };
 
   function iconeAlMove(nome, classe) {
@@ -1401,6 +1435,7 @@
     document.querySelectorAll(".opcoes-item-seta").forEach(function (el) { trocarIconeDentro(el, "direita"); });
     trocarIconeDentro(document.getElementById("btnVoltarTreinos"), "esquerda");
     trocarIconeDentro(document.getElementById("btnCancelarTermino"), "esquerda");
+    trocarIconeDentro(document.querySelector("[data-abandono-icone]"), "parar");
     trocarIconeDentro(document.querySelector(".btn-contacto-pt > svg"), "direita");
     document.querySelectorAll("[data-conquistas-icone]").forEach(function (el) { trocarIconeDentro(el, el.getAttribute("data-conquistas-icone")); });
   }
@@ -1546,8 +1581,7 @@
   }
 
   function iconeMarcoSvg(tipo) {
-    if (tipo === "consistencia") return iconeAlMove("chama");
-    return iconeAlMove("halter");
+    return iconeAlMove(tipo || "conquistas");
   }
 
   function criarMarcoHtml(marco) {
@@ -1594,7 +1628,7 @@
 
     const marcosStreak = metasStreak.map(function (meta) {
       return {
-        icone: "consistencia",
+        icone: meta === 1 ? "semente" : meta === 4 ? "chama" : meta === 8 ? "trofeu" : "diamante",
         titulo: meta === 1 ? "Primeira semana" : meta === 4 ? "Mês consistente" : meta === 8 ? "Hábito criado" : "Trimestre forte",
         desc: meta === 1 ? "Completa pelo menos 1 treino esta semana." : meta + " semanas seguidas de treino.",
         atual: streakAtual,
@@ -1606,7 +1640,7 @@
 
     const marcosVolume = [10, 25, 50, 100].map(function (meta) {
       return {
-        icone: "treino",
+        icone: meta === 10 ? "halter" : meta === 25 ? "medalha" : meta === 50 ? "estrela" : "trofeu",
         titulo: meta + " treinos",
         desc: meta === 10 ? "Primeiro ciclo de treino." : meta === 25 ? "Rotina consolidada." : meta === 50 ? "Meio caminho para 100." : "Cem treinos concluídos.",
         atual: totalTreinos,
@@ -2126,6 +2160,11 @@
   const execucaoExerciciosLista = document.getElementById("execucaoExerciciosLista");
   const execucaoErro = document.getElementById("execucaoErro");
   const btnTerminarTreino = document.getElementById("btnTerminarTreino");
+  const execucaoAcoesFinaisEl = document.getElementById("execucaoAcoesFinais");
+  const btnAbandonarTreino = document.getElementById("btnAbandonarTreino");
+  const confirmarAbandonoTreinoEl = document.getElementById("confirmarAbandonoTreino");
+  const btnCancelarAbandono = document.getElementById("btnCancelarAbandono");
+  const btnConfirmarAbandono = document.getElementById("btnConfirmarAbandono");
   const confirmarTerminoTreinoEl = document.getElementById("confirmarTerminoTreino");
   const btnCancelarTermino = document.getElementById("btnCancelarTermino");
   const btnConfirmarTermino = document.getElementById("btnConfirmarTermino");
@@ -2267,7 +2306,7 @@
         '<div class="sub">' + numExercicios + ' exercício' + (numExercicios === 1 ? "" : "s") + '</div>' +
         '</div>' +
         '<button type="button" data-treino-idx="' + idx + '"' +
-          (workoutHoje && workoutHoje.status === "active" && workoutHoje.nomeTreino !== treino.nome ? " disabled" : "") + '>' +
+          '>' +
           (workoutHoje && workoutHoje.status === "active" && workoutHoje.nomeTreino === treino.nome ? "Continuar" :
             (workoutHoje && (workoutHoje.status === "post-workout" || workoutHoje.status === "completed") ? "Concluído hoje" :
               (treino.feitoAntes ? "Selecionar" : "Selecionar"))) +
@@ -2539,7 +2578,7 @@
     const biblioteca = document.getElementById("execucaoBiblioteca");
     if (biblioteca) biblioteca.classList.remove("oculto");
     execucaoExerciciosLista.querySelectorAll(".execucao-detalhe, .exec-info-pagina").forEach(function (detalhe) { detalhe.classList.remove("player-ativo"); });
-    btnTerminarTreino.classList.remove("oculto");
+    execucaoAcoesFinaisEl.classList.remove("oculto");
     if (scroll !== false) window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -2550,7 +2589,7 @@
     execucaoExerciciosLista.querySelectorAll(".exec-info-pagina").forEach(function (pagina) {
       pagina.classList.toggle("player-ativo", Number(pagina.getAttribute("data-exec-info-index")) === indice);
     });
-    btnTerminarTreino.classList.add("oculto");
+    execucaoAcoesFinaisEl.classList.add("oculto");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -2569,7 +2608,7 @@
       detalhe.classList.toggle("player-ativo", Number(detalhe.getAttribute("data-exec-player-index")) === indice);
     });
     execucaoExerciciosLista.querySelectorAll(".exec-info-pagina").forEach(function (pagina) { pagina.classList.remove("player-ativo"); });
-    btnTerminarTreino.classList.add("oculto");
+    execucaoAcoesFinaisEl.classList.add("oculto");
     atualizarNavegacaoExercicio();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -2906,7 +2945,49 @@
         showToastTreino(mensagemErroLigacao());
       });
   }
+  function abrirConfirmacaoAbandono() {
+    if (!TREINO_ATUAL_EXECUCAO || MODO_EDICAO_TREINO_CONCLUIDO) return;
+    confirmarAbandonoTreinoEl.classList.remove("oculto");
+    confirmarAbandonoTreinoEl.setAttribute("aria-hidden", "false");
+    btnCancelarAbandono.focus();
+  }
+
+  function fecharConfirmacaoAbandono() {
+    confirmarAbandonoTreinoEl.classList.add("oculto");
+    confirmarAbandonoTreinoEl.setAttribute("aria-hidden", "true");
+    btnAbandonarTreino.focus();
+  }
+
+  function abandonarTreino() {
+    const estado = lerEstadoDiario();
+    const workout = estado.workout || {};
+    if (workout.nomePlano && workout.nomeTreino) limparRascunhoTreino(workout.nomePlano, workout.nomeTreino);
+    estado.workout = null;
+    estado.postWorkout = null;
+    guardarEstadoDiario(estado);
+    pararTimerTreino();
+    libertarWakeLock();
+    TREINO_ATUAL_INDEX = null;
+    TREINO_ATUAL_EXECUCAO = null;
+    EXERCICIO_ATUAL_EXECUCAO = 0;
+    confirmarAbandonoTreinoEl.classList.add("oculto");
+    confirmarAbandonoTreinoEl.setAttribute("aria-hidden", "true");
+    cardExecucaoTreino.classList.add("oculto");
+    cardPosTreino.classList.add("oculto");
+    cardTreinoConcluido.classList.add("oculto");
+    btnAbandonarTreino.classList.remove("oculto");
+    mostrarCardEscolherTreino();
+    renderFluxoHoje();
+    showToastTreino("Treino abandonado. Nenhum registo foi guardado.");
+  }
+
   btnTerminarTreino.addEventListener("click", abrirConfirmacaoTermino);
+  btnAbandonarTreino.addEventListener("click", abrirConfirmacaoAbandono);
+  btnCancelarAbandono.addEventListener("click", fecharConfirmacaoAbandono);
+  btnConfirmarAbandono.addEventListener("click", abandonarTreino);
+  confirmarAbandonoTreinoEl.addEventListener("click", function (evento) {
+    if (evento.target === confirmarAbandonoTreinoEl) fecharConfirmacaoAbandono();
+  });
   btnCancelarTermino.addEventListener("click", fecharConfirmacaoTermino);
   btnConfirmarTermino.addEventListener("click", function () {
     confirmarTerminoTreinoEl.classList.add("oculto");
@@ -2918,6 +2999,7 @@
   });
   document.addEventListener("keydown", function (evento) {
     if (evento.key === "Escape" && !confirmarTerminoTreinoEl.classList.contains("oculto")) fecharConfirmacaoTermino();
+    if (evento.key === "Escape" && !confirmarAbandonoTreinoEl.classList.contains("oculto")) fecharConfirmacaoAbandono();
   });
 
   function showToastTreino(texto) {
@@ -3052,7 +3134,8 @@
     const tempoCongelado = Number(workout.duracaoSegundos || 0);
     workoutTimerEl.textContent = formatarCronometroTreino(tempoCongelado);
     workoutSaveStateEl.textContent = "Treino concluído · edição local";
-    btnTerminarTreino.classList.remove("oculto");
+    execucaoAcoesFinaisEl.classList.remove("oculto");
+    btnAbandonarTreino.classList.add("oculto");
     btnTerminarTreino.disabled = false;
     btnTerminarTreino.textContent = "Guardar alterações";
     window.scrollTo({ top: 0, behavior: "smooth" });
