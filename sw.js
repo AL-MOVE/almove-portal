@@ -1,74 +1,3870 @@
-// Service worker do Portal AL MOVE.
-// A versão sobe com esta atualização visual para que instalações existentes
-// recebam o novo index.html em vez de manterem a versão anterior em cache.
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>AL MOVE — Portal</title>
 
-const VERSAO_CACHE = 'almove-portal-v21';
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#050810">
+  <link rel="apple-touch-icon" href="/icons/icon-any-512.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AL MOVE">
 
-const FICHEIROS_ESSENCIAIS = [
-  '/',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-any-512.png',
-];
+  <style>
+    :root{
+      --bg:#050810;
+      --bg-card:rgba(5,10,18,.68);
+      --bg-soft:rgba(255,255,255,.07);
+      --bg-input:rgba(255,255,255,.13);
 
-self.addEventListener('install', (evento) => {
-  evento.waitUntil(
-    caches.open(VERSAO_CACHE).then((cache) => cache.addAll(FICHEIROS_ESSENCIAIS))
-  );
-  self.skipWaiting();
-});
+      --text:#ffffff;
+      --text-soft:#cbd5e1;
+      --text-muted:#94a3b8;
+      --text-dim:#7c8ba1;
 
-self.addEventListener('activate', (evento) => {
-  evento.waitUntil(
-    caches.keys().then((nomes) =>
-      Promise.all(
-        nomes
-          .filter((nome) => nome !== VERSAO_CACHE)
-          .map((nome) => caches.delete(nome))
-      )
-    )
-  );
-  self.clients.claim();
-});
+      --accent:#2dd4bf;
+      --accent-old:#00a99d;
+      --blue:#0b5cc2;
+      --blue-dark:#003da0;
 
-self.addEventListener('fetch', (evento) => {
-  if (!evento.request.url.startsWith('http')) return;
-  if (evento.request.url.includes('/api/')) return;
+      --green:#22c55e;
+      --yellow:#eab308;
+      --red:#ef4444;
 
-  const url = new URL(evento.request.url);
-  const pedePaginaNova = evento.request.mode === 'navigate' ||
-    url.pathname === '/' ||
-    url.pathname.endsWith('/index.html');
+      --border:rgba(255,255,255,.14);
+      --border-soft:rgba(255,255,255,.09);
 
-  if (pedePaginaNova) {
-    evento.respondWith(
-      fetch(new Request(evento.request, { cache: 'no-store' }))
-        .then((respostaRede) => {
-          const clone = respostaRede.clone();
-          caches.open(VERSAO_CACHE).then((cache) => cache.put(evento.request, clone));
-          return respostaRede;
-        })
-        .catch(() => caches.match(evento.request))
-    );
+      /* aliases usados no resto deste ficheiro */
+      --card:var(--bg-card);
+      --card-border:var(--border);
+      --texto:var(--text);
+      --texto-suave:var(--text-muted);
+      --azul:var(--blue);
+      --azul-claro:#3d7bd6;
+      --verde:var(--green);
+      --laranja:var(--yellow);
+      --vermelho:var(--red);
+    }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    html{background:var(--bg);min-height:100%;}
+    body{
+      background-color:var(--bg);
+      background-image:
+        radial-gradient(ellipse 90% 70% at 15% 20%, rgba(11,92,194,.55) 0%, transparent 55%),
+        radial-gradient(ellipse 90% 80% at 20% 75%, rgba(0,150,120,.42) 0%, transparent 60%),
+        radial-gradient(ellipse 100% 90% at 90% 10%, rgba(0,20,45,.9) 0%, transparent 60%),
+        linear-gradient(135deg, #0a2a5e 0%, #073d52 45%, #0a1220 100%);
+      background-attachment:fixed;
+      color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+      min-height:100vh;
+      padding:max(20px, env(safe-area-inset-top)) 16px calc(130px + env(safe-area-inset-bottom));
+    }
+
+    .topo{
+      display:flex;align-items:center;gap:12px;margin-bottom:22px;
+    }
+    .topo img{width:36px;height:36px;}
+    .topo-textos{display:flex;flex-direction:column;}
+    .topo-titulo{font-size:15px;font-weight:800;letter-spacing:.3px;}
+    .topo-sub{font-size:12px;color:var(--text-muted);}
+
+    .card{
+      width:100%;
+      background:var(--bg-card);
+      backdrop-filter:blur(20px);
+      -webkit-backdrop-filter:blur(20px);
+      border:1px solid var(--border);
+      border-radius:20px;
+      padding:20px;
+      margin-bottom:16px;
+      box-shadow:0 12px 38px rgba(0,0,0,.32);
+    }
+    .card-title{
+      margin-bottom:14px;
+      color:var(--accent);
+      font-size:11px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    .card-sub{font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.4;}
+
+    .pergunta{margin-bottom:22px;}
+    .pergunta:last-of-type{margin-bottom:18px;}
+    .pergunta-label{font-size:13px;font-weight:700;color:#fff;margin-bottom:10px;}
+
+    .opcoes{display:flex;gap:8px;}
+    .opcao{
+      flex:1;
+      aspect-ratio:1/1;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(255,255,255,.11);
+      border:1px solid rgba(255,255,255,.22);
+      border-radius:10px;
+      font-size:15px;font-weight:800;
+      color:#fff;
+      transition:transform .12s ease,background .15s ease,border-color .15s ease;
+      user-select:none;
+    }
+    .opcao:active{transform:scale(.96);}
+    .opcao.selecionada{
+      background:linear-gradient(135deg, var(--accent-old), var(--blue-dark));
+      border-color:transparent;
+      box-shadow:0 7px 20px rgba(0,0,0,.18);
+    }
+
+    .extremos{
+      display:flex;justify-content:space-between;
+      font-size:11px;color:var(--text-muted);margin-top:6px;
+    }
+
+    textarea{
+      width:100%;
+      background:var(--bg-input);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      color:var(--text);
+      font-size:16px;
+      font-family:inherit;
+      resize:vertical;
+      min-height:64px;
+    }
+    textarea::placeholder{color:#5b6f8f;}
+
+    .botao{
+      width:100%;
+      min-height:48px;
+      padding:13px 16px;
+      border:0;border-radius:12px;
+      background:linear-gradient(135deg, var(--accent-old) 0%, var(--blue-dark) 100%);
+      color:#fff;
+      font-size:14px;font-weight:800;
+      margin-top:4px;
+      box-shadow:0 10px 24px rgba(0,0,0,.17);
+    }
+    .botao:disabled{opacity:.55;}
+    .botao:active{transform:scale(.98);}
+
+    .erro{
+      display:none;
+      color:#f87171;
+      font-size:13px;margin-top:10px;
+    }
+
+    .resumo-linha{
+      display:flex;justify-content:space-between;
+      font-size:14px;padding:8px 0;
+      border-bottom:1px solid var(--border-soft);
+    }
+    .resumo-linha:last-child{border-bottom:0;}
+    .resumo-linha span:first-child{color:var(--text-muted);}
+    .resumo-linha span:last-child{font-weight:700;}
+
+    .estado-sync{
+      display:flex;align-items:center;gap:8px;
+      font-size:12px;color:var(--text-muted);
+      margin-top:14px;
+    }
+    .estado-sync .ponto{
+      width:7px;height:7px;border-radius:50%;
+      background:var(--green);flex-shrink:0;
+    }
+    .estado-sync.offline .ponto{background:var(--yellow);}
+
+    .carregando{
+      text-align:center;color:var(--text-muted);
+      font-size:13px;padding:30px 0;
+    }
+
+    .oculto{display:none !important;}
+
+    .toast{
+      position:fixed;left:16px;right:16px;bottom:calc(96px + env(safe-area-inset-bottom));
+      z-index:9999;padding:13px 16px;border-radius:12px;
+      background:rgba(6,11,20,.96);border:1px solid rgba(255,255,255,.14);color:var(--text);
+      font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.4);
+      display:flex;justify-content:space-between;align-items:center;gap:12px;
+      animation:toast-entrar .32s cubic-bezier(.22,1,.36,1) both;
+    }
+    .toast button{
+      padding:8px 14px;border-radius:8px;border:0;
+      background:linear-gradient(135deg, var(--accent-old), var(--blue-dark));color:#fff;font-weight:700;font-size:13px;
+      box-shadow:0 6px 14px rgba(11,92,194,.28);
+      transition:transform .16s ease,filter .16s ease,box-shadow .16s ease;
+    }
+    .toast button:active{transform:scale(.94);filter:brightness(1.12);box-shadow:0 2px 7px rgba(11,92,194,.22);}
+    @keyframes toast-entrar{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+    /* ---------- Navegação inferior ---------- */
+    .tabs-nav{
+      position:fixed;left:50%;bottom:max(12px, calc(10px + env(safe-area-inset-bottom, 0px)));
+      width:min(calc(100% - 28px), 452px);
+      transform:translateX(-50%);
+      z-index:100;
+      display:flex;padding:6px;
+      background:linear-gradient(135deg, rgba(28,44,56,.72), rgba(4,12,20,.84));
+      backdrop-filter:blur(28px) saturate(145%);
+      -webkit-backdrop-filter:blur(28px) saturate(145%);
+      border:1px solid rgba(255,255,255,.15);
+      border-radius:24px;
+      box-shadow:0 16px 34px rgba(0,0,0,.44), inset 0 1px 0 rgba(255,255,255,.10);
+    }
+    .tab-btn{
+      flex:1;min-height:52px;
+      display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;
+      border-radius:18px;
+      color:var(--text-muted);
+      font-size:10px;font-weight:750;
+      user-select:none;
+      transition:color .18s ease,background .18s ease,transform .18s ease;
+    }
+    .tab-btn svg{width:20px;height:20px;}
+    .tab-btn.ativo{color:var(--accent);background:rgba(45,212,191,.07);}
+    .tab-btn:active{transform:scale(.96);}
+
+    /* ---------- Barra "O teu percurso de hoje" ---------- */
+    .fluxo-hoje{padding:17px;}
+    .fluxo-hoje-status{
+      margin-bottom:15px;color:var(--text-soft);font-size:13px;font-weight:650;line-height:1.45;
+    }
+    .fluxo-hoje-passos{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;}
+    .fluxo-hoje-etapa{
+      min-width:0;color:var(--text-dim);font-size:9px;font-weight:750;line-height:1.25;text-align:center;
+    }
+    .fluxo-hoje-ponto{
+      width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+      margin:0 auto 6px;border:1px solid rgba(255,255,255,.16);border-radius:50%;
+      background:rgba(255,255,255,.06);color:var(--text-muted);font-size:11px;font-weight:850;
+    }
+    .fluxo-hoje-etapa.concluido,.fluxo-hoje-etapa.ativo{color:#fff;}
+    .fluxo-hoje-etapa.concluido .fluxo-hoje-ponto{
+      border-color:transparent;background:rgba(34,197,94,.18);color:#4ade80;
+    }
+    .fluxo-hoje-etapa.ativo .fluxo-hoje-ponto{
+      border-color:transparent;
+      background:linear-gradient(135deg, var(--accent-old), var(--blue-dark));
+      color:#fff;box-shadow:0 0 0 4px rgba(45,212,191,.10);
+    }
+
+    .fluxo-passo{
+      font-size:10px;font-weight:850;letter-spacing:.08em;
+      color:var(--accent);text-transform:uppercase;
+      display:block;margin-bottom:8px;
+    }
+
+    /* ---------- Início ---------- */
+    .inicio-topo{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;}
+    .inicio-saudacao{font-size:20px;font-weight:850;line-height:1.25;}
+    .inicio-sub{margin-top:4px;color:var(--text-muted);font-size:13px;}
+    .streak-badge{
+      display:inline-flex;align-items:center;gap:6px;margin-top:12px;
+      padding:7px 13px;border-radius:999px;
+      background:rgba(234,179,8,.14);border:1px solid rgba(234,179,8,.28);
+      color:#facc15;font-size:12px;font-weight:800;white-space:nowrap;
+    }
+    .inicio-citacao{
+      margin-top:14px;padding:14px 16px;border-radius:14px;
+      background:var(--bg-soft);border:1px solid var(--border-soft);
+      color:var(--text-soft);font-size:13px;font-style:italic;line-height:1.5;text-align:center;
+    }
+
+    .semana-tira{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:16px;}
+    .semana-dia{
+      display:flex;flex-direction:column;align-items:center;gap:6px;
+      padding:8px 2px;border-radius:14px;border:1px solid transparent;
+    }
+    .semana-dia-letra{color:var(--text-dim);font-size:10px;font-weight:750;}
+    .semana-dia-numero{
+      width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+      border-radius:50%;color:var(--text-soft);font-size:13px;font-weight:800;
+      background:rgba(255,255,255,.05);
+    }
+    .semana-dia.feito .semana-dia-numero{background:rgba(34,197,94,.18);color:#4ade80;}
+    .semana-dia.hoje{border-color:rgba(45,212,191,.45);background:rgba(45,212,191,.06);}
+    .semana-dia.hoje .semana-dia-letra{color:var(--accent);}
+    .semana-dia-ponto{width:4px;height:4px;border-radius:50%;background:transparent;}
+    .semana-dia.feito .semana-dia-ponto{background:#4ade80;}
+
+    .semana-resumo{display:flex;justify-content:space-between;align-items:center;margin-top:14px;margin-bottom:6px;font-size:12px;}
+    .semana-resumo-label{color:var(--text-muted);}
+    .semana-resumo-valor{color:var(--text-soft);font-weight:750;}
+    .semana-barra{width:100%;height:6px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;}
+    .semana-barra-fill{height:100%;border-radius:999px;background:linear-gradient(90deg, var(--accent-old), var(--accent));transition:width .3s ease;}
+
+    .inicio-cta{
+      display:flex;align-items:center;gap:14px;width:100%;
+      padding:16px;border:0;border-radius:18px;text-align:left;
+      background:linear-gradient(135deg, var(--accent-old) 0%, var(--accent) 100%);
+      box-shadow:0 12px 28px rgba(0,169,157,.28);
+      color:#04241f;
+    }
+    .inicio-cta:active{transform:scale(.98);}
+    .inicio-cta-play{
+      flex-shrink:0;width:40px;height:40px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      background:rgba(4,36,31,.16);
+    }
+    .inicio-cta-play svg{width:18px;height:18px;}
+    .inicio-cta-textos{flex:1;min-width:0;display:flex;flex-direction:column;}
+    .inicio-cta-titulo{display:block;font-size:15px;font-weight:850;}
+    .inicio-cta-sub{display:block;margin-top:2px;font-size:12px;font-weight:650;opacity:.85;}
+    .inicio-cta-seta{flex-shrink:0;opacity:.7;}
+    .inicio-cta-seta svg{width:18px;height:18px;}
+
+    .metricas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px;}
+    .metrica-card{
+      padding:12px 10px;border-radius:14px;text-align:center;
+      background:var(--bg-soft);border:1px solid var(--border-soft);
+    }
+    .metrica-icone{font-size:16px;margin-bottom:6px;}
+    .metrica-valor{font-size:16px;font-weight:850;color:#fff;line-height:1.1;}
+    .metrica-meta{margin-top:2px;color:var(--text-dim);font-size:10px;font-weight:650;}
+    .metrica-barra{margin-top:8px;height:4px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;}
+    .metrica-barra-fill{height:100%;border-radius:999px;}
+
+    .coach-msg{display:flex;gap:12px;align-items:flex-start;margin-top:4px;}
+    .coach-avatar{
+      flex-shrink:0;width:36px;height:36px;border-radius:50%;
+      background:linear-gradient(135deg, var(--accent-old), var(--blue-dark));
+      display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:800;
+    }
+    .coach-texto{flex:1;min-width:0;}
+    .coach-nome-linha{display:flex;justify-content:space-between;gap:8px;}
+    .coach-nome{font-size:13px;font-weight:800;color:#fff;}
+    .coach-quando{font-size:11px;color:var(--text-dim);flex-shrink:0;}
+    .coach-frase{margin-top:4px;color:var(--text-soft);font-size:13px;line-height:1.45;font-style:italic;}
+
+    .selo-exemplo{
+      display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;
+      background:rgba(255,255,255,.08);color:var(--text-dim);font-size:9px;font-weight:750;
+      text-transform:uppercase;letter-spacing:.05em;vertical-align:middle;
+    }
+
+    /* ---------- Conquistas ---------- */
+    .gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+    .gauge-svg{width:180px;height:180px;}
+    .gauge-track{fill:none;stroke:rgba(255,255,255,.08);stroke-width:12;}
+    .gauge-fill{
+      fill:none;stroke:url(#gaugeGradiente);stroke-width:12;stroke-linecap:round;
+      transform-origin:50% 50%;transform:rotate(-90deg);
+      transition:stroke-dashoffset .5s ease;
+    }
+    .gauge-centro{text-align:center;}
+    .gauge-valor{font-size:26px;font-weight:900;color:#fff;line-height:1.05;}
+    .gauge-meta{margin-top:2px;color:var(--text-dim);font-size:11px;font-weight:650;}
+    .gauge-pill{
+      display:inline-flex;align-items:center;gap:6px;margin-top:2px;
+      padding:5px 12px;border-radius:999px;
+      background:rgba(45,212,191,.12);border:1px solid rgba(45,212,191,.28);
+      color:var(--accent);font-size:11px;font-weight:800;
+    }
+
+    .hist-semana{display:flex;align-items:flex-end;justify-content:space-between;gap:6px;height:86px;margin-top:18px;}
+    .hist-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px;}
+    .hist-barra-fundo{width:100%;max-width:26px;flex:1;display:flex;align-items:flex-end;border-radius:6px;overflow:hidden;background:rgba(255,255,255,.06);}
+    .hist-barra{width:100%;border-radius:6px;background:linear-gradient(180deg, var(--accent), var(--accent-old));min-height:3px;}
+    .hist-col.hoje .hist-barra{background:linear-gradient(180deg,#5eead4,var(--accent));box-shadow:0 0 12px rgba(45,212,191,.45);}
+    .hist-col-letra{color:var(--text-dim);font-size:10px;font-weight:750;}
+    .hist-col.hoje .hist-col-letra{color:var(--accent);}
+
+    .marcos-resumo{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:4px;}
+    .marco-resumo-card{padding:14px 8px;border-radius:14px;text-align:center;background:var(--bg-soft);border:1px solid var(--border-soft);}
+    .marco-resumo-valor{font-size:20px;font-weight:900;color:#fff;line-height:1.1;}
+    .marco-resumo-label{margin-top:4px;color:var(--text-dim);font-size:10px;font-weight:650;line-height:1.3;}
+
+    .marco-lista{display:flex;flex-direction:column;gap:10px;}
+    .marco-item{
+      display:flex;align-items:center;gap:12px;padding:13px;border-radius:14px;
+      background:var(--bg-soft);border:1px solid var(--border-soft);
+    }
+    .marco-item.conquistado{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.06);}
+    .marco-icone{
+      flex-shrink:0;width:38px;height:38px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;font-size:17px;
+      background:rgba(255,255,255,.06);
+    }
+    .marco-item.conquistado .marco-icone{background:rgba(34,197,94,.16);}
+    .marco-item.bloqueado{opacity:.5;}
+    .marco-corpo{flex:1;min-width:0;}
+    .marco-titulo{font-size:13px;font-weight:800;color:#fff;}
+    .marco-desc{margin-top:2px;font-size:11px;color:var(--text-muted);line-height:1.4;}
+    .marco-progresso{margin-top:6px;height:4px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;}
+    .marco-progresso-fill{height:100%;border-radius:999px;background:var(--accent);}
+    .marco-fracao{margin-top:4px;font-size:10px;color:var(--text-dim);font-weight:650;}
+    .marco-check{flex-shrink:0;color:#4ade80;font-size:18px;font-weight:900;}
+    .marco-cadeado{flex-shrink:0;color:var(--text-dim);font-size:15px;}
+
+    /* ---------- Opções ---------- */
+    .perfil-topo{display:flex;align-items:center;gap:14px;}
+    .perfil-avatar{
+      flex-shrink:0;width:52px;height:52px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg, var(--accent-old), var(--blue-dark));
+      color:#fff;font-size:19px;font-weight:850;
+    }
+    .perfil-corpo{flex:1;min-width:0;}
+    .perfil-nome{font-size:16px;font-weight:850;color:#fff;line-height:1.3;}
+    .perfil-estado-pill{
+      display:inline-flex;align-items:center;gap:6px;margin-top:6px;
+      padding:4px 11px;border-radius:999px;font-size:11px;font-weight:800;
+    }
+    .perfil-estado-pill.ativo{background:rgba(34,197,94,.14);border:1px solid rgba(34,197,94,.3);color:#4ade80;}
+    .perfil-estado-pill.pausado{background:rgba(234,179,8,.14);border:1px solid rgba(234,179,8,.3);color:#facc15;}
+    .perfil-estado-pill.cancelado{background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.3);color:#f87171;}
+
+    .plano-linha{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--border-soft);}
+    .plano-linha:last-child{border-bottom:0;}
+    .plano-linha-label{font-size:12px;color:var(--text-muted);}
+    .plano-linha-valor{font-size:13px;font-weight:750;color:#fff;text-align:right;}
+
+    .opcoes-lista{display:flex;flex-direction:column;}
+    .opcoes-item{
+      display:flex;align-items:center;gap:12px;padding:14px 4px;
+      border-bottom:1px solid var(--border-soft);
+    }
+    .opcoes-item:last-child{border-bottom:0;}
+    .opcoes-item-icone{
+      flex-shrink:0;width:34px;height:34px;border-radius:10px;
+      display:flex;align-items:center;justify-content:center;font-size:16px;
+      background:var(--bg-soft);
+    }
+    .opcoes-item-corpo{flex:1;min-width:0;}
+    .opcoes-item-titulo{font-size:13px;font-weight:750;color:#fff;}
+    .opcoes-item-sub{margin-top:1px;font-size:11px;color:var(--text-dim);}
+    .opcoes-item-seta{flex-shrink:0;color:var(--text-dim);}
+    .opcoes-item-seta svg{width:16px;height:16px;}
+    .opcoes-item.desativado{opacity:.5;}
+    .opcoes-item.desativado .opcoes-item-seta{display:none;}
+
+    .btn-contacto-pt{
+      display:flex;align-items:center;gap:12px;width:100%;
+      padding:14px 16px;border:0;border-radius:16px;text-align:left;
+      background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.28);
+      color:#fff;
+    }
+    .btn-contacto-pt:active{transform:scale(.98);}
+    .btn-contacto-pt-icone{
+      flex-shrink:0;width:38px;height:38px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;font-size:18px;
+      background:rgba(37,211,102,.2);color:#4ade80;
+    }
+    .btn-contacto-pt-corpo{flex:1;min-width:0;display:flex;flex-direction:column;}
+    .btn-contacto-pt-titulo{display:block;font-size:13px;font-weight:800;}
+    .btn-contacto-pt-sub{display:block;margin-top:1px;font-size:11px;color:var(--text-muted);}
+
+    .btn-logout{
+      width:100%;padding:14px;margin-top:4px;border-radius:12px;
+      border:1px solid rgba(239,68,68,.28);background:rgba(239,68,68,.08);
+      color:#f87171;font-size:13px;font-weight:750;
+    }
+    .btn-logout:active{transform:scale(.98);}
+
+    .versao-app{text-align:center;margin-top:6px;color:var(--text-dim);font-size:11px;}
+
+    .btn-secundario{
+      width:100%;padding:14px;margin-top:10px;
+      border:1px solid var(--card-border);border-radius:12px;
+      background:transparent;color:var(--texto-suave);
+      font-size:14px;font-weight:700;
+    }
+    .btn-secundario:active{transform:scale(.98);}
+
+    .prontidao-intro{
+      color:var(--texto-suave);font-size:13px;line-height:1.5;margin-bottom:16px;
+    }
+
+    .prontidao-area{
+      min-height:200px;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;gap:13px;
+    }
+    .prontidao-circulo{
+      width:104px;height:104px;border-radius:50%;border:0;
+      display:flex;align-items:center;justify-content:center;
+      background:#b91c1c;color:#fff;font-weight:850;font-size:14px;
+      box-shadow:0 0 0 8px rgba(239,68,68,.10);
+      transition:background .12s ease,box-shadow .12s ease;
+    }
+    .prontidao-circulo:active{transform:scale(.94);}
+    .prontidao-circulo.verde{
+      background:#16a34a;
+      box-shadow:0 0 0 8px rgba(34,197,94,.15),0 0 28px rgba(34,197,94,.42);
+    }
+    .prontidao-indicacao{color:var(--texto-suave);font-size:13px;font-weight:700;}
+    .prontidao-tentativas{color:#5b6f8f;font-size:11px;}
+
+    .prontidao-resultado{
+      padding:16px;border:1px solid rgba(45,212,191,.22);
+      border-radius:16px;background:rgba(45,212,191,.07);text-align:center;
+    }
+    .prontidao-ms{margin:4px 0;color:#fff;font-size:32px;font-weight:900;line-height:1;}
+    .prontidao-ms small{color:var(--texto-suave);font-size:13px;font-weight:700;}
+    .prontidao-nota{margin-top:10px;color:var(--texto-suave);font-size:12px;line-height:1.48;}
+
+    /* ---------- Escolher treino ---------- */
+    .treino-card{
+      padding:15px;border-radius:15px;margin-bottom:10px;
+      border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.055);
+      display:flex;align-items:center;gap:12px;
+    }
+    .treino-card.feito-hoje{
+      border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.08);
+    }
+    .treino-card-icone{
+      width:37px;height:37px;flex-shrink:0;border-radius:50%;
+      background:rgba(45,212,191,.12);color:#2dd4bf;
+      display:flex;align-items:center;justify-content:center;font-size:18px;
+    }
+    .treino-card-corpo{flex:1;min-width:0;}
+    .treino-card-badge{
+      display:block;color:#4ade80;font-size:10px;font-weight:800;
+      text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px;
+    }
+    .treino-card .nome{font-size:16px;font-weight:800;color:#fff;}
+    .treino-card .sub{font-size:12px;color:var(--texto-suave);}
+    .treino-card button{
+      flex-shrink:0;min-height:42px;padding:0 16px;border-radius:10px;border:0;
+      background:rgba(255,255,255,.1);color:#fff;font-weight:700;font-size:13px;
+    }
+    .treino-card.feito-hoje button{
+      background:linear-gradient(135deg,#00a99d,#003da0);
+    }
+    .aviso-repeticao{
+      padding:12px 14px;border-radius:12px;margin-bottom:14px;
+      background:rgba(234,179,8,.1);border:1px solid rgba(234,179,8,.3);
+      color:#fcd34d;font-size:12px;line-height:1.5;
+    }
+
+    /* ---------- Execução ---------- */
+    .voltar-treinos{
+      display:inline-block;font-size:11px;color:var(--texto-suave);
+      margin-bottom:10px;
+    }
+    .workout-top-bar{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:10px 14px;border-radius:12px;margin-bottom:14px;
+      background:rgba(45,212,191,.07);
+    }
+    .workout-timer{font-size:13px;font-weight:800;color:#fff;font-variant-numeric:tabular-nums;}
+    .workout-save-state{font-size:10px;color:#2dd4bf;}
+
+    .exec-player-rail{
+      display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;
+      margin-bottom:8px;
+    }
+    .exec-player-rail button{
+      padding:10px 12px;border-radius:10px;border:1px solid var(--card-border);
+      background:#101c33;color:#fff;font-size:12px;font-weight:700;
+    }
+    .exec-player-rail button:disabled{opacity:.38;}
+    .exec-player-current{text-align:center;font-size:11px;color:var(--texto-suave);}
+    .exec-player-current strong{display:block;font-size:12px;color:#fff;font-weight:800;}
+
+    .btn-escolher-exercicio{
+      width:100%;padding:10px;margin-bottom:8px;border-radius:10px;
+      border:1px solid var(--card-border);background:transparent;
+      color:var(--texto-suave);font-size:12px;font-weight:700;
+    }
+
+    .exec-player-picker{
+      display:none;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;
+    }
+    .exec-player-picker.aberto{display:grid;}
+    .exec-player-choice{
+      padding:10px;border-radius:10px;text-align:left;
+      border:1px solid var(--card-border);background:#101c33;
+      color:var(--texto-suave);font-size:12px;
+    }
+    .exec-player-choice.ativo{border-color:#2dd4bf;background:rgba(45,212,191,.12);color:#fff;}
+    .exec-player-choice.concluido::before{content:"";display:inline-block;width:7px;height:7px;margin-right:5px;border-radius:50%;background:#2dd4bf;box-shadow:0 0 8px rgba(45,212,191,.8);}
+
+    .exec-exercicio{display:none;padding:16px;border-radius:14px;margin-bottom:14px;
+      border:1px solid var(--card-border);background:#0d1526;transition:background .2s,border-color .2s;}
+    .exec-exercicio.player-ativo{display:block;}
+    .exec-exercicio.exec-parcial{border-color:rgba(234,179,8,.4);background:rgba(234,179,8,.06);}
+    .exec-exercicio.exec-completo{border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.06);}
+
+    .exec-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px;}
+    .exec-exercicio-titulo{font-size:15px;font-weight:800;color:#fff;}
+    .exec-progress{font-size:10px;color:var(--texto-suave);}
+    .exec-historico-btn{
+      flex-shrink:0;padding:6px 10px;border-radius:999px;border:1px solid var(--card-border);
+      background:transparent;color:var(--texto-suave);font-size:10px;
+    }
+    .exec-exercicio-prescrito{font-size:11px;color:var(--texto-suave);margin-bottom:10px;}
+
+    .exec-descanso{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:11px;color:var(--texto-suave);}
+    .exec-descanso button{
+      padding:6px 12px;border-radius:999px;border:1px solid rgba(45,212,191,.35);
+      background:rgba(45,212,191,.1);color:#2dd4bf;font-size:11px;font-weight:700;
+    }
+    .exec-descanso-tempo{font-variant-numeric:tabular-nums;color:#2dd4bf;font-weight:700;}
+
+    .exec-historico-lista{display:none;padding:10px;border-radius:10px;margin-bottom:10px;background:rgba(0,0,0,.14);}
+    .exec-historico-lista.aberto{display:block;}
+    .exec-historico-linha{display:flex;justify-content:space-between;font-size:11px;color:var(--texto-suave);padding:4px 0;}
+
+    .exec-serie{padding:10px;border-radius:11px;background:rgba(255,255,255,.03);margin-bottom:8px;}
+    .exec-serie-linha{display:grid;grid-template-columns:30px 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px;}
+    .exec-serie-numero{font-size:11px;font-weight:800;color:var(--texto-suave);}
+    .exec-serie-linha input{
+      font-size:16px;padding:10px;border-radius:9px;border:1px solid var(--card-border);
+      background:rgba(255,255,255,.13);color:#fff;width:100%;
+    }
+    .exec-serie-linha input[id$="-carga"]{order:1;}
+    .exec-serie-linha input[id$="-reps"]{order:2;}
+    .exec-serie-linha input::placeholder{color:#5b6f8f;}
+
+    .velocidade-label{font-size:9px;color:var(--texto-suave);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px;}
+    .velocidade-opcoes{display:flex;gap:6px;}
+    .velocidade-btn{
+      flex:1;min-height:34px;border-radius:9px;border:1px solid var(--card-border);
+      background:#101c33;color:var(--texto-suave);font-size:11px;
+    }
+    .velocidade-btn.selecionada{border-color:#2dd4bf;background:rgba(45,212,191,.15);color:#fff;}
+    .velocidade-btn.falha.selecionada{border-color:var(--vermelho);background:rgba(239,68,68,.15);color:#fff;}
+
+    .exec-nota{margin-top:4px;min-height:50px;}
+
+    .success-hero{text-align:center;margin-bottom:18px;}
+    .success-icon{
+      width:64px;height:64px;border-radius:50%;margin:0 auto 12px;
+      background:#16a34a;color:#fff;font-size:30px;font-weight:900;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .success-hero h2{font-size:18px;font-weight:800;margin-bottom:4px;}
+    .success-hero p{color:var(--texto-suave);font-size:13px;}
+    .success-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+    .success-stat{
+      padding:14px;border-radius:12px;background:#101c33;text-align:center;
+    }
+    .success-stat strong{display:block;font-size:18px;color:#fff;font-weight:800;}
+    .success-stat span{font-size:11px;color:var(--texto-suave);}
+  </style>
+  <style>
+    /* Sistema visual AL MOVE — referência Stitch/core AL MOVE. */
+    :root {
+      --bg:#050810;
+      --bg-card:rgba(5,10,18,.72);
+      --bg-soft:rgba(255,255,255,.07);
+      --bg-input:rgba(255,255,255,.055);
+      --text:rgba(255,255,255,.95);
+      --text-soft:rgba(255,255,255,.72);
+      --text-muted:rgba(255,255,255,.56);
+      --text-dim:rgba(255,255,255,.38);
+      --accent:#2dd4bf;
+      --accent-old:#00a99d;
+      --blue:#0b5cc2;
+      --blue-dark:#003da0;
+      --green:#22c55e;
+      --yellow:#eab308;
+      --red:#ef4444;
+      --border:rgba(255,255,255,.12);
+      --border-soft:rgba(255,255,255,.085);
+    }
+    html,body { background:var(--bg); }
+    body {
+      background-image:
+        radial-gradient(ellipse 88% 52% at 3% 0%,rgba(11,92,194,.52),transparent 64%),
+        radial-gradient(ellipse 80% 62% at 8% 100%,rgba(0,169,157,.30),transparent 68%),
+        radial-gradient(ellipse 76% 48% at 100% 18%,rgba(0,61,160,.24),transparent 63%),
+        linear-gradient(155deg,#071b3d 0%,#07111e 40%,#050810 100%);
+      color:var(--text); padding:0 0 calc(108px + env(safe-area-inset-bottom));
+    }
+    .topo {
+      position:sticky; top:0; z-index:20; min-height:76px; max-width:none;
+      margin:0; padding:calc(12px + env(safe-area-inset-top)) max(20px,calc((100vw - 640px) / 2)) 12px;
+      background:rgba(5,8,16,.67); border-bottom:1px solid rgba(255,255,255,.06);
+      backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+      display:flex; align-items:center; gap:10px;
+    }
+    .topo img { width:32px; height:32px; border-radius:9px; }
+    .topo-titulo { font-size:15px; letter-spacing:.01em; font-weight:850; }
+    .topo-sub { color:var(--text-muted); font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+    .topo-estado { display:flex; align-items:center; gap:5px; margin-left:auto; color:var(--text-soft); font-size:10px; font-weight:750; }
+    .topo-estado:before { content:""; width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px rgba(45,212,191,.9); }
+    .topo-avatar { width:34px; height:34px; display:grid; place-items:center; margin-left:8px; border-radius:50%; background:rgba(45,212,191,.12); border:1px solid rgba(45,212,191,.75); color:var(--accent); font-size:11px; font-weight:900; box-shadow:0 0 16px rgba(45,212,191,.16); }
+    .tab-conteudo { max-width:640px; margin:0 auto; padding:22px 20px 6px; }
+    .card {
+      background:var(--bg-card); border:1px solid var(--border); border-radius:22px;
+      box-shadow:0 10px 38px rgba(0,0,0,.26); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    }
+    .card-title { color:var(--text); font-size:15px; letter-spacing:-.015em; }
+    .card-title:first-letter { color:inherit; }
+    .card-title .selo-exemplo, .selo-exemplo { vertical-align:middle; background:rgba(173,198,255,.11); border:1px solid rgba(173,198,255,.13); color:#adc6ff; }
+    .inicio-topo { display:block; }
+    #tabInicio > .card:first-child { position:relative; overflow:hidden; padding:22px 18px 18px; }
+    #tabInicio > .card:first-child:before { content:""; position:absolute; width:180px; height:180px; right:-70px; top:-95px; border-radius:50%; background:radial-gradient(circle,rgba(45,212,191,.19),transparent 68%); pointer-events:none; }
+    .inicio-eyebrow { color:var(--accent); font-size:10px; font-weight:850; letter-spacing:.13em; text-transform:uppercase; }
+    .inicio-saudacao { position:relative; margin-top:5px; color:#fff; font-size:29px; line-height:1.08; font-weight:850; letter-spacing:-.045em; }
+    .inicio-sub { position:relative; margin-top:8px; max-width:280px; color:var(--text-soft); font-size:13px; line-height:1.45; }
+    .inicio-citacao { display:none; }
+    .streak-badge { display:inline-flex; margin:17px 0 0; padding:7px 11px; border:1px solid rgba(45,212,191,.27); background:rgba(45,212,191,.10); color:#b5f8eb; font-size:11px; }
+    .semana-tira { margin-top:19px; padding-top:15px; border-top:1px solid var(--border-soft); }
+    .semana-dia { min-height:57px; border-radius:12px; background:rgba(255,255,255,.045); border:1px solid transparent; }
+    .semana-dia.hoje { background:rgba(45,212,191,.12); border-color:rgba(45,212,191,.42); }
+    .semana-dia.feito .semana-dia-ponto { background:var(--accent); box-shadow:0 0 10px rgba(45,212,191,.7); }
+    .semana-dia-letra { color:var(--text-muted); font-weight:800; }.semana-dia-numero{color:var(--text);font-weight:800;}
+    .semana-resumo { margin-top:16px; }.semana-resumo-label{color:var(--text-muted);}.semana-resumo-valor{color:var(--accent);font-weight:800;}
+    .semana-barra { height:6px; background:rgba(255,255,255,.10); }.semana-barra-fill { background:linear-gradient(90deg,var(--blue),var(--accent-old),var(--accent)); box-shadow:0 0 14px rgba(45,212,191,.4); }
+    .inicio-cta { margin:16px 0; padding:17px; border:1px solid rgba(45,212,191,.35); border-radius:21px; background:linear-gradient(135deg,rgba(11,92,194,.80),rgba(0,169,157,.76),rgba(45,212,191,.90)); box-shadow:0 12px 30px rgba(0,169,157,.20); }
+    .inicio-cta-play { color:var(--accent); background:rgba(4,19,29,.55); }.inicio-cta-titulo{font-size:16px;}.inicio-cta-sub{color:rgba(255,255,255,.76);}.inicio-cta-seta{color:#05241f;}
+    .metricas-grid { gap:10px; }.metrica-card { background:rgba(255,255,255,.045); border:1px solid var(--border-soft); border-radius:15px; }.metrica-valor{color:#fff;}.metrica-meta{color:var(--text-muted);}
+    .metrica-icone,.streak-icone { display:grid; place-items:center; color:var(--accent); }.metrica-icone svg{width:19px;height:19px;}.streak-icone svg{width:15px;height:15px;}
+    .coach-msg { padding:13px; border-radius:15px; background:rgba(255,255,255,.045); }.coach-avatar{background:linear-gradient(135deg,var(--blue),var(--accent-old));}.coach-nome{color:#fff;}.coach-frase{color:var(--text-soft);}
+    #tabHoje .card, #tabConquistas .card, #tabPlanos .card { border-radius:22px; }
+    .fluxo-hoje { border:1px solid rgba(45,212,191,.25); background:rgba(5,10,18,.74); }.fluxo-titulo,.fluxo-status{color:var(--text);}.fluxo-passo.ativo .fluxo-passo-circulo{background:var(--accent);color:#04201d;box-shadow:0 0 16px rgba(45,212,191,.42);}
+    .opcao, .velocidade-btn, .exec-serie-linha input, textarea { background:rgba(255,255,255,.055); border-color:var(--border); }
+    .opcao.selecionada, .velocidade-btn.selecionada { border-color:var(--accent); background:rgba(45,212,191,.15); color:#fff; box-shadow:0 0 0 2px rgba(45,212,191,.10); }
+    .botao { border-radius:15px; background:linear-gradient(135deg,var(--blue),var(--accent-old) 54%,var(--accent)); color:#031c1b; font-weight:850; box-shadow:0 7px 22px rgba(45,212,191,.22); }
+    .exec-serie { border:1px solid var(--border-soft); background:rgba(255,255,255,.035); }.exec-serie-linha input:focus, textarea:focus { border-color:var(--accent); outline:0; box-shadow:0 0 0 2px rgba(45,212,191,.14); }
+    .gauge-wrap, .hist-card { background:rgba(255,255,255,.035); border-color:var(--border-soft); }.marco-item{background:rgba(255,255,255,.035);border-color:var(--border-soft);}.marco-item.conquistado{border-color:rgba(45,212,191,.35);}.marco-progresso-fill{background:linear-gradient(90deg,var(--blue),var(--accent));}
+    .perfil-avatar { background:linear-gradient(135deg,var(--blue),var(--accent-old)); box-shadow:0 0 0 4px rgba(45,212,191,.08); }.perfil-nome{color:#fff;}.perfil-estado-pill.ativo{background:rgba(34,197,94,.14);color:#86efac;}
+    .plano-linha { border-color:var(--border-soft); }.plano-linha-valor{color:#fff;}
+    .contacto-pt-card{padding:16px;margin:20px 0;background:linear-gradient(135deg,rgba(0,169,157,.25),rgba(5,48,57,.80));border-color:rgba(45,212,191,.35);}
+    .contacto-pt-resumo{display:flex;align-items:center;gap:12px;}.btn-contacto-pt{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:13px 15px;border:0;border-radius:14px;background:linear-gradient(135deg,#0b5cc2,#00a99d 55%,#2dd4bf);color:#03201d;font:inherit;font-size:13px;font-weight:900;}.btn-contacto-pt:active{transform:scale(.985);}.btn-contacto-pt svg{width:18px;height:18px;}.btn-contacto-pt-icone{background:rgba(45,212,191,.18);}.btn-contacto-pt-icone svg{width:20px;height:20px;}.opcoes-item{border-color:var(--border-soft);}.opcoes-item-icone svg{width:17px;height:17px;color:var(--accent);}
+    .marco-icone svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}.marco-cadeado svg{width:15px;height:15px;vertical-align:middle;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .treino-card-icone svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}.voltar-treinos{border:0;background:transparent;padding:0;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font:inherit;}.voltar-treinos .icone-nativo{width:14px;height:14px;}
+    .confirmar-treino{position:fixed;z-index:100;inset:0;display:flex;align-items:flex-end;justify-content:center;padding:20px max(16px,calc((100vw - 608px)/2)) calc(20px + env(safe-area-inset-bottom));background:rgba(2,6,14,.68);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}.confirmar-treino.oculto{display:none;}.confirmar-treino-painel{width:100%;padding:22px;border:1px solid rgba(45,212,191,.32);border-radius:25px;background:linear-gradient(155deg,rgba(13,34,54,.98),rgba(5,11,21,.98));box-shadow:0 -12px 45px rgba(0,0,0,.45);animation:subir-painel .24s ease-out;}.confirmar-treino-puxador{width:38px;height:4px;margin:0 auto 20px;border-radius:999px;background:rgba(255,255,255,.2);}.confirmar-treino-icone{width:44px;height:44px;display:grid;place-items:center;margin-bottom:14px;border-radius:15px;color:var(--accent);background:rgba(45,212,191,.12);border:1px solid rgba(45,212,191,.28);}.confirmar-treino-icone svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}.confirmar-treino-titulo{font-size:21px;font-weight:900;letter-spacing:-.03em;color:#fff;}.confirmar-treino-texto{margin-top:8px;color:var(--text-soft);font-size:13px;line-height:1.48;}.confirmar-treino-acoes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px;}.confirmar-treino-acoes button{min-height:49px;padding:10px;border-radius:14px;font:inherit;font-size:13px;font-weight:850;}.btn-voltar-treino{border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--text);}.btn-confirmar-termino{border:0;background:linear-gradient(135deg,var(--blue),var(--accent-old),var(--accent));color:#03201d;box-shadow:0 8px 20px rgba(45,212,191,.18);}.confirmar-treino-acoes button:active{transform:scale(.98);}@keyframes subir-painel{from{transform:translateY(28px);opacity:0}to{transform:translateY(0);opacity:1}}@media(max-width:380px){.confirmar-treino-acoes{grid-template-columns:1fr;}.btn-confirmar-termino{order:-1;}}
+    .ecra-boas-vindas{position:fixed;z-index:300;inset:0;display:grid;place-items:center;overflow:hidden;padding:32px 24px calc(40px + env(safe-area-inset-bottom));background:radial-gradient(ellipse 65% 34% at 50% 0%,rgba(0,169,157,.11),transparent 74%),radial-gradient(ellipse 48% 38% at 0% 100%,rgba(11,92,194,.30),transparent 72%),linear-gradient(155deg,#071827 0%,#05101b 54%,#050810 100%);}.ecra-boas-vindas::before{content:"";position:absolute;inset:0;opacity:.32;background-image:linear-gradient(rgba(45,212,191,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(45,212,191,.028) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,black,transparent 70%);pointer-events:none;}.boas-vindas-conteudo{position:relative;width:min(100%,430px);text-align:center;animation:boas-entrar .7s cubic-bezier(.22,1,.36,1) both;}.boas-vindas-logo{width:276px;height:276px;object-fit:contain;margin:0 auto 34px;filter:drop-shadow(0 15px 22px rgba(0,0,0,.34));animation:none;}.boas-vindas-saudacao{margin:0;color:#fff;font-size:42px;line-height:.98;font-weight:900;letter-spacing:-.055em;}.boas-vindas-saudacao span,.boas-vindas-saudacao strong{display:block;}.boas-vindas-saudacao strong{margin-top:7px;background:linear-gradient(105deg,#2dd4bf,#27b8e8 55%,#0b5cc2);background-clip:text;-webkit-background-clip:text;color:transparent;}.boas-vindas-sub{margin:19px auto 35px;color:var(--text-muted);font-size:14px;line-height:1.45;}.btn-comecar{width:min(100%,300px);min-height:54px;border:0;border-radius:999px;background:linear-gradient(100deg,#2dd4bf,#15b7c4 53%,#0b5cc2);color:#04211f;font:inherit;font-size:15px;font-weight:900;box-shadow:0 14px 30px rgba(11,92,194,.28);transition:transform .18s ease,filter .18s ease,box-shadow .18s ease;}.btn-comecar:active{transform:scale(.97);filter:brightness(.96);}.ecra-boas-vindas.a-sair{animation:boas-sair .42s cubic-bezier(.4,0,1,1) forwards;pointer-events:none;}.tab-conteudo:not(.oculto){animation:tab-entrar .28s cubic-bezier(.22,1,.36,1) both;}.card:not(.oculto){transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;}.card:not(.oculto):active{transform:scale(.995);}.icone-nativo{width:1em;height:1em;vertical-align:-.16em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}.btn-contacto-pt-icone{width:52px;height:52px;border-radius:17px;background:linear-gradient(145deg,rgba(45,212,191,.30),rgba(11,92,194,.23));border:1px solid rgba(45,212,191,.34);color:var(--accent);box-shadow:inset 0 1px 0 rgba(255,255,255,.08);}.btn-contacto-pt-icone svg{width:29px;height:29px;stroke-width:2.2;}.success-icon svg{width:30px;height:30px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}@keyframes boas-entrar{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}@keyframes boas-sair{to{opacity:0;transform:scale(1.035)}}@keyframes tab-entrar{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}}
+    .tabs-nav { width:min(calc(100% - 32px),608px); left:50%; bottom:max(12px,env(safe-area-inset-bottom)); transform:translateX(-50%); border:1px solid rgba(255,255,255,.14); border-radius:25px; padding:7px; background:rgba(5,15,25,.88); box-shadow:0 14px 38px rgba(0,0,0,.42); backdrop-filter:blur(22px); -webkit-backdrop-filter:blur(22px); }
+    .tab-btn { min-height:57px; border-radius:18px; color:var(--text-muted); font-size:10px; font-weight:800; }.tab-btn svg{width:20px;height:20px;}.tab-btn.ativo{color:var(--accent);background:rgba(45,212,191,.13);box-shadow:inset 0 0 0 1px rgba(45,212,191,.14);}
+    @media (min-width:641px){.topo{border-left:0;border-right:0}.tab-conteudo{padding-top:28px}body{background-attachment:fixed;}}
+  </style>
+
+  <style id="treinos-exercicios-design">
+    /* Treinos: biblioteca primeiro, registo focado por exercício. */
+    #cardExecucaoTreino { padding:18px; }
+    .execucao-cabecalho { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin:4px 0 14px; }
+    .execucao-cabecalho .card-title { max-width:72%; line-height:1.16; }
+    .execucao-contagem { flex:0 0 auto; padding:7px 10px; border:1px solid rgba(45,212,191,.26); border-radius:999px; color:var(--accent); background:rgba(45,212,191,.09); font-size:10px; font-weight:850; letter-spacing:.04em; }
+    .execucao-biblioteca { animation:exercicioEntrar .24s cubic-bezier(.22,1,.36,1) both; }
+    .execucao-biblioteca.oculto { display:none; }
+    .execucao-biblioteca-intro { margin:0 0 14px; color:var(--text-soft); font-size:12px; line-height:1.45; }
+    .execucao-lista { display:grid; gap:9px; }
+    .execucao-exercicio-item { width:100%; min-height:82px; display:grid; grid-template-columns:38px 1fr auto; align-items:center; gap:11px; padding:13px; text-align:left; border:1px solid var(--border-soft); border-radius:16px; background:rgba(255,255,255,.045); color:var(--text); font:inherit; cursor:pointer; transition:transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease; }
+    .execucao-exercicio-item:hover { border-color:rgba(45,212,191,.46); background:rgba(45,212,191,.07); }
+    .execucao-exercicio-item:active { transform:scale(.985); }
+    .execucao-exercicio-item.parcial { border-color:rgba(234,179,8,.42); }
+    .execucao-exercicio-item.completo { border-color:rgba(45,212,191,.48); background:rgba(45,212,191,.075); }
+    .execucao-exercicio-numero { display:grid; place-items:center; width:38px; height:38px; border-radius:12px; background:rgba(11,92,194,.18); color:#b9d9ff; font-size:12px; font-weight:900; }
+    .execucao-exercicio-item.completo .execucao-exercicio-numero { color:#05241f; background:var(--accent); }
+    .execucao-exercicio-nome { display:block; overflow:hidden; color:#fff; font-size:14px; font-weight:850; letter-spacing:-.015em; text-overflow:ellipsis; white-space:nowrap; }
+    .execucao-exercicio-meta { display:block; margin-top:4px; color:var(--text-muted); font-size:11px; }
+    .execucao-exercicio-estado { display:grid; place-items:center; width:25px; height:25px; color:var(--text-dim); }
+    .execucao-exercicio-estado svg { width:18px; height:18px; }
+    .execucao-exercicio-item.completo .execucao-exercicio-estado { color:var(--accent); }
+    .execucao-exercicio-item.parcial .execucao-exercicio-estado { color:#facc15; }
+    .execucao-detalhe { display:none; }
+    .execucao-detalhe.player-ativo { display:block; animation:exercicioEntrar .25s cubic-bezier(.22,1,.36,1) both; }
+    .exec-detalhe-topo { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
+    .btn-voltar-exercicios, .exec-historico-btn { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--border); background:rgba(255,255,255,.045); color:var(--text-soft); font:inherit; font-size:11px; font-weight:800; cursor:pointer; }
+    .btn-voltar-exercicios { min-height:36px; padding:0 10px; border-radius:10px; }
+    .btn-voltar-exercicios:active, .exec-historico-btn:active { transform:scale(.97); }
+    .btn-voltar-exercicios svg, .exec-historico-btn svg { width:15px; height:15px; }
+    .exec-detalhe-indicador { color:var(--text-muted); font-size:11px; font-weight:750; }
+    .exec-detalhe-media { position:relative; min-height:72px; display:flex; align-items:center; gap:11px; margin-bottom:14px; padding:13px; overflow:hidden; border:1px solid rgba(11,92,194,.34); border-radius:16px; background:linear-gradient(108deg,rgba(11,92,194,.17),rgba(45,212,191,.08)); }
+    .exec-detalhe-media:after { content:""; position:absolute; width:100px; height:100px; right:-40px; top:-44px; border:1px solid rgba(45,212,191,.2); border-radius:50%; }
+    .exec-detalhe-media-icone { display:grid; place-items:center; width:39px; height:39px; border-radius:12px; color:var(--accent); background:rgba(45,212,191,.13); }
+    .exec-detalhe-media-icone svg { width:21px; height:21px; }
+    .exec-detalhe-media strong { display:block; color:#fff; font-size:13px; }
+    .exec-detalhe-media span { display:block; margin-top:3px; color:var(--text-muted); font-size:10px; }
+    .exec-exercicio { display:none; padding:0; margin:0; border:0; background:transparent; }
+    .exec-exercicio.player-ativo { display:block; }
+    .exec-exercicio.exec-parcial, .exec-exercicio.exec-completo { background:transparent; border-color:transparent; }
+    .exec-header { align-items:flex-start; margin:0 0 10px; }
+    .exec-exercicio-titulo { font-size:21px; line-height:1.12; letter-spacing:-.035em; }
+    .exec-progress { display:inline-block; margin-top:5px; color:var(--accent); font-size:11px; font-weight:800; }
+    .exec-exercicio-prescrito { margin:0 0 11px; padding:10px 11px; border-left:2px solid var(--accent); background:rgba(255,255,255,.045); color:var(--text-soft); font-size:11px; line-height:1.5; }
+    .exec-descanso { margin-bottom:14px; }
+    .exec-descanso button { display:inline-flex; align-items:center; gap:5px; }
+    .exec-descanso button svg { width:14px; height:14px; }
+    .exec-serie { padding:11px; margin-bottom:8px; }
+    .exec-detalhe-nav { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:16px; }
+    .exec-detalhe-nav button { min-height:45px; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:0 10px; border:1px solid var(--border); border-radius:13px; background:rgba(255,255,255,.06); color:var(--text); font:inherit; font-size:12px; font-weight:850; cursor:pointer; transition:transform .18s ease, background .18s ease, border-color .18s ease; }
+    .exec-detalhe-nav button:last-child { border-color:rgba(45,212,191,.38); background:rgba(45,212,191,.10); color:var(--accent); }
+    .exec-detalhe-nav button:active { transform:scale(.975); }
+    .exec-detalhe-nav button:disabled { opacity:.34; cursor:default; }
+    .exec-detalhe-nav svg { width:16px; height:16px; }
+    #btnTerminarTreino.oculto { display:none; }
+    @keyframes exercicioEntrar { from { opacity:0; transform:translateY(9px); } to { opacity:1; transform:translateY(0); } }
+    @media (min-width:760px) {
+      .execucao-lista { grid-template-columns:1fr 1fr; }
+      .execucao-exercicio-item { min-height:96px; }
+      .execucao-detalhe { max-width:560px; margin:0 auto; }
+    }
+    @media (prefers-reduced-motion:reduce) { .execucao-biblioteca, .execucao-detalhe.player-ativo { animation:none; } .execucao-exercicio-item, .exec-detalhe-nav button { transition:none; } }
+  </style>
+
+  <style id="conquistas-design-almove">
+    /* Conquistas: referência visual do protótipo, alimentada apenas por dados reais. */
+    #tabConquistas { display:grid; gap:14px; }
+    #tabConquistas .card { margin:0; padding:17px; }
+    .conquistas-cabecalho { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:14px; }
+    .conquistas-eyebrow { margin-bottom:4px; color:var(--accent); font-size:10px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
+    .conquistas-periodo, .conquistas-meta-pill { flex:0 0 auto; padding:6px 9px; border:1px solid rgba(45,212,191,.26); border-radius:999px; background:rgba(45,212,191,.08); color:#a7f3e8; font-size:10px; font-weight:800; }
+    .conquistas-metricas { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+    .conquistas-metrica { min-height:116px; padding:11px 10px; border:1px solid var(--border-soft); border-radius:15px; background:rgba(255,255,255,.04); }
+    .conquistas-metrica-topo { display:flex; align-items:flex-start; justify-content:space-between; gap:5px; }
+    .conquistas-metrica strong { color:#fff; font-size:25px; font-weight:900; line-height:1; letter-spacing:-.05em; }
+    .conquistas-metrica span:not(.conquistas-metrica-icone) { display:block; margin-top:12px; color:#f8fafc; font-size:10px; font-weight:800; line-height:1.2; }
+    .conquistas-metrica small { display:block; margin-top:4px; color:var(--text-dim); font-size:9px; line-height:1.22; }
+    .conquistas-metrica-icone { display:grid; place-items:center; width:27px; height:27px; border-radius:9px; }
+    .conquistas-metrica-icone svg { width:16px; height:16px; stroke-width:2.15; }
+    .metrica-treinos .conquistas-metrica-icone { color:#7dd3fc; border:1px solid rgba(56,189,248,.35); background:rgba(14,165,233,.14); }
+    .metrica-sequencia .conquistas-metrica-icone { color:#fbbf24; border:1px solid rgba(251,191,36,.35); background:rgba(245,158,11,.13); }
+    .metrica-recorde .conquistas-metrica-icone { color:#d8b4fe; border:1px solid rgba(192,132,252,.35); background:rgba(168,85,247,.13); }
+    .conquistas-sequencia-card { overflow:hidden; }
+    .conquistas-sequencia-corpo { display:flex; align-items:center; gap:14px; padding:14px; border:1px solid rgba(45,212,191,.20); border-radius:17px; background:linear-gradient(110deg,rgba(11,92,194,.16),rgba(45,212,191,.065)); }
+    .conquistas-sequencia-numero { flex:0 0 76px; min-height:76px; display:grid; place-content:center; border:2px solid rgba(45,212,191,.7); border-radius:50%; color:#fff; text-align:center; box-shadow:0 0 20px rgba(45,212,191,.13); }
+    .conquistas-sequencia-numero strong { display:block; font-size:25px; line-height:1; letter-spacing:-.05em; }
+    .conquistas-sequencia-numero span { margin-top:3px; color:var(--text-muted); font-size:9px; font-weight:800; text-transform:uppercase; }
+    .conquistas-sequencia-info { min-width:0; flex:1; }
+    .conquistas-sequencia-info strong { display:block; color:#fff; font-size:14px; }
+    .conquistas-sequencia-info p { margin:5px 0 10px; color:var(--text-muted); font-size:11px; line-height:1.35; }
+    .conquistas-progresso { height:6px; overflow:hidden; border-radius:999px; background:rgba(255,255,255,.10); }
+    .conquistas-progresso div { height:100%; min-width:0; border-radius:inherit; background:linear-gradient(90deg,var(--blue),var(--accent)); box-shadow:0 0 12px rgba(45,212,191,.38); transition:width .42s cubic-bezier(.22,1,.36,1); }
+    .conquistas-estado-legenda { display:flex; align-items:center; gap:5px; color:var(--text-muted); font-size:10px; font-weight:700; }
+    .conquistas-estado-legenda i { width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px rgba(45,212,191,.65); }
+    .marco-grade { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+    .marco-item { min-height:157px; display:flex; flex-direction:column; align-items:flex-start; gap:10px; padding:12px; border-radius:15px; background:rgba(255,255,255,.04); border:1px solid var(--border-soft); opacity:1; }
+    .marco-item.conquistado { border-color:rgba(45,212,191,.42); background:linear-gradient(145deg,rgba(45,212,191,.115),rgba(11,92,194,.065)); }
+    .marco-item.em-progresso { border-color:rgba(56,189,248,.36); }
+    .marco-item.bloqueado { opacity:.54; background:rgba(255,255,255,.025); }
+    .marco-icone { width:36px; height:36px; display:grid; place-items:center; border-radius:12px; }
+    .marco-icone svg { width:20px; height:20px; stroke-width:2.2; }
+    .marco-icone-consistencia { color:#fbbf24; background:rgba(245,158,11,.14); border:1px solid rgba(251,191,36,.26); }
+    .marco-icone-treino { color:#7dd3fc; background:rgba(14,165,233,.14); border:1px solid rgba(56,189,248,.26); }
+    .marco-corpo { width:100%; min-width:0; }
+    .marco-topo { min-height:19px; margin-bottom:5px; }
+    .marco-etiqueta { display:inline-flex; align-items:center; gap:4px; min-height:18px; padding:2px 6px; border-radius:999px; font-size:9px; font-weight:850; }
+    .marco-etiqueta svg { width:11px; height:11px; }
+    .marco-etiqueta-concluido { color:#a7f3d0; background:rgba(34,197,94,.13); border:1px solid rgba(34,197,94,.28); }
+    .marco-etiqueta-progresso { color:#7dd3fc; background:rgba(14,165,233,.12); border:1px solid rgba(56,189,248,.25); }
+    .marco-etiqueta-bloqueado { color:var(--text-dim); background:rgba(255,255,255,.05); }
+    .marco-etiqueta-bloqueado svg { width:12px; height:12px; }
+    .marco-titulo { color:#fff; font-size:12px; font-weight:850; line-height:1.22; }
+    .marco-desc { margin-top:4px; color:var(--text-muted); font-size:10px; line-height:1.32; }
+    .marco-progresso { height:4px; margin-top:9px; background:rgba(255,255,255,.09); }
+    .marco-progresso-fill { background:linear-gradient(90deg,var(--blue),var(--accent)); }
+    .marco-fracao { margin-top:4px; color:var(--text-dim); font-size:9px; font-weight:750; }
+    @media (min-width:680px) { .marco-grade { grid-template-columns:repeat(4,minmax(0,1fr)); } .marco-item { min-height:166px; } }
+    @media (max-width:360px) { .conquistas-metrica { padding:9px 8px; } .conquistas-metrica strong { font-size:22px; } .conquistas-sequencia-corpo { gap:10px; padding:11px; } .conquistas-sequencia-numero { flex-basis:66px; min-height:66px; } }
+  </style>
+
+  <style id="detalhes-exercicio-design">
+    .exec-acoes-exercicio { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; }
+    .btn-detalhes-exercicio { display:inline-flex; align-items:center; gap:5px; min-height:30px; padding:5px 9px; border:1px solid rgba(45,212,191,.34); border-radius:999px; background:rgba(45,212,191,.11); color:var(--accent); font:inherit; font-size:10px; font-weight:850; cursor:pointer; }
+    .btn-detalhes-exercicio svg { width:13px; height:13px; }
+    .btn-detalhes-exercicio:active { transform:scale(.96); }
+    .exec-info-pagina { display:none; max-width:560px; margin:0 auto; }
+    .exec-info-pagina.player-ativo { display:block; animation:exercicioEntrar .25s cubic-bezier(.22,1,.36,1) both; }
+    .exec-info-titulo { display:flex; align-items:center; gap:11px; margin:8px 0 16px; }
+    .exec-info-titulo > span { display:grid; place-items:center; width:42px; height:42px; border:1px solid rgba(56,189,248,.36); border-radius:14px; background:rgba(14,165,233,.13); color:#7dd3fc; }
+    .exec-info-titulo > span svg { width:22px; height:22px; }
+    .exec-info-titulo small { display:block; margin-bottom:3px; color:var(--accent); font-size:9px; font-weight:900; letter-spacing:.1em; }
+    .exec-info-titulo h2 { margin:0; color:#fff; font-size:21px; line-height:1.12; letter-spacing:-.035em; }
+    .exec-info-imagem { display:block; width:100%; max-height:280px; margin:0 0 12px; object-fit:cover; border:1px solid var(--border); border-radius:17px; background:#091426; }
+    .exec-info-link { display:grid; grid-template-columns:35px 1fr 16px; align-items:center; gap:10px; min-height:62px; margin-bottom:10px; padding:12px; border:1px solid rgba(56,189,248,.30); border-radius:15px; background:rgba(11,92,194,.10); color:#9bd8ff; text-decoration:none; transition:transform .18s ease,border-color .18s ease; }
+    .exec-info-link:active { transform:scale(.985); }
+    .exec-info-link > svg:first-child { width:35px; height:35px; padding:8px; border-radius:11px; background:rgba(14,165,233,.15); }
+    .exec-info-link > svg:last-child { width:16px; height:16px; }
+    .exec-info-link strong { display:block; color:#fff; font-size:12px; }
+    .exec-info-link small { display:block; margin-top:3px; color:var(--text-muted); font-size:10px; }
+    .exec-info-bloco { display:flex; align-items:flex-start; gap:10px; margin-top:10px; padding:13px; border:1px solid var(--border-soft); border-radius:15px; background:rgba(255,255,255,.04); }
+    .exec-info-bloco-icone { display:grid; place-items:center; flex:0 0 auto; width:32px; height:32px; border-radius:10px; }
+    .exec-info-bloco-icone svg { width:18px; height:18px; }
+    .exec-info-notas .exec-info-bloco-icone { color:#7dd3fc; background:rgba(14,165,233,.14); }
+    .exec-info-dicas .exec-info-bloco-icone { color:#fbbf24; background:rgba(245,158,11,.14); }
+    .exec-info-bloco h3 { margin:1px 0 4px; color:#fff; font-size:12px; }
+    .exec-info-bloco p { margin:0; color:var(--text-soft); font-size:11px; line-height:1.45; }
+    .exec-info-vazio { display:grid; place-items:center; min-height:190px; padding:22px; border:1px dashed rgba(255,255,255,.18); border-radius:17px; color:var(--text-muted); text-align:center; }
+    .exec-info-vazio > span { display:grid; place-items:center; width:44px; height:44px; margin-bottom:10px; border-radius:14px; color:#7dd3fc; background:rgba(14,165,233,.13); }
+    .exec-info-vazio svg { width:23px; height:23px; }
+    .exec-info-vazio strong { color:#fff; font-size:13px; }
+    .exec-info-vazio p { max-width:250px; margin:6px 0 0; color:var(--text-muted); font-size:11px; line-height:1.45; }
+    .exec-info-voltar { width:100%; min-height:46px; display:inline-flex; align-items:center; justify-content:center; gap:7px; margin-top:15px; border:1px solid var(--border); border-radius:13px; background:rgba(255,255,255,.055); color:var(--text); font:inherit; font-size:12px; font-weight:850; cursor:pointer; }
+    .exec-info-voltar svg { width:16px; height:16px; }
+    .exec-info-voltar:active { transform:scale(.98); }
+    @media (max-width:390px) { .exec-header { gap:8px; } .exec-acoes-exercicio { gap:4px; } .exec-historico-btn, .btn-detalhes-exercicio { padding:5px 7px; font-size:9px; } }
+  </style>
+
+  <style id="correcoes-treino-escalas">
+    /* Cores aparecem apenas depois de escolher um valor. */
+    .opcao.selecionada.escala-muito-mau { border-color:#fb7185; background:rgba(225,29,72,.26); color:#fff; box-shadow:0 0 0 2px rgba(251,113,133,.14),0 7px 16px rgba(225,29,72,.12); }
+    .opcao.selecionada.escala-mau { border-color:#fb923c; background:rgba(234,88,12,.24); color:#fff; box-shadow:0 0 0 2px rgba(251,146,60,.13),0 7px 16px rgba(234,88,12,.10); }
+    .opcao.selecionada.escala-medio { border-color:#facc15; background:rgba(202,138,4,.22); color:#fff; box-shadow:0 0 0 2px rgba(250,204,21,.12),0 7px 16px rgba(202,138,4,.10); }
+    .opcao.selecionada.escala-bom { border-color:#4ade80; background:rgba(22,163,74,.23); color:#fff; box-shadow:0 0 0 2px rgba(74,222,128,.12),0 7px 16px rgba(22,163,74,.10); }
+    .opcao.selecionada.escala-muito-bom { border-color:#38bdf8; background:rgba(2,132,199,.25); color:#fff; box-shadow:0 0 0 2px rgba(56,189,248,.15),0 7px 16px rgba(2,132,199,.12); }
+    .fluxo-hoje-ponto { box-sizing:border-box; display:grid; place-items:center; flex:0 0 28px; aspect-ratio:1 / 1; border-radius:50% !important; overflow:hidden; }
+    .fluxo-hoje-etapa.ativo .fluxo-hoje-ponto { background:#0b83bd; box-shadow:0 0 0 4px rgba(14,165,233,.12),0 0 18px rgba(14,165,233,.32); }
+    .confirmar-treino-acoes button { display:inline-flex; align-items:center; justify-content:center; gap:7px; }
+    .confirmar-treino-acoes .btn-voltar-treino svg, .confirmar-treino-acoes .btn-confirmar-termino svg, .icone-almove { width:1em; height:1em; flex:0 0 auto; }
+    .confirmar-treino-acoes .btn-voltar-treino svg { width:17px; height:17px; }
+    .execucao-acoes-finais { display:grid; gap:9px; margin:28px 0 5px; padding:15px; border:1px solid var(--border-soft); border-radius:18px; background:rgba(255,255,255,.025); }
+    .execucao-acoes-finais .botao { margin:0; }
+    .btn-abandonar-treino { width:100%; min-height:42px; border:1px solid rgba(251,113,133,.38); border-radius:12px; background:rgba(225,29,72,.11); color:#fda4af; font:inherit; font-size:12px; font-weight:850; cursor:pointer; transition:transform .16s ease,background .16s ease; }
+    .btn-abandonar-treino:active { transform:scale(.98); background:rgba(225,29,72,.18); }
+    .confirmar-abandono .confirmar-treino-painel { border-color:rgba(251,113,133,.38); }
+    .confirmar-abandono-icone { color:#fda4af; border-color:rgba(251,113,133,.36); background:rgba(225,29,72,.14); }
+    .btn-confirmar-abandono { border:0; background:linear-gradient(135deg,#e11d48,#fb7185); color:#fff; box-shadow:0 8px 20px rgba(225,29,72,.18); }
+    .marco-icone-semente { color:#86efac; background:rgba(34,197,94,.13); border:1px solid rgba(74,222,128,.26); }
+    .marco-icone-chama { color:#fbbf24; background:rgba(245,158,11,.14); border:1px solid rgba(251,191,36,.26); }
+    .marco-icone-trofeu { color:#d8b4fe; background:rgba(168,85,247,.13); border:1px solid rgba(192,132,252,.26); }
+    .marco-icone-diamante { color:#7dd3fc; background:rgba(14,165,233,.14); border:1px solid rgba(56,189,248,.26); }
+    .marco-icone-medalha { color:#fda4af; background:rgba(225,29,72,.12); border:1px solid rgba(251,113,133,.25); }
+    .marco-icone-estrela { color:#fde68a; background:rgba(202,138,4,.13); border:1px solid rgba(250,204,21,.26); }
+    .inicio-passos-card { padding:16px 18px; }
+    .inicio-passos-topo { display:flex; align-items:center; gap:10px; }
+    .inicio-passos-topo .card-title { margin:0; }
+    .inicio-passos-topo p { margin:3px 0 0; color:var(--text-muted); font-size:10px; }
+    .inicio-passos-icone { display:grid; place-items:center; width:34px; height:34px; border:1px solid rgba(45,212,191,.3); border-radius:11px; color:var(--accent); background:rgba(45,212,191,.11); }
+    .inicio-passos-icone svg { width:19px; height:19px; }
+    .inicio-passos-valor, .passos-semana-valor { display:flex; align-items:baseline; gap:7px; margin:13px 0 9px; }
+    .inicio-passos-valor strong, .passos-semana-valor strong { color:#fff; font-size:24px; font-weight:900; letter-spacing:-.05em; }
+    .inicio-passos-valor span, .passos-semana-valor span { color:var(--text-muted); font-size:11px; font-weight:750; }
+    .passos-semana-card { background:linear-gradient(135deg,rgba(11,92,194,.12),rgba(45,212,191,.06)); }
+    .passos-semana-texto { min-height:16px; margin:10px 0 0; color:var(--text-muted); font-size:11px; line-height:1.35; }
+    .passos-hoje-contador { display:grid; grid-template-columns:48px 1fr 48px; align-items:center; gap:12px; margin:6px 0 15px; text-align:center; }
+    .passos-hoje-contador strong { display:block; color:#fff; font-size:31px; font-weight:900; letter-spacing:-.055em; line-height:1; }
+    .passos-hoje-contador span { display:block; margin-top:5px; color:var(--text-muted); font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; }
+    .passos-ajuste { width:48px; height:48px; border:1px solid rgba(56,189,248,.32); border-radius:15px; background:rgba(14,165,233,.1); color:#a5e3ff; font:inherit; font-size:25px; font-weight:600; cursor:pointer; transition:transform .16s ease,background .16s ease; }
+    .passos-ajuste-mais { color:#052b27; border-color:transparent; background:linear-gradient(135deg,var(--accent),#22b8d7); }
+    .passos-ajuste:active { transform:scale(.94); }
+    .passos-ajuste:disabled { opacity:.38; cursor:default; }
+    .passos-hoje-card .botao { margin-top:16px; }
+    .btn-passos-editar { width:100%; min-height:45px; margin-top:16px; border:1px solid rgba(45,212,191,.35); border-radius:12px; background:rgba(45,212,191,.09); color:var(--accent); font:inherit; font-size:13px; font-weight:850; cursor:pointer; }
+    .marco-icone-passos { color:#5eead4; background:rgba(45,212,191,.12); border:1px solid rgba(45,212,191,.28); }
+    .marco-icone-caminhar { color:#7dd3fc; background:rgba(14,165,233,.14); border:1px solid rgba(56,189,248,.26); }
+    .marco-icone-foguetao { color:#fda4af; background:rgba(225,29,72,.12); border:1px solid rgba(251,113,133,.25); }
+    /* Marca AL MOVE maior no cabeçalho e gesto de puxar para atualizar. */
+    .topo { min-height:86px; padding:11px 14px; }
+    .topo img { width:64px; height:64px; border-radius:0; object-fit:contain; }
+    .topo-titulo { font-size:20px; letter-spacing:.02em; }
+    .topo-sub { font-size:11px; }
+    .pull-refresh { position:fixed; z-index:260; top:calc(env(safe-area-inset-top) + 4px); left:50%; width:54px; height:54px; display:grid; place-items:center; pointer-events:none; opacity:0; transform:translate(-50%,-76px) scale(.78); transition:transform .18s cubic-bezier(.22,1,.36,1),opacity .18s ease; }
+    .pull-refresh img { width:48px; height:48px; object-fit:contain; opacity:.5; filter:drop-shadow(0 7px 12px rgba(0,0,0,.34)); }
+    body.puxar-atualizar .pull-refresh { opacity:1; transform:translate(-50%,var(--puxar-y,-6px)) scale(1); }
+    body.puxar-pronto .pull-refresh { opacity:1; transform:translate(-50%,8px) scale(1.08); }
+    body.a-atualizar .pull-refresh { opacity:1; transform:translate(-50%,12px) scale(1); }
+    body.a-atualizar .pull-refresh img { animation:rodar-logo-atualizar .82s linear infinite; }
+    @keyframes rodar-logo-atualizar { to { transform:rotate(360deg); } }
+    @media (prefers-reduced-motion:reduce) { body.a-atualizar .pull-refresh img { animation:none; } }
+    /* Perfil e métricas: campos compactos, cálculo legível e ícones sem distorção. */
+    .icone-almove { display:block; box-sizing:border-box; max-width:100%; max-height:100%; }
+    .conquistas-metrica-icone .icone-almove { width:17px; height:17px; }
+    .fluxo-hoje-editavel { padding:0; border:0; background:transparent; font:inherit; cursor:pointer; }
+    .fluxo-hoje-editavel:focus-visible { outline:2px solid var(--accent); outline-offset:4px; border-radius:9px; }
+    .fluxo-hoje-editavel:not(.concluido):not(.ativo) { pointer-events:none; }
+    .metricas-atividade-card { overflow:hidden; background:linear-gradient(135deg,rgba(11,92,194,.13),rgba(45,212,191,.055)); }
+    .metricas-cabecalho { display:flex; justify-content:space-between; gap:12px; }
+    .metricas-cabecalho .card-title { margin:3px 0 0; }
+    .metricas-cabecalho p { margin:5px 0 0; color:var(--text-muted); font-size:11px; line-height:1.4; }
+    .metricas-eyebrow { color:var(--accent); font-size:10px; font-weight:900; letter-spacing:.1em; text-transform:uppercase; }
+    .metricas-icone { width:38px; height:38px; display:grid; place-items:center; flex:0 0 auto; color:#7dd3fc; border:1px solid rgba(56,189,248,.32); border-radius:13px; background:rgba(14,165,233,.12); }
+    .metricas-icone .icone-almove { width:20px; height:20px; }
+    .metricas-modo { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin:16px 0 12px; padding:4px; border:1px solid var(--border-soft); border-radius:14px; background:rgba(3,12,22,.48); }
+    .metricas-modo-btn, .metricas-velocidade button { min-height:38px; border:1px solid transparent; border-radius:10px; background:transparent; color:var(--text-muted); font:inherit; font-size:12px; font-weight:850; cursor:pointer; transition:transform .16s ease,background .16s ease,color .16s ease; }
+    .metricas-modo-btn.ativo, .metricas-velocidade button.ativo { background:rgba(45,212,191,.14); color:var(--accent); border-color:rgba(45,212,191,.28); }
+    .metricas-modo-btn:active, .metricas-velocidade button:active { transform:scale(.97); }
+    .metricas-campos { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    .metricas-campos label { display:grid; gap:5px; color:var(--text-soft); font-size:10px; font-weight:800; }
+    .metricas-campos label:nth-child(3) { grid-column:span 2; }
+    .metricas-campos input, .metricas-campos select { width:100%; min-height:42px; padding:0 11px; border:1px solid var(--border); border-radius:11px; outline:0; background:rgba(255,255,255,.055); color:#fff; font:inherit; font-size:13px; }
+    .metricas-campos select option { background:#091421; }
+    .metricas-campos input:focus, .metricas-campos select:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(45,212,191,.10); }
+    .metricas-velocidade-wrap { margin-top:14px; }
+    .metricas-velocidade-wrap > span { display:block; margin-bottom:7px; color:var(--text-soft); font-size:10px; font-weight:800; }
+    .metricas-velocidade { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
+    .metricas-velocidade button { min-height:43px; padding:5px; border-color:var(--border-soft); background:rgba(255,255,255,.04); }
+    .metricas-velocidade small { display:block; margin-top:2px; color:var(--text-muted); font-size:9px; font-weight:700; }
+    .metricas-resultado { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-top:14px; }
+    .metricas-resultado-item { min-height:65px; padding:10px 7px; border:1px solid rgba(45,212,191,.16); border-radius:12px; background:rgba(0,0,0,.14); text-align:center; }
+    .metricas-resultado-item strong { display:block; color:#fff; font-size:16px; font-weight:900; letter-spacing:-.04em; }
+    .metricas-resultado-item span { display:block; margin-top:4px; color:var(--text-muted); font-size:9px; font-weight:800; }
+    .metricas-vazio { grid-column:1/-1; padding:12px; border:1px dashed rgba(45,212,191,.28); border-radius:12px; color:var(--text-muted); font-size:11px; line-height:1.45; }
+    .metricas-nota, .metricas-sync { margin:10px 0 0; color:var(--text-muted); font-size:10px; line-height:1.4; }
+    .metricas-sync { min-height:14px; color:var(--accent); }
+    .metricas-guardar { width:100%; margin-top:14px; }
+    /* Cartões e ícones têm uma resposta luminosa discreta ao passar/carregar. */
+    .conquistas-metrica-icone > .icone-almove { display:block !important; width:16px !important; height:16px !important; stroke-width:2.1; }
+    .conquistas-metrica-icone { flex:0 0 27px; }
+    .fluxo-hoje-editavel { width:100%; min-height:54px; touch-action:manipulation; }
+    .fluxo-hoje-editavel.concluido, .fluxo-hoje-editavel.ativo { pointer-events:auto; }
+    .inicio-passos-diarios { margin-top:15px; padding-top:13px; border-top:1px solid rgba(255,255,255,.09); }
+    .inicio-passos-hoje { display:flex; align-items:baseline; gap:7px; }
+    .inicio-passos-hoje strong { color:#fff; font-size:19px; font-weight:900; letter-spacing:-.045em; }
+    .inicio-passos-hoje span { color:var(--text-muted); font-size:10px; font-weight:750; }
+    .inicio-metricas-diarias { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-top:11px; }
+    .inicio-metricas-diarias > div { padding:9px 6px; border:1px solid rgba(45,212,191,.16); border-radius:11px; background:rgba(0,0,0,.13); text-align:center; }
+    .inicio-metricas-diarias strong { display:block; color:#dffcf7; font-size:13px; font-weight:900; letter-spacing:-.035em; }
+    .inicio-metricas-diarias span { display:block; margin-top:3px; color:var(--text-muted); font-size:9px; font-weight:750; }
+    .perfil-acessos { display:grid; gap:8px; margin-top:15px; }
+    .perfil-acesso { display:grid; grid-template-columns:38px 1fr 16px; align-items:center; gap:10px; width:100%; padding:11px; border:1px solid var(--border-soft); border-radius:15px; background:rgba(255,255,255,.035); color:var(--text); text-align:left; font:inherit; cursor:pointer; transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease; }
+    .perfil-acesso-icone { display:grid; place-items:center; width:38px; height:38px; color:#8be9db; border:1px solid rgba(45,212,191,.25); border-radius:12px; background:rgba(45,212,191,.10); }
+    .perfil-acesso-icone.corrida { color:#8cd3ff; border-color:rgba(56,189,248,.28); background:rgba(14,165,233,.10); }
+    .perfil-acesso-icone .icone-almove { width:19px; height:19px; }
+    .perfil-acesso strong, .perfil-acesso small { display:block; }
+    .perfil-acesso strong { color:#fff; font-size:12px; font-weight:850; }
+    .perfil-acesso small { margin-top:3px; color:var(--text-muted); font-size:10px; font-weight:650; }
+    .perfil-acesso-seta { width:9px; height:9px; border-top:2px solid var(--text-muted); border-right:2px solid var(--text-muted); transform:rotate(45deg); }
+    .perfil-voltar { display:inline-flex; align-items:center; gap:8px; padding:0; margin-bottom:14px; border:0; background:transparent; color:var(--text-soft); font:inherit; font-size:12px; font-weight:850; cursor:pointer; }
+    .perfil-voltar span { width:9px; height:9px; border-left:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(45deg); }
+    body.perfil-detalhe-aberto #tabPlanos > :not(#perfilMetricas) { display:none; }
+    .metricas-corrida-campos { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:13px; }
+    .metricas-corrida-campos label { display:grid; gap:5px; color:var(--text-soft); font-size:10px; font-weight:800; }
+    .metricas-corrida-campos input { width:100%; min-height:42px; padding:0 11px; border:1px solid var(--border); border-radius:11px; outline:0; background:rgba(255,255,255,.055); color:#fff; font:inherit; font-size:13px; }
+    @media (hover:hover) {
+      .conquistas-metrica:hover, .perfil-acesso:hover, .fluxo-hoje-editavel:hover { border-color:rgba(45,212,191,.42); background-color:rgba(45,212,191,.055); box-shadow:0 0 18px rgba(45,212,191,.10); }
+      .conquistas-metrica:hover .conquistas-metrica-icone, .perfil-acesso:hover .perfil-acesso-icone { box-shadow:0 0 15px rgba(45,212,191,.22); }
+    }
+    .perfil-acesso:active, .fluxo-hoje-editavel:active { transform:scale(.985); }
+  </style>
+</head>
+<body>
+
+  <section class="ecra-boas-vindas" id="ecraBoasVindas" aria-labelledby="boasVindasTitulo">
+    <div class="boas-vindas-conteudo">
+      <img class="boas-vindas-logo" src="/icons/icon-any-512.png" alt="AL MOVE">
+      <h1 class="boas-vindas-saudacao" id="boasVindasTitulo"><span id="boasVindasPrefixo">Olá</span><strong id="boasVindasNome" class="oculto"></strong></h1>
+      <p class="boas-vindas-sub">O teu caminho começa aqui.</p>
+      <button type="button" class="btn-comecar" id="btnComecarPortal">Começar</button>
+    </div>
+  </section>
+
+  <div class="pull-refresh" id="pullRefresh" aria-live="polite" aria-label="Puxar para atualizar">
+    <img src="/icons/icon-any-512.png" alt="">
+  </div>
+
+  <div class="topo">
+    <img src="/icons/icon-any-512.png" alt="AL MOVE">
+    <div class="topo-textos">
+      <div class="topo-titulo">AL MOVE</div>
+      <div class="topo-sub">Portal do cliente</div>
+    </div>
+    <div class="topo-estado">Sincronizado</div>
+    <div class="topo-avatar" id="topoAvatar">A</div>
+  </div>
+
+  <div id="ecraSemToken" class="card oculto">
+    <div class="card-title">Link inválido</div>
+    <div class="card-sub">Este link não tem um token de acesso válido. Pede ao André o teu link do Portal.</div>
+  </div>
+
+  <!-- ============ TAB: INÍCIO ============ -->
+  <div id="tabInicio" class="tab-conteudo oculto">
+
+    <div class="card">
+      <div class="inicio-topo">
+        <div>
+          <div class="inicio-eyebrow">O teu acompanhamento</div>
+          <div class="inicio-saudacao" id="inicioSaudacao">Olá!</div>
+          <div class="inicio-sub">O teu plano, a tua consistência e o teu progresso num só lugar.</div>
+        </div>
+      </div>
+      <div class="streak-badge oculto" id="inicioStreakBadge">
+        <span class="streak-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c4.4 0 7-2.9 7-6.8 0-3-1.7-5.6-4.4-7.4.2 2.3-1 3.8-2.2 4.7.1-3.3-1.6-6.7-4.4-8.5.2 3.3-2 5.4-3.2 7.5C3.7 13.2 4 16.2 5.7 18.3 7.2 20.4 9.3 22 12 22Z"/></svg></span>
+        <span id="inicioStreakTexto">0 semanas seguidas</span>
+      </div>
+      <div class="inicio-citacao">"Pequenos progressos continuam a ser progresso."</div>
+
+      <div class="semana-tira" id="inicioSemanaTira"></div>
+
+      <div class="semana-resumo">
+        <span class="semana-resumo-label">Esta semana</span>
+        <span class="semana-resumo-valor" id="inicioSemanaResumo">0 de 0 treinos</span>
+      </div>
+      <div class="semana-barra"><div class="semana-barra-fill" id="inicioSemanaBarra" style="width:0%"></div></div>
+    </div>
+
+    <section class="card inicio-passos-card" aria-labelledby="inicioPassosTitulo">
+      <div class="inicio-passos-topo">
+        <span class="inicio-passos-icone" data-passos-icone="passos" aria-hidden="true"></span>
+        <div><div class="card-title" id="inicioPassosTitulo">Passos esta semana</div><p>Movimento registado por ti</p></div>
+      </div>
+      <div class="inicio-passos-valor"><strong id="inicioPassosSemana">0</strong><span>/ 56 000 passos</span></div>
+      <div class="semana-barra"><div class="semana-barra-fill" id="inicioPassosSemanaBarra" style="width:0%"></div></div>
+      <div class="inicio-passos-diarios">
+        <div class="inicio-passos-hoje"><strong id="inicioPassosHoje">0</strong><span>passos hoje</span></div>
+        <div class="inicio-metricas-diarias" aria-label="Métricas diárias">
+          <div><strong id="inicioDistanciaDiaria">—</strong><span>distância</span></div>
+          <div><strong id="inicioDuracaoDiaria">—</strong><span>duração</span></div>
+          <div><strong id="inicioCaloriasDiarias">—</strong><span>calorias</span></div>
+        </div>
+      </div>
+    </section>
+
+    <button type="button" class="inicio-cta" id="inicioBtnContinuarTreino">
+      <span class="inicio-cta-play">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </span>
+      <span class="inicio-cta-textos">
+        <span class="inicio-cta-titulo" id="inicioCtaTitulo">Continuar treino</span>
+        <span class="inicio-cta-sub" id="inicioCtaSub">Vai ao separador Treinos para começares</span>
+      </span>
+      <span class="inicio-cta-seta">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </span>
+    </button>
+
+  </div>
+
+  <!-- ============ TAB: HOJE ============ -->
+  <div id="tabHoje" class="tab-conteudo">
+
+    <div id="ecraCarregando" class="card carregando">
+      A carregar o teu check-in de hoje…
+    </div>
+
+    <div class="card fluxo-hoje oculto" id="fluxoHoje">
+      <div class="card-title">O teu percurso de hoje</div>
+      <p class="fluxo-hoje-status" id="fluxoHojeStatus"></p>
+      <div class="fluxo-hoje-passos">
+        <button type="button" class="fluxo-hoje-etapa fluxo-hoje-editavel" id="fluxoHojeEtapa1" data-fluxo-etapa="checkin" aria-label="Editar check-in"><span class="fluxo-hoje-ponto">1</span>Check-in</button>
+        <button type="button" class="fluxo-hoje-etapa fluxo-hoje-editavel" id="fluxoHojeEtapa2" data-fluxo-etapa="teste" aria-label="Voltar ao teste de prontidão"><span class="fluxo-hoje-ponto">2</span>Teste</button>
+        <div class="fluxo-hoje-etapa" id="fluxoHojeEtapa3"><span class="fluxo-hoje-ponto">3</span>Escolher</div>
+        <div class="fluxo-hoje-etapa" id="fluxoHojeEtapa4"><span class="fluxo-hoje-ponto">4</span>Treinar</div>
+        <div class="fluxo-hoje-etapa" id="fluxoHojeEtapa5"><span class="fluxo-hoje-ponto">5</span>Feedback</div>
+        <div class="fluxo-hoje-etapa" id="fluxoHojeEtapa6"><span class="fluxo-hoje-ponto">6</span>Concluído</div>
+      </div>
+    </div>
+
+  <div id="cardCheckin" class="card oculto">
+    <div class="card-title">Check-in de hoje</div>
+
+    <div id="checkinResumo" class="oculto"></div>
+
+    <div id="checkinForm">
+      <div class="card-sub">Responde a estas perguntas para desbloquear o treino de hoje.</div>
+
+      <div class="pergunta">
+        <div class="pergunta-label">Como dormiste?</div>
+        <div class="opcoes" data-campo="sono">
+          <div class="opcao" data-valor="1">1</div>
+          <div class="opcao" data-valor="2">2</div>
+          <div class="opcao" data-valor="3">3</div>
+          <div class="opcao" data-valor="4">4</div>
+          <div class="opcao" data-valor="5">5</div>
+        </div>
+        <div class="extremos"><span>Muito mal</span><span>Muito bem</span></div>
+      </div>
+
+      <div class="pergunta">
+        <div class="pergunta-label">Nível de stress</div>
+        <div class="opcoes" data-campo="stress">
+          <div class="opcao" data-valor="1">1</div>
+          <div class="opcao" data-valor="2">2</div>
+          <div class="opcao" data-valor="3">3</div>
+          <div class="opcao" data-valor="4">4</div>
+          <div class="opcao" data-valor="5">5</div>
+        </div>
+        <div class="extremos"><span>Baixo</span><span>Muito alto</span></div>
+      </div>
+
+      <div class="pergunta">
+        <div class="pergunta-label">Energia hoje</div>
+        <div class="opcoes" data-campo="cansaco">
+          <div class="opcao" data-valor="1">1</div>
+          <div class="opcao" data-valor="2">2</div>
+          <div class="opcao" data-valor="3">3</div>
+          <div class="opcao" data-valor="4">4</div>
+          <div class="opcao" data-valor="5">5</div>
+        </div>
+        <div class="extremos"><span>Sem energia</span><span>Muita energia</span></div>
+      </div>
+
+      <div class="pergunta">
+        <div class="pergunta-label">Como tens comido</div>
+        <div class="opcoes" data-campo="refeicoes">
+          <div class="opcao" data-valor="1">1</div>
+          <div class="opcao" data-valor="2">2</div>
+          <div class="opcao" data-valor="3">3</div>
+          <div class="opcao" data-valor="4">4</div>
+          <div class="opcao" data-valor="5">5</div>
+        </div>
+        <div class="extremos"><span>Mal</span><span>Muito bem</span></div>
+      </div>
+
+      <div class="pergunta">
+        <div class="pergunta-label">Dor muscular (DOMS)</div>
+        <div class="opcoes" data-campo="doms">
+          <div class="opcao" data-valor="0">0</div>
+          <div class="opcao" data-valor="1">1</div>
+          <div class="opcao" data-valor="2">2</div>
+          <div class="opcao" data-valor="3">3</div>
+          <div class="opcao" data-valor="4">4</div>
+        </div>
+        <div class="extremos"><span>Nenhuma</span><span>Muito intensa</span></div>
+      </div>
+
+      <div class="pergunta">
+        <div class="pergunta-label">Algo que o André deva saber?</div>
+        <textarea id="checkinNota" placeholder="Ex.: dor ligeira no joelho direito"></textarea>
+      </div>
+
+      <button type="button" class="botao" id="btnCheckinSubmit">Enviar check-in</button>
+      <p class="erro" id="checkinErro"></p>
+
+      <div class="estado-sync oculto" id="estadoSync">
+        <div class="ponto"></div>
+        <span id="estadoSyncTexto"></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="cardProntidao" class="card oculto">
+    <div class="card-title">Teste de prontidão</div>
+    <div id="prontidaoConteudo"></div>
+  </div>
+
+  <div id="cardEscolherTreino" class="card oculto">
+    <span class="fluxo-passo">Passo 3 de 3</span>
+    <div class="card-title">O que vais treinar hoje?</div>
+    <div id="listaTreinosHoje"></div>
+  </div>
+
+  <div id="cardExecucaoTreino" class="card oculto">
+    <button type="button" class="voltar-treinos" id="btnVoltarTreinos"><svg class="icone-nativo" viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg> Escolher outro treino</button>
+    <div class="card-title" id="execucaoTreinoTitulo">Treino</div>
+    <div class="workout-top-bar">
+      <div class="workout-timer" id="workoutTimer">00:00</div>
+      <div class="workout-save-state" id="workoutSaveState">Guardado no dispositivo</div>
+    </div>
+    <div id="execucaoAvisoRepeticao"></div>
+    <div id="execucaoExerciciosLista"></div>
+    <div class="execucao-acoes-finais" id="execucaoAcoesFinais">
+      <button type="button" class="botao" id="btnTerminarTreino">Terminar treino</button>
+      <button type="button" class="btn-abandonar-treino" id="btnAbandonarTreino">Abandonar treino</button>
+    </div>
+    <p class="erro" id="execucaoErro"></p>
+  </div>
+
+  <div class="confirmar-treino oculto" id="confirmarTerminoTreino" aria-hidden="true">
+    <div class="confirmar-treino-painel" role="dialog" aria-modal="true" aria-labelledby="confirmarTerminoTitulo">
+      <div class="confirmar-treino-puxador" aria-hidden="true"></div>
+      <div class="confirmar-treino-icone" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 12 11 14 15 10"/><circle cx="12" cy="12" r="9"/></svg></div>
+      <div class="confirmar-treino-titulo" id="confirmarTerminoTitulo">Terminar treino?</div>
+      <p class="confirmar-treino-texto">Confirma apenas quando tiveres registado todas as séries. Podes voltar ao treino e continuar a editar.</p>
+      <div class="confirmar-treino-acoes">
+        <button type="button" class="btn-voltar-treino" id="btnCancelarTermino"><svg class="icone-nativo" viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg> Voltar ao treino</button>
+        <button type="button" class="btn-confirmar-termino" id="btnConfirmarTermino">Sim, terminar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="confirmar-treino confirmar-abandono oculto" id="confirmarAbandonoTreino" aria-hidden="true">
+    <div class="confirmar-treino-painel" role="dialog" aria-modal="true" aria-labelledby="confirmarAbandonoTitulo">
+      <div class="confirmar-treino-puxador" aria-hidden="true"></div>
+      <div class="confirmar-treino-icone confirmar-abandono-icone" aria-hidden="true"><span data-abandono-icone></span></div>
+      <div class="confirmar-treino-titulo" id="confirmarAbandonoTitulo">Abandonar treino?</div>
+      <p class="confirmar-treino-texto">Os valores registados neste treino serão apagados deste dispositivo e não serão enviados.</p>
+      <div class="confirmar-treino-acoes">
+        <button type="button" class="btn-voltar-treino" id="btnCancelarAbandono">Continuar treino</button>
+        <button type="button" class="btn-confirmar-abandono" id="btnConfirmarAbandono">Sim, abandonar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="cardPosTreino" class="card oculto">
+    <span class="fluxo-passo">Um último passo</span>
+    <div class="card-title">Como correu o treino?</div>
+
+    <div class="pergunta">
+      <div class="pergunta-label">Energia no final</div>
+      <div class="opcoes" data-campo-pos="energia">
+        <div class="opcao" data-valor="1">1</div>
+        <div class="opcao" data-valor="2">2</div>
+        <div class="opcao" data-valor="3">3</div>
+        <div class="opcao" data-valor="4">4</div>
+        <div class="opcao" data-valor="5">5</div>
+      </div>
+      <div class="extremos"><span>Esgotada</span><span>Cheia de energia</span></div>
+    </div>
+
+    <div class="pergunta">
+      <div class="pergunta-label">Esforço percebido</div>
+      <div class="opcoes" data-campo-pos="esforco">
+        <div class="opcao" data-valor="1">1</div>
+        <div class="opcao" data-valor="2">2</div>
+        <div class="opcao" data-valor="3">3</div>
+        <div class="opcao" data-valor="4">4</div>
+        <div class="opcao" data-valor="5">5</div>
+      </div>
+      <div class="extremos"><span>Leve</span><span>Ao máximo</span></div>
+    </div>
+
+    <div class="pergunta">
+      <div class="pergunta-label">Dificuldade sentida</div>
+      <div class="opcoes" data-campo-pos="dificuldade">
+        <div class="opcao" data-valor="1">1</div>
+        <div class="opcao" data-valor="2">2</div>
+        <div class="opcao" data-valor="3">3</div>
+        <div class="opcao" data-valor="4">4</div>
+        <div class="opcao" data-valor="5">5</div>
+      </div>
+      <div class="extremos"><span>Fácil</span><span>Muito difícil</span></div>
+    </div>
+
+    <button type="button" class="botao" id="btnConfirmarPosTreino">Confirmar</button>
+    <p class="erro" id="posTreinoErro"></p>
+  </div>
+
+  <div id="cardTreinoConcluido" class="card oculto">
+    <div class="success-hero">
+      <div class="success-icon" aria-label="Concluído"><svg viewBox="0 0 24 24"><path d="M7 12.5 10.2 16 17 8"/><circle cx="12" cy="12" r="9"/></svg></div>
+      <h2>Treino concluído</h2>
+      <p id="treinoConcluidoNome"></p>
+    </div>
+    <div class="success-stats">
+      <div class="success-stat"><strong id="treinoConcluidoVolume"></strong><span>Volume registado</span></div>
+      <div class="success-stat"><strong id="treinoConcluidoDuracao"></strong><span>Duração</span></div>
+    </div>
+    <button type="button" class="botao" id="btnRegistarOutroTreino">Editar registo</button>
+  </div>
+
+  </div><!-- fim #tabHoje -->
+
+  <!-- ============ TAB: CONQUISTAS ============ -->
+  <div id="tabConquistas" class="tab-conteudo oculto">
+
+    <section class="card conquistas-atividade">
+      <div class="conquistas-cabecalho">
+        <div>
+          <div class="conquistas-eyebrow">O teu percurso</div>
+          <div class="card-title">A tua atividade</div>
+        </div>
+        <span class="conquistas-periodo">Dados reais</span>
+      </div>
+      <div class="conquistas-metricas">
+        <div class="conquistas-metrica metrica-treinos">
+          <div class="conquistas-metrica-topo"><strong id="marcoTotalTreinos">0</strong><span class="conquistas-metrica-icone" aria-hidden="true"><span data-conquistas-icone="halter"></span></span></div>
+          <span>Treinos concluídos</span>
+          <small>Total registado</small>
+        </div>
+        <div class="conquistas-metrica metrica-sequencia">
+          <div class="conquistas-metrica-topo"><strong id="marcoStreakAtual">0</strong><span class="conquistas-metrica-icone" aria-hidden="true"><span data-conquistas-icone="chama"></span></span></div>
+          <span>Semanas ativas</span>
+          <small>Sequência atual</small>
+        </div>
+        <div class="conquistas-metrica metrica-recorde">
+          <div class="conquistas-metrica-topo"><strong id="marcoMelhorStreak">0</strong><span class="conquistas-metrica-icone" aria-hidden="true"><span data-conquistas-icone="conquistas"></span></span></div>
+          <span>Melhor sequência</span>
+          <small>Recorde pessoal</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="card conquistas-sequencia-card">
+      <div class="conquistas-cabecalho">
+        <div>
+          <div class="conquistas-eyebrow">Consistência</div>
+          <div class="card-title">A tua sequência</div>
+        </div>
+        <span class="conquistas-meta-pill" id="conquistasMetaPill">Próximo marco</span>
+      </div>
+      <div class="conquistas-sequencia-corpo">
+        <div class="conquistas-sequencia-numero"><strong id="conquistasSequenciaValor">0</strong><span>semanas</span></div>
+        <div class="conquistas-sequencia-info">
+          <strong id="conquistasSequenciaTitulo">Começa a tua sequência</strong>
+          <p id="conquistasSequenciaTexto">Regista um treino para desbloquear o primeiro marco.</p>
+          <div class="conquistas-progresso"><div id="conquistasSequenciaBarra"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card passos-semana-card">
+      <div class="conquistas-cabecalho">
+        <div><div class="conquistas-eyebrow">Movimento</div><div class="card-title">Passos esta semana</div></div>
+        <span class="conquistas-meta-pill" id="passosSemanaPercentagem">0%</span>
+      </div>
+      <div class="passos-semana-valor"><strong id="passosSemanaTotal">0</strong><span>/ 56 000 passos</span></div>
+      <div class="conquistas-progresso"><div id="passosSemanaBarra"></div></div>
+      <p class="passos-semana-texto" id="passosSemanaTexto">Regista os passos de hoje para começares.</p>
+    </section>
+
+    <section class="card conquistas-trofeus-card">
+      <div class="conquistas-cabecalho">
+        <div>
+          <div class="conquistas-eyebrow">Troféus</div>
+          <div class="card-title">Consistência</div>
+        </div>
+        <span class="conquistas-estado-legenda"><i></i> Desbloqueado</span>
+      </div>
+      <div class="marco-lista marco-grade" id="marcosListaStreak"></div>
+    </section>
+
+    <section class="card conquistas-trofeus-card">
+      <div class="conquistas-cabecalho">
+        <div>
+          <div class="conquistas-eyebrow">Troféus</div>
+          <div class="card-title">Treinos concluídos</div>
+        </div>
+        <span class="conquistas-estado-legenda"><i></i> Desbloqueado</span>
+      </div>
+      <div class="marco-lista marco-grade" id="marcosListaVolume"></div>
+    </section>
+
+    <section class="card conquistas-trofeus-card">
+      <div class="conquistas-cabecalho">
+        <div><div class="conquistas-eyebrow">Troféus</div><div class="card-title">Passos · esta semana</div></div>
+        <span class="conquistas-estado-legenda"><i></i> Desbloqueado</span>
+      </div>
+      <div class="marco-lista marco-grade" id="marcosListaPassos"></div>
+    </section>
+
+    <section class="card passos-hoje-card">
+      <div class="conquistas-cabecalho">
+        <div><div class="conquistas-eyebrow">Hábitos</div><div class="card-title">Passos de hoje</div></div>
+        <span class="conquistas-meta-pill">Meta: 8 000</span>
+      </div>
+      <div class="passos-hoje-contador">
+        <button type="button" class="passos-ajuste" id="btnRetirarPassos" aria-label="Retirar 500 passos">−</button>
+        <div><strong id="passosHojeValor">0</strong><span>passos</span></div>
+        <button type="button" class="passos-ajuste passos-ajuste-mais" id="btnAdicionarPassos" aria-label="Adicionar 500 passos">+</button>
+      </div>
+      <div class="conquistas-progresso"><div id="passosHojeBarra"></div></div>
+      <p class="passos-semana-texto" id="passosHojeEstado">Regista o teu movimento de hoje.</p>
+      <button type="button" class="botao" id="btnSubmeterPassos">Guardar passos</button>
+      <button type="button" class="btn-passos-editar oculto" id="btnEditarPassos">Editar passos</button>
+    </section>
+
+  </div>
+
+  <!-- ============ TAB: OPÇÕES ============ -->
+  <div id="tabPlanos" class="tab-conteudo oculto">
+
+    <div class="card" data-perfil-raiz>
+      <div class="perfil-topo">
+        <div class="perfil-avatar" id="opcoesAvatarInicial">A</div>
+        <div class="perfil-corpo">
+          <div class="perfil-nome" id="opcoesNomeCliente">A carregar…</div>
+          <span class="perfil-estado-pill oculto" id="opcoesEstadoPill"></span>
+        </div>
+      </div>
+      <div class="perfil-acessos">
+        <button type="button" class="perfil-acesso" data-abrir-perfil="caminhada"><span class="perfil-acesso-icone" data-perfil-icone="caminhar"></span><span><strong>Métricas de caminhada</strong><small>Passos, distância, duração e calorias</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="corrida"><span class="perfil-acesso-icone corrida" data-perfil-icone="foguetao"></span><span><strong>Calculadora de corrida</strong><small>Estimativa por distância e velocidade</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+      </div>
+    </div>
+
+    <section class="card metricas-atividade-card oculto" id="perfilMetricas" aria-labelledby="metricasAtividadeTitulo">
+      <button type="button" class="perfil-voltar" id="btnVoltarPerfil"><span aria-hidden="true"></span> Perfil</button>
+      <div class="metricas-cabecalho">
+        <div><span class="metricas-eyebrow">Movimento diário</span><div class="card-title" id="metricasAtividadeTitulo">Métricas de atividade</div><p>Estimativas pessoais a partir dos teus passos.</p></div>
+        <span class="metricas-icone" data-metricas-icone="caminhar"></span>
+      </div>
+      <div class="metricas-modo" role="group" aria-label="Atividade">
+        <button type="button" class="metricas-modo-btn ativo" data-atividade="caminhada">Caminhada</button>
+        <button type="button" class="metricas-modo-btn" data-atividade="corrida">Corrida</button>
+      </div>
+      <div class="metricas-campos">
+        <label>Peso (kg)<input id="metricasPeso" type="number" inputmode="decimal" min="30" max="300" placeholder="Ex.: 68"></label>
+        <label>Altura (cm)<input id="metricasAltura" type="number" inputmode="numeric" min="120" max="230" placeholder="Ex.: 170"></label>
+        <label>Género <select id="metricasGenero"><option value="">Prefiro não indicar</option><option value="feminino">Feminino</option><option value="masculino">Masculino</option><option value="outro">Outro</option></select></label>
+        <label>Passada a caminhar (cm)<input id="metricasPassadaCaminhada" type="number" inputmode="numeric" min="30" max="200" placeholder="Ex.: 70"></label>
+        <label>Passada a correr (cm)<input id="metricasPassadaCorrida" type="number" inputmode="numeric" min="50" max="300" placeholder="Ex.: 110"></label>
+      </div>
+      <div class="metricas-velocidade-wrap"><span id="metricasVelocidadeTitulo">Ritmo de caminhada</span><div class="metricas-velocidade" id="metricasVelocidade"></div></div>
+      <div class="metricas-corrida-campos oculto" id="metricasCorridaCampos">
+        <label>Distância (km)<input id="metricasCorridaDistancia" type="number" inputmode="decimal" min="0" step="0.1" placeholder="Ex.: 5"></label>
+        <label>Velocidade (km/h)<input id="metricasCorridaVelocidade" type="number" inputmode="decimal" min="5" max="25" step="0.1" placeholder="Ex.: 9,5"></label>
+      </div>
+      <div class="metricas-resultado" id="metricasResultado" aria-live="polite"></div>
+      <p class="metricas-nota" id="metricasNota">Estes dados servem para estimar as métricas diárias dos teus passos no Início.</p>
+      <button type="button" class="btn-secundario metricas-guardar" id="btnGuardarMetricas">Guardar métricas</button>
+      <p class="metricas-sync" id="metricasSync"></p>
+    </section>
+
+    <div class="card">
+      <div class="card-title">O teu plano</div>
+      <div id="opcoesPlanoConteudo">
+        <div class="plano-linha"><span class="plano-linha-label">Serviço</span><span class="plano-linha-valor" id="opcoesPlanoServico">—</span></div>
+        <div class="plano-linha oculto" id="opcoesPlanoValidadeLinha"><span class="plano-linha-label">Válido até</span><span class="plano-linha-valor" id="opcoesPlanoValidade">—</span></div>
+        <div class="plano-linha oculto" id="opcoesPlanoSessoesLinha"><span class="plano-linha-label">Sessões restantes</span><span class="plano-linha-valor" id="opcoesPlanoSessoes">—</span></div>
+      </div>
+    </div>
+
+    <div class="card contacto-pt-card">
+      <div class="contacto-pt-resumo">
+        <span class="btn-contacto-pt-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10.5a6.5 6.5 0 0 1-7.2 6.4 7.3 7.3 0 0 1-2.8-.7L5 18l1.2-3.4A6.5 6.5 0 1 1 20 10.5Z"/><path d="M8.5 10.5h6M8.5 13.5h3.5"/></svg></span>
+        <span class="btn-contacto-pt-corpo">
+          <span class="btn-contacto-pt-titulo" id="opcoesContactoPTTitulo">Falar com o André</span>
+          <span class="btn-contacto-pt-sub" id="opcoesContactoPTSub">Dúvidas, faltas ou remarcações</span>
+        </span>
+      </div>
+      <button type="button" class="btn-contacto-pt" id="opcoesBtnContactoPT">
+        Abrir mensagem direta
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Documentos e faturação<span class="selo-exemplo">Exemplo</span></div>
+      <div class="opcoes-lista">
+        <div class="opcoes-item">
+          <div class="opcoes-item-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg></div>
+          <div class="opcoes-item-corpo">
+            <div class="opcoes-item-titulo">Contrato</div>
+            <div class="opcoes-item-sub">Ver o teu contrato assinado</div>
+          </div>
+          <div class="opcoes-item-seta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
+        </div>
+        <div class="opcoes-item">
+          <div class="opcoes-item-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3Z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></div>
+          <div class="opcoes-item-corpo">
+            <div class="opcoes-item-titulo">Faturas</div>
+            <div class="opcoes-item-sub">Histórico de pagamentos</div>
+          </div>
+          <div class="opcoes-item-seta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Preferências<span class="selo-exemplo">Exemplo</span></div>
+      <div class="opcoes-lista">
+        <div class="opcoes-item">
+          <div class="opcoes-item-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></div>
+          <div class="opcoes-item-corpo">
+            <div class="opcoes-item-titulo">Notificações</div>
+            <div class="opcoes-item-sub">Lembretes de treino e mensagens</div>
+          </div>
+          <div class="opcoes-item-seta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
+        </div>
+        <div class="opcoes-item">
+          <div class="opcoes-item-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+          <div class="opcoes-item-corpo">
+            <div class="opcoes-item-titulo">Privacidade e dados</div>
+            <div class="opcoes-item-sub">Como os teus dados são tratados</div>
+          </div>
+          <div class="opcoes-item-seta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="versao-app">AL MOVE — Portal do cliente</div>
+
+  </div>
+
+  <!-- ============ NAVEGAÇÃO INFERIOR ============ -->
+  <div class="tabs-nav">
+    <div class="tab-btn" id="tabBtnInicio" data-tab="inicio">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+      Início
+    </div>
+    <div class="tab-btn ativo" id="tabBtnHoje" data-tab="hoje">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="m8.5 15 2.2 2.2 4.8-5"/></svg>
+      Treinos
+    </div>
+    <div class="tab-btn" id="tabBtnConquistas" data-tab="conquistas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h2a2 2 0 0 1 0 4h-1M7 5H5a2 2 0 0 0 0 4h1"/></svg>
+      Conquistas
+    </div>
+    <div class="tab-btn" id="tabBtnPlanos" data-tab="planos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Perfil
+    </div>
+  </div>
+
+<script>
+(function () {
+  "use strict";
+
+  // Sistema único de ícones AL MOVE: todos usam o mesmo viewBox, traço e cantos.
+  const CAMINHOS_ICONES_ALMOVE = {
+    inicio: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></g>',
+    treinos: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829zM2.5 21.5l1.4-1.4M20.1 3.9l1.4-1.4M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829zM9.6 14.4l4.8-4.8"/>',
+    conquistas: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M7.21 15L2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15M11 12L5.12 2.2M13 12l5.88-9.8M8 7h8"/><circle cx="12" cy="17" r="5"/><path d="M12 18v-2h-.5"/></g>',
+    opcoes: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M10 15H6a4 4 0 0 0-4 4v2m12.305-4.47l.923-.382m0-2.296l-.923-.383m2.547-1.241l-.383-.923m.383 6.467l-.383.924m2.679-6.468l.383-.923m-.001 7.391l-.382-.924m1.624-3.92l.924-.383m-.924 2.679l.924.383"/><circle cx="18" cy="15" r="3"/><circle cx="9" cy="7" r="4"/></g>',
+    ajustes: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M10 15H6a4 4 0 0 0-4 4v2m12.305-4.47l.923-.382m0-2.296l-.923-.383m2.547-1.241l-.383-.923m.383 6.467l-.383.924m2.679-6.468l.383-.923m-.001 7.391l-.382-.924m1.624-3.92l.924-.383m-.924 2.679l.924.383"/><circle cx="18" cy="15" r="3"/><circle cx="9" cy="7" r="4"/></g>',
+    mensagem: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2zm4-1a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/>',
+    documento: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5M10 9H8m8 4H8m8 4H8"/></g>',
+    fatura: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5M10 9H8m8 4H8m8 4H8"/></g>',
+    notificacoes: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.268 21a2 2 0 0 0 3.464 0m-10.47-5.674A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>',
+    bloqueado: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></g>',
+    reproduzir: '<path d="M5 5a2 2 0 0 1 3-1.7l12 7a2 2 0 0 1 0 3.4l-12 7A2 2 0 0 1 5 19Z"/>',
+    esquerda: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m15 18l-6-6l6-6"/>',
+    direita: '<path d="m9 18 6-6-6-6"/>',
+    concluido: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m16 9l-5.5 5.5L8 12"/></g>',
+    halter: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829zM2.5 21.5l1.4-1.4M20.1 3.9l1.4-1.4M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829zM9.6 14.4l4.8-4.8"/>',
+    chama: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0a5 5 0 0 1 1-3a1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"/>',
+    grafico: '<path d="M4 19V5M4 19h16"/><path d="m7 15 3-3 3 2 5-6"/>',
+    relogio: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></g>',
+    raio: '<path d="m13 2-8 12h6l-1 8 9-13h-6z"/>',
+    parar: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><rect width="6" height="6" x="9" y="9" rx="1"/></g>',
+    info: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></g>',
+    imagem: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></g>',
+    link: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 3h6v6m-11 5L21 3m-3 10v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+    dica: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 14c.2-1 .7-1.7 1.5-2.5c1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5c.7.7 1.3 1.5 1.5 2.5m0 4h6m-5 4h4"/>',
+    semente: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0a5 5 0 0 1 1-3a1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"/>',
+    trofeu: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.12 2.12 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.12 2.12 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.12 2.12 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.12 2.12 0 0 0 1.597-1.16z"/>',
+    diamante: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M10.5 3L8 9l4 13l4-13l-2.5-6"/><path d="M17 3a2 2 0 0 1 1.6.8l3 4a2 2 0 0 1 .013 2.382l-7.99 10.986a2 2 0 0 1-3.247 0l-7.99-10.986A2 2 0 0 1 2.4 7.8l2.998-3.997A2 2 0 0 1 7 3zM2 9h20"/></g>',
+    medalha: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M7.21 15L2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15M11 12L5.12 2.2M13 12l5.88-9.8M8 7h8"/><circle cx="12" cy="17" r="5"/><path d="M12 18v-2h-.5"/></g>',
+    estrela: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.12 2.12 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.12 2.12 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.12 2.12 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.12 2.12 0 0 0 1.597-1.16z"/>',
+    passos: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0m16 4v-2.38c0-2.12 1.03-3.12 1-5.62c-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0m-4-3h4M4 13h4"/>',
+    caminhar: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0m16 4v-2.38c0-2.12 1.03-3.12 1-5.62c-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0m-4-3h4M4 13h4"/>',
+    foguetao: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.12 2.12 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.12 2.12 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.12 2.12 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.12 2.12 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.12 2.12 0 0 0 1.597-1.16z"/>'
+  };
+
+  function iconeAlMove(nome, classe) {
+    const caminho = CAMINHOS_ICONES_ALMOVE[nome] || CAMINHOS_ICONES_ALMOVE.concluido;
+    return '<svg class="icone-almove ' + (classe || '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + caminho + '</svg>';
+  }
+
+  function trocarIconeDentro(seletor, nome) {
+    const elemento = typeof seletor === "string" ? document.querySelector(seletor) : seletor;
+    if (!elemento) return;
+    const antigo = elemento.matches("svg") ? elemento : elemento.querySelector("svg");
+    if (antigo) antigo.outerHTML = iconeAlMove(nome);
+    else elemento.innerHTML = iconeAlMove(nome);
+  }
+
+  function normalizarIconesFixos() {
+    [["#tabBtnInicio", "inicio"], ["#tabBtnHoje", "treinos"], ["#tabBtnConquistas", "conquistas"], ["#tabBtnPlanos", "ajustes"], [".streak-icone", "chama"], [".inicio-cta-play", "reproduzir"], [".inicio-cta-seta", "direita"], [".btn-contacto-pt-icone", "mensagem"], [".success-icon", "concluido"], [".confirmar-treino-icone", "concluido"]].forEach(function (par) {
+      trocarIconeDentro(par[0], par[1]);
+    });
+    const opcoes = ["documento", "fatura", "notificacoes", "bloqueado"];
+    document.querySelectorAll(".opcoes-item-icone").forEach(function (el, indice) { trocarIconeDentro(el, opcoes[indice] || "documento"); });
+    document.querySelectorAll(".opcoes-item-seta").forEach(function (el) { trocarIconeDentro(el, "direita"); });
+    trocarIconeDentro(document.getElementById("btnVoltarTreinos"), "esquerda");
+    trocarIconeDentro(document.getElementById("btnCancelarTermino"), "esquerda");
+    trocarIconeDentro(document.querySelector("[data-abandono-icone]"), "parar");
+    document.querySelectorAll("[data-passos-icone]").forEach(function (el) { trocarIconeDentro(el, el.getAttribute("data-passos-icone")); });
+    trocarIconeDentro(document.querySelector(".btn-contacto-pt > svg"), "direita");
+    document.querySelectorAll("[data-conquistas-icone]").forEach(function (el) { trocarIconeDentro(el, el.getAttribute("data-conquistas-icone")); });
+  }
+
+  // ---------- Token do cliente ----------
+  const params = new URLSearchParams(window.location.search);
+  const TOKEN = params.get("token") || params.get("portal");
+
+  const ecraBoasVindas = document.getElementById("ecraBoasVindas");
+  const boasVindasPrefixoEl = document.getElementById("boasVindasPrefixo");
+  const boasVindasNomeEl = document.getElementById("boasVindasNome");
+  const btnComecarPortal = document.getElementById("btnComecarPortal");
+  const ecraCarregando = document.getElementById("ecraCarregando");
+  const ecraSemToken = document.getElementById("ecraSemToken");
+  const cardCheckin = document.getElementById("cardCheckin");
+  const checkinForm = document.getElementById("checkinForm");
+  const checkinResumo = document.getElementById("checkinResumo");
+  const checkinNota = document.getElementById("checkinNota");
+  const checkinErro = document.getElementById("checkinErro");
+  const btnSubmit = document.getElementById("btnCheckinSubmit");
+  const estadoSync = document.getElementById("estadoSync");
+  const estadoSyncTexto = document.getElementById("estadoSyncTexto");
+
+  if (!TOKEN) {
+    ecraBoasVindas.classList.add("oculto");
+    ecraCarregando.classList.add("oculto");
+    ecraSemToken.classList.remove("oculto");
     return;
   }
 
-  evento.respondWith(
-    caches.match(evento.request).then((respostaCache) => (
-      respostaCache ||
-      fetch(evento.request).then((respostaRede) => {
-        const clone = respostaRede.clone();
-        caches.open(VERSAO_CACHE).then((cache) => {
-          if (respostaRede && respostaRede.status === 200 && respostaRede.type === 'basic') {
-            cache.put(evento.request, clone);
-          }
-        });
-        return respostaRede;
-      })
-    ))
-  );
-});
+  // ---------- Navegação por separadores (Início / Hoje / Conquistas / Planos) ----------
+  const TABS = ["inicio", "hoje", "conquistas", "planos"];
+  function mudarTab(nome) {
+    TABS.forEach(function (t) {
+      document.getElementById("tab" + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle("oculto", t !== nome);
+      document.getElementById("tabBtn" + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle("ativo", t === nome);
+    });
+    window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+  }
+  document.querySelectorAll(".tab-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () { mudarTab(btn.getAttribute("data-tab")); });
+  });
+  normalizarIconesFixos();
 
-self.addEventListener('message', (evento) => {
-  if (evento.data === 'SKIP_WAITING') self.skipWaiting();
-});
+  // ---------- Puxar para atualizar ----------
+  // Só ativa junto ao cabeçalho e no início da página, para não interferir
+  // com os controlos de treino e os cartões deslizáveis.
+  const pullRefreshEl = document.getElementById("pullRefresh");
+  let inicioPuxarY = 0;
+  let puxarAtivo = false;
+  let atualizarEmCurso = false;
+  const LIMIAR_ATUALIZAR = 76;
+
+  document.addEventListener("touchstart", function (evento) {
+    if (atualizarEmCurso || window.scrollY > 2 || !evento.touches.length) return;
+    const topo = document.querySelector(".topo");
+    const toque = evento.touches[0];
+    if (!topo || toque.clientY > topo.getBoundingClientRect().bottom + 20) return;
+    inicioPuxarY = toque.clientY;
+    puxarAtivo = true;
+  }, { passive: true });
+
+  document.addEventListener("touchmove", function (evento) {
+    if (!puxarAtivo || atualizarEmCurso || !evento.touches.length) return;
+    const distancia = evento.touches[0].clientY - inicioPuxarY;
+    if (distancia <= 0) {
+      puxarAtivo = false;
+      document.body.classList.remove("puxar-atualizar", "puxar-pronto");
+      return;
+    }
+    evento.preventDefault();
+    document.body.classList.add("puxar-atualizar");
+    document.body.classList.toggle("puxar-pronto", distancia >= LIMIAR_ATUALIZAR);
+    pullRefreshEl.style.setProperty("--puxar-y", Math.min(8, -76 + (distancia * .9)) + "px");
+  }, { passive: false });
+
+  document.addEventListener("touchend", function () {
+    if (!puxarAtivo || atualizarEmCurso) return;
+    const pronto = document.body.classList.contains("puxar-pronto");
+    puxarAtivo = false;
+    pullRefreshEl.style.removeProperty("--puxar-y");
+    document.body.classList.remove("puxar-atualizar", "puxar-pronto");
+    if (!pronto) return;
+    atualizarEmCurso = true;
+    document.body.classList.add("a-atualizar");
+    window.setTimeout(function () { window.location.reload(); }, 520);
+  }, { passive: true });
+
+  btnComecarPortal.addEventListener("click", function () {
+    mudarTab("inicio");
+    ecraBoasVindas.classList.add("a-sair");
+    window.setTimeout(function () { ecraBoasVindas.remove(); }, 450);
+  });
+
+  // ---------- Início ----------
+  const DIAS_SEMANA_LETRAS = ["S", "T", "Q", "Q", "S", "S", "D"];
+  const inicioSaudacaoEl = document.getElementById("inicioSaudacao");
+  const inicioStreakBadgeEl = document.getElementById("inicioStreakBadge");
+  const inicioStreakTextoEl = document.getElementById("inicioStreakTexto");
+  const inicioSemanaTiraEl = document.getElementById("inicioSemanaTira");
+  const inicioSemanaResumoEl = document.getElementById("inicioSemanaResumo");
+  const inicioSemanaBarraEl = document.getElementById("inicioSemanaBarra");
+  const inicioBtnContinuarTreinoEl = document.getElementById("inicioBtnContinuarTreino");
+  const topoAvatarEl = document.getElementById("topoAvatar");
+
+  inicioBtnContinuarTreinoEl.addEventListener("click", function () {
+    mudarTab("hoje");
+  });
+
+  function obterSaudacaoAtual() {
+    const hora = new Date().getHours();
+    if (!Number.isFinite(hora)) return "Olá";
+    if (hora >= 5 && hora < 12) return "Bom dia";
+    if (hora >= 12 && hora < 20) return "Boa tarde";
+    return "Boa noite";
+  }
+
+  function atualizarIdentidadeCliente(primeiroNome) {
+    const nome = String(primeiroNome || "").trim();
+    inicioSaudacaoEl.textContent = nome
+      ? obterSaudacaoAtual() + ", " + nome
+      : "Olá";
+    if (nome) topoAvatarEl.textContent = nome.charAt(0).toUpperCase();
+    if (nome) {
+      boasVindasPrefixoEl.textContent = "Olá,";
+      boasVindasNomeEl.textContent = nome;
+      boasVindasNomeEl.classList.remove("oculto");
+    }
+  }
+
+  function renderInicio(dados) {
+    atualizarIdentidadeCliente(dados.primeiroNome);
+
+    if (dados.streakSemanas > 0) {
+      inicioStreakBadgeEl.classList.remove("oculto");
+      inicioStreakTextoEl.textContent = dados.streakSemanas === 1
+        ? "1 semana seguida"
+        : dados.streakSemanas + " semanas seguidas";
+    } else {
+      inicioStreakBadgeEl.classList.add("oculto");
+    }
+
+    inicioSemanaTiraEl.innerHTML = "";
+    (dados.diasSemana || []).forEach(function (dia, idx) {
+      const el = document.createElement("div");
+      el.className = "semana-dia" + (dia.feito ? " feito" : "") + (dia.hoje ? " hoje" : "");
+      el.innerHTML =
+        '<span class="semana-dia-letra">' + DIAS_SEMANA_LETRAS[idx] + '</span>' +
+        '<span class="semana-dia-numero">' + dia.diaMes + '</span>' +
+        '<span class="semana-dia-ponto"></span>';
+      inicioSemanaTiraEl.appendChild(el);
+    });
+
+    const feitos = dados.treinosFeitosSemana || 0;
+    const total = dados.treinosNoPlanoSemana || 0;
+    inicioSemanaResumoEl.textContent = total > 0
+      ? feitos + " de " + total + " treinos"
+      : feitos + " treino" + (feitos === 1 ? "" : "s") + " esta semana";
+    const percent = total > 0 ? Math.min(100, Math.round((feitos / total) * 100)) : (feitos > 0 ? 100 : 0);
+    inicioSemanaBarraEl.style.width = percent + "%";
+  }
+
+  chamarApi("getResumoInicioPortal", {})
+    .then(function (resp) {
+      if (resp && resp.ok && resp.dados) renderInicio(resp.dados);
+    })
+    .catch(function () {
+      // Sem ligação — o ecrã Início fica com os valores por omissão até haver rede.
+    });
+
+  // ---------- Conquistas ----------
+  // Só mostra métricas recebidas pelo portal; não há passos ou dados de exemplo.
+  const marcoTotalTreinosEl = document.getElementById("marcoTotalTreinos");
+  const marcoStreakAtualEl = document.getElementById("marcoStreakAtual");
+  const marcoMelhorStreakEl = document.getElementById("marcoMelhorStreak");
+  const marcosListaStreakEl = document.getElementById("marcosListaStreak");
+  const marcosListaVolumeEl = document.getElementById("marcosListaVolume");
+  const conquistasSequenciaValorEl = document.getElementById("conquistasSequenciaValor");
+  const conquistasSequenciaTituloEl = document.getElementById("conquistasSequenciaTitulo");
+  const conquistasSequenciaTextoEl = document.getElementById("conquistasSequenciaTexto");
+  const conquistasSequenciaBarraEl = document.getElementById("conquistasSequenciaBarra");
+  const conquistasMetaPillEl = document.getElementById("conquistasMetaPill");
+
+  function iconeNativoSvg(tipo) {
+    const nomes = { check: "concluido", setaEsquerda: "esquerda", setaDireita: "direita", relogio: "relogio", grafico: "grafico", pausa: "parar", raio: "raio", lento: "relogio", parar: "parar", halter: "halter" };
+    return iconeAlMove(nomes[tipo] || "concluido", "icone-nativo");
+  }
+
+  function iconeMarcoSvg(tipo) {
+    return iconeAlMove(tipo || "conquistas");
+  }
+
+  function criarMarcoHtml(marco) {
+    const estado = marco.concluido ? "conquistado" : (marco.emProgresso ? "em-progresso" : "bloqueado");
+    const percentagem = marco.meta ? Math.min(100, Math.round((marco.atual / marco.meta) * 100)) : 0;
+    let etiqueta = "";
+    if (marco.concluido) etiqueta = '<span class="marco-etiqueta marco-etiqueta-concluido">' + iconeNativoSvg("check") + ' Obtido</span>';
+    else if (marco.emProgresso) etiqueta = '<span class="marco-etiqueta marco-etiqueta-progresso">' + percentagem + '%</span>';
+    else etiqueta = '<span class="marco-etiqueta marco-etiqueta-bloqueado">' + iconeAlMove("bloqueado") + '</span>';
+    const progresso = !marco.concluido && marco.meta
+      ? '<div class="marco-progresso"><div class="marco-progresso-fill" style="width:' + percentagem + '%"></div></div><div class="marco-fracao">' + marco.atual + ' / ' + marco.meta + '</div>'
+      : '';
+    return '<article class="marco-item ' + estado + '">' +
+      '<div class="marco-icone marco-icone-' + marco.icone + '" aria-hidden="true">' + iconeMarcoSvg(marco.icone) + '</div>' +
+      '<div class="marco-corpo"><div class="marco-topo">' + etiqueta + '</div>' +
+      '<div class="marco-titulo">' + marco.titulo + '</div><div class="marco-desc">' + marco.desc + '</div>' + progresso + '</div></article>';
+  }
+
+  function renderConquistas(dados) {
+    const totalTreinos = Number(dados.totalTreinosConcluidos || 0);
+    const streakAtual = Number(dados.streakSemanas || 0);
+    const melhorStreak = Math.max(Number(dados.melhorStreakSemanas || 0), streakAtual);
+    const metasStreak = [1, 4, 8, 12];
+    const proximaMeta = metasStreak.find(function (meta) { return streakAtual < meta; }) || 12;
+    const percentagemSequencia = Math.min(100, Math.round((streakAtual / proximaMeta) * 100));
+
+    marcoTotalTreinosEl.textContent = totalTreinos;
+    marcoStreakAtualEl.textContent = streakAtual;
+    marcoMelhorStreakEl.textContent = melhorStreak;
+    conquistasSequenciaValorEl.textContent = streakAtual;
+    conquistasMetaPillEl.textContent = streakAtual >= 12 ? "Marco máximo" : "Meta: " + proximaMeta + " semanas";
+    conquistasSequenciaBarraEl.style.width = percentagemSequencia + "%";
+    if (streakAtual === 0) {
+      conquistasSequenciaTituloEl.textContent = "Começa a tua sequência";
+      conquistasSequenciaTextoEl.textContent = "Regista um treino para desbloquear o primeiro marco.";
+    } else if (streakAtual >= 12) {
+      conquistasSequenciaTituloEl.textContent = "Sequência de elite";
+      conquistasSequenciaTextoEl.textContent = "Já alcançaste o marco máximo de consistência.";
+    } else {
+      const faltam = proximaMeta - streakAtual;
+      conquistasSequenciaTituloEl.textContent = "Estás em ritmo";
+      conquistasSequenciaTextoEl.textContent = "Falta" + (faltam === 1 ? "" : "m") + " " + faltam + " semana" + (faltam === 1 ? "" : "s") + " para o próximo marco.";
+    }
+
+    const marcosStreak = metasStreak.map(function (meta) {
+      return {
+        icone: meta === 1 ? "semente" : meta === 4 ? "chama" : meta === 8 ? "trofeu" : "diamante",
+        titulo: meta === 1 ? "Primeira semana" : meta === 4 ? "Mês consistente" : meta === 8 ? "Hábito criado" : "Trimestre forte",
+        desc: meta === 1 ? "Completa pelo menos 1 treino esta semana." : meta + " semanas seguidas de treino.",
+        atual: streakAtual,
+        meta: meta,
+        concluido: melhorStreak >= meta,
+        emProgresso: streakAtual > 0 && streakAtual < meta && melhorStreak < meta
+      };
+    });
+
+    const marcosVolume = [10, 25, 50, 100].map(function (meta) {
+      return {
+        icone: meta === 10 ? "halter" : meta === 25 ? "medalha" : meta === 50 ? "estrela" : "trofeu",
+        titulo: meta + " treinos",
+        desc: meta === 10 ? "Primeiro ciclo de treino." : meta === 25 ? "Rotina consolidada." : meta === 50 ? "Meio caminho para 100." : "Cem treinos concluídos.",
+        atual: totalTreinos,
+        meta: meta,
+        concluido: totalTreinos >= meta,
+        emProgresso: totalTreinos > 0 && totalTreinos < meta
+      };
+    });
+
+    marcosListaStreakEl.innerHTML = marcosStreak.map(criarMarcoHtml).join("");
+    marcosListaVolumeEl.innerHTML = marcosVolume.map(criarMarcoHtml).join("");
+  }
+
+  renderConquistas({});
+  chamarApi("getResumoConquistasPortal", {})
+    .then(function (resp) {
+      if (resp && resp.ok && resp.dados) renderConquistas(resp.dados);
+    })
+    .catch(function () {
+      // Mantém a estrutura a zero até a ligação voltar.
+    });
+
+  // ---------- Opções ----------
+  const ESTADO_PILL_CLASSE = { Ativo: "ativo", Pausado: "pausado", Cancelado: "cancelado" };
+  const opcoesAvatarInicialEl = document.getElementById("opcoesAvatarInicial");
+  const opcoesNomeClienteEl = document.getElementById("opcoesNomeCliente");
+  const opcoesEstadoPillEl = document.getElementById("opcoesEstadoPill");
+  const opcoesPlanoServicoEl = document.getElementById("opcoesPlanoServico");
+  const opcoesPlanoValidadeLinhaEl = document.getElementById("opcoesPlanoValidadeLinha");
+  const opcoesPlanoValidadeEl = document.getElementById("opcoesPlanoValidade");
+  const opcoesPlanoSessoesLinhaEl = document.getElementById("opcoesPlanoSessoesLinha");
+  const opcoesPlanoSessoesEl = document.getElementById("opcoesPlanoSessoes");
+  const opcoesBtnContactoPTEl = document.getElementById("opcoesBtnContactoPT");
+  const opcoesContactoPTTituloEl = document.getElementById("opcoesContactoPTTitulo");
+  const opcoesContactoPTSubEl = document.getElementById("opcoesContactoPTSub");
+
+  var opcoesContactoPTNumero = "";
+
+  function renderOpcoes(dados) {
+    const nome = String(dados.nome || "").trim();
+    if (nome) {
+      opcoesNomeClienteEl.textContent = nome;
+      opcoesAvatarInicialEl.textContent = nome.charAt(0).toUpperCase();
+      atualizarIdentidadeCliente(nome.split(" ")[0]);
+    }
+
+    if (dados.estado) {
+      const classe = ESTADO_PILL_CLASSE[dados.estado] || "ativo";
+      opcoesEstadoPillEl.textContent = dados.estado;
+      opcoesEstadoPillEl.className = "perfil-estado-pill " + classe;
+      opcoesEstadoPillEl.classList.remove("oculto");
+    }
+
+    opcoesPlanoServicoEl.textContent = dados.servicoAtual || "A combinar com o André";
+
+    if (dados.validadeAte) {
+      opcoesPlanoValidadeEl.textContent = dados.validadeAte;
+      opcoesPlanoValidadeLinhaEl.classList.remove("oculto");
+    }
+
+    if (dados.sessoesRestantes !== null && dados.sessoesRestantes !== undefined) {
+      opcoesPlanoSessoesEl.textContent = dados.sessoesRestantes;
+      opcoesPlanoSessoesLinhaEl.classList.remove("oculto");
+    }
+
+    if (dados.contactoPTNome) {
+      opcoesContactoPTTituloEl.textContent = "Falar com " + dados.contactoPTNome;
+    }
+    if (dados.contactoPTNumero) {
+      // Aceita o número guardado com ou sem indicativo de país (ex.: "915707627"
+      // ou "351915707627") e normaliza sempre para o formato internacional.
+      let digitos = String(dados.contactoPTNumero).replace(/\D/g, "");
+      if (digitos.length === 9) digitos = "351" + digitos;
+      opcoesContactoPTNumero = digitos;
+      opcoesContactoPTSubEl.textContent = "Dúvidas, faltas ou remarcações";
+    } else {
+      opcoesContactoPTSubEl.textContent = "Contacto ainda não disponível";
+    }
+  }
+
+  opcoesBtnContactoPTEl.addEventListener("click", function () {
+    if (opcoesContactoPTNumero) {
+      window.open("https://wa.me/" + opcoesContactoPTNumero, "_blank");
+    }
+  });
+
+  chamarApi("getResumoOpcoesPortal", {})
+    .then(function (resp) {
+      if (resp && resp.ok && resp.dados) renderOpcoes(resp.dados);
+    })
+    .catch(function () {
+      // Sem ligação — o ecrã Opções fica com os valores por omissão até haver rede.
+    });
+
+  // ---------- Perfil: métricas pessoais de caminhada e corrida ----------
+  const CHAVE_METRICAS_ATIVIDADE = "ALMOVE_METRICAS_" + TOKEN;
+  const METRICAS_PADRAO = { pesoKg: "", alturaCm: "", genero: "", passadaCaminhadaCm: "", passadaCorridaCm: "", atividade: "caminhada", velocidadeCaminhada: 4.8, velocidadeCorrida: 8, corridaDistanciaKm: "", corridaVelocidadeKmh: "" };
+  let metricasAtividade = lerMetricasAtividade();
+
+  function lerMetricasAtividade() {
+    try { return Object.assign({}, METRICAS_PADRAO, JSON.parse(localStorage.getItem(CHAVE_METRICAS_ATIVIDADE) || "{}")); }
+    catch (e) { return Object.assign({}, METRICAS_PADRAO); }
+  }
+  function guardarMetricasLocais() { try { localStorage.setItem(CHAVE_METRICAS_ATIVIDADE, JSON.stringify(metricasAtividade)); } catch (e) {} }
+  function numeroMetrica(valor) { return Math.max(0, Number(String(valor || "").replace(",", ".")) || 0); }
+  function opcoesVelocidade() { return [{ valor: 3.2, nome: "Lenta", meta: "3,2 km/h" }, { valor: 4.8, nome: "Média", meta: "4,8 km/h" }, { valor: 6.4, nome: "Rápida", meta: "6,4 km/h" }]; }
+  function metEstimado(atividade, velocidade) {
+    if (atividade === "corrida") return velocidade <= 8 ? 8.3 : velocidade <= 10 ? 9.8 : 11.5;
+    return velocidade <= 3.2 ? 2.8 : velocidade <= 4.8 ? 3.5 : 5.0;
+  }
+  function lerCamposMetricas() {
+    const campos = { pesoKg: "metricasPeso", alturaCm: "metricasAltura", passadaCaminhadaCm: "metricasPassadaCaminhada", passadaCorridaCm: "metricasPassadaCorrida", corridaDistanciaKm: "metricasCorridaDistancia", corridaVelocidadeKmh: "metricasCorridaVelocidade" };
+    Object.keys(campos).forEach(function (campo) { const el = document.getElementById(campos[campo]); if (el) metricasAtividade[campo] = el.value; });
+    const genero = document.getElementById("metricasGenero"); if (genero) metricasAtividade.genero = genero.value;
+  }
+  function atualizarMetricasDiariasInicio() {
+    const passos = obterPassosHoje(), peso = numeroMetrica(metricasAtividade.pesoKg), passada = numeroMetrica(metricasAtividade.passadaCaminhadaCm), velocidade = Number(metricasAtividade.velocidadeCaminhada || 4.8);
+    const passosEl = document.getElementById("inicioPassosHoje"), distanciaEl = document.getElementById("inicioDistanciaDiaria"), duracaoEl = document.getElementById("inicioDuracaoDiaria"), caloriasEl = document.getElementById("inicioCaloriasDiarias");
+    if (passosEl) passosEl.textContent = formatarPassos(passos);
+    if (!passada || !peso) { if (distanciaEl) distanciaEl.textContent = "—"; if (duracaoEl) duracaoEl.textContent = "—"; if (caloriasEl) caloriasEl.textContent = "—"; return; }
+    const metros = passos * passada / 100, minutos = velocidade ? metros / 1000 / velocidade * 60 : 0, kcal = metEstimado("caminhada", velocidade) * 3.5 * peso / 200 * minutos;
+    if (distanciaEl) distanciaEl.textContent = Math.round(metros).toLocaleString("pt-PT") + " m";
+    if (duracaoEl) duracaoEl.textContent = Math.round(minutos) + " min";
+    if (caloriasEl) caloriasEl.textContent = Math.round(kcal) + " kcal";
+  }
+  function atualizarResultadoMetricas() {
+    const resultado = document.getElementById("metricasResultado"); if (!resultado) return;
+    if (metricasAtividade.atividade !== "corrida") { resultado.innerHTML = ""; atualizarMetricasDiariasInicio(); return; }
+    const peso = numeroMetrica(metricasAtividade.pesoKg), distancia = numeroMetrica(metricasAtividade.corridaDistanciaKm), velocidade = numeroMetrica(metricasAtividade.corridaVelocidadeKmh);
+    if (!peso || !distancia || !velocidade) { resultado.innerHTML = '<div class="metricas-vazio">Indica peso, distância e velocidade para calcular a corrida.</div>'; return; }
+    const minutos = distancia / velocidade * 60, calorias = metEstimado("corrida", velocidade) * 3.5 * peso / 200 * minutos;
+    resultado.innerHTML = '<div class="metricas-resultado-item"><strong>' + Math.round(minutos) + ' min</strong><span>Duração aprox.</span></div><div class="metricas-resultado-item"><strong>' + Math.round(calorias) + ' kcal</strong><span>Energia aprox.</span></div><div class="metricas-resultado-item"><strong>' + velocidade.toLocaleString("pt-PT") + ' km/h</strong><span>Velocidade</span></div>';
+  }
+  function renderMetricasAtividade() {
+    const campos = { pesoKg: "metricasPeso", alturaCm: "metricasAltura", passadaCaminhadaCm: "metricasPassadaCaminhada", passadaCorridaCm: "metricasPassadaCorrida", corridaDistanciaKm: "metricasCorridaDistancia", corridaVelocidadeKmh: "metricasCorridaVelocidade" };
+    Object.keys(campos).forEach(function (campo) { const el = document.getElementById(campos[campo]); if (el && document.activeElement !== el) el.value = metricasAtividade[campo] || ""; });
+    const genero = document.getElementById("metricasGenero"); if (genero && document.activeElement !== genero) genero.value = metricasAtividade.genero || "";
+    document.querySelectorAll(".metricas-modo-btn").forEach(function (btn) { btn.classList.toggle("ativo", btn.dataset.atividade === metricasAtividade.atividade); });
+    const corrida = metricasAtividade.atividade === "corrida";
+    document.getElementById("metricasCorridaCampos").classList.toggle("oculto", !corrida);
+    document.getElementById("metricasVelocidade").parentElement.classList.toggle("oculto", corrida);
+    const nota = document.getElementById("metricasNota"); if (nota) nota.textContent = corrida ? "Calculadora aproximada: usa a distância e a velocidade que indicares." : "Estes dados servem para estimar as métricas diárias dos teus passos no Início.";
+    const titulo = document.getElementById("metricasVelocidadeTitulo"); if (titulo) titulo.textContent = "Ritmo de caminhada";
+    const velocidadeAtual = Number(metricasAtividade.velocidadeCaminhada);
+    const velocidades = document.getElementById("metricasVelocidade");
+    if (velocidades) {
+      velocidades.innerHTML = opcoesVelocidade().map(function (opcao) { return '<button type="button" data-velocidade="' + opcao.valor + '" class="' + (Number(opcao.valor) === velocidadeAtual ? "ativo" : "") + '">' + opcao.nome + '<small>' + opcao.meta + '</small></button>'; }).join("");
+      velocidades.querySelectorAll("button").forEach(function (btn) { btn.addEventListener("click", function () { metricasAtividade.velocidadeCaminhada = Number(btn.dataset.velocidade); guardarMetricasLocais(); renderMetricasAtividade(); }); });
+    }
+    atualizarResultadoMetricas();
+  }
+  function guardarMetricasAtividade() {
+    lerCamposMetricas(); guardarMetricasLocais(); atualizarResultadoMetricas();
+    const sync = document.getElementById("metricasSync");
+    if (!navigator.onLine) { if (sync) sync.textContent = "Guardado neste dispositivo. Será sincronizado quando houver ligação."; return; }
+    if (sync) sync.textContent = "A sincronizar…";
+    chamarApi("guardarMetricasAtividadePortal", metricasAtividade)
+      .then(function (resp) { if (!resp || !resp.ok) throw new Error(); if (resp.dados) { metricasAtividade = Object.assign({}, metricasAtividade, resp.dados); guardarMetricasLocais(); renderMetricasAtividade(); } if (sync) sync.textContent = "Métricas sincronizadas."; })
+      .catch(function () { if (sync) sync.textContent = "Guardado neste dispositivo. A sincronização fica pendente."; });
+  }
+  document.querySelectorAll(".metricas-modo-btn").forEach(function (btn) { btn.addEventListener("click", function () { metricasAtividade.atividade = btn.dataset.atividade; guardarMetricasLocais(); renderMetricasAtividade(); }); });
+  ["metricasPeso", "metricasAltura", "metricasPassadaCaminhada", "metricasPassadaCorrida", "metricasGenero", "metricasCorridaDistancia", "metricasCorridaVelocidade"].forEach(function (id) { const el = document.getElementById(id); if (el) el.addEventListener("input", function () { lerCamposMetricas(); guardarMetricasLocais(); atualizarResultadoMetricas(); }); });
+  document.getElementById("btnGuardarMetricas").addEventListener("click", guardarMetricasAtividade);
+  document.querySelectorAll("[data-metricas-icone]").forEach(function (el) { trocarIconeDentro(el, el.getAttribute("data-metricas-icone")); });
+  document.querySelectorAll("[data-perfil-icone]").forEach(function (el) { trocarIconeDentro(el, el.getAttribute("data-perfil-icone")); });
+  const perfilMetricasEl = document.getElementById("perfilMetricas");
+  function abrirPerfilMetricas(tipo) {
+    metricasAtividade.atividade = tipo === "corrida" ? "corrida" : "caminhada";
+    guardarMetricasLocais();
+    document.body.classList.add("perfil-detalhe-aberto");
+    perfilMetricasEl.classList.remove("oculto");
+    renderMetricasAtividade();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function fecharPerfilMetricas() {
+    document.body.classList.remove("perfil-detalhe-aberto");
+    perfilMetricasEl.classList.add("oculto");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  document.querySelectorAll("[data-abrir-perfil]").forEach(function (btn) { btn.addEventListener("click", function () { abrirPerfilMetricas(btn.dataset.abrirPerfil); }); });
+  document.getElementById("btnVoltarPerfil").addEventListener("click", fecharPerfilMetricas);
+
+  // ---------- Barra "O teu percurso de hoje" ----------
+  const fluxoHojeEl = document.getElementById("fluxoHoje");
+  const fluxoHojeStatusEl = document.getElementById("fluxoHojeStatus");
+
+  function renderFluxoHoje() {
+    fluxoHojeEl.classList.remove("oculto");
+
+    const estado = lerEstadoDiario();
+    let etapaAtual = 1;
+    let mensagem = "Começa pelo check-in para desbloquear o treino de hoje.";
+
+    const temCheckin = CHECKIN_HOJE_CONFIRMADO || !!(estado.checkin && (estado.checkin.submitted || estado.checkin.values));
+    const teste = obterProntidaoAtual();
+
+    if (temCheckin) {
+      etapaAtual = 2;
+      mensagem = "Check-in concluído. Faz agora o teste de prontidão.";
+    }
+
+    if (temCheckin && teste && (teste.medianaMs || teste.ignorado)) {
+      etapaAtual = 3;
+      mensagem = teste.ignorado
+        ? "Pronto. Agora escolhe o treino de hoje."
+        : "Teste concluído. Agora escolhe o treino de hoje.";
+    }
+
+    if (estado.workout && estado.workout.status === "active") {
+      etapaAtual = 4;
+      mensagem = "Estás a treinar. Regista as séries à medida que avanças.";
+    } else if (estado.workout && estado.workout.status === "post-workout") {
+      etapaAtual = 5;
+      mensagem = "Treino terminado. Falta apenas o feedback final.";
+    } else if (estado.workout && estado.workout.status === "completed") {
+      etapaAtual = 6;
+      mensagem = "Dia concluído. Excelente trabalho!";
+    }
+
+    fluxoHojeStatusEl.textContent = mensagem;
+
+    for (let i = 1; i <= 6; i++) {
+      const etapaEl = document.getElementById("fluxoHojeEtapa" + i);
+      etapaEl.classList.remove("concluido", "ativo");
+      if (i < etapaAtual) etapaEl.classList.add("concluido");
+      else if (i === etapaAtual) etapaEl.classList.add("ativo");
+    }
+  }
+
+  function abrirEtapaEditavel(etapa) {
+    const estado = lerEstadoDiario();
+    if (etapa === "checkin") {
+      if (!(estado.checkin && estado.checkin.values) && !CHECKIN_HOJE_CONFIRMADO) return;
+      const tentativas = Number((estado.checkin && estado.checkin.tentativasHoje) || (CHECKIN_HOJE_CONFIRMADO ? 1 : 0));
+      if (tentativas >= 2) { showToastTreino("Já fizeste os dois check-ins permitidos para hoje."); return; }
+      preencherRespostas((estado.checkin && estado.checkin.values) || {});
+      checkinResumo.classList.add("oculto");
+      checkinForm.classList.remove("oculto");
+      cardProntidao.classList.add("oculto");
+      cardEscolherTreino.classList.add("oculto");
+      cardExecucaoTreino.classList.add("oculto");
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = "Guardar alterações";
+      checkinErro.style.display = "none";
+      mudarTab("hoje");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    if (etapa === "teste") {
+      if (!temCheckinFeito()) return;
+      cardCheckin.classList.add("oculto");
+      cardEscolherTreino.classList.add("oculto");
+      cardExecucaoTreino.classList.add("oculto");
+      cardProntidao.classList.remove("oculto");
+      renderProntidao();
+      mudarTab("hoje");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+  fluxoHojeEl.addEventListener("click", function (evento) {
+    const botao = evento.target.closest("[data-fluxo-etapa]");
+    if (botao) abrirEtapaEditavel(botao.dataset.fluxoEtapa);
+  });
+
+  // ---------- Estado local (offline-first) ----------
+  // Mesmo padrão do Portal.html actual: guarda um rascunho do dia por
+  // token+data, para nunca se perder uma resposta por falta de rede.
+  function dataLocalHoje() {
+    const agora = new Date();
+    return agora.getFullYear() + "-" + String(agora.getMonth() + 1).padStart(2, "0") + "-" + String(agora.getDate()).padStart(2, "0");
+  }
+
+  function chaveEstadoDiario() {
+    return "ALMOVE_DAILY_" + TOKEN + "_" + dataLocalHoje();
+  }
+
+  function lerEstadoDiario() {
+    const base = { date: dataLocalHoje(), checkin: null };
+    try {
+      const raw = localStorage.getItem(chaveEstadoDiario());
+      if (!raw) return base;
+      return Object.assign(base, JSON.parse(raw) || {});
+    } catch (e) {
+      return base;
+    }
+  }
+
+  function guardarEstadoDiario(estado) {
+    try {
+      localStorage.setItem(chaveEstadoDiario(), JSON.stringify(estado));
+    } catch (e) {
+      // localStorage indisponível — segue sem rascunho local.
+    }
+  }
+
+  function gerarIdLocal() {
+    return "ck_" + Date.now() + "_" + Math.random().toString(36).slice(2, 9);
+  }
+
+  // ---------- Chamadas à API (via o estafeta /api/almove) ----------
+  function chamarApi(fn, dados) {
+    const corpo = Object.assign({ fn: fn, token: TOKEN }, dados || {});
+    return fetch("/api/almove", {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(corpo)
+    }).then(function (resposta) {
+      return resposta.json();
+    });
+  }
+
+  // ---------- Passos: valor real, guardado no Apps Script ----------
+  const META_PASSOS = 8000;
+  const META_PASSOS_SEMANAL = META_PASSOS * 7;
+  var PASSOS_PORTAL = {};
+  const inicioPassosSemanaEl = document.getElementById("inicioPassosSemana");
+  const inicioPassosSemanaBarraEl = document.getElementById("inicioPassosSemanaBarra");
+  const passosSemanaTotalEl = document.getElementById("passosSemanaTotal");
+  const passosSemanaBarraEl = document.getElementById("passosSemanaBarra");
+  const passosSemanaPercentagemEl = document.getElementById("passosSemanaPercentagem");
+  const passosSemanaTextoEl = document.getElementById("passosSemanaTexto");
+  const passosHojeValorEl = document.getElementById("passosHojeValor");
+  const passosHojeBarraEl = document.getElementById("passosHojeBarra");
+  const passosHojeEstadoEl = document.getElementById("passosHojeEstado");
+  const btnRetirarPassos = document.getElementById("btnRetirarPassos");
+  const btnAdicionarPassos = document.getElementById("btnAdicionarPassos");
+  const btnSubmeterPassos = document.getElementById("btnSubmeterPassos");
+  const btnEditarPassos = document.getElementById("btnEditarPassos");
+  const marcosListaPassosEl = document.getElementById("marcosListaPassos");
+
+  function numeroPassos(valor) {
+    return Math.max(0, Math.round(Number(valor) || 0));
+  }
+
+  function formatarPassos(valor) {
+    return numeroPassos(valor).toLocaleString("pt-PT");
+  }
+
+  function obterEstadoPassos() {
+    const estado = lerEstadoDiario();
+    return estado.steps || null;
+  }
+
+  function obterPassosHoje() {
+    const passosLocais = obterEstadoPassos();
+    if (passosLocais && passosLocais.value !== null && passosLocais.value !== undefined) return numeroPassos(passosLocais.value);
+    return numeroPassos(PASSOS_PORTAL.passosHoje);
+  }
+
+  function obterPassosSemana() {
+    const passosLocais = obterEstadoPassos();
+    const remotoHoje = numeroPassos(PASSOS_PORTAL.passosHoje);
+    const remotoSemana = numeroPassos(PASSOS_PORTAL.passosSemana);
+    return Math.max(0, remotoSemana + (passosLocais ? obterPassosHoje() - remotoHoje : 0));
+  }
+
+  function guardarPassosLocais(valor, submetido, synced) {
+    const estado = lerEstadoDiario();
+    estado.steps = {
+      value: numeroPassos(valor),
+      submitted: !!submetido,
+      synced: !!synced,
+      eventId: (estado.steps && estado.steps.eventId) || gerarIdLocal()
+    };
+    guardarEstadoDiario(estado);
+  }
+
+  function aplicarResumoPassos(resumo) {
+    PASSOS_PORTAL = resumo || {};
+    const local = obterEstadoPassos();
+    if (!local || local.value === null || local.value === undefined) {
+      guardarPassosLocais(PASSOS_PORTAL.passosHoje, !!PASSOS_PORTAL.passosHojeSubmetidos, !!PASSOS_PORTAL.passosHojeSubmetidos);
+    }
+    renderPassos();
+    sincronizarPassosPendentes();
+  }
+
+  function alterarPassos(delta) {
+    const local = obterEstadoPassos();
+    if (local && local.submitted) return;
+    guardarPassosLocais(obterPassosHoje() + delta, false, false);
+    renderPassos();
+  }
+
+  function editarPassos() {
+    guardarPassosLocais(obterPassosHoje(), false, false);
+    renderPassos();
+  }
+
+  function renderTrofeusPassos() {
+    if (!marcosListaPassosEl) return;
+    const total = obterPassosSemana();
+    const trofeus = [
+      { meta: 15000, icone: "passos", titulo: "Primeiros passos", desc: "15 mil passos numa semana." },
+      { meta: 30000, icone: "caminhar", titulo: "Em movimento", desc: "30 mil passos numa semana." },
+      { meta: 56000, icone: "estrela", titulo: "Meta semanal", desc: "56 mil passos numa semana." },
+      { meta: 75000, icone: "foguetao", titulo: "Passada extra", desc: "75 mil passos numa semana." },
+      { meta: 100000, icone: "medalha", titulo: "100K Club", desc: "100 mil passos numa semana." }
+    ].map(function (trofeu) {
+      return Object.assign({}, trofeu, {
+        atual: total,
+        concluido: total >= trofeu.meta,
+        emProgresso: total > 0 && total < trofeu.meta
+      });
+    });
+    marcosListaPassosEl.innerHTML = trofeus.map(criarMarcoHtml).join("");
+  }
+
+  function renderPassos() {
+    const hoje = obterPassosHoje();
+    const semana = obterPassosSemana();
+    const estado = obterEstadoPassos();
+    const submetido = !!(estado && estado.submitted);
+    const synced = !!(estado && estado.synced);
+    const percentHoje = Math.min(100, Math.round((hoje / META_PASSOS) * 100));
+    const percentSemana = Math.min(100, Math.round((semana / META_PASSOS_SEMANAL) * 100));
+
+    inicioPassosSemanaEl.textContent = formatarPassos(semana);
+    inicioPassosSemanaBarraEl.style.width = percentSemana + "%";
+    passosSemanaTotalEl.textContent = formatarPassos(semana);
+    passosSemanaBarraEl.style.width = percentSemana + "%";
+    passosSemanaPercentagemEl.textContent = percentSemana + "%";
+    passosSemanaTextoEl.textContent = semana >= META_PASSOS_SEMANAL
+      ? "Meta semanal atingida. Excelente ritmo!"
+      : "Faltam " + formatarPassos(META_PASSOS_SEMANAL - semana) + " passos para a meta semanal.";
+    passosHojeValorEl.textContent = formatarPassos(hoje);
+    passosHojeBarraEl.style.width = percentHoje + "%";
+    passosHojeEstadoEl.textContent = submetido && synced
+      ? "Passos sincronizados."
+      : submetido
+        ? "Guardado neste dispositivo. Falta sincronizar."
+        : hoje >= META_PASSOS
+          ? "Meta diária atingida. Excelente trabalho!"
+          : "Faltam " + formatarPassos(META_PASSOS - hoje) + " passos para a meta de hoje.";
+    btnRetirarPassos.disabled = submetido;
+    btnAdicionarPassos.disabled = submetido;
+    btnSubmeterPassos.classList.toggle("oculto", submetido);
+    btnEditarPassos.classList.toggle("oculto", !submetido);
+    renderTrofeusPassos();
+    atualizarResultadoMetricas();
+  }
+
+  function submeterPassos() {
+    const valor = obterPassosHoje();
+    guardarPassosLocais(valor, true, false);
+    renderPassos();
+    if (!navigator.onLine) {
+      showToastTreino("Sem ligação. Os passos serão sincronizados quando voltares a ter rede.");
+      return;
+    }
+    btnSubmeterPassos.disabled = true;
+    btnSubmeterPassos.textContent = "A sincronizar…";
+    const estado = obterEstadoPassos();
+    chamarApi("guardarPassosPortal", { dataISO: dataLocalHoje(), passos: valor, eventId: estado.eventId })
+      .then(function (resp) {
+        if (!resp || !resp.ok) throw new Error((resp && resp.erro) || "Falha ao guardar passos");
+        PASSOS_PORTAL = resp.dados || {};
+        guardarPassosLocais(valor, true, true);
+        renderPassos();
+      })
+      .catch(function () {
+        guardarPassosLocais(valor, true, false);
+        renderPassos();
+        showToastTreino("Não foi possível sincronizar os passos agora.");
+      })
+      .finally(function () {
+        btnSubmeterPassos.disabled = false;
+        btnSubmeterPassos.textContent = "Guardar passos";
+      });
+  }
+
+  function sincronizarPassosPendentes() {
+    const estado = obterEstadoPassos();
+    if (!estado || !estado.submitted || estado.synced || !navigator.onLine) return;
+    submeterPassos();
+  }
+
+  btnRetirarPassos.addEventListener("click", function () { alterarPassos(-500); });
+  btnAdicionarPassos.addEventListener("click", function () { alterarPassos(500); });
+  btnSubmeterPassos.addEventListener("click", submeterPassos);
+  btnEditarPassos.addEventListener("click", editarPassos);
+  renderPassos();
+
+  // ---------- Selecção de respostas (1-5 / 0-4) ----------
+  // Cada pergunta declara o sentido da sua escala: crescente = 5 é melhor;
+  // decrescente = o menor valor é melhor (stress, dor, esforço e dificuldade).
+  const CONFIGURACAO_ESCALAS = {
+    sono: { min: 1, max: 5, sentido: "crescente" },
+    stress: { min: 1, max: 5, sentido: "decrescente" },
+    cansaco: { min: 1, max: 5, sentido: "crescente" },
+    refeicoes: { min: 1, max: 5, sentido: "crescente" },
+    doms: { min: 0, max: 4, sentido: "decrescente" },
+    energia: { min: 1, max: 5, sentido: "crescente" },
+    esforco: { min: 1, max: 5, sentido: "decrescente" },
+    dificuldade: { min: 1, max: 5, sentido: "decrescente" }
+  };
+  const CLASSES_ESCALA = ["escala-muito-mau", "escala-mau", "escala-medio", "escala-bom", "escala-muito-bom"];
+
+  function classeQualidadeEscala(campo, valor) {
+    const config = CONFIGURACAO_ESCALAS[campo] || { min: 1, max: 5, sentido: "crescente" };
+    const intervalo = Math.max(1, config.max - config.min);
+    let qualidade = (Number(valor) - config.min) / intervalo;
+    if (config.sentido === "decrescente") qualidade = 1 - qualidade;
+    const indice = Math.max(0, Math.min(4, Math.round(qualidade * 4)));
+    return CLASSES_ESCALA[indice];
+  }
+
+  function selecionarOpcaoEscala(grupo, opcao, campo) {
+    grupo.querySelectorAll(".opcao").forEach(function (el) {
+      el.classList.remove("selecionada");
+      CLASSES_ESCALA.forEach(function (classe) { el.classList.remove(classe); });
+    });
+    if (!opcao) return;
+    opcao.classList.add("selecionada", classeQualidadeEscala(campo, Number(opcao.getAttribute("data-valor"))));
+  }
+
+  const respostas = {};
+
+  document.querySelectorAll(".opcoes").forEach(function (grupo) {
+    grupo.addEventListener("click", function (evento) {
+      const opcao = evento.target.closest(".opcao");
+      if (!opcao) return;
+      const campo = grupo.getAttribute("data-campo");
+      respostas[campo] = Number(opcao.getAttribute("data-valor"));
+      selecionarOpcaoEscala(grupo, opcao, campo);
+      checkinErro.style.display = "none";
+    });
+  });
+
+  function preencherRespostas(valores) {
+    Object.keys(valores || {}).forEach(function (campo) {
+      const valor = valores[campo];
+      if (valor === undefined || valor === null) return;
+      respostas[campo] = valor;
+      const grupo = document.querySelector('.opcoes[data-campo="' + campo + '"]');
+      if (!grupo) return;
+      const opcaoSelecionada = Array.from(grupo.querySelectorAll(".opcao")).find(function (el) { return Number(el.getAttribute("data-valor")) === Number(valor); });
+      selecionarOpcaoEscala(grupo, opcaoSelecionada, campo);
+    });
+    if (valores && valores.nota) checkinNota.value = valores.nota;
+  }
+
+  function mostrarEstadoSync(tipo, texto) {
+    estadoSync.classList.remove("oculto");
+    estadoSync.classList.toggle("offline", tipo === "offline");
+    estadoSyncTexto.textContent = texto;
+  }
+
+  function mostrarResumo(valores) {
+    const linhas = [
+      ["Sono", valores.sono],
+      ["Stress", valores.stress],
+      ["Energia", valores.cansaco],
+      ["Alimentação", valores.refeicoes],
+      ["Dor muscular", valores.doms]
+    ];
+    let html = "";
+    linhas.forEach(function (linha) {
+      html += '<div class="resumo-linha"><span>' + linha[0] + "</span><span>" + linha[1] + "</span></div>";
+    });
+    if (valores.nota) {
+      html += '<div class="resumo-linha"><span>Nota</span><span>' + valores.nota + "</span></div>";
+    }
+    checkinResumo.innerHTML = html;
+    checkinResumo.classList.remove("oculto");
+    checkinForm.classList.add("oculto");
+  }
+
+  // ---------- Envio ----------
+  function submeterCheckin() {
+    const campos = ["sono", "stress", "cansaco", "refeicoes", "doms"];
+    const falta = campos.filter(function (campo) { return respostas[campo] === undefined; });
+
+    if (falta.length) {
+      checkinErro.textContent = "Falta responder a tudo antes de enviares.";
+      checkinErro.style.display = "block";
+      return;
+    }
+
+    const estadoAnterior = lerEstadoDiario();
+    const tentativasAnteriores = Number((estadoAnterior.checkin && estadoAnterior.checkin.tentativasHoje) || (CHECKIN_HOJE_CONFIRMADO ? 1 : 0));
+    if (tentativasAnteriores >= 2) {
+      checkinErro.textContent = "Já fizeste os dois check-ins permitidos para hoje.";
+      checkinErro.style.display = "block";
+      return;
+    }
+
+    const payload = {
+      sono: respostas.sono,
+      stress: respostas.stress,
+      cansaco: respostas.cansaco,
+      refeicoes: respostas.refeicoes,
+      doms: respostas.doms,
+      nota: checkinNota.value || "",
+      eventId: gerarIdLocal()
+    };
+
+    // Guarda localmente antes de tentar o servidor — nunca se perde a resposta.
+    const estado = lerEstadoDiario();
+    estado.checkin = { values: payload, submitted: true, synced: false, eventId: payload.eventId, tentativasHoje: tentativasAnteriores + 1 };
+    guardarEstadoDiario(estado);
+
+    mostrarResumo(payload);
+
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = "A sincronizar…";
+    mostrarEstadoSync("saving", "A guardar…");
+
+    if (!navigator.onLine) {
+      btnSubmit.textContent = "Tentar sincronizar";
+      btnSubmit.disabled = false;
+      mostrarEstadoSync("offline", "Sem ligação · dados guardados neste dispositivo");
+      return;
+    }
+
+    chamarApi("registarCheckin", payload)
+      .then(function (resp) {
+        if (!resp || !resp.ok) throw new Error((resp && resp.erro) || "Falha desconhecida");
+        const estadoAtual = lerEstadoDiario();
+        if (estadoAtual.checkin) estadoAtual.checkin.synced = true;
+        guardarEstadoDiario(estadoAtual);
+        mostrarEstadoSync("ok", "Sincronizado");
+      })
+      .catch(function () {
+        btnSubmit.textContent = "Tentar sincronizar";
+        btnSubmit.disabled = false;
+        mostrarEstadoSync("offline", "Sem ligação. Os teus dados ficaram guardados neste dispositivo.");
+      });
+
+    CHECKIN_HOJE_CONFIRMADO = true;
+    if (estado.workout && estado.workout.status === "active") restaurarEstadoTreino();
+    else mostrarCardProntidao();
+  }
+
+  btnSubmit.addEventListener("click", submeterCheckin);
+
+  // ==========================================================
+  // TESTE DE PRONTIDÃO (passo 2 de 3)
+  // ==========================================================
+  const cardProntidao = document.getElementById("cardProntidao");
+  const prontidaoConteudo = document.getElementById("prontidaoConteudo");
+
+  var prontidaoEmCurso = false;
+  var prontidaoVerde = false;
+  var prontidaoInicio = 0;
+  var prontidaoTemporizador = null;
+  var prontidaoTempos = [];
+  var PRONTIDAO_HOJE_INICIAL = null; // preenchido a partir de getEstadoPortalHoje
+
+  function obterProntidaoAtual() {
+    return lerEstadoDiario().testeProntidao || PRONTIDAO_HOJE_INICIAL || null;
+  }
+
+  function notaProntidao(teste) {
+    if (!teste || !teste.referenciaMs) return "Estamos a criar a tua referência pessoal. Faz o teste antes de cada treino.";
+    if (teste.estado === "abaixo-do-habitual") return "Hoje estás abaixo do teu ritmo habitual. Dá prioridade à técnica e deixa 1–2 repetições na reserva nos exercícios principais.";
+    if (teste.estado === "acima-do-habitual") return "Boa prontidão face ao teu habitual. Mantém a execução controlada e aproveita o treino.";
+    return "Estás dentro do teu padrão habitual de prontidão.";
+  }
+
+  function mostrarCardProntidao() {
+    // O check-in já foi guardado. Fica assinalado no percurso de hoje, sem
+    // ocupar o ecrã enquanto o cliente faz o teste e o treino.
+    cardCheckin.classList.add("oculto");
+    cardProntidao.classList.remove("oculto");
+    renderProntidao();
+    renderFluxoHoje();
+  }
+
+  function renderProntidao() {
+    if (!cardProntidao || cardProntidao.classList.contains("oculto")) return;
+
+    const teste = obterProntidaoAtual();
+
+    if (teste && teste.ignorado) {
+      cardProntidao.classList.add("oculto");
+      return;
+    }
+
+    if (teste && teste.medianaMs) {
+      const referencia = teste.referenciaMs ? "Referência pessoal: " + teste.referenciaMs + " ms" : "Referência pessoal em construção";
+      prontidaoConteudo.innerHTML =
+        '<div class="prontidao-resultado"><span class="fluxo-passo">Passo 2 de 3 · Teste concluído</span>' +
+        '<div class="prontidao-ms">' + teste.medianaMs + ' <small>ms</small></div>' +
+        '<div class="prontidao-tentativas">Mediana de ' + (teste.tentativas || 5) + ' toques · ' + referencia + '</div>' +
+        '<p class="prontidao-nota">' + notaProntidao(teste) + '</p></div>' +
+        (!teste.tentativaExtraUsada ? '<button type="button" class="btn-secundario" id="btnRepetirProntidao" style="margin-top:14px;">Repetir teste uma vez</button>' : '') +
+        '<button type="button" class="botao" id="btnLibertarTreino" style="margin-top:10px;">Continuar para escolher treino</button>';
+      document.getElementById("btnLibertarTreino").addEventListener("click", libertarEscolhaTreino);
+      const btnRepetir = document.getElementById("btnRepetirProntidao");
+      if (btnRepetir) btnRepetir.addEventListener("click", repetirProntidao);
+      return;
+    }
+
+    prontidaoConteudo.innerHTML =
+      '<span class="fluxo-passo">Passo 2 de 3</span>' +
+      '<p class="prontidao-intro">Avalia a tua rapidez de reação em cerca de 20 segundos. É opcional e é comparado apenas contigo próprio.</p>' +
+      '<button type="button" class="botao" id="btnIniciarProntidao">Fazer teste de prontidão</button>' +
+      '<button type="button" class="btn-secundario" id="btnSemProntidao">Continuar sem teste</button>';
+
+    document.getElementById("btnIniciarProntidao").addEventListener("click", iniciarProntidao);
+    document.getElementById("btnSemProntidao").addEventListener("click", continuarSemProntidao);
+  }
+
+  function continuarSemProntidao() {
+    const teste = { ignorado: true, libertouTreino: true, synced: true };
+    const estado = lerEstadoDiario();
+    estado.testeProntidao = teste;
+    guardarEstadoDiario(estado);
+    PRONTIDAO_HOJE_INICIAL = teste;
+    cardProntidao.classList.add("oculto");
+    mostrarCardEscolherTreino();
+  }
+
+  function libertarEscolhaTreino() {
+    const estado = lerEstadoDiario();
+    const teste = estado.testeProntidao || PRONTIDAO_HOJE_INICIAL || null;
+    if (teste) {
+      teste.libertouTreino = true;
+      estado.testeProntidao = teste;
+      guardarEstadoDiario(estado);
+      PRONTIDAO_HOJE_INICIAL = teste;
+    }
+    cardProntidao.classList.add("oculto");
+    mostrarCardEscolherTreino();
+  }
+
+  function iniciarProntidao() {
+    prontidaoEmCurso = true;
+    prontidaoTempos = [];
+    mostrarTentativaProntidao();
+  }
+
+  function repetirProntidao() {
+    const estado = lerEstadoDiario();
+    const anterior = estado.testeProntidao || PRONTIDAO_HOJE_INICIAL;
+    if (!anterior || anterior.tentativaExtraUsada) return;
+    estado.testeProntidao = Object.assign({}, anterior, { tentativaExtraUsada: true, primeiraMedianaMs: anterior.medianaMs });
+    guardarEstadoDiario(estado);
+    PRONTIDAO_HOJE_INICIAL = estado.testeProntidao;
+    iniciarProntidao();
+  }
+
+  function mostrarTentativaProntidao(mensagem) {
+    if (!prontidaoEmCurso) return;
+    prontidaoVerde = false;
+    clearTimeout(prontidaoTemporizador);
+    prontidaoConteudo.innerHTML =
+      '<div class="prontidao-area"><button type="button" class="prontidao-circulo" id="prontidaoCirculo">ESPERA</button>' +
+      '<div class="prontidao-indicacao" id="prontidaoIndicacao">' + (mensagem || "Toca apenas quando ficar verde") + '</div>' +
+      '<div class="prontidao-tentativas">Tentativa ' + (prontidaoTempos.length + 1) + ' de 5</div></div>';
+
+    document.getElementById("prontidaoCirculo").addEventListener("click", registarToqueProntidao);
+
+    prontidaoTemporizador = setTimeout(function () {
+      const circulo = document.getElementById("prontidaoCirculo");
+      const indicacao = document.getElementById("prontidaoIndicacao");
+      if (!prontidaoEmCurso || !circulo) return;
+      prontidaoVerde = true;
+      prontidaoInicio = performance.now();
+      circulo.classList.add("verde");
+      circulo.textContent = "TOCA!";
+      if (indicacao) indicacao.textContent = "Agora!";
+    }, 2000 + Math.floor(Math.random() * 3001));
+  }
+
+  function registarToqueProntidao() {
+    if (!prontidaoEmCurso) return;
+    if (!prontidaoVerde) {
+      clearTimeout(prontidaoTemporizador);
+      setTimeout(function () { mostrarTentativaProntidao("Ainda não — espera pelo verde"); }, 650);
+      return;
+    }
+    const tempo = Math.round(performance.now() - prontidaoInicio);
+    prontidaoVerde = false;
+    if (tempo < 120 || tempo > 1500) {
+      setTimeout(function () { mostrarTentativaProntidao("Vamos repetir esta tentativa"); }, 650);
+      return;
+    }
+    prontidaoTempos.push(tempo);
+    if (prontidaoTempos.length < 5) {
+      setTimeout(function () { mostrarTentativaProntidao("Boa. Prepara-te para a próxima."); }, 650);
+      return;
+    }
+    concluirProntidao();
+  }
+
+  function medianaLocal(numeros) {
+    const ordenados = numeros.slice().sort(function (a, b) { return a - b; });
+    const meio = Math.floor(ordenados.length / 2);
+    return ordenados.length % 2 ? ordenados[meio] : Math.round((ordenados[meio - 1] + ordenados[meio]) / 2);
+  }
+
+  function concluirProntidao() {
+    prontidaoEmCurso = false;
+    const estado = lerEstadoDiario();
+    const anterior = estado.testeProntidao || PRONTIDAO_HOJE_INICIAL || null;
+    const medianaNova = medianaLocal(prontidaoTempos);
+    const manterPrimeiro = !!(anterior && anterior.tentativaExtraUsada && anterior.primeiraMedianaMs && anterior.primeiraMedianaMs <= medianaNova);
+    const teste = manterPrimeiro
+      ? Object.assign({}, anterior, { melhorDeDuas: true, medianaMs: anterior.primeiraMedianaMs, tentativas: anterior.tentativas || 5, libertouTreino: false })
+      : { medianaMs: medianaNova, tentativas: prontidaoTempos.length, temposMs: prontidaoTempos.slice(), eventId: gerarIdLocal(), synced: false, libertouTreino: false, tentativaExtraUsada: !!(anterior && anterior.tentativaExtraUsada), primeiraMedianaMs: anterior && anterior.primeiraMedianaMs ? anterior.primeiraMedianaMs : undefined, melhorDeDuas: !!(anterior && anterior.tentativaExtraUsada) };
+    estado.testeProntidao = teste;
+    guardarEstadoDiario(estado);
+    PRONTIDAO_HOJE_INICIAL = teste;
+    renderProntidao();
+    if (!manterPrimeiro) sincronizarProntidaoPendente();
+  }
+
+  function sincronizarProntidaoPendente() {
+    if (!navigator.onLine) return;
+    const teste = lerEstadoDiario().testeProntidao;
+    if (!teste || teste.synced !== false || !teste.temposMs || !teste.temposMs.length) return;
+
+    chamarApi("registarTesteProntidao", { temposMs: teste.temposMs, eventId: teste.eventId, dispositivo: navigator.userAgent || "" })
+      .then(function (resp) {
+        if (!resp || !resp.ok) throw new Error((resp && resp.erro) || "Falha desconhecida");
+        const estado = lerEstadoDiario();
+        if (estado.testeProntidao && estado.testeProntidao.eventId === teste.eventId) {
+          Object.assign(estado.testeProntidao, resp.dados || {}, { synced: true });
+          guardarEstadoDiario(estado);
+        }
+        PRONTIDAO_HOJE_INICIAL = Object.assign({}, teste, resp.dados || {}, { synced: true });
+        renderProntidao();
+      })
+      .catch(function () {
+        // Fica marcado como não sincronizado — tenta-se novamente no próximo arranque.
+      });
+  }
+
+  // ==========================================================
+  // ESCOLHER E EXECUTAR TREINO (passo 3 de 3)
+  // ==========================================================
+  const cardEscolherTreino = document.getElementById("cardEscolherTreino");
+  const listaTreinosHoje = document.getElementById("listaTreinosHoje");
+  const cardExecucaoTreino = document.getElementById("cardExecucaoTreino");
+  const execucaoTreinoTitulo = document.getElementById("execucaoTreinoTitulo");
+  const execucaoAvisoRepeticao = document.getElementById("execucaoAvisoRepeticao");
+  const execucaoExerciciosLista = document.getElementById("execucaoExerciciosLista");
+  const execucaoErro = document.getElementById("execucaoErro");
+  const btnTerminarTreino = document.getElementById("btnTerminarTreino");
+  const execucaoAcoesFinaisEl = document.getElementById("execucaoAcoesFinais");
+  const btnAbandonarTreino = document.getElementById("btnAbandonarTreino");
+  const confirmarAbandonoTreinoEl = document.getElementById("confirmarAbandonoTreino");
+  const btnCancelarAbandono = document.getElementById("btnCancelarAbandono");
+  const btnConfirmarAbandono = document.getElementById("btnConfirmarAbandono");
+  const confirmarTerminoTreinoEl = document.getElementById("confirmarTerminoTreino");
+  const btnCancelarTermino = document.getElementById("btnCancelarTermino");
+  const btnConfirmarTermino = document.getElementById("btnConfirmarTermino");
+  const workoutTimerEl = document.getElementById("workoutTimer");
+  const workoutSaveStateEl = document.getElementById("workoutSaveState");
+  const cardPosTreino = document.getElementById("cardPosTreino");
+  const posTreinoErro = document.getElementById("posTreinoErro");
+  const btnConfirmarPosTreino = document.getElementById("btnConfirmarPosTreino");
+  const cardTreinoConcluido = document.getElementById("cardTreinoConcluido");
+
+  var PLANO_ATIVO = null;          // { nome, treinos: [...] }
+  var PLANO_ATIVO_CARREGADO = false; // true assim que uma resposta (com ou sem plano) chega do servidor
+  var TREINO_ATUAL_INDEX = null;
+  var TREINO_ATUAL_EXECUCAO = null;
+  var EXERCICIO_ATUAL_EXECUCAO = 0;
+  var timerTreinoInterval = null;
+  var wakeLockAtivo = null;
+  var respostasPosTreino = {};
+  var historicoCarregado = {};
+  var descansoIntervalos = {};
+  var CHECKIN_HOJE_CONFIRMADO = false; // true quando o servidor OU o rascunho local confirmam check-in feito hoje
+  var MODO_EDICAO_TREINO_CONCLUIDO = false;
+
+  function temCheckinFeito() {
+    if (CHECKIN_HOJE_CONFIRMADO) return true;
+    const estado = lerEstadoDiario();
+    return !!(estado.checkin && (estado.checkin.submitted || estado.checkin.values));
+  }
+
+  function chaveRascunhoTreino(nomePlano, nomeTreino) {
+    return "ALMOVE_WORKOUT_" + TOKEN + "_" + dataLocalHoje() + "_" + slugStorage(nomePlano + "|" + nomeTreino);
+  }
+
+  function slugStorage(texto) {
+    return String(texto).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  }
+
+  function lerRascunhoTreino(nomePlano, nomeTreino) {
+    try {
+      const raw = localStorage.getItem(chaveRascunhoTreino(nomePlano, nomeTreino));
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function guardarRascunhoTreino(rascunho) {
+    try {
+      rascunho.updatedAt = new Date().toISOString();
+      localStorage.setItem(chaveRascunhoTreino(rascunho.nomePlano, rascunho.nomeTreino), JSON.stringify(rascunho));
+    } catch (e) { /* localStorage indisponível */ }
+  }
+
+  function limparRascunhoTreino(nomePlano, nomeTreino) {
+    try { localStorage.removeItem(chaveRascunhoTreino(nomePlano, nomeTreino)); } catch (e) {}
+  }
+
+  function novoRascunhoTreino(treino) {
+    return {
+      version: 2,
+      eventId: gerarIdLocal(),
+      nomePlano: PLANO_ATIVO.nome,
+      nomeTreino: treino.nome,
+      startedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      status: "active",
+      exercises: treino.exercicios.map(function (ex) {
+        const numSeries = parseInt(ex.series, 10) || 3;
+        const series = [];
+        for (let i = 0; i < numSeries; i++) series.push({ reps: "", carga: "", velocidade: "" });
+        return { exercicio: ex.exercicio, series: series, notas: "" };
+      })
+    };
+  }
+
+  // ---------- Ecrã: escolher treino ----------
+  function carregarPlanoAtivoSeNecessario() {
+    if (PLANO_ATIVO_CARREGADO) return Promise.resolve();
+    return chamarApi("getPlanoAtivoPortal", {})
+      .then(function (respPlano) {
+        PLANO_ATIVO_CARREGADO = true;
+        if (!respPlano || !respPlano.ok) return;
+        const dadosPlano = respPlano.dados || {};
+        if (dadosPlano.temPlanos && dadosPlano.planosCliente && dadosPlano.planosCliente.length) {
+          PLANO_ATIVO = dadosPlano.planosCliente.find(function (p) { return p.nome === dadosPlano.planoAtivoNome; }) || dadosPlano.planosCliente[0];
+        }
+      })
+      .catch(function () {
+        // Não marca como carregado — tenta-se novamente da próxima vez que for preciso.
+      });
+  }
+
+  function mostrarCardEscolherTreino() {
+    if (!temCheckinFeito()) return;
+    const teste = obterProntidaoAtual();
+    const treinoLibertado = !!(teste && teste.libertouTreino);
+    if (!teste || !(teste.medianaMs || teste.ignorado) || !treinoLibertado) return;
+
+    const estado = lerEstadoDiario();
+    if (estado.workout && ["active", "post-workout", "completed"].indexOf(estado.workout.status) !== -1) {
+      // Já há um treino em curso ou concluído — restaura o ecrã certo em vez de mostrar a escolha.
+      restaurarEstadoTreino();
+      return;
+    }
+
+    cardCheckin.classList.add("oculto");
+    cardProntidao.classList.add("oculto");
+    cardEscolherTreino.classList.remove("oculto");
+    renderFluxoHoje();
+
+    if (!PLANO_ATIVO_CARREGADO) {
+      listaTreinosHoje.innerHTML = '<p class="card-sub">A carregar os teus treinos…</p>';
+      carregarPlanoAtivoSeNecessario().then(renderListaTreinosHoje);
+      return;
+    }
+
+    renderListaTreinosHoje();
+  }
+
+  function renderListaTreinosHoje() {
+    const workoutHoje = lerEstadoDiario().workout;
+    if (!PLANO_ATIVO || !PLANO_ATIVO.treinos || !PLANO_ATIVO.treinos.length) {
+      listaTreinosHoje.innerHTML = '<p class="card-sub">O André ainda não te definiu nenhum treino.</p>';
+      return;
+    }
+
+    let html = "";
+    PLANO_ATIVO.treinos.forEach(function (treino, idx) {
+      const numExercicios = treino.exercicios ? treino.exercicios.length : 0;
+      const badge = treino.feitoAntes
+        ? '<span class="treino-card-badge">' + iconeNativoSvg("check") + ' Realizado ' + (treino.diasDesde === 0 ? "hoje" : "há " + treino.diasDesde + "d") + '</span>'
+        : "";
+      html +=
+        '<div class="treino-card' + (treino.feitoAntes ? " feito-hoje" : "") + '">' +
+        '<div class="treino-card-icone" aria-hidden="true">' + iconeAlMove("halter") + '</div>' +
+        '<div class="treino-card-corpo">' + badge +
+        '<div class="nome">' + treino.nome + '</div>' +
+        '<div class="sub">' + numExercicios + ' exercício' + (numExercicios === 1 ? "" : "s") + '</div>' +
+        '</div>' +
+        '<button type="button" data-treino-idx="' + idx + '"' +
+          '>' +
+          (workoutHoje && workoutHoje.status === "active" && workoutHoje.nomeTreino === treino.nome ? "Continuar" :
+            (workoutHoje && (workoutHoje.status === "post-workout" || workoutHoje.status === "completed") ? "Concluído hoje" :
+              (treino.feitoAntes ? "Selecionar" : "Selecionar"))) +
+        '</button>' +
+        '</div>';
+    });
+    listaTreinosHoje.innerHTML = html;
+
+    listaTreinosHoje.querySelectorAll("button[data-treino-idx]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        escolherTreino(Number(btn.getAttribute("data-treino-idx")));
+      });
+    });
+  }
+
+  // ---------- Escolher um treino ----------
+  function escolherTreino(idx, restaurando) {
+    const treino = PLANO_ATIVO.treinos[idx];
+    if (!treino) return;
+    const estadoExistente = lerEstadoDiario();
+    const treinoExistente = estadoExistente.workout;
+    if (treinoExistente && treinoExistente.status === "active" && treinoExistente.nomeTreino !== treino.nome) {
+      showToastTreino("Tens o treino “" + treinoExistente.nomeTreino + "” em curso. Termina-o antes de iniciares outro.");
+      restaurarEstadoTreino();
+      return;
+    }
+    if (treinoExistente && (treinoExistente.status === "post-workout" || treinoExistente.status === "completed")) {
+      showToastTreino("O treino de hoje já foi concluído. Podes apenas editar o registo.");
+      restaurarEstadoTreino();
+      return;
+    }
+    MODO_EDICAO_TREINO_CONCLUIDO = false;
+
+    TREINO_ATUAL_INDEX = idx;
+    TREINO_ATUAL_EXECUCAO = treino;
+    EXERCICIO_ATUAL_EXECUCAO = 0;
+
+    cardEscolherTreino.classList.add("oculto");
+    cardProntidao.classList.add("oculto");
+    cardExecucaoTreino.classList.remove("oculto");
+    execucaoTreinoTitulo.textContent = treino.nome;
+
+    const outrosPorFazer = PLANO_ATIVO.treinos
+      .filter(function (t) { return t.nome !== treino.nome && !t.feitoAntes; })
+      .map(function (t) { return t.nome; });
+
+    if (treino.feitoAntes && outrosPorFazer.length) {
+      execucaoAvisoRepeticao.innerHTML = '<div class="aviso-repeticao">Vais repetir este treino. Ainda não fizeste: ' + outrosPorFazer.join(", ") + '.</div>';
+    } else {
+      execucaoAvisoRepeticao.innerHTML = "";
+    }
+
+    let rascunho = lerRascunhoTreino(PLANO_ATIVO.nome, treino.nome);
+    if (!rascunho) {
+      rascunho = novoRascunhoTreino(treino);
+      guardarRascunhoTreino(rascunho);
+    }
+
+    const estado = lerEstadoDiario();
+    const terminouEmPendente = estado.workout && estado.workout.status === "active" && estado.workout.nomeTreino === treino.nome
+      ? estado.workout.endedAt || null
+      : null;
+    estado.workout = {
+      status: "active",
+      nomePlano: PLANO_ATIVO.nome,
+      nomeTreino: treino.nome,
+      treinoIndex: idx,
+      startedAt: rascunho.startedAt,
+      endedAt: terminouEmPendente,
+      eventId: rascunho.eventId
+    };
+    guardarEstadoDiario(estado);
+
+    construirInterfaceTreino(treino, rascunho);
+    iniciarTimerTreino(rascunho.startedAt, terminouEmPendente);
+    ativarWakeLock();
+    renderFluxoHoje();
+
+    if (!restaurando) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+
+  function voltarEscolherTreino() {
+    if (MODO_EDICAO_TREINO_CONCLUIDO) {
+      cardExecucaoTreino.classList.add("oculto");
+      MODO_EDICAO_TREINO_CONCLUIDO = false;
+      mostrarTreinoConcluido(lerEstadoDiario().workout || {});
+      return;
+    }
+    // O treino continua ativo mesmo quando o cliente consulta a lista ou o Início.
+    // O cronómetro só é parado quando o treino é realmente terminado.
+    libertarWakeLock();
+    cardExecucaoTreino.classList.add("oculto");
+    cardEscolherTreino.classList.remove("oculto");
+    renderListaTreinosHoje();
+  }
+  document.getElementById("btnVoltarTreinos").addEventListener("click", voltarEscolherTreino);
+
+  // ---------- Construir a interface de execução ----------
+  function textoPrescricaoExercicio(ex) {
+    const porTempo = ex.tipoPrescricao === "TEMPO" || /(?:seg|sec|min|tempo|\d\s*s\b|:)/i.test(String(ex.repsMin || "") + " " + String(ex.repsMax || ""));
+    const unidade = porTempo ? "seg" : "reps";
+    return (ex.series || "-") + " séries · " + (ex.repsMin || "-") + "–" + (ex.repsMax || "-") + " " + unidade + " · RIR " + (ex.rir || "-");
+  }
+
+  function escaparTextoExercicio(valor) {
+    return String(valor || "").replace(/[&<>"']/g, function (caractere) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[caractere];
+    });
+  }
+
+  function obterCampoExercicio(exercicio, nomes) {
+    for (let i = 0; i < nomes.length; i++) {
+      const valor = exercicio && exercicio[nomes[i]];
+      if (valor !== undefined && valor !== null && String(valor).trim()) return String(valor).trim();
+    }
+    return "";
+  }
+
+  function obterLinkSeguroExercicio(valor) {
+    if (!valor) return "";
+    try {
+      const url = new URL(valor, window.location.origin);
+      return /^https?:$/.test(url.protocol) ? url.href : "";
+    } catch (erro) {
+      return "";
+    }
+  }
+
+  function obterDetalhesExercicio(exercicio) {
+    return {
+      imagem: obterLinkSeguroExercicio(obterCampoExercicio(exercicio, ["imagemUrl", "imageUrl", "imagem", "image", "fotoUrl", "foto"])),
+      link: obterLinkSeguroExercicio(obterCampoExercicio(exercicio, ["linkVideo", "videoUrl", "urlVideo", "link", "url", "video"])),
+      notas: obterCampoExercicio(exercicio, ["notasTreinador", "notasExercicio", "instrucoes", "execucao", "descricao"]),
+      dicas: obterCampoExercicio(exercicio, ["dicas", "dica", "cuidados", "errosEvitar"])
+    };
+  }
+
+  function construirPaginaDetalhesExercicio(exercicio, indice, total) {
+    const detalhes = obterDetalhesExercicio(exercicio);
+    const temConteudo = detalhes.imagem || detalhes.link || detalhes.notas || detalhes.dicas;
+    let conteudo = '';
+    if (detalhes.imagem) {
+      conteudo += '<img class="exec-info-imagem" src="' + escaparTextoExercicio(detalhes.imagem) + '" alt="Demonstração de ' + escaparTextoExercicio(exercicio.exercicio) + '">';
+    }
+    if (detalhes.link) {
+      conteudo += '<a class="exec-info-link" href="' + escaparTextoExercicio(detalhes.link) + '" target="_blank" rel="noopener noreferrer">' + iconeAlMove("link") + '<span><strong>Abrir vídeo ou ligação</strong><small>Ver técnica do exercício</small></span>' + iconeNativoSvg("setaDireita") + '</a>';
+    }
+    if (detalhes.notas) {
+      conteudo += '<section class="exec-info-bloco exec-info-notas"><div class="exec-info-bloco-icone">' + iconeAlMove("info") + '</div><div><h3>Notas de execução</h3><p>' + escaparTextoExercicio(detalhes.notas).replace(/\n/g, '<br>') + '</p></div></section>';
+    }
+    if (detalhes.dicas) {
+      conteudo += '<section class="exec-info-bloco exec-info-dicas"><div class="exec-info-bloco-icone">' + iconeAlMove("dica") + '</div><div><h3>Dicas do treinador</h3><p>' + escaparTextoExercicio(detalhes.dicas).replace(/\n/g, '<br>') + '</p></div></section>';
+    }
+    if (!temConteudo) {
+      conteudo = '<div class="exec-info-vazio"><span>' + iconeAlMove("info") + '</span><strong>Detalhes em breve</strong><p>O André ainda não adicionou imagem, ligação ou notas para este exercício.</p></div>';
+    }
+    return '<section class="exec-info-pagina" data-exec-info-index="' + indice + '">' +
+      '<div class="exec-detalhe-topo"><button type="button" class="btn-voltar-exercicios" data-voltar-registo="' + indice + '">' + iconeNativoSvg("setaEsquerda") + ' Voltar ao registo</button><span class="exec-detalhe-indicador">' + (indice + 1) + ' de ' + total + '</span></div>' +
+      '<div class="exec-info-titulo"><span>' + iconeAlMove("info") + '</span><div><small>DETALHES DO EXERCÍCIO</small><h2>' + escaparTextoExercicio(exercicio.exercicio) + '</h2></div></div>' +
+      conteudo +
+      '<button type="button" class="exec-info-voltar" data-voltar-registo="' + indice + '">' + iconeNativoSvg("setaEsquerda") + ' Voltar ao registo</button>' +
+      '</section>';
+  }
+
+  function construirInterfaceTreino(treino, rascunho) {
+    let html = '<section class="execucao-biblioteca" id="execucaoBiblioteca">' +
+      '<p class="execucao-biblioteca-intro">Escolhe um exercício para registares as séries. Podes voltar a esta lista a qualquer momento.</p>' +
+      '<div class="execucao-lista">';
+
+    treino.exercicios.forEach(function (ex, exIdx) {
+      html += '<button type="button" class="execucao-exercicio-item" data-abrir-exercicio="' + exIdx + '">' +
+        '<span class="execucao-exercicio-numero" id="exec-list-numero-' + exIdx + '">' + (exIdx + 1) + '</span>' +
+        '<span><span class="execucao-exercicio-nome">' + ex.exercicio + '</span><span class="execucao-exercicio-meta">' + textoPrescricaoExercicio(ex) + '</span></span>' +
+        '<span class="execucao-exercicio-estado" id="exec-list-estado-' + exIdx + '">' + iconeNativoSvg("setaDireita") + '</span>' +
+        '</button>';
+    });
+    html += '</div></section>';
+
+    treino.exercicios.forEach(function (ex, exIdx) {
+      const numSeries = parseInt(ex.series, 10) || 3;
+      const porTempo = ex.tipoPrescricao === "TEMPO" || /(?:seg|sec|min|tempo|\d\s*s\b|:)/i.test(String(ex.repsMin || "") + " " + String(ex.repsMax || ""));
+      const descansoSegundos = Math.max(0, Number(ex.descansoSegundos || 60));
+      html += '<section class="execucao-detalhe exec-exercicio" data-exec-player-index="' + exIdx + '" id="exec-card-' + exIdx + '">' +
+        '<div class="exec-detalhe-topo">' +
+          '<button type="button" class="btn-voltar-exercicios" data-voltar-exercicios>' + iconeNativoSvg("setaEsquerda") + ' Exercícios</button>' +
+          '<span class="exec-detalhe-indicador">' + (exIdx + 1) + ' de ' + treino.exercicios.length + '</span>' +
+        '</div>' +
+        '<div class="exec-header"><div class="exec-header-info">' +
+          '<div class="exec-exercicio-titulo">' + ex.exercicio + '</div>' +
+          '<span class="exec-progress" id="exec-progress-' + exIdx + '">0/' + numSeries + ' séries</span>' +
+        '</div>' +
+        '<div class="exec-acoes-exercicio"><button type="button" class="btn-detalhes-exercicio" data-detalhes-exercicio="' + exIdx + '">' + iconeAlMove("info") + ' Detalhes</button><button type="button" class="exec-historico-btn" data-historico-idx="' + exIdx + '">' + iconeNativoSvg("grafico") + ' Histórico</button></div></div>' +
+        '<div class="exec-exercicio-prescrito">Prescrito: ' + textoPrescricaoExercicio(ex) + '</div>' +
+        '<div class="exec-descanso">Descanso: <button type="button" data-descanso-idx="' + exIdx + '" data-descanso-seg="' + descansoSegundos + '">' + iconeNativoSvg("relogio") + ' ' + descansoSegundos + ' s</button> <span class="exec-descanso-tempo" id="exec-descanso-' + exIdx + '"></span></div>' +
+        '<div class="exec-historico-lista" id="exec-historico-' + exIdx + '"></div>';
+
+      for (let s = 0; s < numSeries; s++) {
+        html += '<div class="exec-serie"><div class="exec-serie-linha">' +
+          '<span class="exec-serie-numero">S' + (s + 1) + '</span>' +
+          '<input type="text" inputmode="numeric" placeholder="' + (porTempo ? "tempo (seg)" : "reps") + '" id="exec-' + exIdx + '-' + s + '-reps" data-ex="' + exIdx + '" data-s="' + s + '">' +
+          '<input type="text" inputmode="decimal" placeholder="kg" id="exec-' + exIdx + '-' + s + '-carga" data-ex="' + exIdx + '" data-s="' + s + '">' +
+          '</div><div class="velocidade-wrap"><div class="velocidade-label">Como saiu a série?</div><div class="velocidade-opcoes">' +
+          '<button type="button" class="velocidade-btn" data-vel-ex="' + exIdx + '" data-vel-s="' + s + '" data-vel="rapida">' + iconeNativoSvg("raio") + ' Rápida</button>' +
+          '<button type="button" class="velocidade-btn" data-vel-ex="' + exIdx + '" data-vel-s="' + s + '" data-vel="controlada">' + iconeNativoSvg("check") + ' Controlada</button>' +
+          '<button type="button" class="velocidade-btn" data-vel-ex="' + exIdx + '" data-vel-s="' + s + '" data-vel="lenta">' + iconeNativoSvg("lento") + ' Lenta</button>' +
+          '<button type="button" class="velocidade-btn falha" data-vel-ex="' + exIdx + '" data-vel-s="' + s + '" data-vel="falha">' + iconeNativoSvg("parar") + ' Falha</button>' +
+          '</div></div></div>';
+      }
+      html += '<textarea class="exec-nota" id="exec-' + exIdx + '-notas" placeholder="Notas (opcional)" data-ex-notas="' + exIdx + '"></textarea>' +
+        '<div class="exec-detalhe-nav">' +
+          '<button type="button" data-exec-nav="anterior" data-exec-index="' + exIdx + '">' + iconeNativoSvg("setaEsquerda") + ' Anterior</button>' +
+          '<button type="button" data-exec-nav="seguinte" data-exec-index="' + exIdx + '">Seguinte ' + iconeNativoSvg("setaDireita") + '</button>' +
+        '</div></section>' + construirPaginaDetalhesExercicio(ex, exIdx, treino.exercicios.length);
+    });
+    execucaoExerciciosLista.innerHTML = html;
+
+    rascunho.exercises.forEach(function (exData, exIdx) {
+      exData.series.forEach(function (serieData, s) {
+        const repsInput = document.getElementById("exec-" + exIdx + "-" + s + "-reps");
+        const cargaInput = document.getElementById("exec-" + exIdx + "-" + s + "-carga");
+        if (repsInput) repsInput.value = serieData.reps || "";
+        if (cargaInput) cargaInput.value = serieData.carga || "";
+        if (serieData.velocidade) marcarVelocidadeVisual(exIdx, s, serieData.velocidade);
+      });
+      const notaEl = document.getElementById("exec-" + exIdx + "-notas");
+      if (notaEl) notaEl.value = exData.notas || "";
+    });
+
+    execucaoExerciciosLista.querySelectorAll('input[data-ex]').forEach(function (input) {
+      input.addEventListener("input", function () { onWorkoutInput(Number(input.getAttribute("data-ex"))); });
+    });
+    execucaoExerciciosLista.querySelectorAll('textarea[data-ex-notas]').forEach(function (textarea) {
+      textarea.addEventListener("input", function () { onWorkoutInput(Number(textarea.getAttribute("data-ex-notas"))); });
+    });
+    execucaoExerciciosLista.querySelectorAll('.velocidade-btn').forEach(function (btn) {
+      btn.addEventListener("click", function () { selecionarVelocidade(Number(btn.getAttribute("data-vel-ex")), Number(btn.getAttribute("data-vel-s")), btn.getAttribute("data-vel")); });
+    });
+    execucaoExerciciosLista.querySelectorAll('[data-historico-idx]').forEach(function (btn) {
+      btn.addEventListener("click", function () { toggleHistoricoExercicio(Number(btn.getAttribute("data-historico-idx"))); });
+    });
+    execucaoExerciciosLista.querySelectorAll('[data-descanso-idx]').forEach(function (btn) {
+      btn.addEventListener("click", function () { iniciarDescansoExercicio(Number(btn.getAttribute("data-descanso-idx")), Number(btn.getAttribute("data-descanso-seg"))); });
+    });
+    execucaoExerciciosLista.querySelectorAll('[data-abrir-exercicio]').forEach(function (btn) {
+      btn.addEventListener("click", function () { escolherExercicioExecucao(Number(btn.getAttribute("data-abrir-exercicio"))); });
+    });
+    execucaoExerciciosLista.querySelectorAll('[data-voltar-exercicios]').forEach(function (btn) {
+      btn.addEventListener("click", mostrarListaExerciciosExecucao);
+    });
+    execucaoExerciciosLista.querySelectorAll('[data-detalhes-exercicio]').forEach(function (btn) {
+      btn.addEventListener("click", function () { abrirDetalhesExercicio(Number(btn.getAttribute("data-detalhes-exercicio"))); });
+    });
+    execucaoExerciciosLista.querySelectorAll('[data-voltar-registo]').forEach(function (btn) {
+      btn.addEventListener("click", function () { escolherExercicioExecucao(Number(btn.getAttribute("data-voltar-registo"))); });
+    });
+    execucaoExerciciosLista.querySelectorAll('[data-exec-nav]').forEach(function (btn) {
+      btn.addEventListener("click", function () { navegarExercicioExecucao(btn.getAttribute("data-exec-nav") === "anterior" ? -1 : 1); });
+    });
+
+    atualizarEstadoTodosExercicios();
+    mostrarListaExerciciosExecucao(false);
+  }
+
+  function mostrarListaExerciciosExecucao(scroll) {
+    if (!TREINO_ATUAL_EXECUCAO) return;
+    guardarTreinoAtual();
+    const biblioteca = document.getElementById("execucaoBiblioteca");
+    if (biblioteca) biblioteca.classList.remove("oculto");
+    execucaoExerciciosLista.querySelectorAll(".execucao-detalhe, .exec-info-pagina").forEach(function (detalhe) { detalhe.classList.remove("player-ativo"); });
+    execucaoAcoesFinaisEl.classList.remove("oculto");
+    if (scroll !== false) window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function abrirDetalhesExercicio(indice) {
+    if (!TREINO_ATUAL_EXECUCAO) return;
+    guardarTreinoAtual();
+    execucaoExerciciosLista.querySelectorAll(".execucao-detalhe").forEach(function (detalhe) { detalhe.classList.remove("player-ativo"); });
+    execucaoExerciciosLista.querySelectorAll(".exec-info-pagina").forEach(function (pagina) {
+      pagina.classList.toggle("player-ativo", Number(pagina.getAttribute("data-exec-info-index")) === indice);
+    });
+    execucaoAcoesFinaisEl.classList.add("oculto");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function navegarExercicioExecucao(direcao) {
+    escolherExercicioExecucao(EXERCICIO_ATUAL_EXECUCAO + direcao);
+  }
+
+  function escolherExercicioExecucao(indice) {
+    const total = TREINO_ATUAL_EXECUCAO.exercicios.length;
+    if (indice < 0 || indice >= total) return;
+    guardarTreinoAtual();
+    EXERCICIO_ATUAL_EXECUCAO = indice;
+    const biblioteca = document.getElementById("execucaoBiblioteca");
+    if (biblioteca) biblioteca.classList.add("oculto");
+    execucaoExerciciosLista.querySelectorAll(".execucao-detalhe").forEach(function (detalhe) {
+      detalhe.classList.toggle("player-ativo", Number(detalhe.getAttribute("data-exec-player-index")) === indice);
+    });
+    execucaoExerciciosLista.querySelectorAll(".exec-info-pagina").forEach(function (pagina) { pagina.classList.remove("player-ativo"); });
+    execucaoAcoesFinaisEl.classList.add("oculto");
+    atualizarNavegacaoExercicio();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function atualizarNavegacaoExercicio() {
+    if (!TREINO_ATUAL_EXECUCAO) return;
+    const total = TREINO_ATUAL_EXECUCAO.exercicios.length;
+    execucaoExerciciosLista.querySelectorAll('[data-exec-nav]').forEach(function (btn) {
+      const idx = Number(btn.getAttribute("data-exec-index"));
+      const anterior = btn.getAttribute("data-exec-nav") === "anterior";
+      btn.disabled = anterior ? idx === 0 : idx === total - 1;
+      if (!anterior && idx === total - 1) btn.innerHTML = 'Último exercício ' + iconeNativoSvg("concluido");
+    });
+  }
+
+  function atualizarEstadoTodosExercicios() {
+    if (!TREINO_ATUAL_EXECUCAO) return;
+    TREINO_ATUAL_EXECUCAO.exercicios.forEach(function (_, exIdx) { atualizarEstadoExercicio(exIdx, true); });
+    atualizarNavegacaoExercicio();
+  }
+
+  // ---------- Registo de séries ----------
+  var debounceWorkoutInput = null;
+  function onWorkoutInput(exIdx) {
+    atualizarEstadoExercicio(exIdx);
+    clearTimeout(debounceWorkoutInput);
+    debounceWorkoutInput = setTimeout(guardarTreinoAtual, 180);
+  }
+
+  function atualizarEstadoExercicio(exIdx, semNavegacao) {
+    const card = document.getElementById("exec-card-" + exIdx);
+    const item = document.querySelector('[data-abrir-exercicio="' + exIdx + '"]');
+    if (!card || !item) return;
+    const numSeries = parseInt(TREINO_ATUAL_EXECUCAO.exercicios[exIdx].series, 10) || 3;
+    let completas = 0;
+    for (let s = 0; s < numSeries; s++) {
+      const repsInput = document.getElementById("exec-" + exIdx + "-" + s + "-reps");
+      if (repsInput && String(repsInput.value || "").trim() !== "") completas++;
+    }
+    const concluido = completas === numSeries && numSeries > 0;
+    const parcial = completas > 0 && !concluido;
+    const progressoEl = document.getElementById("exec-progress-" + exIdx);
+    if (progressoEl) progressoEl.textContent = completas + "/" + numSeries + " séries";
+    card.classList.toggle("exec-completo", concluido);
+    card.classList.toggle("exec-parcial", parcial);
+    item.classList.toggle("completo", concluido);
+    item.classList.toggle("parcial", parcial);
+    const estadoEl = document.getElementById("exec-list-estado-" + exIdx);
+    const numeroEl = document.getElementById("exec-list-numero-" + exIdx);
+    if (estadoEl) estadoEl.innerHTML = concluido ? iconeNativoSvg("check") : (parcial ? (completas + "/" + numSeries) : iconeNativoSvg("setaDireita"));
+    if (numeroEl) numeroEl.innerHTML = concluido ? iconeNativoSvg("check") : (exIdx + 1);
+    if (!semNavegacao) atualizarNavegacaoExercicio();
+  }
+
+  function marcarVelocidadeVisual(exIdx, s, valor) {
+    document.querySelectorAll('[data-vel-ex="' + exIdx + '"][data-vel-s="' + s + '"]').forEach(function (btn) {
+      btn.classList.toggle("selecionada", btn.getAttribute("data-vel") === valor);
+    });
+  }
+
+  function selecionarVelocidade(exIdx, s, valor) {
+    marcarVelocidadeVisual(exIdx, s, valor);
+    guardarTreinoAtual();
+  }
+
+  function guardarTreinoAtual() {
+    if (!TREINO_ATUAL_EXECUCAO) return;
+    const rascunho = lerRascunhoTreino(PLANO_ATIVO.nome, TREINO_ATUAL_EXECUCAO.nome) || novoRascunhoTreino(TREINO_ATUAL_EXECUCAO);
+    TREINO_ATUAL_EXECUCAO.exercicios.forEach(function (ex, exIdx) {
+      const numSeries = parseInt(ex.series, 10) || 3;
+      const series = [];
+      for (let s = 0; s < numSeries; s++) {
+        const repsInput = document.getElementById("exec-" + exIdx + "-" + s + "-reps");
+        const cargaInput = document.getElementById("exec-" + exIdx + "-" + s + "-carga");
+        const velBtn = document.querySelector('.velocidade-btn.selecionada[data-vel-ex="' + exIdx + '"][data-vel-s="' + s + '"]');
+        series.push({
+          reps: repsInput ? repsInput.value : "",
+          carga: cargaInput ? cargaInput.value : "",
+          velocidade: velBtn ? velBtn.getAttribute("data-vel") : ""
+        });
+      }
+      const notaEl = document.getElementById("exec-" + exIdx + "-notas");
+      rascunho.exercises[exIdx] = { exercicio: ex.exercicio, series: series, notas: notaEl ? notaEl.value : "" };
+    });
+    guardarRascunhoTreino(rascunho);
+    marcarGuardadoLocalTreino();
+    return rascunho;
+  }
+
+  function marcarGuardadoLocalTreino() {
+    workoutSaveStateEl.textContent = navigator.onLine ? "Guardado no dispositivo" : "Offline · guardado no dispositivo";
+  }
+
+  // ---------- Cronómetro de descanso ----------
+  function iniciarDescansoExercicio(exIdx, segundos) {
+    if (descansoIntervalos[exIdx]) clearInterval(descansoIntervalos[exIdx]);
+    Object.keys(descansoIntervalos).forEach(function (k) { clearInterval(descansoIntervalos[k]); });
+    descansoIntervalos = {};
+
+    let restante = segundos;
+    const el = document.getElementById("exec-descanso-" + exIdx);
+    if (!el) return;
+    el.innerHTML = iconeNativoSvg("relogio") + " " + restante + " s";
+    descansoIntervalos[exIdx] = setInterval(function () {
+      restante--;
+      if (restante <= 0) {
+        clearInterval(descansoIntervalos[exIdx]);
+        delete descansoIntervalos[exIdx];
+        el.textContent = "Pronto";
+        if (navigator.vibrate) navigator.vibrate([80, 60, 80]);
+        return;
+      }
+      el.innerHTML = iconeNativoSvg("relogio") + " " + restante + " s";
+    }, 1000);
+  }
+
+  // ---------- Histórico por exercício ----------
+  function toggleHistoricoExercicio(exIdx) {
+    const el = document.getElementById("exec-historico-" + exIdx);
+    if (!el) return;
+    const aberto = el.classList.toggle("aberto");
+    if (!aberto) return;
+
+    const nomeExercicio = TREINO_ATUAL_EXECUCAO.exercicios[exIdx].exercicio;
+    if (historicoCarregado[nomeExercicio]) {
+      el.innerHTML = historicoCarregado[nomeExercicio];
+      return;
+    }
+    if (!navigator.onLine) {
+      el.innerHTML = '<div class="exec-historico-linha"><span>O histórico precisa de ligação à internet.</span></div>';
+      return;
+    }
+    el.innerHTML = '<div class="exec-historico-linha"><span>A carregar…</span></div>';
+    chamarApi("getHistoricoExercicio", { nomeExercicio: nomeExercicio, limite: 3 })
+      .then(function (resp) {
+        if (!resp || !resp.ok) throw new Error();
+        const sessoes = (resp.dados && resp.dados.sessoes) || [];
+        let html = "";
+        if (!sessoes.length) {
+          html = '<div class="exec-historico-linha"><span>Ainda não há histórico para este exercício.</span></div>';
+        } else {
+          sessoes.forEach(function (sessao) {
+            html += '<div class="exec-historico-linha"><span>' + sessao.data + '</span><span>' + sessao.resumo + '</span></div>';
+          });
+        }
+        historicoCarregado[nomeExercicio] = html;
+        el.innerHTML = html;
+      })
+      .catch(function () {
+        el.innerHTML = '<div class="exec-historico-linha"><span>Não foi possível carregar o histórico agora.</span></div>';
+      });
+  }
+
+  // ---------- Cronómetro do treino ----------
+  function formatarCronometroTreino(segundos) {
+    const total = Math.max(0, Math.floor(segundos || 0));
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    return (h > 0 ? String(h).padStart(2, "0") + ":" : "") + String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+  }
+
+  function iniciarTimerTreino(startedAt, endedAt) {
+    pararTimerTreino();
+    const inicio = new Date(startedAt).getTime();
+    const fim = endedAt ? new Date(endedAt).getTime() : null;
+    function atualizar() {
+      const referencia = Number.isFinite(fim) ? fim : Date.now();
+      const segundos = Math.max(0, Math.floor((referencia - inicio) / 1000));
+      workoutTimerEl.textContent = formatarCronometroTreino(segundos);
+    }
+    atualizar();
+    if (!Number.isFinite(fim)) timerTreinoInterval = setInterval(atualizar, 1000);
+  }
+
+  function pararTimerTreino() {
+    if (timerTreinoInterval) clearInterval(timerTreinoInterval);
+    timerTreinoInterval = null;
+  }
+
+  // ---------- Wake Lock ----------
+  function ativarWakeLock() {
+    if (!("wakeLock" in navigator)) return;
+    navigator.wakeLock.request("screen").then(function (lock) {
+      wakeLockAtivo = lock;
+    }).catch(function () { /* pode falhar em alguns browsers/estados — não é crítico */ });
+  }
+
+  function libertarWakeLock() {
+    if (wakeLockAtivo) {
+      wakeLockAtivo.release().catch(function () {});
+      wakeLockAtivo = null;
+    }
+  }
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible" && !wakeLockAtivo) {
+      const estado = lerEstadoDiario();
+      if (estado.workout && estado.workout.status === "active") ativarWakeLock();
+    }
+  });
+
+  // ---------- Terminar treino ----------
+  function abrirConfirmacaoTermino() {
+    if (!TREINO_ATUAL_EXECUCAO) return;
+    if (MODO_EDICAO_TREINO_CONCLUIDO) {
+      guardarTreinoAtual();
+      cardExecucaoTreino.classList.add("oculto");
+      MODO_EDICAO_TREINO_CONCLUIDO = false;
+      showToastTreino("Alterações guardadas neste dispositivo.");
+      mostrarTreinoConcluido(lerEstadoDiario().workout || {});
+      return;
+    }
+    execucaoErro.style.display = "none";
+    const payload = criarPayloadTreino();
+    if (!payload.exercicios.length) {
+      execucaoErro.textContent = "Regista pelo menos uma série antes de terminares.";
+      execucaoErro.style.display = "block";
+      return;
+    }
+    confirmarTerminoTreinoEl.classList.remove("oculto");
+    confirmarTerminoTreinoEl.setAttribute("aria-hidden", "false");
+    btnCancelarTermino.focus();
+  }
+
+  function fecharConfirmacaoTermino() {
+    confirmarTerminoTreinoEl.classList.add("oculto");
+    confirmarTerminoTreinoEl.setAttribute("aria-hidden", "true");
+    btnTerminarTreino.focus();
+  }
+
+  function criarPayloadTreino() {
+    const rascunho = guardarTreinoAtual();
+    const exercicios = rascunho.exercises
+      .map(function (ex) {
+        const series = ex.series.filter(function (s) { return String(s.reps || "").trim() !== "" || String(s.carga || "").trim() !== ""; });
+        return { exercicio: ex.exercicio, series: series, notas: ex.notas };
+      })
+      .filter(function (ex) { return ex.series.length > 0; });
+
+    return {
+      nomePlano: rascunho.nomePlano,
+      nomeTreino: rascunho.nomeTreino,
+      eventId: rascunho.eventId,
+      startedAt: rascunho.startedAt,
+      exercicios: exercicios
+    };
+  }
+
+  function calcularResumoTreino(payload, endedAt) {
+    let volume = 0;
+    payload.exercicios.forEach(function (ex) {
+      ex.series.forEach(function (s) {
+        const reps = Number(String(s.reps || "").replace(",", "."));
+        const carga = Number(String(s.carga || "").replace(",", "."));
+        if (Number.isFinite(reps) && Number.isFinite(carga)) volume += reps * carga;
+      });
+    });
+    const fim = endedAt ? new Date(endedAt) : new Date();
+    const duracaoSegundos = Math.max(0, Math.round((fim.getTime() - new Date(payload.startedAt).getTime()) / 1000));
+    return { volume: Math.round(volume), duracaoSegundos: duracaoSegundos, endedAt: fim.toISOString() };
+  }
+
+  function terminarTreino() {
+    if (!TREINO_ATUAL_EXECUCAO) return;
+    execucaoErro.style.display = "none";
+
+    const payload = criarPayloadTreino();
+    if (!payload.exercicios.length) {
+      execucaoErro.textContent = "Regista pelo menos uma série antes de terminares.";
+      execucaoErro.style.display = "block";
+      return;
+    }
+
+    const estadoAntesDeGuardar = lerEstadoDiario();
+    const fimConfirmado = (estadoAntesDeGuardar.workout && estadoAntesDeGuardar.workout.endedAt) || new Date().toISOString();
+    if (estadoAntesDeGuardar.workout && !estadoAntesDeGuardar.workout.endedAt) {
+      estadoAntesDeGuardar.workout.endedAt = fimConfirmado;
+      guardarEstadoDiario(estadoAntesDeGuardar);
+    }
+    const resumo = calcularResumoTreino(payload, fimConfirmado);
+    // A confirmação termina o tempo imediatamente; a sincronização não pode deixá-lo a contar.
+    pararTimerTreino();
+    libertarWakeLock();
+
+    btnTerminarTreino.disabled = true;
+    btnTerminarTreino.textContent = "A sincronizar…";
+
+    if (!navigator.onLine) {
+      btnTerminarTreino.disabled = false;
+      btnTerminarTreino.textContent = "Tentar terminar treino";
+      showToastTreino(mensagemErroLigacao());
+      return;
+    }
+
+    workoutSaveStateEl.textContent = "A guardar…";
+
+    chamarApi("registarExecucaoTreino", payload)
+      .then(function (resp) {
+        if (!resp || !resp.ok) throw new Error((resp && resp.erro) || "Falha desconhecida");
+        const rascunhoConcluido = lerRascunhoTreino(payload.nomePlano, payload.nomeTreino);
+        if (rascunhoConcluido) {
+          rascunhoConcluido.status = "completed";
+          rascunhoConcluido.endedAt = resumo.endedAt;
+          guardarRascunhoTreino(rascunhoConcluido);
+        }
+
+        const estado = lerEstadoDiario();
+        estado.workout = {
+          status: "post-workout",
+          nomePlano: payload.nomePlano,
+          nomeTreino: payload.nomeTreino,
+          treinoIndex: TREINO_ATUAL_INDEX,
+          startedAt: payload.startedAt,
+          endedAt: resumo.endedAt,
+          eventId: payload.eventId,
+          volume: resumo.volume,
+          duracaoSegundos: resumo.duracaoSegundos,
+          synced: true
+        };
+        estado.postWorkout = { values: {}, submitted: false, synced: false };
+        guardarEstadoDiario(estado);
+
+        pararTimerTreino();
+        libertarWakeLock();
+
+        cardExecucaoTreino.classList.add("oculto");
+        mostrarCardPosTreino();
+      })
+      .catch(function () {
+        btnTerminarTreino.disabled = false;
+        btnTerminarTreino.textContent = "Tentar terminar treino";
+        marcarGuardadoLocalTreino();
+        showToastTreino(mensagemErroLigacao());
+      });
+  }
+  function abrirConfirmacaoAbandono() {
+    if (!TREINO_ATUAL_EXECUCAO || MODO_EDICAO_TREINO_CONCLUIDO) return;
+    confirmarAbandonoTreinoEl.classList.remove("oculto");
+    confirmarAbandonoTreinoEl.setAttribute("aria-hidden", "false");
+    btnCancelarAbandono.focus();
+  }
+
+  function fecharConfirmacaoAbandono() {
+    confirmarAbandonoTreinoEl.classList.add("oculto");
+    confirmarAbandonoTreinoEl.setAttribute("aria-hidden", "true");
+    btnAbandonarTreino.focus();
+  }
+
+  function abandonarTreino() {
+    const estado = lerEstadoDiario();
+    const workout = estado.workout || {};
+    if (workout.nomePlano && workout.nomeTreino) limparRascunhoTreino(workout.nomePlano, workout.nomeTreino);
+    estado.workout = null;
+    estado.postWorkout = null;
+    guardarEstadoDiario(estado);
+    pararTimerTreino();
+    libertarWakeLock();
+    TREINO_ATUAL_INDEX = null;
+    TREINO_ATUAL_EXECUCAO = null;
+    EXERCICIO_ATUAL_EXECUCAO = 0;
+    confirmarAbandonoTreinoEl.classList.add("oculto");
+    confirmarAbandonoTreinoEl.setAttribute("aria-hidden", "true");
+    cardExecucaoTreino.classList.add("oculto");
+    cardPosTreino.classList.add("oculto");
+    cardTreinoConcluido.classList.add("oculto");
+    btnAbandonarTreino.classList.remove("oculto");
+    mostrarCardEscolherTreino();
+    renderFluxoHoje();
+    showToastTreino("Treino abandonado. Nenhum registo foi guardado.");
+  }
+
+  btnTerminarTreino.addEventListener("click", abrirConfirmacaoTermino);
+  btnAbandonarTreino.addEventListener("click", abrirConfirmacaoAbandono);
+  btnCancelarAbandono.addEventListener("click", fecharConfirmacaoAbandono);
+  btnConfirmarAbandono.addEventListener("click", abandonarTreino);
+  confirmarAbandonoTreinoEl.addEventListener("click", function (evento) {
+    if (evento.target === confirmarAbandonoTreinoEl) fecharConfirmacaoAbandono();
+  });
+  btnCancelarTermino.addEventListener("click", fecharConfirmacaoTermino);
+  btnConfirmarTermino.addEventListener("click", function () {
+    confirmarTerminoTreinoEl.classList.add("oculto");
+    confirmarTerminoTreinoEl.setAttribute("aria-hidden", "true");
+    terminarTreino();
+  });
+  confirmarTerminoTreinoEl.addEventListener("click", function (evento) {
+    if (evento.target === confirmarTerminoTreinoEl) fecharConfirmacaoTermino();
+  });
+  document.addEventListener("keydown", function (evento) {
+    if (evento.key === "Escape" && !confirmarTerminoTreinoEl.classList.contains("oculto")) fecharConfirmacaoTermino();
+    if (evento.key === "Escape" && !confirmarAbandonoTreinoEl.classList.contains("oculto")) fecharConfirmacaoAbandono();
+  });
+
+  function showToastTreino(texto) {
+    const aviso = document.createElement("div");
+    aviso.className = "toast";
+    aviso.innerHTML = "<span>" + texto + "</span>";
+    document.body.appendChild(aviso);
+    setTimeout(function () { aviso.remove(); }, 4000);
+  }
+
+  // ---------- Pós-treino ----------
+  document.querySelectorAll('#cardPosTreino .opcoes').forEach(function (grupo) {
+    grupo.addEventListener("click", function (evento) {
+      const opcao = evento.target.closest(".opcao");
+      if (!opcao) return;
+      const campo = grupo.getAttribute("data-campo-pos");
+      respostasPosTreino[campo] = Number(opcao.getAttribute("data-valor"));
+      selecionarOpcaoEscala(grupo, opcao, campo);
+      posTreinoErro.style.display = "none";
+
+      const estado = lerEstadoDiario();
+      if (estado.postWorkout) {
+        estado.postWorkout.values = estado.postWorkout.values || {};
+        estado.postWorkout.values[campo] = respostasPosTreino[campo];
+        guardarEstadoDiario(estado);
+      }
+    });
+  });
+
+  function mostrarCardPosTreino() {
+    respostasPosTreino = {};
+    document.querySelectorAll('#cardPosTreino .opcao').forEach(function (el) { el.classList.remove("selecionada"); CLASSES_ESCALA.forEach(function (classe) { el.classList.remove(classe); }); });
+    cardPosTreino.classList.remove("oculto");
+    renderFluxoHoje();
+  }
+
+  function confirmarPosTreino() {
+    const campos = ["energia", "esforco", "dificuldade"];
+    const falta = campos.filter(function (c) { return respostasPosTreino[c] === undefined; });
+    if (falta.length) {
+      posTreinoErro.textContent = "Falta responder a tudo antes de confirmares.";
+      posTreinoErro.style.display = "block";
+      return;
+    }
+
+    const estadoAtual = lerEstadoDiario();
+    const eventId = (estadoAtual.postWorkout && estadoAtual.postWorkout.eventId) || gerarIdLocal();
+    const workout = estadoAtual.workout || {};
+
+    const payload = {
+      nomePlano: workout.nomePlano,
+      nomeTreino: workout.nomeTreino,
+      energia: respostasPosTreino.energia,
+      esforco: respostasPosTreino.esforco,
+      dificuldade: respostasPosTreino.dificuldade,
+      eventId: eventId
+    };
+
+    estadoAtual.postWorkout = { values: respostasPosTreino, submitted: true, synced: false, eventId: eventId };
+    guardarEstadoDiario(estadoAtual);
+
+    if (!navigator.onLine) {
+      showToastTreino(mensagemErroLigacao());
+      return;
+    }
+
+    btnConfirmarPosTreino.disabled = true;
+    btnConfirmarPosTreino.textContent = "A sincronizar…";
+
+    chamarApi("registarPosTreino", payload)
+      .then(function (resp) {
+        if (!resp || !resp.ok) throw new Error((resp && resp.erro) || "Falha desconhecida");
+        const estado = lerEstadoDiario();
+        if (estado.workout) estado.workout.status = "completed";
+        if (estado.postWorkout) estado.postWorkout.synced = true;
+        guardarEstadoDiario(estado);
+
+        cardPosTreino.classList.add("oculto");
+        cardEscolherTreino.classList.add("oculto");
+        mostrarTreinoConcluido(estado.workout);
+      })
+      .catch(function () {
+        btnConfirmarPosTreino.disabled = false;
+        btnConfirmarPosTreino.textContent = "Tentar sincronizar";
+        showToastTreino(mensagemErroLigacao());
+      });
+  }
+  btnConfirmarPosTreino.addEventListener("click", confirmarPosTreino);
+
+  // ---------- Treino concluído ----------
+  function formatarDuracao(segundos) {
+    const minutos = Math.round(segundos / 60);
+    if (minutos < 60) return minutos + " min";
+    const h = Math.floor(minutos / 60);
+    const m = minutos % 60;
+    return h + "h " + m + "m";
+  }
+
+  function mostrarTreinoConcluido(workout) {
+    cardCheckin.classList.add("oculto");
+    cardProntidao.classList.add("oculto");
+    cardEscolherTreino.classList.add("oculto");
+    cardExecucaoTreino.classList.add("oculto");
+    document.getElementById("treinoConcluidoNome").textContent = workout.nomeTreino || "";
+    document.getElementById("treinoConcluidoVolume").textContent = (workout.volume || 0) + " kg";
+    document.getElementById("treinoConcluidoDuracao").textContent = formatarDuracao(workout.duracaoSegundos || 0);
+    cardTreinoConcluido.classList.remove("oculto");
+    renderFluxoHoje();
+  }
+
+  function editarTreinoConcluido() {
+    const estado = lerEstadoDiario();
+    const workout = estado.workout;
+    if (!workout || workout.status !== "completed" || !PLANO_ATIVO) return;
+    const idx = PLANO_ATIVO.treinos.findIndex(function (treino) { return treino.nome === workout.nomeTreino; });
+    if (idx < 0) return;
+    const treino = PLANO_ATIVO.treinos[idx];
+    const rascunho = lerRascunhoTreino(workout.nomePlano, workout.nomeTreino);
+    if (!rascunho) {
+      showToastTreino("Não foi possível abrir este registo para edição.");
+      return;
+    }
+    TREINO_ATUAL_INDEX = idx;
+    TREINO_ATUAL_EXECUCAO = treino;
+    EXERCICIO_ATUAL_EXECUCAO = 0;
+    MODO_EDICAO_TREINO_CONCLUIDO = true;
+    cardTreinoConcluido.classList.add("oculto");
+    cardEscolherTreino.classList.add("oculto");
+    cardExecucaoTreino.classList.remove("oculto");
+    execucaoTreinoTitulo.textContent = treino.nome + " · edição";
+    construirInterfaceTreino(treino, rascunho);
+    const tempoCongelado = Number(workout.duracaoSegundos || 0);
+    workoutTimerEl.textContent = formatarCronometroTreino(tempoCongelado);
+    workoutSaveStateEl.textContent = "Treino concluído · edição local";
+    execucaoAcoesFinaisEl.classList.remove("oculto");
+    btnAbandonarTreino.classList.add("oculto");
+    btnTerminarTreino.disabled = false;
+    btnTerminarTreino.textContent = "Guardar alterações";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  document.getElementById("btnRegistarOutroTreino").addEventListener("click", editarTreinoConcluido);
+
+  // ---------- Restauro automático ao reabrir a app ----------
+  function restaurarEstadoTreino() {
+    const estado = lerEstadoDiario();
+    const workout = estado.workout;
+    if (!workout) return;
+
+    if (workout.status === "active") {
+      const idx = PLANO_ATIVO ? PLANO_ATIVO.treinos.findIndex(function (t) { return t.nome === workout.nomeTreino; }) : -1;
+      if (idx === -1) return;
+      escolherTreino(idx, true);
+      return;
+    }
+
+    if ((workout.status === "post-workout" || workout.status === "completed") && !workout.endedAt) {
+      // Estado incompleto/corrompido — limpa em vez de deixar a app presa.
+      estado.workout = null;
+      estado.postWorkout = null;
+      guardarEstadoDiario(estado);
+      return;
+    }
+
+    if (workout.status === "post-workout") {
+      mostrarCardPosTreino();
+      return;
+    }
+
+    if (workout.status === "completed") {
+      mostrarTreinoConcluido(workout);
+    }
+  }
+
+  function iniciarMetricasAtividade() {
+    renderMetricasAtividade();
+    chamarApi("getMetricasAtividadePortal", {})
+      .then(function (resp) {
+        if (resp && resp.ok && resp.dados) {
+          metricasAtividade = Object.assign({}, metricasAtividade, resp.dados);
+          guardarMetricasLocais();
+          renderMetricasAtividade();
+        }
+      })
+      .catch(function () {});
+  }
+
+  // ---------- Arranque: pergunta ao servidor o estado de hoje ----------
+  iniciarMetricasAtividade();
+  renderFluxoHoje();
+  chamarApi("getEstadoPortalHoje", {})
+    .then(function (resp) {
+      ecraCarregando.classList.add("oculto");
+      cardCheckin.classList.remove("oculto");
+
+      if (!resp || !resp.ok) {
+        checkinErro.textContent = (resp && resp.erro) || "Não foi possível ligar ao servidor.";
+        checkinErro.style.display = "block";
+        return;
+      }
+
+      const dados = resp.dados || {};
+
+      if (dados.passosPortal) aplicarResumoPassos(dados.passosPortal);
+
+      if (dados.testeProntidaoHoje) {
+        PRONTIDAO_HOJE_INICIAL = dados.testeProntidaoHoje;
+      }
+
+      let temCheckinHoje = false;
+
+      if (dados.jaFezCheckinHoje && dados.checkinHoje) {
+        const estadoCheckinRemoto = lerEstadoDiario();
+        if (!estadoCheckinRemoto.checkin || !estadoCheckinRemoto.checkin.values) {
+          estadoCheckinRemoto.checkin = { values: dados.checkinHoje, submitted: true, synced: true, tentativasHoje: 1 };
+          guardarEstadoDiario(estadoCheckinRemoto);
+        }
+        mostrarResumo(dados.checkinHoje);
+        mostrarCardProntidao();
+        temCheckinHoje = true;
+        CHECKIN_HOJE_CONFIRMADO = true;
+      } else {
+        // Sem check-in no servidor — verifica se há um rascunho local por
+        // sincronizar (ex.: enviou offline e voltou à app antes de haver rede).
+        const estadoLocal = lerEstadoDiario();
+        if (estadoLocal.checkin && estadoLocal.checkin.submitted && !estadoLocal.checkin.synced) {
+          preencherRespostas(estadoLocal.checkin.values);
+          mostrarResumo(estadoLocal.checkin.values);
+          mostrarCardProntidao();
+          temCheckinHoje = true;
+          CHECKIN_HOJE_CONFIRMADO = true;
+          if (navigator.onLine) {
+            chamarApi("registarCheckin", Object.assign({}, estadoLocal.checkin.values, { eventId: estadoLocal.checkin.eventId }))
+              .then(function (resp2) {
+                if (resp2 && resp2.ok) {
+                  estadoLocal.checkin.synced = true;
+                  guardarEstadoDiario(estadoLocal);
+                }
+              })
+              .catch(function () {});
+          }
+          sincronizarProntidaoPendente();
+        }
+      }
+
+      if (!temCheckinHoje) return;
+
+      // Carrega o plano ativo e os treinos, e decide que ecrã do passo 3 mostrar.
+      carregarPlanoAtivoSeNecessario()
+        .then(function () {
+          const estadoAgora = lerEstadoDiario();
+          if (estadoAgora.workout && estadoAgora.workout.status) {
+            restaurarEstadoTreino();
+          } else {
+            mostrarCardEscolherTreino();
+          }
+        })
+        .catch(function () {
+          // Sem plano carregado — o cliente continua a ver check-in/prontidão normalmente.
+        });
+    })
+    .catch(function () {
+      ecraCarregando.classList.add("oculto");
+      cardCheckin.classList.remove("oculto");
+      checkinErro.textContent = "Sem ligação. Tenta novamente quando tiveres rede.";
+      checkinErro.style.display = "block";
+    });
+
+  // ---------- Service worker ----------
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("/sw.js").then(function (registo) {
+        registo.addEventListener("updatefound", function () {
+          const novoWorker = registo.installing;
+          novoWorker.addEventListener("statechange", function () {
+            if (novoWorker.state === "installed" && navigator.serviceWorker.controller) {
+              mostrarAvisoAtualizacao(novoWorker);
+            }
+          });
+        });
+      }).catch(function () {
+        // Ambientes sem suporte a service worker (ex.: teste local via file://)
+        // não devem impedir o resto da app de funcionar.
+      });
+    });
+  }
+
+  function mostrarAvisoAtualizacao(novoWorker) {
+    const aviso = document.createElement("div");
+    aviso.className = "toast";
+    aviso.innerHTML = '<span>Há uma versão nova da app.</span><button>Atualizar</button>';
+    aviso.querySelector("button").onclick = function () {
+      novoWorker.postMessage("SKIP_WAITING");
+      novoWorker.addEventListener("statechange", function () {
+        if (novoWorker.state === "activated") window.location.reload();
+      });
+    };
+    document.body.appendChild(aviso);
+  }
+})();
+</script>
+</body>
+</html>
+
+
