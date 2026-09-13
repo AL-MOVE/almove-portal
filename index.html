@@ -940,21 +940,38 @@
     .marco-icone-passos { color:#5eead4; background:rgba(45,212,191,.12); border:1px solid rgba(45,212,191,.28); }
     .marco-icone-caminhar { color:#7dd3fc; background:rgba(14,165,233,.14); border:1px solid rgba(56,189,248,.26); }
     .marco-icone-foguetao { color:#fda4af; background:rgba(225,29,72,.12); border:1px solid rgba(251,113,133,.25); }
+    /* Marca AL MOVE maior no cabeçalho e gesto de puxar para atualizar. */
+    .topo { min-height:86px; padding:11px 14px; }
+    .topo img { width:64px; height:64px; border-radius:0; object-fit:contain; }
+    .topo-titulo { font-size:20px; letter-spacing:.02em; }
+    .topo-sub { font-size:11px; }
+    .pull-refresh { position:fixed; z-index:260; top:calc(env(safe-area-inset-top) + 4px); left:50%; width:54px; height:54px; display:grid; place-items:center; pointer-events:none; opacity:0; transform:translate(-50%,-76px) scale(.78); transition:transform .18s cubic-bezier(.22,1,.36,1),opacity .18s ease; }
+    .pull-refresh img { width:48px; height:48px; object-fit:contain; opacity:.5; filter:drop-shadow(0 7px 12px rgba(0,0,0,.34)); }
+    body.puxar-atualizar .pull-refresh { opacity:1; transform:translate(-50%,var(--puxar-y,-6px)) scale(1); }
+    body.puxar-pronto .pull-refresh { opacity:1; transform:translate(-50%,8px) scale(1.08); }
+    body.a-atualizar .pull-refresh { opacity:1; transform:translate(-50%,12px) scale(1); }
+    body.a-atualizar .pull-refresh img { animation:rodar-logo-atualizar .82s linear infinite; }
+    @keyframes rodar-logo-atualizar { to { transform:rotate(360deg); } }
+    @media (prefers-reduced-motion:reduce) { body.a-atualizar .pull-refresh img { animation:none; } }
   </style>
 </head>
 <body>
 
   <section class="ecra-boas-vindas" id="ecraBoasVindas" aria-labelledby="boasVindasTitulo">
     <div class="boas-vindas-conteudo">
-      <img class="boas-vindas-logo" src="/icons/icon-any-512.png" alt="AL MOVE">
+      <img class="boas-vindas-logo" src="/al-move-mark.png" alt="AL MOVE">
       <h1 class="boas-vindas-saudacao" id="boasVindasTitulo"><span id="boasVindasPrefixo">Olá</span><strong id="boasVindasNome" class="oculto"></strong></h1>
       <p class="boas-vindas-sub">O teu caminho começa aqui.</p>
       <button type="button" class="btn-comecar" id="btnComecarPortal">Começar</button>
     </div>
   </section>
 
+  <div class="pull-refresh" id="pullRefresh" aria-live="polite" aria-label="Puxar para atualizar">
+    <img src="/al-move-mark.png" alt="">
+  </div>
+
   <div class="topo">
-    <img src="/icons/icon-any-512.png" alt="AL MOVE">
+    <img src="/al-move-mark.png" alt="AL MOVE">
     <div class="topo-textos">
       <div class="topo-titulo">AL MOVE</div>
       <div class="topo-sub">Portal do cliente</div>
@@ -1549,6 +1566,50 @@
     btn.addEventListener("click", function () { mudarTab(btn.getAttribute("data-tab")); });
   });
   normalizarIconesFixos();
+
+  // ---------- Puxar para atualizar ----------
+  // Só ativa junto ao cabeçalho e no início da página, para não interferir
+  // com os controlos de treino e os cartões deslizáveis.
+  const pullRefreshEl = document.getElementById("pullRefresh");
+  let inicioPuxarY = 0;
+  let puxarAtivo = false;
+  let atualizarEmCurso = false;
+  const LIMIAR_ATUALIZAR = 76;
+
+  document.addEventListener("touchstart", function (evento) {
+    if (atualizarEmCurso || window.scrollY > 2 || !evento.touches.length) return;
+    const topo = document.querySelector(".topo");
+    const toque = evento.touches[0];
+    if (!topo || toque.clientY > topo.getBoundingClientRect().bottom + 20) return;
+    inicioPuxarY = toque.clientY;
+    puxarAtivo = true;
+  }, { passive: true });
+
+  document.addEventListener("touchmove", function (evento) {
+    if (!puxarAtivo || atualizarEmCurso || !evento.touches.length) return;
+    const distancia = evento.touches[0].clientY - inicioPuxarY;
+    if (distancia <= 0) {
+      puxarAtivo = false;
+      document.body.classList.remove("puxar-atualizar", "puxar-pronto");
+      return;
+    }
+    evento.preventDefault();
+    document.body.classList.add("puxar-atualizar");
+    document.body.classList.toggle("puxar-pronto", distancia >= LIMIAR_ATUALIZAR);
+    pullRefreshEl.style.setProperty("--puxar-y", Math.min(8, -76 + (distancia * .9)) + "px");
+  }, { passive: false });
+
+  document.addEventListener("touchend", function () {
+    if (!puxarAtivo || atualizarEmCurso) return;
+    const pronto = document.body.classList.contains("puxar-pronto");
+    puxarAtivo = false;
+    pullRefreshEl.style.removeProperty("--puxar-y");
+    document.body.classList.remove("puxar-atualizar", "puxar-pronto");
+    if (!pronto) return;
+    atualizarEmCurso = true;
+    document.body.classList.add("a-atualizar");
+    window.setTimeout(function () { window.location.reload(); }, 520);
+  }, { passive: true });
 
   btnComecarPortal.addEventListener("click", function () {
     mudarTab("inicio");
