@@ -1,8 +1,6 @@
 // Service worker do Portal AL MOVE.
-// A versão sobe com esta atualização visual para que instalações existentes
-// recebam o novo index.html em vez de manterem a versão anterior em cache.
 
-const VERSAO_CACHE = 'almove-portal-v16';
+const VERSAO_CACHE = 'almove-portal-v17';
 
 const FICHEIROS_ESSENCIAIS = [
   '/',
@@ -33,8 +31,6 @@ self.addEventListener('activate', (evento) => {
 
 self.addEventListener('fetch', (evento) => {
   if (!evento.request.url.startsWith('http')) return;
-
-  // Dados do Portal nunca são servidos de cache.
   if (evento.request.url.includes('/api/')) return;
 
   const url = new URL(evento.request.url);
@@ -42,8 +38,6 @@ self.addEventListener('fetch', (evento) => {
     url.pathname === '/' ||
     url.pathname.endsWith('/index.html');
 
-  // A página principal vai sempre primeiro à rede. Assim, F5 recebe o
-  // index.html da última implementação; sem rede usa a cópia guardada.
   if (pedePaginaNova) {
     evento.respondWith(
       fetch(new Request(evento.request, { cache: 'no-store' }))
@@ -76,7 +70,3 @@ self.addEventListener('fetch', (evento) => {
 self.addEventListener('message', (evento) => {
   if (evento.data === 'SKIP_WAITING') self.skipWaiting();
 });
-
-
-
-
