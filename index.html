@@ -953,13 +953,49 @@
     body.a-atualizar .pull-refresh img { animation:rodar-logo-atualizar .82s linear infinite; }
     @keyframes rodar-logo-atualizar { to { transform:rotate(360deg); } }
     @media (prefers-reduced-motion:reduce) { body.a-atualizar .pull-refresh img { animation:none; } }
+    /* Perfil e métricas: campos compactos, cálculo legível e ícones sem distorção. */
+    .icone-almove { display:block; box-sizing:border-box; max-width:100%; max-height:100%; }
+    .conquistas-metrica-icone .icone-almove { width:17px; height:17px; }
+    .fluxo-hoje-editavel { padding:0; border:0; background:transparent; font:inherit; cursor:pointer; }
+    .fluxo-hoje-editavel:focus-visible { outline:2px solid var(--accent); outline-offset:4px; border-radius:9px; }
+    .fluxo-hoje-editavel:not(.concluido):not(.ativo) { pointer-events:none; }
+    .metricas-atividade-card { overflow:hidden; background:linear-gradient(135deg,rgba(11,92,194,.13),rgba(45,212,191,.055)); }
+    .metricas-cabecalho { display:flex; justify-content:space-between; gap:12px; }
+    .metricas-cabecalho .card-title { margin:3px 0 0; }
+    .metricas-cabecalho p { margin:5px 0 0; color:var(--text-muted); font-size:11px; line-height:1.4; }
+    .metricas-eyebrow { color:var(--accent); font-size:10px; font-weight:900; letter-spacing:.1em; text-transform:uppercase; }
+    .metricas-icone { width:38px; height:38px; display:grid; place-items:center; flex:0 0 auto; color:#7dd3fc; border:1px solid rgba(56,189,248,.32); border-radius:13px; background:rgba(14,165,233,.12); }
+    .metricas-icone .icone-almove { width:20px; height:20px; }
+    .metricas-modo { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin:16px 0 12px; padding:4px; border:1px solid var(--border-soft); border-radius:14px; background:rgba(3,12,22,.48); }
+    .metricas-modo-btn, .metricas-velocidade button { min-height:38px; border:1px solid transparent; border-radius:10px; background:transparent; color:var(--text-muted); font:inherit; font-size:12px; font-weight:850; cursor:pointer; transition:transform .16s ease,background .16s ease,color .16s ease; }
+    .metricas-modo-btn.ativo, .metricas-velocidade button.ativo { background:rgba(45,212,191,.14); color:var(--accent); border-color:rgba(45,212,191,.28); }
+    .metricas-modo-btn:active, .metricas-velocidade button:active { transform:scale(.97); }
+    .metricas-campos { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    .metricas-campos label { display:grid; gap:5px; color:var(--text-soft); font-size:10px; font-weight:800; }
+    .metricas-campos label:nth-child(3) { grid-column:span 2; }
+    .metricas-campos input, .metricas-campos select { width:100%; min-height:42px; padding:0 11px; border:1px solid var(--border); border-radius:11px; outline:0; background:rgba(255,255,255,.055); color:#fff; font:inherit; font-size:13px; }
+    .metricas-campos select option { background:#091421; }
+    .metricas-campos input:focus, .metricas-campos select:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(45,212,191,.10); }
+    .metricas-velocidade-wrap { margin-top:14px; }
+    .metricas-velocidade-wrap > span { display:block; margin-bottom:7px; color:var(--text-soft); font-size:10px; font-weight:800; }
+    .metricas-velocidade { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
+    .metricas-velocidade button { min-height:43px; padding:5px; border-color:var(--border-soft); background:rgba(255,255,255,.04); }
+    .metricas-velocidade small { display:block; margin-top:2px; color:var(--text-muted); font-size:9px; font-weight:700; }
+    .metricas-resultado { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-top:14px; }
+    .metricas-resultado-item { min-height:65px; padding:10px 7px; border:1px solid rgba(45,212,191,.16); border-radius:12px; background:rgba(0,0,0,.14); text-align:center; }
+    .metricas-resultado-item strong { display:block; color:#fff; font-size:16px; font-weight:900; letter-spacing:-.04em; }
+    .metricas-resultado-item span { display:block; margin-top:4px; color:var(--text-muted); font-size:9px; font-weight:800; }
+    .metricas-vazio { grid-column:1/-1; padding:12px; border:1px dashed rgba(45,212,191,.28); border-radius:12px; color:var(--text-muted); font-size:11px; line-height:1.45; }
+    .metricas-nota, .metricas-sync { margin:10px 0 0; color:var(--text-muted); font-size:10px; line-height:1.4; }
+    .metricas-sync { min-height:14px; color:var(--accent); }
+    .metricas-guardar { width:100%; margin-top:14px; }
   </style>
 </head>
 <body>
 
   <section class="ecra-boas-vindas" id="ecraBoasVindas" aria-labelledby="boasVindasTitulo">
     <div class="boas-vindas-conteudo">
-      <img class="boas-vindas-logo" src="/al-move-mark.png" alt="AL MOVE">
+      <img class="boas-vindas-logo" src="/icons/icon-any-512.png" alt="AL MOVE">
       <h1 class="boas-vindas-saudacao" id="boasVindasTitulo"><span id="boasVindasPrefixo">Olá</span><strong id="boasVindasNome" class="oculto"></strong></h1>
       <p class="boas-vindas-sub">O teu caminho começa aqui.</p>
       <button type="button" class="btn-comecar" id="btnComecarPortal">Começar</button>
@@ -967,11 +1003,11 @@
   </section>
 
   <div class="pull-refresh" id="pullRefresh" aria-live="polite" aria-label="Puxar para atualizar">
-    <img src="/al-move-mark.png" alt="">
+    <img src="/icons/icon-any-512.png" alt="">
   </div>
 
   <div class="topo">
-    <img src="/al-move-mark.png" alt="AL MOVE">
+    <img src="/icons/icon-any-512.png" alt="AL MOVE">
     <div class="topo-textos">
       <div class="topo-titulo">AL MOVE</div>
       <div class="topo-sub">Portal do cliente</div>
@@ -1046,8 +1082,8 @@
       <div class="card-title">O teu percurso de hoje</div>
       <p class="fluxo-hoje-status" id="fluxoHojeStatus"></p>
       <div class="fluxo-hoje-passos">
-        <div class="fluxo-hoje-etapa" id="fluxoHojeEtapa1"><span class="fluxo-hoje-ponto">1</span>Check-in</div>
-        <div class="fluxo-hoje-etapa" id="fluxoHojeEtapa2"><span class="fluxo-hoje-ponto">2</span>Teste</div>
+        <button type="button" class="fluxo-hoje-etapa fluxo-hoje-editavel" id="fluxoHojeEtapa1" data-fluxo-etapa="checkin" aria-label="Editar check-in"><span class="fluxo-hoje-ponto">1</span>Check-in</button>
+        <button type="button" class="fluxo-hoje-etapa fluxo-hoje-editavel" id="fluxoHojeEtapa2" data-fluxo-etapa="teste" aria-label="Voltar ao teste de prontidão"><span class="fluxo-hoje-ponto">2</span>Teste</button>
         <div class="fluxo-hoje-etapa" id="fluxoHojeEtapa3"><span class="fluxo-hoje-ponto">3</span>Escolher</div>
         <div class="fluxo-hoje-etapa" id="fluxoHojeEtapa4"><span class="fluxo-hoje-ponto">4</span>Treinar</div>
         <div class="fluxo-hoje-etapa" id="fluxoHojeEtapa5"><span class="fluxo-hoje-ponto">5</span>Feedback</div>
@@ -1369,6 +1405,29 @@
       </div>
     </div>
 
+    <section class="card metricas-atividade-card" aria-labelledby="metricasAtividadeTitulo">
+      <div class="metricas-cabecalho">
+        <div><span class="metricas-eyebrow">Movimento diário</span><div class="card-title" id="metricasAtividadeTitulo">Métricas de atividade</div><p>Estimativas pessoais a partir dos teus passos.</p></div>
+        <span class="metricas-icone" data-metricas-icone="caminhar"></span>
+      </div>
+      <div class="metricas-modo" role="group" aria-label="Atividade">
+        <button type="button" class="metricas-modo-btn ativo" data-atividade="caminhada">Caminhada</button>
+        <button type="button" class="metricas-modo-btn" data-atividade="corrida">Corrida</button>
+      </div>
+      <div class="metricas-campos">
+        <label>Peso (kg)<input id="metricasPeso" type="number" inputmode="decimal" min="30" max="300" placeholder="Ex.: 68"></label>
+        <label>Altura (cm)<input id="metricasAltura" type="number" inputmode="numeric" min="120" max="230" placeholder="Ex.: 170"></label>
+        <label>Género <select id="metricasGenero"><option value="">Prefiro não indicar</option><option value="feminino">Feminino</option><option value="masculino">Masculino</option><option value="outro">Outro</option></select></label>
+        <label>Passada a caminhar (cm)<input id="metricasPassadaCaminhada" type="number" inputmode="numeric" min="30" max="200" placeholder="Ex.: 70"></label>
+        <label>Passada a correr (cm)<input id="metricasPassadaCorrida" type="number" inputmode="numeric" min="50" max="300" placeholder="Ex.: 110"></label>
+      </div>
+      <div class="metricas-velocidade-wrap"><span id="metricasVelocidadeTitulo">Ritmo de caminhada</span><div class="metricas-velocidade" id="metricasVelocidade"></div></div>
+      <div class="metricas-resultado" id="metricasResultado" aria-live="polite"></div>
+      <p class="metricas-nota">O género fica apenas no teu perfil; esta estimativa usa peso, distância e ritmo.</p>
+      <button type="button" class="btn-secundario metricas-guardar" id="btnGuardarMetricas">Guardar métricas</button>
+      <p class="metricas-sync" id="metricasSync"></p>
+    </section>
+
     <div class="card">
       <div class="card-title">O teu plano</div>
       <div id="opcoesPlanoConteudo">
@@ -1456,7 +1515,7 @@
     </div>
     <div class="tab-btn" id="tabBtnPlanos" data-tab="planos">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      Opções
+      Perfil
     </div>
   </div>
 
@@ -1470,6 +1529,7 @@
     treinos: '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18M9 15l2 2 4-4"/>',
     conquistas: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h2a2 2 0 0 1 0 4h-1M7 5H5a2 2 0 0 0 0 4h1"/>',
     opcoes: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+    ajustes: '<path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="11" cy="18" r="2"/>',
     mensagem: '<path d="M20 11a8 8 0 0 1-8.8 8 8.8 8.8 0 0 1-3.3-.8L4 20l1.7-4.2A8 8 0 1 1 20 11Z"/><path d="M8.5 10.5h7M8.5 13.5h4"/>',
     documento: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h6"/>',
     fatura: '<path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3Z"/><path d="M9 8h6M9 12h6M9 16h4"/>',
@@ -1513,7 +1573,7 @@
   }
 
   function normalizarIconesFixos() {
-    [["#tabBtnInicio", "inicio"], ["#tabBtnHoje", "treinos"], ["#tabBtnConquistas", "conquistas"], ["#tabBtnPlanos", "opcoes"], [".streak-icone", "chama"], [".inicio-cta-play", "reproduzir"], [".inicio-cta-seta", "direita"], [".btn-contacto-pt-icone", "mensagem"], [".success-icon", "concluido"], [".confirmar-treino-icone", "concluido"]].forEach(function (par) {
+    [["#tabBtnInicio", "inicio"], ["#tabBtnHoje", "treinos"], ["#tabBtnConquistas", "conquistas"], ["#tabBtnPlanos", "ajustes"], [".streak-icone", "chama"], [".inicio-cta-play", "reproduzir"], [".inicio-cta-seta", "direita"], [".btn-contacto-pt-icone", "mensagem"], [".success-icon", "concluido"], [".confirmar-treino-icone", "concluido"]].forEach(function (par) {
       trocarIconeDentro(par[0], par[1]);
     });
     const opcoes = ["documento", "fatura", "notificacoes", "bloqueado"];
@@ -1866,6 +1926,71 @@
       // Sem ligação — o ecrã Opções fica com os valores por omissão até haver rede.
     });
 
+  // ---------- Perfil: métricas pessoais de caminhada e corrida ----------
+  const CHAVE_METRICAS_ATIVIDADE = "ALMOVE_METRICAS_" + TOKEN;
+  const METRICAS_PADRAO = { pesoKg: "", alturaCm: "", genero: "", passadaCaminhadaCm: "", passadaCorridaCm: "", atividade: "caminhada", velocidadeCaminhada: 4.8, velocidadeCorrida: 8 };
+  let metricasAtividade = lerMetricasAtividade();
+
+  function lerMetricasAtividade() {
+    try { return Object.assign({}, METRICAS_PADRAO, JSON.parse(localStorage.getItem(CHAVE_METRICAS_ATIVIDADE) || "{}")); }
+    catch (e) { return Object.assign({}, METRICAS_PADRAO); }
+  }
+  function guardarMetricasLocais() { try { localStorage.setItem(CHAVE_METRICAS_ATIVIDADE, JSON.stringify(metricasAtividade)); } catch (e) {} }
+  function numeroMetrica(valor) { return Math.max(0, Number(String(valor || "").replace(",", ".")) || 0); }
+  function opcoesVelocidade() {
+    return metricasAtividade.atividade === "corrida"
+      ? [{ valor: 8, nome: "Leve", meta: "8 km/h" }, { valor: 10, nome: "Média", meta: "10 km/h" }, { valor: 12, nome: "Rápida", meta: "12 km/h" }]
+      : [{ valor: 3.2, nome: "Lenta", meta: "3,2 km/h" }, { valor: 4.8, nome: "Média", meta: "4,8 km/h" }, { valor: 6.4, nome: "Rápida", meta: "6,4 km/h" }];
+  }
+  function metEstimado(atividade, velocidade) {
+    if (atividade === "corrida") return velocidade <= 8 ? 8.3 : velocidade <= 10 ? 9.8 : 11.5;
+    return velocidade <= 3.2 ? 2.8 : velocidade <= 4.8 ? 3.5 : 5.0;
+  }
+  function lerCamposMetricas() {
+    const campos = { pesoKg: "metricasPeso", alturaCm: "metricasAltura", passadaCaminhadaCm: "metricasPassadaCaminhada", passadaCorridaCm: "metricasPassadaCorrida" };
+    Object.keys(campos).forEach(function (campo) { const el = document.getElementById(campos[campo]); if (el) metricasAtividade[campo] = el.value; });
+    const genero = document.getElementById("metricasGenero"); if (genero) metricasAtividade.genero = genero.value;
+  }
+  function atualizarResultadoMetricas() {
+    const resultado = document.getElementById("metricasResultado"); if (!resultado) return;
+    const peso = numeroMetrica(metricasAtividade.pesoKg);
+    const passada = numeroMetrica(metricasAtividade.atividade === "corrida" ? metricasAtividade.passadaCorridaCm : metricasAtividade.passadaCaminhadaCm);
+    const velocidade = metricasAtividade.atividade === "corrida" ? Number(metricasAtividade.velocidadeCorrida) : Number(metricasAtividade.velocidadeCaminhada);
+    const passos = obterPassosHoje();
+    if (!peso || !passada) { resultado.innerHTML = '<div class="metricas-vazio">Indica o teu peso e comprimento de passada para estimar a distância, duração e calorias dos teus passos de hoje.</div>'; return; }
+    const distanciaMetros = passos * passada / 100;
+    const minutos = velocidade ? (distanciaMetros / 1000) / velocidade * 60 : 0;
+    const calorias = metEstimado(metricasAtividade.atividade, velocidade) * 3.5 * peso / 200 * minutos;
+    resultado.innerHTML = '<div class="metricas-resultado-item"><strong>' + Math.round(distanciaMetros).toLocaleString("pt-PT") + ' m</strong><span>Distância</span></div><div class="metricas-resultado-item"><strong>' + Math.round(minutos) + ' min</strong><span>Duração aprox.</span></div><div class="metricas-resultado-item"><strong>' + Math.round(calorias) + ' kcal</strong><span>Energia aprox.</span></div>';
+  }
+  function renderMetricasAtividade() {
+    const campos = { pesoKg: "metricasPeso", alturaCm: "metricasAltura", passadaCaminhadaCm: "metricasPassadaCaminhada", passadaCorridaCm: "metricasPassadaCorrida" };
+    Object.keys(campos).forEach(function (campo) { const el = document.getElementById(campos[campo]); if (el && document.activeElement !== el) el.value = metricasAtividade[campo] || ""; });
+    const genero = document.getElementById("metricasGenero"); if (genero && document.activeElement !== genero) genero.value = metricasAtividade.genero || "";
+    document.querySelectorAll(".metricas-modo-btn").forEach(function (btn) { btn.classList.toggle("ativo", btn.dataset.atividade === metricasAtividade.atividade); });
+    const titulo = document.getElementById("metricasVelocidadeTitulo"); if (titulo) titulo.textContent = metricasAtividade.atividade === "corrida" ? "Ritmo de corrida" : "Ritmo de caminhada";
+    const velocidadeAtual = metricasAtividade.atividade === "corrida" ? Number(metricasAtividade.velocidadeCorrida) : Number(metricasAtividade.velocidadeCaminhada);
+    const velocidades = document.getElementById("metricasVelocidade");
+    if (velocidades) {
+      velocidades.innerHTML = opcoesVelocidade().map(function (opcao) { return '<button type="button" data-velocidade="' + opcao.valor + '" class="' + (Number(opcao.valor) === velocidadeAtual ? "ativo" : "") + '">' + opcao.nome + '<small>' + opcao.meta + '</small></button>'; }).join("");
+      velocidades.querySelectorAll("button").forEach(function (btn) { btn.addEventListener("click", function () { if (metricasAtividade.atividade === "corrida") metricasAtividade.velocidadeCorrida = Number(btn.dataset.velocidade); else metricasAtividade.velocidadeCaminhada = Number(btn.dataset.velocidade); guardarMetricasLocais(); renderMetricasAtividade(); }); });
+    }
+    atualizarResultadoMetricas();
+  }
+  function guardarMetricasAtividade() {
+    lerCamposMetricas(); guardarMetricasLocais(); atualizarResultadoMetricas();
+    const sync = document.getElementById("metricasSync");
+    if (!navigator.onLine) { if (sync) sync.textContent = "Guardado neste dispositivo. Será sincronizado quando houver ligação."; return; }
+    if (sync) sync.textContent = "A sincronizar…";
+    chamarApi("guardarMetricasAtividadePortal", metricasAtividade)
+      .then(function (resp) { if (!resp || !resp.ok) throw new Error(); if (resp.dados) { metricasAtividade = Object.assign({}, metricasAtividade, resp.dados); guardarMetricasLocais(); renderMetricasAtividade(); } if (sync) sync.textContent = "Métricas sincronizadas."; })
+      .catch(function () { if (sync) sync.textContent = "Guardado neste dispositivo. A sincronização fica pendente."; });
+  }
+  document.querySelectorAll(".metricas-modo-btn").forEach(function (btn) { btn.addEventListener("click", function () { metricasAtividade.atividade = btn.dataset.atividade; guardarMetricasLocais(); renderMetricasAtividade(); }); });
+  ["metricasPeso", "metricasAltura", "metricasPassadaCaminhada", "metricasPassadaCorrida", "metricasGenero"].forEach(function (id) { const el = document.getElementById(id); if (el) el.addEventListener("input", function () { lerCamposMetricas(); guardarMetricasLocais(); atualizarResultadoMetricas(); }); });
+  document.getElementById("btnGuardarMetricas").addEventListener("click", guardarMetricasAtividade);
+  document.querySelectorAll("[data-metricas-icone]").forEach(function (el) { trocarIconeDentro(el, el.getAttribute("data-metricas-icone")); });
+
   // ---------- Barra "O teu percurso de hoje" ----------
   const fluxoHojeEl = document.getElementById("fluxoHoje");
   const fluxoHojeStatusEl = document.getElementById("fluxoHojeStatus");
@@ -1912,6 +2037,38 @@
       else if (i === etapaAtual) etapaEl.classList.add("ativo");
     }
   }
+
+  function abrirEtapaEditavel(etapa) {
+    const estado = lerEstadoDiario();
+    if (etapa === "checkin") {
+      if (!(estado.checkin && estado.checkin.values) && !CHECKIN_HOJE_CONFIRMADO) return;
+      preencherRespostas((estado.checkin && estado.checkin.values) || {});
+      checkinResumo.classList.add("oculto");
+      checkinForm.classList.remove("oculto");
+      cardProntidao.classList.add("oculto");
+      cardEscolherTreino.classList.add("oculto");
+      cardExecucaoTreino.classList.add("oculto");
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = "Guardar alterações";
+      checkinErro.style.display = "none";
+      mudarTab("hoje");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    if (etapa === "teste") {
+      if (!temCheckinFeito()) return;
+      cardCheckin.classList.add("oculto");
+      cardEscolherTreino.classList.add("oculto");
+      cardExecucaoTreino.classList.add("oculto");
+      cardProntidao.classList.remove("oculto");
+      renderProntidao();
+      mudarTab("hoje");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+  document.querySelectorAll("[data-fluxo-etapa]").forEach(function (btn) {
+    btn.addEventListener("click", function () { abrirEtapaEditavel(btn.dataset.fluxoEtapa); });
+  });
 
   // ---------- Estado local (offline-first) ----------
   // Mesmo padrão do Portal.html actual: guarda um rascunho do dia por
@@ -2088,6 +2245,7 @@
     btnSubmeterPassos.classList.toggle("oculto", submetido);
     btnEditarPassos.classList.toggle("oculto", !submetido);
     renderTrofeusPassos();
+    atualizarResultadoMetricas();
   }
 
   function submeterPassos() {
@@ -2325,8 +2483,11 @@
         '<div class="prontidao-ms">' + teste.medianaMs + ' <small>ms</small></div>' +
         '<div class="prontidao-tentativas">Mediana de ' + (teste.tentativas || 5) + ' toques · ' + referencia + '</div>' +
         '<p class="prontidao-nota">' + notaProntidao(teste) + '</p></div>' +
-        '<button type="button" class="botao" id="btnLibertarTreino" style="margin-top:14px;">Continuar para escolher treino</button>';
+        (!teste.tentativaExtraUsada ? '<button type="button" class="btn-secundario" id="btnRepetirProntidao" style="margin-top:14px;">Repetir teste uma vez</button>' : '') +
+        '<button type="button" class="botao" id="btnLibertarTreino" style="margin-top:10px;">Continuar para escolher treino</button>';
       document.getElementById("btnLibertarTreino").addEventListener("click", libertarEscolhaTreino);
+      const btnRepetir = document.getElementById("btnRepetirProntidao");
+      if (btnRepetir) btnRepetir.addEventListener("click", repetirProntidao);
       return;
     }
 
@@ -2367,6 +2528,16 @@
     prontidaoEmCurso = true;
     prontidaoTempos = [];
     mostrarTentativaProntidao();
+  }
+
+  function repetirProntidao() {
+    const estado = lerEstadoDiario();
+    const anterior = estado.testeProntidao || PRONTIDAO_HOJE_INICIAL;
+    if (!anterior || anterior.tentativaExtraUsada) return;
+    estado.testeProntidao = Object.assign({}, anterior, { tentativaExtraUsada: true, primeiraMedianaMs: anterior.medianaMs });
+    guardarEstadoDiario(estado);
+    PRONTIDAO_HOJE_INICIAL = estado.testeProntidao;
+    iniciarProntidao();
   }
 
   function mostrarTentativaProntidao(mensagem) {
@@ -2421,13 +2592,18 @@
 
   function concluirProntidao() {
     prontidaoEmCurso = false;
-    const teste = { medianaMs: medianaLocal(prontidaoTempos), tentativas: prontidaoTempos.length, temposMs: prontidaoTempos.slice(), eventId: gerarIdLocal(), synced: false, libertouTreino: false };
     const estado = lerEstadoDiario();
+    const anterior = estado.testeProntidao || PRONTIDAO_HOJE_INICIAL || null;
+    const medianaNova = medianaLocal(prontidaoTempos);
+    const manterPrimeiro = !!(anterior && anterior.tentativaExtraUsada && anterior.primeiraMedianaMs && anterior.primeiraMedianaMs <= medianaNova);
+    const teste = manterPrimeiro
+      ? Object.assign({}, anterior, { melhorDeDuas: true, medianaMs: anterior.primeiraMedianaMs, tentativas: anterior.tentativas || 5, libertouTreino: false })
+      : { medianaMs: medianaNova, tentativas: prontidaoTempos.length, temposMs: prontidaoTempos.slice(), eventId: gerarIdLocal(), synced: false, libertouTreino: false, tentativaExtraUsada: !!(anterior && anterior.tentativaExtraUsada), primeiraMedianaMs: anterior && anterior.primeiraMedianaMs ? anterior.primeiraMedianaMs : undefined, melhorDeDuas: !!(anterior && anterior.tentativaExtraUsada) };
     estado.testeProntidao = teste;
     guardarEstadoDiario(estado);
     PRONTIDAO_HOJE_INICIAL = teste;
     renderProntidao();
-    sincronizarProntidaoPendente();
+    if (!manterPrimeiro) sincronizarProntidaoPendente();
   }
 
   function sincronizarProntidaoPendente() {
@@ -3476,7 +3652,21 @@
     }
   }
 
+  function iniciarMetricasAtividade() {
+    renderMetricasAtividade();
+    chamarApi("getMetricasAtividadePortal", {})
+      .then(function (resp) {
+        if (resp && resp.ok && resp.dados) {
+          metricasAtividade = Object.assign({}, metricasAtividade, resp.dados);
+          guardarMetricasLocais();
+          renderMetricasAtividade();
+        }
+      })
+      .catch(function () {});
+  }
+
   // ---------- Arranque: pergunta ao servidor o estado de hoje ----------
+  iniciarMetricasAtividade();
   renderFluxoHoje();
   chamarApi("getEstadoPortalHoje", {})
     .then(function (resp) {
