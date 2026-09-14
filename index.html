@@ -1123,6 +1123,33 @@
     /* As métricas continuam acessíveis por deslize, sem a barra nativa repetida. */
     .avaliacao-grafico-opcoes { overflow-x:auto; overscroll-behavior-inline:contain; scrollbar-width:none; -ms-overflow-style:none; }
     .avaliacao-grafico-opcoes::-webkit-scrollbar { display:none; width:0; height:0; }
+  </style>  <style id="ajuste-evolucao-gaveta">
+    /* Gaveta AL MOVE para métricas: sem menus brancos do sistema. */
+    .evolucao-seletor { position:relative; }
+    .evolucao-seletor-botao { width:100%; min-height:42px; display:flex; align-items:center; justify-content:space-between; gap:9px; padding:0 11px; border:1px solid rgba(45,212,191,.42); border-radius:11px; background:linear-gradient(135deg,rgba(9,31,50,.96),rgba(13,26,44,.96)); color:#f1f8ff; font:inherit; font-size:12px; font-weight:800; text-align:left; cursor:pointer; }
+    .evolucao-seletor-botao > span:last-child { color:#5eead4; font-size:17px; line-height:1; }
+    .evolucao-gaveta { position:absolute; z-index:80; top:calc(100% + 7px); left:0; right:0; max-height:278px; overflow-y:auto; padding:7px; border:1px solid rgba(45,212,191,.34); border-radius:14px; background:#091827; box-shadow:0 18px 36px rgba(0,0,0,.45); }
+    .evolucao-gaveta-titulo { padding:5px 7px 8px; color:#5eead4; font-size:10px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+    .evolucao-gaveta button { width:100%; display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:10px 9px; border:1px solid transparent; border-radius:10px; background:transparent; color:#e8f4ff; font:inherit; text-align:left; cursor:pointer; }
+    .evolucao-gaveta button span { font-size:12px; font-weight:850; }
+    .evolucao-gaveta button small { color:#8fa5bb; font-size:10px; font-weight:700; }
+    .evolucao-gaveta button.ativo { border-color:rgba(45,212,191,.36); background:rgba(45,212,191,.12); color:#7ff4e3; }
+    .evolucao-gaveta button:active { transform:scale(.985); }
+    .avaliacao-dias { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); width:100%; gap:7px; justify-content:center; }
+    .avaliacao-dia { min-width:0; }
+    .avaliacao-dia span { display:grid; place-items:center; min-height:42px; padding:8px 3px; border-width:1px; font-size:11px; text-align:center; }
+    .avaliacao-dia:nth-child(1) span { color:#72e8dc; border-color:rgba(45,212,191,.30); background:rgba(45,212,191,.08); }
+    .avaliacao-dia:nth-child(2) span { color:#9bd8ff; border-color:rgba(56,189,248,.30); background:rgba(56,189,248,.08); }
+    .avaliacao-dia:nth-child(3) span { color:#c4b5fd; border-color:rgba(167,139,250,.30); background:rgba(167,139,250,.08); }
+    .avaliacao-dia:nth-child(4) span { color:#e9b8ff; border-color:rgba(217,70,239,.30); background:rgba(217,70,239,.08); }
+    .avaliacao-dia:nth-child(5) span { color:#fde68a; border-color:rgba(251,191,36,.30); background:rgba(251,191,36,.08); }
+    .avaliacao-dia:nth-child(6) span { color:#fcb4c2; border-color:rgba(251,113,133,.30); background:rgba(251,113,133,.08); }
+    .avaliacao-dia:nth-child(1) input:checked+span { background:rgba(45,212,191,.22); border-color:#2dd4bf; color:#e5fffb; }
+    .avaliacao-dia:nth-child(2) input:checked+span { background:rgba(56,189,248,.22); border-color:#38bdf8; color:#eefaff; }
+    .avaliacao-dia:nth-child(3) input:checked+span { background:rgba(167,139,250,.22); border-color:#a78bfa; color:#f2edff; }
+    .avaliacao-dia:nth-child(4) input:checked+span { background:rgba(217,70,239,.22); border-color:#d946ef; color:#fdeeff; }
+    .avaliacao-dia:nth-child(5) input:checked+span { background:rgba(251,191,36,.22); border-color:#fbbf24; color:#fff9df; }
+    .avaliacao-dia:nth-child(6) input:checked+span { background:rgba(251,113,133,.22); border-color:#fb7185; color:#fff0f3; }
   </style></head>
 <body>
 
@@ -1604,11 +1631,6 @@
         <p class="avaliacao-atualizacao" id="avaliacaoAtualizacao">Ainda não há uma avaliação guardada.</p>
         <p class="metricas-sync" id="avaliacaoSync"></p>
       </section>
-      <section class="avaliacao-historico" aria-labelledby="historicoAvaliacoesTitulo">
-        <h3 id="historicoAvaliacoesTitulo">Histórico de avaliações</h3>
-        <div class="avaliacao-grafico-opcoes" id="avaliacaoGraficoOpcoes" role="tablist" aria-label="Métrica do gráfico"></div>
-        <div class="avaliacao-grafico" id="avaliacaoGrafico"></div>
-      </section>
     </section>
 
     <section class="card peso-diario-card oculto" id="perfilPesoDiario" aria-labelledby="pesoDiarioTitulo">
@@ -1624,7 +1646,7 @@
       <button type="button" class="perfil-voltar" id="btnVoltarEvolucao"><span aria-hidden="true"></span> Perfil</button>
       <div class="metricas-cabecalho"><div><span class="metricas-eyebrow">Acompanhamento</span><div class="card-title" id="evolucaoTitulo">A minha evolução</div><p>Consulta as medições e os dados da balança por período.</p></div><span class="metricas-icone" data-evolucao-icone="grafico"></span></div>
       <div class="evolucao-tipo" role="tablist"><button type="button" data-evolucao-tipo="medicoes" class="ativo">Medições</button><button type="button" data-evolucao-tipo="bioimpedancia">Balança e composição</button></div>
-      <div class="evolucao-filtros"><label>Métrica<select id="evolucaoMetrica"></select></label><label>De<input id="evolucaoInicio" type="date"></label><label>Até<input id="evolucaoFim" type="date"></label></div>
+      <div class="evolucao-filtros"><label>Métrica<div class="evolucao-seletor"><button type="button" class="evolucao-seletor-botao" id="btnEvolucaoMetrica" aria-haspopup="listbox" aria-expanded="false"><span id="evolucaoMetricaTexto">Todas as métricas</span><span aria-hidden="true">⌄</span></button><div class="evolucao-gaveta oculto" id="evolucaoGaveta" role="listbox" aria-label="Escolher métrica"></div></div></label><label>De<input id="evolucaoInicio" type="date"></label><label>Até<input id="evolucaoFim" type="date"></label></div>
       <div class="evolucao-resumo" id="evolucaoResumo"></div>
       <div class="avaliacao-grafico" id="evolucaoGrafico"></div>
     </section>
@@ -2528,7 +2550,7 @@
   let pesosDiarios = [];
   let pesoPeriodo = "registos";
   let evolucaoTipo = "medicoes";
-  let evolucaoMetrica = "cinturaCm";
+  let evolucaoMetrica = "__todas";
   const METRICAS_EVOLUCAO = {
     medicoes: { cinturaCm:["Cintura","cm"], abdomenCm:["Abdómen","cm"], bracoDireitoCm:["Braço direito","cm"], bracoEsquerdoCm:["Braço esquerdo","cm"], pernaDireitaCm:["Perna direita","cm"], pernaEsquerdaCm:["Perna esquerda","cm"] },
     bioimpedancia: { pesoKg:["Peso","kg"], massaGordaPercent:["Massa gorda","%"], alturaCm:["Altura","cm"] }
@@ -2557,7 +2579,27 @@
   function abrirPerfilPesoDiario() { document.body.classList.add('perfil-detalhe-aberto'); document.getElementById('perfilPesoDiario').classList.remove('oculto'); document.getElementById('pesoDiarioData').value=dataLocalHoje(); renderPesoDiario(); window.scrollTo({top:0,behavior:'smooth'}); }
   function fecharPerfilPesoDiario() { document.body.classList.remove('perfil-detalhe-aberto'); document.getElementById('perfilPesoDiario').classList.add('oculto'); }
   function guardarPesoDiario() { const data=document.getElementById('pesoDiarioData').value, peso=document.getElementById('pesoDiarioValor').value, sync=document.getElementById('pesoDiarioSync'); if(!data||!peso){sync.textContent='Indica a data e o peso.';return;} sync.textContent='A sincronizar…'; chamarApi('guardarPesoDiarioPortal',{data:data,pesoKg:peso}).then(function(resp){if(!resp||!resp.ok)throw new Error();pesosDiarios=resp.dados||[];document.getElementById('pesoDiarioValor').value='';sync.textContent='Peso guardado.';renderPesoDiario();renderEvolucao();}).catch(function(){sync.textContent='Não foi possível guardar. Tenta novamente com ligação.';}); }
-  function atualizarOpcoesEvolucao() { const seletor=document.getElementById('evolucaoMetrica'), metricas=METRICAS_EVOLUCAO[evolucaoTipo]; if(evolucaoMetrica!=="__todas"&&!metricas[evolucaoMetrica]) evolucaoMetrica=Object.keys(metricas)[0]; seletor.innerHTML='<option value="__todas">Mostrar todas</option>'+Object.keys(metricas).map(chave=>'<option value="'+chave+'">'+metricas[chave][0]+'</option>').join(''); seletor.value=evolucaoMetrica; }
+  function atualizarOpcoesEvolucao() {
+    const gaveta = document.getElementById('evolucaoGaveta');
+    const texto = document.getElementById('evolucaoMetricaTexto');
+    const metricas = METRICAS_EVOLUCAO[evolucaoTipo];
+    if (evolucaoMetrica !== "__todas" && !metricas[evolucaoMetrica]) evolucaoMetrica = "__todas";
+    const opcoes = [{ chave: "__todas", nome: "Todas as métricas", detalhe: "Ver todos os gráficos" }].concat(Object.keys(metricas).map(chave => ({ chave: chave, nome: metricas[chave][0], detalhe: metricas[chave][1] })));
+    const ativa = opcoes.find(opcao => opcao.chave === evolucaoMetrica) || opcoes[0];
+    texto.textContent = ativa.nome;
+    gaveta.innerHTML = '<div class="evolucao-gaveta-titulo">Métrica a mostrar</div>' + opcoes.map(function(opcao) {
+      return '<button type="button" role="option" aria-selected="' + (opcao.chave === evolucaoMetrica) + '" class="' + (opcao.chave === evolucaoMetrica ? 'ativo' : '') + '" data-escolher-metrica="' + opcao.chave + '"><span>' + opcao.nome + '</span><small>' + opcao.detalhe + '</small></button>';
+    }).join('');
+    gaveta.querySelectorAll('[data-escolher-metrica]').forEach(function(botao) {
+      botao.addEventListener('click', function() {
+        evolucaoMetrica = botao.dataset.escolherMetrica;
+        gaveta.classList.add('oculto');
+        document.getElementById('btnEvolucaoMetrica').setAttribute('aria-expanded', 'false');
+        atualizarOpcoesEvolucao();
+        renderEvolucao();
+      });
+    });
+  }
   function dadosEvolucao(chave,inicio,fim) { const origem=chave==='pesoKg'&&pesosDiarios.length?pesosDiarios.map(item=>({atualizadoEm:item.data,pesoKg:item.pesoKg})):historicoAvaliacoesFisicas; return origem.filter(item=>!inicio||String(item.atualizadoEm).slice(0,10)>=inicio).filter(item=>!fim||String(item.atualizadoEm).slice(0,10)<=fim).map(item=>({data:dataValidaAvaliacao(item.atualizadoEm),valor:Number(String(item[chave]||'').replace(',','.'))})).filter(item=>item.data&&Number.isFinite(item.valor)); }
   function renderEvolucao() { const destino=document.getElementById('evolucaoGrafico'), resumo=document.getElementById('evolucaoResumo'); if(!destino||!resumo)return; const inicio=document.getElementById('evolucaoInicio').value, fim=document.getElementById('evolucaoFim').value, metricas=METRICAS_EVOLUCAO[evolucaoTipo]; if(evolucaoMetrica==="__todas"){const chaves=Object.keys(metricas); resumo.innerHTML=chaves.map(chave=>{const dados=dadosEvolucao(chave,inicio,fim),ultimo=dados[dados.length-1];return '<div><strong>'+ (ultimo?ultimo.valor.toLocaleString('pt-PT',{maximumFractionDigits:1})+' '+metricas[chave][1]:'—') +'</strong><span>'+metricas[chave][0]+'</span></div>';}).join(''); destino.innerHTML=chaves.map(chave=>'<section class="evolucao-grafico-item"><h3>'+metricas[chave][0]+'</h3><div class="avaliacao-grafico" id="evolucao-grafico-'+chave+'"></div></section>').join(''); chaves.forEach(chave=>renderGraficoSerie(document.getElementById('evolucao-grafico-'+chave),dadosEvolucao(chave,inicio,fim),metricas[chave][1],'Sem registos.')); return;} const dados=dadosEvolucao(evolucaoMetrica,inicio,fim), meta=metricas[evolucaoMetrica]; resumo.innerHTML='<div><strong>'+dados.length+'</strong><span>avaliações no período</span></div>'+(dados.length?'<div><strong>'+dados[dados.length-1].valor.toLocaleString('pt-PT',{maximumFractionDigits:1})+' '+meta[1]+'</strong><span>último valor</span></div>':''); renderGraficoSerie(destino,dados,meta[1],'Ainda não há registos desta métrica no período escolhido.'); }
   function abrirPerfilEvolucao() { document.body.classList.add('perfil-detalhe-aberto'); document.getElementById('perfilEvolucao').classList.remove('oculto'); atualizarOpcoesEvolucao(); renderEvolucao(); window.scrollTo({top:0,behavior:'smooth'}); }
@@ -2582,7 +2624,8 @@
   document.getElementById("btnGuardarPesoDiario").addEventListener("click", guardarPesoDiario);
   document.querySelectorAll("[data-peso-periodo]").forEach(function (botao) { botao.addEventListener("click", function(){ pesoPeriodo=botao.dataset.pesoPeriodo; renderPesoDiario(); }); });
   document.querySelectorAll("[data-evolucao-tipo]").forEach(function (botao) { botao.addEventListener("click", function(){ evolucaoTipo=botao.dataset.evolucaoTipo; document.querySelectorAll("[data-evolucao-tipo]").forEach(item=>item.classList.toggle("ativo",item===botao)); atualizarOpcoesEvolucao(); renderEvolucao(); }); });
-  document.getElementById("evolucaoMetrica").addEventListener("change", function(e){ evolucaoMetrica=e.target.value; renderEvolucao(); });
+  document.getElementById("btnEvolucaoMetrica").addEventListener("click", function() { const gaveta=document.getElementById('evolucaoGaveta'); const abre=gaveta.classList.contains('oculto'); gaveta.classList.toggle('oculto',!abre); this.setAttribute('aria-expanded',String(abre)); });
+  document.addEventListener("click", function(evento) { const seletor=document.querySelector('.evolucao-seletor'); if(seletor && !seletor.contains(evento.target)) { document.getElementById('evolucaoGaveta').classList.add('oculto'); document.getElementById('btnEvolucaoMetrica').setAttribute('aria-expanded','false'); } });
   document.getElementById("evolucaoInicio").addEventListener("change", renderEvolucao);
   document.getElementById("evolucaoFim").addEventListener("change", renderEvolucao);
   document.getElementById("btnVoltarPerfil").addEventListener("click", fecharPerfilMetricas);
@@ -4569,6 +4612,7 @@
 </script>
 </body>
 </html>
+
 
 
 
