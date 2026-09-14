@@ -3,6 +3,7 @@
 // recebam o novo index.html em vez de manterem a versão anterior em cache.
 
 const VERSAO_CACHE = 'almove-portal-v33';
+const VERSAO_CACHE = 'almove-portal-v34';
 
 const FICHEIROS_ESSENCIAIS = [
   '/',
