@@ -2197,11 +2197,11 @@
     const detalhe = [hora, item.local || item.estado].filter(Boolean).join(" · ");
     return '<article class="agenda-inicio-item"><span class="agenda-inicio-data">' + dia + '<small>' + mes + '</small></span><span><strong>' + escaparTextoNotificacao(titulo) + '</strong><small>' + escaparTextoNotificacao(detalhe || "Detalhes a confirmar") + '</small></span><button type="button" class="agenda-remarcar" data-remarcar-agenda="' + indice + '">Remarcar</button></article>';
   }
-  function renderAgendaInicio(lista) {
+  function renderAgendaInicio(lista, indisponivel) {
     const destino = document.getElementById("agendaInicioLista");
     const itens = Array.isArray(lista) ? lista : [];
     if (!itens.length) {
-      destino.innerHTML = '<p class="agenda-inicio-vazio">Não tens sessões ou avaliações marcadas para os próximos dias.</p>';
+      destino.innerHTML = '<p class="agenda-inicio-vazio">' + (indisponivel ? 'A agenda ainda não está ligada ao Apps Script. Adiciona o código de Agenda e publica uma nova implementação.' : 'Não tens sessões ou avaliações marcadas para os próximos dias.') + '</p>';
       return;
     }
     const proximos = itens.slice(0, 4);
@@ -2217,8 +2217,8 @@
   }
   function iniciarAgendaPortal() {
     chamarApi("getAgendaPortal", {})
-      .then(function (resp) { renderAgendaInicio(resp && resp.ok ? resp.dados : []); })
-      .catch(function () { renderAgendaInicio([]); });
+      .then(function (resp) { renderAgendaInicio(resp && resp.ok ? resp.dados : [], !(resp && resp.ok)); })
+      .catch(function () { renderAgendaInicio([], true); });
   }
 
   chamarApi("getResumoOpcoesPortal", {})
