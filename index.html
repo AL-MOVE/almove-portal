@@ -1052,7 +1052,7 @@
     .perfil-acesso-seta { width:9px; height:9px; border-top:2px solid var(--text-muted); border-right:2px solid var(--text-muted); transform:rotate(45deg); }
     .perfil-voltar { display:inline-flex; align-items:center; gap:8px; padding:0; margin-bottom:14px; border:0; background:transparent; color:var(--text-soft); font:inherit; font-size:12px; font-weight:850; cursor:pointer; }
     .perfil-voltar span { width:9px; height:9px; border-left:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(45deg); }
-    body.perfil-detalhe-aberto #tabPlanos > :not(#perfilMetricas) { display:none; }
+    body.perfil-detalhe-aberto #tabPlanos > :not(#perfilMetricas):not(#perfilAvaliacoes) { display:none; }
     .metricas-corrida-campos { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:13px; }
     .metricas-corrida-campos label { display:grid; gap:5px; color:var(--text-soft); font-size:10px; font-weight:800; }
     .metricas-corrida-campos input { width:100%; min-height:42px; padding:0 11px; border:1px solid var(--border); border-radius:11px; outline:0; background:rgba(255,255,255,.055); color:#fff; font:inherit; font-size:13px; }
@@ -1088,6 +1088,13 @@
     .topo-luz{display:inline-block;width:7px;height:7px;margin:0 6px 1px 0;border-radius:50%;background:var(--accent);box-shadow:0 0 10px rgba(45,212,191,.9);vertical-align:middle}
     .btn-notificacoes{position:absolute;right:14px;top:13px;width:38px;height:38px;display:grid;place-items:center;border:1px solid rgba(45,212,191,.54);border-radius:50%;background:rgba(45,212,191,.08);color:var(--accent);cursor:pointer;box-shadow:0 0 16px rgba(45,212,191,.1)}.btn-notificacoes:hover{background:rgba(45,212,191,.17);box-shadow:0 0 18px rgba(45,212,191,.24)}.btn-notificacoes svg{width:19px;height:19px}.notificacoes-ponto{position:absolute;top:5px;right:5px;width:7px;height:7px;border:2px solid #081424;border-radius:50%;background:#fb7185}.notificacoes-ponto.oculto{display:none}
     .painel-notificacoes{position:fixed;z-index:280;top:80px;right:max(14px,calc((100vw - 640px)/2));width:min(360px,calc(100vw - 28px));max-height:calc(100vh - 100px);overflow:auto;padding:16px;border:1px solid rgba(45,212,191,.32);border-radius:16px;background:#081424;box-shadow:0 22px 50px rgba(0,0,0,.42)}.painel-notificacoes.oculto{display:none}.painel-notificacoes-cabecalho{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.painel-notificacoes p{margin:4px 0 0;color:var(--text-muted);font-size:11px;line-height:1.4}.btn-fechar-notificacoes{width:28px;height:28px;border:0;border-radius:8px;background:rgba(255,255,255,.07);color:#fff;font-size:22px;line-height:1;cursor:pointer}.btn-ativar-notificacoes{width:100%;min-height:38px;margin:14px 0 4px;border:1px solid rgba(45,212,191,.44);border-radius:10px;background:rgba(45,212,191,.11);color:var(--accent);font:inherit;font-size:11px;font-weight:850;cursor:pointer}.lista-notificacoes{margin-top:10px}.notificacoes-vazio{padding:13px 0;text-align:center}.notificacao-item{padding:11px 0;border-top:1px solid var(--border-soft)}.notificacao-item strong{display:block;color:#fff;font-size:12px}.notificacao-item span{display:block;margin-top:4px;color:var(--text-muted);font-size:10px;line-height:1.35}
+  </style>
+  <style id="avaliacoes-fisicas-estilo">
+    .perfil-acesso-icone.avaliacao,.avaliacao-fisica-card .metricas-icone{color:#c4b5fd;border-color:rgba(167,139,250,.34);background:rgba(139,92,246,.12)}
+    .avaliacao-fisica-card{overflow:hidden;background:linear-gradient(135deg,rgba(79,70,229,.14),rgba(45,212,191,.055))}.avaliacao-secao-titulo{margin:18px 0 8px;color:#c4b5fd;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.avaliacao-campos{display:grid;grid-template-columns:1fr 1fr;gap:9px}.avaliacao-campos label{display:grid;gap:5px;color:var(--text-soft);font-size:10px;font-weight:800}.avaliacao-campos label:nth-child(3){grid-column:span 2}.avaliacao-campos input{width:100%;min-height:42px;padding:0 11px;border:1px solid var(--border);border-radius:11px;outline:0;background:rgba(255,255,255,.055);color:#fff;font:inherit;font-size:13px}.avaliacao-campos input:focus{border-color:#a78bfa;box-shadow:0 0 0 3px rgba(167,139,250,.12)}.avaliacao-atualizacao{margin:14px 0 0;color:var(--text-muted);font-size:10px;line-height:1.4}
+    .pos-treino-nota-label{display:grid;gap:6px;margin-top:16px;color:var(--text-soft);font-size:11px;font-weight:800}.pos-treino-nota-label textarea{width:100%;min-height:82px;resize:vertical;padding:10px 11px;border:1px solid var(--border);border-radius:11px;outline:0;background:rgba(255,255,255,.055);color:#fff;font:inherit;font-size:12px;line-height:1.4}.pos-treino-nota-label textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,212,191,.1)}
+    .treino-recordes{display:inline-flex;margin:9px auto 0;padding:6px 9px;border:1px solid rgba(251,191,36,.34);border-radius:999px;background:rgba(245,158,11,.12);color:#fde68a!important;font-size:10px!important;font-weight:850}
+    .agenda-inicio-card{background:linear-gradient(135deg,rgba(14,165,233,.12),rgba(45,212,191,.05))}.agenda-inicio-lista{display:grid;gap:8px;margin-top:13px}.agenda-inicio-item{display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:9px;padding:10px;border:1px solid var(--border-soft);border-radius:13px;background:rgba(255,255,255,.035)}.agenda-inicio-data{display:grid;place-items:center;min-height:40px;border-radius:10px;background:rgba(56,189,248,.12);color:#7dd3fc;font-size:11px;font-weight:900;text-align:center;line-height:1.05}.agenda-inicio-item strong{display:block;color:#fff;font-size:12px}.agenda-inicio-item small{display:block;margin-top:3px;color:var(--text-muted);font-size:10px}.agenda-remarcar{border:0;background:transparent;color:var(--accent);font:inherit;font-size:10px;font-weight:850;cursor:pointer}.agenda-inicio-vazio{margin:0;padding:6px 0;color:var(--text-muted);font-size:11px}
   </style>
 </head>
 <body>
@@ -1156,6 +1163,11 @@
       </div>
       <div class="semana-barra"><div class="semana-barra-fill" id="inicioSemanaBarra" style="width:0%"></div></div>
     </div>
+
+    <section class="card agenda-inicio-card" aria-labelledby="agendaInicioTitulo">
+      <div class="conquistas-cabecalho"><div><div class="conquistas-eyebrow">Agenda</div><div class="card-title" id="agendaInicioTitulo">Próximos compromissos</div></div><span class="conquistas-meta-pill" id="agendaInicioPeriodo">Esta semana</span></div>
+      <div class="agenda-inicio-lista" id="agendaInicioLista"><p class="agenda-inicio-vazio">A carregar agenda…</p></div>
+    </section>
 
     <section class="card inicio-passos-card" aria-labelledby="inicioPassosTitulo">
       <div class="inicio-passos-topo">
@@ -1405,6 +1417,8 @@
       <div class="extremos"><span>Fácil</span><span>Muito difícil</span></div>
     </div>
 
+    <label class="pos-treino-nota-label">Nota para o André<textarea id="posTreinoNota" maxlength="500" placeholder="Ex.: senti desconforto no ombro, aumentei a carga, estava sem energia…"></textarea></label>
+
     <button type="button" class="botao" id="btnConfirmarPosTreino">Confirmar</button>
     <p class="erro" id="posTreinoErro"></p>
   </div>
@@ -1414,6 +1428,7 @@
       <div class="success-icon" aria-label="Concluído"><svg viewBox="0 0 24 24"><path d="M7 12.5 10.2 16 17 8"/><circle cx="12" cy="12" r="9"/></svg></div>
       <h2>Treino concluído</h2>
       <p id="treinoConcluidoNome"></p>
+      <p class="treino-recordes oculto" id="treinoConcluidoRecordes"></p>
     </div>
     <div class="success-stats">
       <div class="success-stat"><strong id="treinoConcluidoVolume"></strong><span>Volume registado</span></div>
@@ -1526,6 +1541,7 @@
         </div>
       </div>
       <div class="perfil-acessos">
+        <button type="button" class="perfil-acesso" data-abrir-perfil="avaliacoes"><span class="perfil-acesso-icone avaliacao" data-perfil-icone="avaliacao"></span><span><strong>Avaliações físicas</strong><small>Peso, medidas e composição corporal</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
         <button type="button" class="perfil-acesso" data-abrir-perfil="caminhada"><span class="perfil-acesso-icone" data-perfil-icone="caminhar"></span><span><strong>Métricas de caminhada</strong><small>Passos, distância, duração e calorias</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
         <button type="button" class="perfil-acesso" data-abrir-perfil="corrida"><span class="perfil-acesso-icone corrida" data-perfil-icone="foguetao"></span><span><strong>Calculadora de corrida</strong><small>Estimativa por distância e velocidade</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
       </div>
@@ -1539,6 +1555,32 @@
         </div>
       </div>
     </div>
+
+    <section class="card avaliacao-fisica-card oculto" id="perfilAvaliacoes" aria-labelledby="avaliacaoFisicaTitulo">
+      <button type="button" class="perfil-voltar" id="btnVoltarAvaliacoes"><span aria-hidden="true"></span> Perfil</button>
+      <div class="metricas-cabecalho">
+        <div><span class="metricas-eyebrow">Acompanhamento</span><div class="card-title" id="avaliacaoFisicaTitulo">Avaliação física</div><p>Regista as tuas medidas atuais. O histórico será acrescentado numa próxima fase.</p></div>
+        <span class="metricas-icone" data-avaliacao-icone="avaliacao"></span>
+      </div>
+      <div class="avaliacao-secao-titulo">Composição corporal</div>
+      <div class="avaliacao-campos">
+        <label>Peso (kg)<input id="avaliacaoPeso" type="number" inputmode="decimal" min="30" max="300" step="0.1" placeholder="Ex.: 68,5"></label>
+        <label>Altura (cm)<input id="avaliacaoAltura" type="number" inputmode="numeric" min="120" max="230" step="1" placeholder="Ex.: 170"></label>
+        <label>Massa gorda (%)<input id="avaliacaoMassaGorda" type="number" inputmode="decimal" min="1" max="80" step="0.1" placeholder="Ex.: 24,5"></label>
+      </div>
+      <div class="avaliacao-secao-titulo">Perímetros (cm)</div>
+      <div class="avaliacao-campos">
+        <label>Cintura<input id="avaliacaoCintura" type="number" inputmode="decimal" min="30" max="250" step="0.1" placeholder="Ex.: 78"></label>
+        <label>Abdómen<input id="avaliacaoAbdomen" type="number" inputmode="decimal" min="30" max="250" step="0.1" placeholder="Ex.: 86"></label>
+        <label>Braço direito<input id="avaliacaoBracoDir" type="number" inputmode="decimal" min="15" max="100" step="0.1" placeholder="Ex.: 30"></label>
+        <label>Braço esquerdo<input id="avaliacaoBracoEsq" type="number" inputmode="decimal" min="15" max="100" step="0.1" placeholder="Ex.: 30"></label>
+        <label>Perna direita<input id="avaliacaoPernaDir" type="number" inputmode="decimal" min="25" max="150" step="0.1" placeholder="Ex.: 55"></label>
+        <label>Perna esquerda<input id="avaliacaoPernaEsq" type="number" inputmode="decimal" min="25" max="150" step="0.1" placeholder="Ex.: 55"></label>
+      </div>
+      <p class="avaliacao-atualizacao" id="avaliacaoAtualizacao">Ainda não há uma avaliação guardada.</p>
+      <button type="button" class="btn-secundario metricas-guardar" id="btnGuardarAvaliacao">Guardar avaliação</button>
+      <p class="metricas-sync" id="avaliacaoSync"></p>
+    </section>
 
     <section class="card metricas-atividade-card oculto" id="perfilMetricas" aria-labelledby="metricasAtividadeTitulo">
       <button type="button" class="perfil-voltar" id="btnVoltarPerfil"><span aria-hidden="true"></span> Perfil</button>
@@ -1671,6 +1713,7 @@
     conquistas: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M7.21 15L2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15M11 12L5.12 2.2M13 12l5.88-9.8M8 7h8"/><circle cx="12" cy="17" r="5"/><path d="M12 18v-2h-.5"/></g>',
     opcoes: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M10 15H6a4 4 0 0 0-4 4v2m12.305-4.47l.923-.382m0-2.296l-.923-.383m2.547-1.241l-.383-.923m.383 6.467l-.383.924m2.679-6.468l.383-.923m-.001 7.391l-.382-.924m1.624-3.92l.924-.383m-.924 2.679l.924.383"/><circle cx="18" cy="15" r="3"/><circle cx="9" cy="7" r="4"/></g>',
     ajustes: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M10 15H6a4 4 0 0 0-4 4v2m12.305-4.47l.923-.382m0-2.296l-.923-.383m2.547-1.241l-.383-.923m.383 6.467l-.383.924m2.679-6.468l.383-.923m-.001 7.391l-.382-.924m1.624-3.92l.924-.383m-.924 2.679l.924.383"/><circle cx="18" cy="15" r="3"/><circle cx="9" cy="7" r="4"/></g>',
+    avaliacao: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="14" height="18" x="5" y="4" rx="2"/><path d="M9 4V2h6v2M9 13l2 2l4-4M9 18h6"/></g>',
     mensagem: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 10a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 14.286V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2zm4-1a2 2 0 0 1 2 2v10.286a.71.71 0 0 1-1.212.502l-2.202-2.202A2 2 0 0 0 17.172 19H10a2 2 0 0 1-2-2v-1"/>',
     documento: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5M10 9H8m8 4H8m8 4H8"/></g>',
     fatura: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"/><path d="M14 2v5a1 1 0 0 0 1 1h5M10 9H8m8 4H8m8 4H8"/></g>',
@@ -2143,6 +2186,41 @@
     }
   });
 
+  // ---------- Agenda semanal ----------
+  function formatarCompromissoAgenda(item, indice) {
+    const data = new Date(item.dataHora || item.data || "");
+    const temData = !Number.isNaN(data.getTime());
+    const dia = temData ? String(data.getDate()).padStart(2, "0") : "—";
+    const mes = temData ? data.toLocaleDateString("pt-PT", { month: "short" }).replace(".", "").toUpperCase() : "";
+    const hora = temData ? data.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" }) : "A combinar";
+    const titulo = item.titulo || item.tipo || "Sessão AL MOVE";
+    const detalhe = [hora, item.local || item.estado].filter(Boolean).join(" · ");
+    return '<article class="agenda-inicio-item"><span class="agenda-inicio-data">' + dia + '<small>' + mes + '</small></span><span><strong>' + escaparTextoNotificacao(titulo) + '</strong><small>' + escaparTextoNotificacao(detalhe || "Detalhes a confirmar") + '</small></span><button type="button" class="agenda-remarcar" data-remarcar-agenda="' + indice + '">Remarcar</button></article>';
+  }
+  function renderAgendaInicio(lista) {
+    const destino = document.getElementById("agendaInicioLista");
+    const itens = Array.isArray(lista) ? lista : [];
+    if (!itens.length) {
+      destino.innerHTML = '<p class="agenda-inicio-vazio">Não tens sessões ou avaliações marcadas para os próximos dias.</p>';
+      return;
+    }
+    const proximos = itens.slice(0, 4);
+    destino.innerHTML = proximos.map(formatarCompromissoAgenda).join("");
+    destino.querySelectorAll("[data-remarcar-agenda]").forEach(function (botao) {
+      botao.addEventListener("click", function () {
+        const item = proximos[Number(botao.getAttribute("data-remarcar-agenda"))] || {};
+        const assunto = item.titulo || item.tipo || "a sessão";
+        if (opcoesContactoPTNumero) window.open("https://wa.me/" + opcoesContactoPTNumero + "?text=" + encodeURIComponent("Olá André, gostaria de remarcar " + assunto + "."), "_blank");
+        else { mudarTab("planos"); showToastTreino("Usa a mensagem direta para pedir a remarcação."); }
+      });
+    });
+  }
+  function iniciarAgendaPortal() {
+    chamarApi("getAgendaPortal", {})
+      .then(function (resp) { renderAgendaInicio(resp && resp.ok ? resp.dados : []); })
+      .catch(function () { renderAgendaInicio([]); });
+  }
+
   chamarApi("getResumoOpcoesPortal", {})
     .then(function (resp) {
       if (resp && resp.ok && resp.dados) renderOpcoes(resp.dados);
@@ -2250,7 +2328,61 @@
     perfilMetricasEl.classList.add("oculto");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
-  document.querySelectorAll("[data-abrir-perfil]").forEach(function (btn) { btn.addEventListener("click", function () { abrirPerfilMetricas(btn.dataset.abrirPerfil); }); });
+  // ---------- Perfil: avaliações físicas ----------
+  const CHAVE_AVALIACAO_FISICA = "ALMOVE_AVALIACAO_FISICA_" + TOKEN;
+  const AVALIACAO_FISICA_PADRAO = { pesoKg: "", alturaCm: "", massaGordaPercent: "", cinturaCm: "", abdomenCm: "", bracoDireitoCm: "", bracoEsquerdoCm: "", pernaDireitaCm: "", pernaEsquerdaCm: "", atualizadoEm: "" };
+  let avaliacaoFisica = lerAvaliacaoFisicaLocal();
+  const perfilAvaliacoesEl = document.getElementById("perfilAvaliacoes");
+  const CAMPOS_AVALIACAO = { pesoKg: "avaliacaoPeso", alturaCm: "avaliacaoAltura", massaGordaPercent: "avaliacaoMassaGorda", cinturaCm: "avaliacaoCintura", abdomenCm: "avaliacaoAbdomen", bracoDireitoCm: "avaliacaoBracoDir", bracoEsquerdoCm: "avaliacaoBracoEsq", pernaDireitaCm: "avaliacaoPernaDir", pernaEsquerdaCm: "avaliacaoPernaEsq" };
+
+  function lerAvaliacaoFisicaLocal() {
+    try { return Object.assign({}, AVALIACAO_FISICA_PADRAO, JSON.parse(localStorage.getItem(CHAVE_AVALIACAO_FISICA) || "{}")); }
+    catch (erro) { return Object.assign({}, AVALIACAO_FISICA_PADRAO); }
+  }
+  function guardarAvaliacaoFisicaLocal() { try { localStorage.setItem(CHAVE_AVALIACAO_FISICA, JSON.stringify(avaliacaoFisica)); } catch (erro) {} }
+  function lerCamposAvaliacao() { Object.keys(CAMPOS_AVALIACAO).forEach(function (campo) { const el = document.getElementById(CAMPOS_AVALIACAO[campo]); if (el) avaliacaoFisica[campo] = el.value; }); }
+  function textoDataAvaliacao(data) {
+    if (!data) return "Ainda não há uma avaliação guardada.";
+    const dataObj = new Date(data);
+    return Number.isNaN(dataObj.getTime()) ? "Avaliação guardada." : "Última atualização: " + dataObj.toLocaleDateString("pt-PT", { day: "2-digit", month: "long", year: "numeric" }) + ".";
+  }
+  function renderAvaliacaoFisica() {
+    Object.keys(CAMPOS_AVALIACAO).forEach(function (campo) { const el = document.getElementById(CAMPOS_AVALIACAO[campo]); if (el && document.activeElement !== el) el.value = avaliacaoFisica[campo] || ""; });
+    document.getElementById("avaliacaoAtualizacao").textContent = textoDataAvaliacao(avaliacaoFisica.atualizadoEm);
+  }
+  function abrirPerfilAvaliacoes() {
+    document.body.classList.add("perfil-detalhe-aberto");
+    perfilAvaliacoesEl.classList.remove("oculto");
+    renderAvaliacaoFisica();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function fecharPerfilAvaliacoes() {
+    document.body.classList.remove("perfil-detalhe-aberto");
+    perfilAvaliacoesEl.classList.add("oculto");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  function guardarAvaliacaoFisica() {
+    lerCamposAvaliacao();
+    avaliacaoFisica.atualizadoEm = new Date().toISOString();
+    guardarAvaliacaoFisicaLocal();
+    metricasAtividade.pesoKg = avaliacaoFisica.pesoKg || metricasAtividade.pesoKg;
+    metricasAtividade.alturaCm = avaliacaoFisica.alturaCm || metricasAtividade.alturaCm;
+    guardarMetricasLocais();
+    atualizarMetricasDiariasInicio();
+    renderAvaliacaoFisica();
+    const sync = document.getElementById("avaliacaoSync");
+    if (!navigator.onLine) { if (sync) sync.textContent = "Guardada neste dispositivo. Será sincronizada quando houver ligação."; return; }
+    if (sync) sync.textContent = "A sincronizar…";
+    chamarApi("guardarMetricasAtividadePortal", metricasAtividade).catch(function () {});
+    chamarApi("guardarAvaliacaoFisicaPortal", avaliacaoFisica)
+      .then(function (resp) { if (!resp || !resp.ok) throw new Error(); if (resp.dados) { avaliacaoFisica = Object.assign({}, avaliacaoFisica, resp.dados); guardarAvaliacaoFisicaLocal(); renderAvaliacaoFisica(); } if (sync) sync.textContent = "Avaliação sincronizada."; })
+      .catch(function () { if (sync) sync.textContent = "Guardada neste dispositivo. A sincronização fica pendente."; });
+  }
+  Object.keys(CAMPOS_AVALIACAO).forEach(function (campo) { const el = document.getElementById(CAMPOS_AVALIACAO[campo]); if (el) el.addEventListener("input", function () { lerCamposAvaliacao(); guardarAvaliacaoFisicaLocal(); }); });
+  document.getElementById("btnGuardarAvaliacao").addEventListener("click", guardarAvaliacaoFisica);
+  document.getElementById("btnVoltarAvaliacoes").addEventListener("click", fecharPerfilAvaliacoes);
+  document.querySelectorAll("[data-avaliacao-icone]").forEach(function (el) { trocarIconeDentro(el, "avaliacao"); });
+  document.querySelectorAll("[data-abrir-perfil]").forEach(function (btn) { btn.addEventListener("click", function () { if (btn.dataset.abrirPerfil === "avaliacoes") abrirPerfilAvaliacoes(); else abrirPerfilMetricas(btn.dataset.abrirPerfil); }); });
   document.getElementById("btnVoltarPerfil").addEventListener("click", fecharPerfilMetricas);
 
   // ---------- Barra "O teu percurso de hoje" ----------
@@ -3028,6 +3160,34 @@
     try { localStorage.removeItem(chaveRascunhoTreino(nomePlano, nomeTreino)); } catch (e) {}
   }
 
+  const CHAVE_ULTIMAS_SERIES = "ALMOVE_ULTIMAS_SERIES_" + TOKEN;
+  function lerUltimasSeries() {
+    try { return JSON.parse(localStorage.getItem(CHAVE_ULTIMAS_SERIES) || "{}"); }
+    catch (erro) { return {}; }
+  }
+  function obterUltimaSerieExercicio(nomeExercicio) { return lerUltimasSeries()[String(nomeExercicio || "").toLowerCase()] || null; }
+  function guardarUltimasSeriesTreino(payload) {
+    try {
+      const ultimas = lerUltimasSeries();
+      payload.exercicios.forEach(function (exercicio) {
+        ultimas[String(exercicio.exercicio || "").toLowerCase()] = { series: exercicio.series || [], atualizadoEm: new Date().toISOString() };
+      });
+      localStorage.setItem(CHAVE_ULTIMAS_SERIES, JSON.stringify(ultimas));
+    } catch (erro) {}
+  }
+  function maiorCargaRegistada(series) {
+    return (series || []).reduce(function (maior, serie) {
+      const carga = Number(String(serie.carga || "").replace(",", "."));
+      return Number.isFinite(carga) ? Math.max(maior, carga) : maior;
+    }, 0);
+  }
+  function detetarRecordesLocais(payload) {
+    return payload.exercicios.filter(function (exercicio) {
+      const anterior = obterUltimaSerieExercicio(exercicio.exercicio);
+      return !!anterior && maiorCargaRegistada(exercicio.series) > maiorCargaRegistada(anterior.series);
+    }).map(function (exercicio) { return exercicio.exercicio; });
+  }
+
   function novoRascunhoTreino(treino) {
     return {
       version: 2,
@@ -3039,9 +3199,13 @@
       status: "active",
       exercises: treino.exercicios.map(function (ex) {
         const numSeries = parseInt(ex.series, 10) || 3;
+        const ultima = obterUltimaSerieExercicio(ex.exercicio);
         const series = [];
-        for (let i = 0; i < numSeries; i++) series.push({ reps: "", carga: "", velocidade: "" });
-        return { exercicio: ex.exercicio, series: series, notas: "" };
+        for (let i = 0; i < numSeries; i++) {
+          const serieAnterior = ultima && ultima.series ? ultima.series[i] : null;
+          series.push({ reps: serieAnterior ? serieAnterior.reps || "" : "", carga: serieAnterior ? serieAnterior.carga || "" : "", velocidade: "" });
+        }
+        return { exercicio: ex.exercicio, series: series, notas: "", veioDaUltimaSessao: !!ultima };
       })
     };
   }
@@ -3326,7 +3490,7 @@
           '<span class="exec-progress" id="exec-progress-' + exIdx + '">0/' + numSeries + ' séries</span>' +
         '</div>' +
         '<div class="exec-acoes-exercicio"><button type="button" class="btn-detalhes-exercicio" data-detalhes-exercicio="' + exIdx + '">' + iconeAlMove("info") + ' Detalhes</button><button type="button" class="exec-historico-btn" data-historico-idx="' + exIdx + '">' + iconeNativoSvg("grafico") + ' Histórico</button></div></div>' +
-        '<div class="exec-exercicio-prescrito">Prescrito: ' + textoPrescricaoExercicio(ex) + '</div>' +
+        '<div class="exec-exercicio-prescrito">Prescrito: ' + textoPrescricaoExercicio(ex) + (rascunho.exercises[exIdx] && rascunho.exercises[exIdx].veioDaUltimaSessao ? '<br><strong>Valores preenchidos com base na última sessão.</strong>' : '') + '</div>' +
         '<div class="exec-descanso">Descanso: <button type="button" data-descanso-idx="' + exIdx + '" data-descanso-seg="' + descansoSegundos + '">' + iconeNativoSvg("relogio") + ' ' + descansoSegundos + ' s</button> <span class="exec-descanso-tempo" id="exec-descanso-' + exIdx + '"></span></div>' +
         '<div class="exec-historico-lista" id="exec-historico-' + exIdx + '"></div>';
 
@@ -3732,6 +3896,7 @@
       guardarEstadoDiario(estadoAntesDeGuardar);
     }
     const resumo = calcularResumoTreino(payload, fimConfirmado);
+    const recordesLocais = detetarRecordesLocais(payload);
     // A confirmação termina o tempo imediatamente; a sincronização não pode deixá-lo a contar.
     pararTimerTreino();
     libertarWakeLock();
@@ -3751,6 +3916,7 @@
     chamarApi("registarExecucaoTreino", payload)
       .then(function (resp) {
         if (!resp || !resp.ok) throw new Error((resp && resp.erro) || "Falha desconhecida");
+        guardarUltimasSeriesTreino(payload);
         const rascunhoConcluido = lerRascunhoTreino(payload.nomePlano, payload.nomeTreino);
         if (rascunhoConcluido) {
           rascunhoConcluido.status = "completed";
@@ -3769,6 +3935,7 @@
           eventId: payload.eventId,
           volume: resumo.volume,
           duracaoSegundos: resumo.duracaoSegundos,
+          recordes: recordesLocais,
           synced: true
         };
         estado.postWorkout = { values: {}, submitted: false, synced: false };
@@ -3874,6 +4041,7 @@
   function mostrarCardPosTreino() {
     respostasPosTreino = {};
     document.querySelectorAll('#cardPosTreino .opcao').forEach(function (el) { el.classList.remove("selecionada"); CLASSES_ESCALA.forEach(function (classe) { el.classList.remove(classe); }); });
+    document.getElementById("posTreinoNota").value = "";
     cardPosTreino.classList.remove("oculto");
     renderFluxoHoje();
   }
@@ -3897,10 +4065,11 @@
       energia: respostasPosTreino.energia,
       esforco: respostasPosTreino.esforco,
       dificuldade: respostasPosTreino.dificuldade,
+      nota: document.getElementById("posTreinoNota").value.trim(),
       eventId: eventId
     };
 
-    estadoAtual.postWorkout = { values: respostasPosTreino, submitted: true, synced: false, eventId: eventId };
+    estadoAtual.postWorkout = { values: Object.assign({}, respostasPosTreino, { nota: payload.nota }), submitted: true, synced: false, eventId: eventId };
     guardarEstadoDiario(estadoAtual);
 
     if (!navigator.onLine) {
@@ -3948,6 +4117,10 @@
     document.getElementById("treinoConcluidoNome").textContent = workout.nomeTreino || "";
     document.getElementById("treinoConcluidoVolume").textContent = (workout.volume || 0) + " kg";
     document.getElementById("treinoConcluidoDuracao").textContent = formatarDuracao(workout.duracaoSegundos || 0);
+    const recordesEl = document.getElementById("treinoConcluidoRecordes");
+    const recordes = Array.isArray(workout.recordes) ? workout.recordes : [];
+    recordesEl.classList.toggle("oculto", recordes.length === 0);
+    recordesEl.textContent = recordes.length ? "Novo recorde: " + recordes.slice(0, 2).join(", ") + (recordes.length > 2 ? " +" + (recordes.length - 2) : "") : "";
     cardTreinoConcluido.classList.remove("oculto");
     renderFluxoHoje();
   }
@@ -4029,8 +4202,23 @@
       .catch(function () {});
   }
 
+  function iniciarAvaliacoesFisicas() {
+    renderAvaliacaoFisica();
+    chamarApi("getAvaliacaoFisicaPortal", {})
+      .then(function (resp) {
+        if (resp && resp.ok && resp.dados) {
+          avaliacaoFisica = Object.assign({}, avaliacaoFisica, resp.dados);
+          guardarAvaliacaoFisicaLocal();
+          renderAvaliacaoFisica();
+        }
+      })
+      .catch(function () {});
+  }
+
   // ---------- Arranque: pergunta ao servidor o estado de hoje ----------
   iniciarMetricasAtividade();
+  iniciarAvaliacoesFisicas();
+  iniciarAgendaPortal();
   renderFluxoHoje();
   chamarApi("getEstadoPortalHoje", {})
     .then(function (resp) {
