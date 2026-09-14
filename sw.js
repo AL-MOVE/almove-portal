@@ -2,7 +2,7 @@
 // A versão sobe com esta atualização visual para que instalações existentes
 // recebam o novo index.html em vez de manterem a versão anterior em cache.
 
-const VERSAO_CACHE = 'almove-portal-v36';
+const VERSAO_CACHE = 'almove-portal-v37';
 
 const FICHEIROS_ESSENCIAIS = [
   '/',
@@ -76,6 +76,7 @@ self.addEventListener('fetch', (evento) => {
 self.addEventListener('message', (evento) => {
   if (evento.data === 'SKIP_WAITING') self.skipWaiting();
 });
+
 
 
 
