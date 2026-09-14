@@ -1119,6 +1119,10 @@
     @media (prefers-reduced-motion:reduce) {
       *, *::before, *::after { scroll-behavior:auto !important; transition-duration:.01ms !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; }
     }
+  </style>  <style id="ajuste-scroll-metricas-avaliacao">
+    /* As métricas continuam acessíveis por deslize, sem a barra nativa repetida. */
+    .avaliacao-grafico-opcoes { overflow-x:auto; overscroll-behavior-inline:contain; scrollbar-width:none; -ms-overflow-style:none; }
+    .avaliacao-grafico-opcoes::-webkit-scrollbar { display:none; width:0; height:0; }
   </style></head>
 <body>
 
@@ -4565,6 +4569,7 @@
 </script>
 </body>
 </html>
+
 
 
 
