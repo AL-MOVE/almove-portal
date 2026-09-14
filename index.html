@@ -2674,6 +2674,14 @@
     estado.textContent = "A enviar pedido…";
     chamarApi("guardarPedidoAvaliacaoPortal", dados).then(function (resp) {
       if (!resp || !resp.ok) throw new Error((resp && resp.erro) || 'O pedido não foi aceite pelo servidor.');
+      return resp;
+    }).catch(function (erro) {
+      // O pedido não bloqueia se a rota rápida estiver temporariamente indisponível.
+      return chamarApiDireta("guardarPedidoAvaliacaoPortal", dados).then(function (resp) {
+        if (!resp || !resp.ok) throw new Error((resp && resp.erro) || (erro && erro.message) || 'O pedido não foi aceite pelo servidor.');
+        return resp;
+      });
+    }).then(function (resp) {
       pedidoAvaliacaoAtual = resp.dados || Object.assign({}, dados, { estado: "Pendente", criadoEm: new Date().toISOString() });
       atualizarEstadoPedidoAvaliacao();
       if (porWhatsApp) {
@@ -2822,12 +2830,14 @@
     return "ck_" + Date.now() + "_" + Math.random().toString(36).slice(2, 9);
   }
 
-  // ---------- Chamadas à API (Apps Script publicado) ----------
-  // O portal é estático no GitHub; por isso não existe uma rota /api/almove no servidor.
-  const ENDPOINT_API = "https://script.google.com/macros/s/AKfycbyiOl7KkXMYSFv9lKKVb2sMspvwER2P5IMlpNQcr9csLyEDnzJqvVqisE-XVuAHgeUV/exec";
-  function chamarApi(fn, dados) {
+  // ---------- Chamadas à API ----------
+  // O estafeta do portal mantém o carregamento inicial rápido. O Apps Script
+  // direto é apenas uma alternativa para guardar um pedido por WhatsApp.
+  const ENDPOINT_API = "/api/almove";
+  const ENDPOINT_API_DIRETO = "https://script.google.com/macros/s/AKfycbyiOl7KkXMYSFv9lKKVb2sMspvwER2P5IMlpNQcr9csLyEDnzJqvVqisE-XVuAHgeUV/exec";
+  function chamarApiNoEndpoint(endpoint, fn, dados) {
     const corpo = Object.assign({ fn: fn, token: TOKEN }, dados || {});
-    return fetch(ENDPOINT_API, {
+    return fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(corpo)
@@ -2836,6 +2846,8 @@
       return resposta.json().catch(function () { throw new Error("O servidor devolveu uma resposta inválida."); });
     });
   }
+  function chamarApi(fn, dados) { return chamarApiNoEndpoint(ENDPOINT_API, fn, dados); }
+  function chamarApiDireta(fn, dados) { return chamarApiNoEndpoint(ENDPOINT_API_DIRETO, fn, dados); }
 
   // ---------- Passos: valor real, guardado no Apps Script ----------
   const META_PASSOS = 8000;
