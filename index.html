@@ -513,16 +513,16 @@
     .treino-card.feito-hoje{
       border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.08);
     }
+    .treino-card.feito-hoje .treino-card-corpo{text-align:center;}
     .treino-card-icone{
       width:37px;height:37px;flex-shrink:0;border-radius:50%;
       background:rgba(45,212,191,.12);color:#2dd4bf;
       display:flex;align-items:center;justify-content:center;font-size:18px;
     }
     .treino-card-corpo{flex:1;min-width:0;}
-    .treino-card-badge{
-      display:block;color:#4ade80;font-size:10px;font-weight:800;
-      text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px;
-    }
+    .treino-card-badge{display:flex;align-items:center;justify-content:center;gap:5px;color:#4ade80;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px;}
+    .treino-card-badge svg{width:13px;height:13px;flex:0 0 auto;}
+    .treino-card-concluido-em{display:block;margin-top:4px;color:#a7b7c8;font-size:10px;font-weight:700;}
     .treino-card .nome{font-size:16px;font-weight:800;color:#fff;}
     .treino-card .sub{font-size:12px;color:var(--texto-suave);}
     .treino-card button{
@@ -637,6 +637,7 @@
     }
     .success-hero h2{font-size:18px;font-weight:800;margin-bottom:4px;}
     .success-hero p{color:var(--texto-suave);font-size:13px;}
+    .success-concluido-em{margin-top:6px!important;color:#a7f3d0!important;font-size:11px!important;font-weight:800;}
     .success-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
     .success-stat{
       padding:14px;border-radius:12px;background:#101c33;text-align:center;
@@ -849,11 +850,11 @@
     .conquistas-metrica strong { color:#fff; font-size:25px; font-weight:900; line-height:1; letter-spacing:-.05em; }
     .conquistas-metrica span:not(.conquistas-metrica-icone) { display:block; margin-top:12px; color:#f8fafc; font-size:10px; font-weight:800; line-height:1.2; }
     .conquistas-metrica small { display:block; margin-top:4px; color:var(--text-dim); font-size:9px; line-height:1.22; }
-    .conquistas-metrica-icone { display:grid; place-items:center; width:27px; height:27px; border-radius:9px; }
-    .conquistas-metrica-icone svg { width:16px; height:16px; stroke-width:2.15; }
-    .metrica-treinos .conquistas-metrica-icone { color:#7dd3fc; border:1px solid rgba(56,189,248,.35); background:rgba(14,165,233,.14); }
-    .metrica-sequencia .conquistas-metrica-icone { color:#fbbf24; border:1px solid rgba(251,191,36,.35); background:rgba(245,158,11,.13); }
-    .metrica-recorde .conquistas-metrica-icone { color:#d8b4fe; border:1px solid rgba(192,132,252,.35); background:rgba(168,85,247,.13); }
+    .conquistas-metrica-icone { display:grid; place-items:center; width:30px; height:30px; margin:0; padding:0; border:0; border-radius:0; background:transparent; line-height:0; }
+    .conquistas-metrica-icone svg { display:block; width:25px; height:25px; margin:0; stroke-width:2.15; }
+    .metrica-treinos .conquistas-metrica-icone { color:#7dd3fc; }
+    .metrica-sequencia .conquistas-metrica-icone { color:#fbbf24; }
+    .metrica-recorde .conquistas-metrica-icone { color:#d8b4fe; }
     .conquistas-sequencia-card { overflow:hidden; }
     .conquistas-sequencia-corpo { display:flex; align-items:center; gap:14px; padding:14px; border:1px solid rgba(45,212,191,.20); border-radius:17px; background:linear-gradient(110deg,rgba(11,92,194,.16),rgba(45,212,191,.065)); }
     .conquistas-sequencia-numero { flex:0 0 76px; min-height:76px; display:grid; place-content:center; border:2px solid rgba(45,212,191,.7); border-radius:50%; color:#fff; text-align:center; box-shadow:0 0 20px rgba(45,212,191,.13); }
@@ -1028,8 +1029,8 @@
     .metricas-guardar { width:100%; margin-top:14px; }
     /* Cartões e ícones têm uma resposta luminosa discreta ao passar/carregar. */
     .conquistas-metrica-topo { align-items:center; }
-    .conquistas-metrica-icone { display:flex !important; align-items:center !important; justify-content:center !important; flex:0 0 30px; width:30px !important; height:30px !important; min-width:30px; min-height:30px; margin:0 !important; padding:0 !important; overflow:hidden; line-height:0; }
-    .conquistas-metrica-icone > .icone-almove { display:block !important; width:17px !important; height:17px !important; min-width:17px; min-height:17px; margin:0 !important; padding:0 !important; transform:none !important; stroke-width:2.05; }
+    .conquistas-metrica-icone { display:flex !important; align-items:center !important; justify-content:center !important; flex:0 0 30px; width:30px !important; height:30px !important; min-width:30px; min-height:30px; margin:0 !important; padding:0 !important; overflow:visible; line-height:0; border:0 !important; border-radius:0 !important; background:transparent !important; }
+    .conquistas-metrica-icone > .icone-almove { display:block !important; width:25px !important; height:25px !important; min-width:25px; min-height:25px; margin:0 !important; padding:0 !important; transform:none !important; stroke-width:2.05; }
     .conquistas-metrica-icone > .icone-almove * { vector-effect:non-scaling-stroke; }
     .fluxo-hoje-editavel { width:100%; min-height:54px; touch-action:manipulation; }
     .fluxo-hoje-editavel.concluido, .fluxo-hoje-editavel.ativo { pointer-events:auto; }
@@ -1052,7 +1053,7 @@
     .perfil-acesso-seta { width:9px; height:9px; border-top:2px solid var(--text-muted); border-right:2px solid var(--text-muted); transform:rotate(45deg); }
     .perfil-voltar { display:inline-flex; align-items:center; gap:8px; padding:0; margin-bottom:14px; border:0; background:transparent; color:var(--text-soft); font:inherit; font-size:12px; font-weight:850; cursor:pointer; }
     .perfil-voltar span { width:9px; height:9px; border-left:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(45deg); }
-    body.perfil-detalhe-aberto #tabPlanos > :not(#perfilMetricas):not(#perfilAvaliacoes) { display:none; }
+    body.perfil-detalhe-aberto #tabPlanos > :not(#perfilMetricas):not(#perfilAvaliacoes):not(#perfilPesoDiario):not(#perfilEvolucao) { display:none; }
     .metricas-corrida-campos { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:13px; }
     .metricas-corrida-campos label { display:grid; gap:5px; color:var(--text-soft); font-size:10px; font-weight:800; }
     .metricas-corrida-campos input { width:100%; min-height:42px; padding:0 11px; border:1px solid var(--border); border-radius:11px; outline:0; background:rgba(255,255,255,.055); color:#fff; font:inherit; font-size:13px; }
@@ -1092,12 +1093,13 @@
   <style id="avaliacoes-fisicas-estilo">
     .perfil-acesso-icone.avaliacao,.avaliacao-fisica-card .metricas-icone{color:#c4b5fd;border-color:rgba(167,139,250,.34);background:rgba(139,92,246,.12)}
     .avaliacao-fisica-card{overflow:hidden;background:linear-gradient(135deg,rgba(79,70,229,.14),rgba(45,212,191,.055))}.avaliacao-secao-titulo{margin:18px 0 8px;color:#c4b5fd;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.avaliacao-campos{display:grid;grid-template-columns:1fr 1fr;gap:9px}.avaliacao-campos label{display:grid;gap:5px;color:var(--text-soft);font-size:10px;font-weight:800}.avaliacao-campos label:nth-child(3){grid-column:span 2}.avaliacao-campos input{width:100%;min-height:42px;padding:0 11px;border:1px solid var(--border);border-radius:11px;outline:0;background:rgba(255,255,255,.055);color:#fff;font:inherit;font-size:13px}.avaliacao-campos input:focus{border-color:#a78bfa;box-shadow:0 0 0 3px rgba(167,139,250,.12)}.avaliacao-atualizacao{margin:14px 0 0;color:var(--text-muted);font-size:10px;line-height:1.4}
-    .avaliacao-pedido{margin-top:18px;padding:15px;border:1px solid rgba(167,139,250,.28);border-radius:16px;background:rgba(12,18,39,.44)}.avaliacao-pedido h3,.avaliacao-historico h3{margin:0;color:#fff;font-size:14px;letter-spacing:-.02em}.avaliacao-pedido p{margin:5px 0 12px;color:var(--text-muted);font-size:11px;line-height:1.45}.avaliacao-pedido-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.avaliacao-pedido label{display:grid;gap:5px;color:var(--text-soft);font-size:10px;font-weight:800}.avaliacao-pedido label.largo{grid-column:span 2}.avaliacao-pedido input,.avaliacao-pedido select,.avaliacao-pedido textarea{width:100%;min-height:40px;padding:0 10px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.055);color:#fff;font:inherit;font-size:12px}.avaliacao-pedido textarea{min-height:64px;padding:9px 10px;resize:vertical}.avaliacao-dias{display:flex;flex-wrap:wrap;gap:6px}.avaliacao-dia{position:relative}.avaliacao-dia input{position:absolute;opacity:0}.avaliacao-dia span{display:block;padding:7px 9px;border:1px solid var(--border-soft);border-radius:9px;color:var(--text-muted);font-size:10px;font-weight:850}.avaliacao-dia input:checked+span{border-color:#a78bfa;background:rgba(167,139,250,.16);color:#e9ddff}.avaliacao-pedido-estado{margin:10px 0 0!important;color:#c4b5fd!important}.avaliacao-historico{margin-top:18px;padding-top:16px;border-top:1px solid var(--border-soft)}.avaliacao-grafico-opcoes{display:flex;gap:6px;overflow:auto;margin:11px 0}.avaliacao-grafico-opcoes button{flex:0 0 auto;padding:7px 9px;border:1px solid var(--border-soft);border-radius:999px;background:rgba(255,255,255,.04);color:var(--text-muted);font:inherit;font-size:10px;font-weight:800}.avaliacao-grafico-opcoes button.ativo{border-color:rgba(167,139,250,.7);background:rgba(167,139,250,.15);color:#eee7ff}.avaliacao-grafico{padding:11px;border:1px solid var(--border-soft);border-radius:13px;background:rgba(3,8,17,.25)}.avaliacao-grafico-topo{display:flex;align-items:baseline;justify-content:space-between;gap:10px}.avaliacao-grafico-topo strong{color:#fff;font-size:18px}.avaliacao-grafico-topo span{color:var(--text-muted);font-size:10px}.avaliacao-grafico svg{display:block;width:100%;height:132px;margin-top:8px;overflow:visible}.avaliacao-grafico-linha{fill:none;stroke:#a78bfa;stroke-width:2.5}.avaliacao-grafico-ponto{fill:#2dd4bf;stroke:#07101f;stroke-width:3}.avaliacao-grafico-eixo{stroke:rgba(255,255,255,.13);stroke-width:1}.avaliacao-grafico-data{fill:#8290a4;font-size:9px}.avaliacao-grafico-vazio{margin:0;padding:18px 0;text-align:center;color:var(--text-muted);font-size:11px}
+    .avaliacao-resultados-cliente{margin:14px 0;padding:14px;border:1px solid rgba(45,212,191,.22);border-radius:14px;background:rgba(45,212,191,.05)}.avaliacao-resultados-cliente p{margin:7px 0;color:#a7b7c8;font-size:13px;line-height:1.45}.avaliacao-pedido{margin-top:18px;padding:15px;border:1px solid rgba(167,139,250,.28);border-radius:16px;background:rgba(12,18,39,.44)}.avaliacao-pedido h3,.avaliacao-historico h3{margin:0;color:#fff;font-size:14px;letter-spacing:-.02em}.avaliacao-pedido p{margin:5px 0 12px;color:var(--text-muted);font-size:11px;line-height:1.45}.avaliacao-pedido-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.avaliacao-pedido label{display:grid;gap:5px;color:var(--text-soft);font-size:10px;font-weight:800}.avaliacao-pedido label.largo{grid-column:span 2}.avaliacao-pedido input,.avaliacao-pedido select,.avaliacao-pedido textarea{width:100%;min-height:40px;padding:0 10px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.055);color:#fff;font:inherit;font-size:12px}.avaliacao-pedido textarea{min-height:64px;padding:9px 10px;resize:vertical}.avaliacao-dias{display:flex;flex-wrap:wrap;gap:6px}.avaliacao-dia{position:relative}.avaliacao-dia input{position:absolute;opacity:0}.avaliacao-dia span{display:block;padding:7px 9px;border:1px solid var(--border-soft);border-radius:9px;color:var(--text-muted);font-size:10px;font-weight:850}.avaliacao-dia input:checked+span{border-color:#a78bfa;background:rgba(167,139,250,.16);color:#e9ddff}.avaliacao-pedido-estado{margin:10px 0 0!important;color:#c4b5fd!important}.avaliacao-historico{margin-top:18px;padding-top:16px;border-top:1px solid var(--border-soft)}.avaliacao-grafico-opcoes{display:flex;gap:6px;overflow:auto;margin:11px 0}.avaliacao-grafico-opcoes button{flex:0 0 auto;padding:7px 9px;border:1px solid var(--border-soft);border-radius:999px;background:rgba(255,255,255,.04);color:var(--text-muted);font:inherit;font-size:10px;font-weight:800}.avaliacao-grafico-opcoes button.ativo{border-color:rgba(167,139,250,.7);background:rgba(167,139,250,.15);color:#eee7ff}.avaliacao-grafico{padding:11px;border:1px solid var(--border-soft);border-radius:13px;background:rgba(3,8,17,.25)}.avaliacao-grafico-topo{display:flex;align-items:baseline;justify-content:space-between;gap:10px}.avaliacao-grafico-topo strong{color:#fff;font-size:18px}.avaliacao-grafico-topo span{color:var(--text-muted);font-size:10px}.avaliacao-grafico svg{display:block;width:100%;height:132px;margin-top:8px;overflow:visible}.avaliacao-grafico-linha{fill:none;stroke:#a78bfa;stroke-width:2.5}.avaliacao-grafico-ponto{fill:#2dd4bf;stroke:#07101f;stroke-width:3}.avaliacao-grafico-eixo{stroke:rgba(255,255,255,.13);stroke-width:1}.avaliacao-grafico-data{fill:#8290a4;font-size:9px}.avaliacao-grafico-vazio{margin:0;padding:18px 0;text-align:center;color:var(--text-muted);font-size:11px}
     .inicio-treino-ativo{position:absolute;z-index:2;right:16px;top:22px;width:122px;padding:10px;border:1px solid rgba(45,212,191,.38);border-radius:15px;background:linear-gradient(145deg,rgba(10,91,150,.72),rgba(14,159,149,.50));color:#fff;text-align:left;box-shadow:0 10px 22px rgba(0,0,0,.18);cursor:pointer}.inicio-treino-ativo .inicio-cta-play{display:grid;place-items:center;width:30px;height:30px;margin-bottom:7px;border-radius:10px;color:var(--accent);background:rgba(4,19,29,.48)}.inicio-treino-ativo .inicio-cta-play svg{width:16px;height:16px}.inicio-treino-ativo .inicio-cta-titulo{font-size:11px;font-weight:900;line-height:1.15}.inicio-treino-ativo .inicio-cta-sub{display:block;margin-top:4px;color:rgba(255,255,255,.72);font-size:9px;line-height:1.28}.inicio-treino-ativo:active{transform:scale(.97)}
     .pos-treino-nota-label{display:grid;gap:6px;margin-top:16px;color:var(--text-soft);font-size:11px;font-weight:800}.pos-treino-nota-label textarea{width:100%;min-height:82px;resize:vertical;padding:10px 11px;border:1px solid var(--border);border-radius:11px;outline:0;background:rgba(255,255,255,.055);color:#fff;font:inherit;font-size:12px;line-height:1.4}.pos-treino-nota-label textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,212,191,.1)}
     .treino-recordes{display:inline-flex;margin:9px auto 0;padding:6px 9px;border:1px solid rgba(251,191,36,.34);border-radius:999px;background:rgba(245,158,11,.12);color:#fde68a!important;font-size:10px!important;font-weight:850}
     .agenda-inicio-card{background:linear-gradient(135deg,rgba(14,165,233,.12),rgba(45,212,191,.05))}.agenda-inicio-lista{display:grid;gap:8px;margin-top:13px}.agenda-inicio-item{display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:9px;padding:10px;border:1px solid var(--border-soft);border-radius:13px;background:rgba(255,255,255,.035)}.agenda-inicio-data{display:grid;place-items:center;min-height:40px;border-radius:10px;background:rgba(56,189,248,.12);color:#7dd3fc;font-size:11px;font-weight:900;text-align:center;line-height:1.05}.agenda-inicio-item strong{display:block;color:#fff;font-size:12px}.agenda-inicio-item small{display:block;margin-top:3px;color:var(--text-muted);font-size:10px}.agenda-remarcar{border:0;background:transparent;color:var(--accent);font:inherit;font-size:10px;font-weight:850;cursor:pointer}.agenda-inicio-vazio{margin:0;padding:6px 0;color:var(--text-muted);font-size:11px}
     .perfil-acesso:disabled{opacity:.58;cursor:not-allowed;filter:saturate(.6)}.perfil-acesso:disabled .perfil-acesso-seta{opacity:.35}
+    .peso-diario-card,.evolucao-card{background:linear-gradient(135deg,rgba(11,92,194,.12),rgba(45,212,191,.05))}.peso-diario-form,.evolucao-filtros{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}.peso-diario-form label,.evolucao-filtros label{display:grid;gap:5px;color:var(--text-soft);font-size:10px;font-weight:800}.peso-diario-form input,.evolucao-filtros input,.evolucao-filtros select{width:100%;min-height:42px;padding:0 11px;border:1px solid var(--border);border-radius:11px;outline:0;background:rgba(255,255,255,.055);color:#fff;font:inherit;font-size:13px}.peso-diario-form .metricas-guardar{margin:0;align-self:end}.peso-guia{margin:17px 0;padding:14px;border:1px solid rgba(56,189,248,.23);border-radius:14px;background:rgba(14,165,233,.06)}.peso-guia h3{margin:0;color:#e5f5ff;font-size:13px}.peso-guia ul{margin:9px 0 0;padding-left:18px;color:var(--text-muted);font-size:11px;line-height:1.65}.evolucao-periodos,.evolucao-tipo{display:flex;gap:6px;overflow:auto;margin:11px 0}.evolucao-periodos button,.evolucao-tipo button{flex:0 0 auto;padding:8px 10px;border:1px solid var(--border-soft);border-radius:999px;background:rgba(255,255,255,.04);color:var(--text-muted);font:inherit;font-size:10px;font-weight:850;cursor:pointer}.evolucao-periodos button.ativo,.evolucao-tipo button.ativo{border-color:rgba(45,212,191,.65);background:rgba(45,212,191,.13);color:#e5fffb}.evolucao-grafico-item{margin:12px 0;padding:11px;border:1px solid var(--border-soft);border-radius:12px;background:rgba(255,255,255,.025)}.evolucao-grafico-item h3{margin:0 0 7px;color:#fff;font-size:12px}.evolucao-grafico-item .avaliacao-grafico{padding:0;border:0;background:transparent}.evolucao-resumo{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0}.evolucao-resumo div{padding:10px;border:1px solid var(--border-soft);border-radius:11px;background:rgba(255,255,255,.035)}.evolucao-resumo strong{display:block;color:#fff;font-size:14px}.evolucao-resumo span{display:block;margin-top:3px;color:var(--text-muted);font-size:9px;font-weight:750}@media(max-width:380px){.peso-diario-form,.evolucao-filtros{grid-template-columns:1fr}.peso-diario-form .metricas-guardar{width:100%}}
   </style>
 </head>
 <body>
@@ -1423,6 +1425,7 @@
       <div class="success-icon" aria-label="Concluído"><svg viewBox="0 0 24 24"><path d="M7 12.5 10.2 16 17 8"/><circle cx="12" cy="12" r="9"/></svg></div>
       <h2>Treino concluído</h2>
       <p id="treinoConcluidoNome"></p>
+      <p class="success-concluido-em" id="treinoConcluidoEm"></p>
       <p class="treino-recordes oculto" id="treinoConcluidoRecordes"></p>
     </div>
     <div class="success-stats">
@@ -1536,7 +1539,9 @@
         </div>
       </div>
       <div class="perfil-acessos">
-        <button type="button" class="perfil-acesso" id="btnAbrirAvaliacoes" data-abrir-perfil="avaliacoes" disabled><span class="perfil-acesso-icone avaliacao" data-perfil-icone="avaliacao"></span><span><strong>Avaliações físicas</strong><small id="avaliacaoAcessoEstado">A aguardar marcação do André</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="evolucao"><span class="perfil-acesso-icone" data-perfil-icone="grafico"></span><span><strong>A minha evolução</strong><small>Gráficos, filtros e calendário</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="peso"><span class="perfil-acesso-icone" data-perfil-icone="avaliacao"></span><span><strong>Registo de peso</strong><small>Regista o peso diário, se quiseres</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" id="btnAbrirAvaliacoes" data-abrir-perfil="avaliacoes"><span class="perfil-acesso-icone avaliacao" data-perfil-icone="avaliacao"></span><span><strong>Avaliações físicas</strong><small id="avaliacaoAcessoEstado">Pedir avaliação e ver evolução</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
         <button type="button" class="perfil-acesso" data-abrir-perfil="caminhada"><span class="perfil-acesso-icone" data-perfil-icone="caminhar"></span><span><strong>Métricas de caminhada</strong><small>Passos, distância, duração e calorias</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
         <button type="button" class="perfil-acesso" data-abrir-perfil="corrida"><span class="perfil-acesso-icone corrida" data-perfil-icone="foguetao"></span><span><strong>Calculadora de corrida</strong><small>Estimativa por distância e velocidade</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
       </div>
@@ -1554,7 +1559,7 @@
     <section class="card avaliacao-fisica-card oculto" id="perfilAvaliacoes" aria-labelledby="avaliacaoFisicaTitulo">
       <button type="button" class="perfil-voltar" id="btnVoltarAvaliacoes"><span aria-hidden="true"></span> Perfil</button>
       <div class="metricas-cabecalho">
-        <div><span class="metricas-eyebrow">Acompanhamento</span><div class="card-title" id="avaliacaoFisicaTitulo">Avaliação física</div><p>Regista medidas na data marcada e acompanha a tua evolução.</p></div>
+        <div><span class="metricas-eyebrow">Acompanhamento</span><div class="card-title" id="avaliacaoFisicaTitulo">Avaliação física</div><p>Consulta a marcação, os resultados e a tua evolução.</p></div>
         <span class="metricas-icone" data-avaliacao-icone="avaliacao"></span>
       </div>
       <section class="avaliacao-pedido" aria-labelledby="pedidoAvaliacaoTitulo">
@@ -1571,29 +1576,35 @@
         <button type="button" class="btn-secundario metricas-guardar" id="btnPedirAvaliacao">Enviar pedido</button>
         <p class="avaliacao-pedido-estado" id="avaliacaoPedidoEstado"></p>
       </section>
-      <div class="avaliacao-secao-titulo">Composição corporal</div>
-      <div class="avaliacao-campos">
-        <label>Peso (kg)<input id="avaliacaoPeso" type="number" inputmode="decimal" min="30" max="300" step="0.1" placeholder="Ex.: 68,5"></label>
-        <label>Altura (cm)<input id="avaliacaoAltura" type="number" inputmode="numeric" min="120" max="230" step="1" placeholder="Ex.: 170"></label>
-        <label>Massa gorda (%)<input id="avaliacaoMassaGorda" type="number" inputmode="decimal" min="1" max="80" step="0.1" placeholder="Ex.: 24,5"></label>
-      </div>
-      <div class="avaliacao-secao-titulo">Perímetros (cm)</div>
-      <div class="avaliacao-campos">
-        <label>Cintura<input id="avaliacaoCintura" type="number" inputmode="decimal" min="30" max="250" step="0.1" placeholder="Ex.: 78"></label>
-        <label>Abdómen<input id="avaliacaoAbdomen" type="number" inputmode="decimal" min="30" max="250" step="0.1" placeholder="Ex.: 86"></label>
-        <label>Braço direito<input id="avaliacaoBracoDir" type="number" inputmode="decimal" min="15" max="100" step="0.1" placeholder="Ex.: 30"></label>
-        <label>Braço esquerdo<input id="avaliacaoBracoEsq" type="number" inputmode="decimal" min="15" max="100" step="0.1" placeholder="Ex.: 30"></label>
-        <label>Perna direita<input id="avaliacaoPernaDir" type="number" inputmode="decimal" min="25" max="150" step="0.1" placeholder="Ex.: 55"></label>
-        <label>Perna esquerda<input id="avaliacaoPernaEsq" type="number" inputmode="decimal" min="25" max="150" step="0.1" placeholder="Ex.: 55"></label>
-      </div>
-      <p class="avaliacao-atualizacao" id="avaliacaoAtualizacao">Ainda não há uma avaliação guardada.</p>
-      <button type="button" class="btn-secundario metricas-guardar" id="btnGuardarAvaliacao">Guardar avaliação</button>
-      <p class="metricas-sync" id="avaliacaoSync"></p>
+      <section class="avaliacao-resultados-cliente">
+        <div class="avaliacao-secao-titulo">Resultados da avaliação</div>
+        <p>As medidas são registadas pelo André durante a avaliação. Aqui podes acompanhar a última atualização e a tua evolução.</p>
+        <p class="avaliacao-atualizacao" id="avaliacaoAtualizacao">Ainda não há uma avaliação guardada.</p>
+        <p class="metricas-sync" id="avaliacaoSync"></p>
+      </section>
       <section class="avaliacao-historico" aria-labelledby="historicoAvaliacoesTitulo">
         <h3 id="historicoAvaliacoesTitulo">Histórico de avaliações</h3>
         <div class="avaliacao-grafico-opcoes" id="avaliacaoGraficoOpcoes" role="tablist" aria-label="Métrica do gráfico"></div>
         <div class="avaliacao-grafico" id="avaliacaoGrafico"></div>
       </section>
+    </section>
+
+    <section class="card peso-diario-card oculto" id="perfilPesoDiario" aria-labelledby="pesoDiarioTitulo">
+      <button type="button" class="perfil-voltar" id="btnVoltarPesoDiario"><span aria-hidden="true"></span> Perfil</button>
+      <div class="metricas-cabecalho"><div><span class="metricas-eyebrow">Acompanhamento opcional</span><div class="card-title" id="pesoDiarioTitulo">Registo de peso</div><p>Um registo por dia, guardado e sincronizado com a tua conta.</p></div><span class="metricas-icone" data-peso-icone="avaliacao"></span></div>
+      <div class="peso-diario-form"><label>Data<input id="pesoDiarioData" type="date"></label><label>Peso (kg)<input id="pesoDiarioValor" type="number" min="30" max="300" step="0.1" inputmode="decimal" placeholder="Ex.: 65,4"></label><button type="button" class="btn-secundario metricas-guardar" id="btnGuardarPesoDiario">Guardar peso</button></div>
+      <p class="metricas-sync" id="pesoDiarioSync"></p>
+      <section class="peso-guia" aria-labelledby="pesoGuiaTitulo"><h3 id="pesoGuiaTitulo">Para uma pesagem comparável</h3><ul><li>Pesa-te de manhã, depois de ir à casa de banho.</li><li>Faz a pesagem antes de comer ou beber.</li><li>Usa sempre a mesma balança, no mesmo local e sem calçado.</li><li>Olha para a tendência semanal, não para uma variação de um único dia.</li></ul></section>
+      <section class="avaliacao-historico" aria-labelledby="pesoGraficoTitulo"><h3 id="pesoGraficoTitulo">Evolução do peso</h3><div class="evolucao-periodos" role="group"><button type="button" data-peso-periodo="registos" class="ativo">Registos</button><button type="button" data-peso-periodo="semanal">Semanal</button><button type="button" data-peso-periodo="mensal">Mensal</button></div><div class="avaliacao-grafico" id="pesoDiarioGrafico"></div></section>
+    </section>
+
+    <section class="card evolucao-card oculto" id="perfilEvolucao" aria-labelledby="evolucaoTitulo">
+      <button type="button" class="perfil-voltar" id="btnVoltarEvolucao"><span aria-hidden="true"></span> Perfil</button>
+      <div class="metricas-cabecalho"><div><span class="metricas-eyebrow">Acompanhamento</span><div class="card-title" id="evolucaoTitulo">A minha evolução</div><p>Consulta as medições e os dados da balança por período.</p></div><span class="metricas-icone" data-evolucao-icone="grafico"></span></div>
+      <div class="evolucao-tipo" role="tablist"><button type="button" data-evolucao-tipo="medicoes" class="ativo">Medições</button><button type="button" data-evolucao-tipo="bioimpedancia">Balança e composição</button></div>
+      <div class="evolucao-filtros"><label>Métrica<select id="evolucaoMetrica"></select></label><label>De<input id="evolucaoInicio" type="date"></label><label>Até<input id="evolucaoFim" type="date"></label></div>
+      <div class="evolucao-resumo" id="evolucaoResumo"></div>
+      <div class="avaliacao-grafico" id="evolucaoGrafico"></div>
     </section>
 
     <section class="card metricas-atividade-card oculto" id="perfilMetricas" aria-labelledby="metricasAtividadeTitulo">
@@ -2239,9 +2250,9 @@
     const diaAvaliacao = new Date(data); diaAvaliacao.setHours(0, 0, 0, 0);
     const textoData = data.toLocaleDateString("pt-PT", { day: "2-digit", month: "long" });
     AVALIACAO_MARCADA_EM = data.toISOString();
-    AVALIACAO_PODE_SER_PREENCHIDA = diaAvaliacao.getTime() <= hoje.getTime();
+    AVALIACAO_PODE_SER_PREENCHIDA = false;
     botao.disabled = false;
-    estado.textContent = AVALIACAO_PODE_SER_PREENCHIDA ? "Avaliação disponível desde " + textoData : "Marcada para " + textoData;
+    estado.textContent = diaAvaliacao.getTime() <= hoje.getTime() ? "Resultados da avaliação disponíveis" : "Marcada para " + textoData;
   }
   function formatarCompromissoAgenda(item, indice) {
     const data = new Date(item.dataHora || item.data || "");
@@ -2419,8 +2430,13 @@
     const texto = document.getElementById("avaliacaoElegibilidade"), botao = document.getElementById("btnPedirAvaliacao"), estado = document.getElementById("avaliacaoPedidoEstado");
     const proxima = proximaElegibilidadeAvaliacao(), agora = new Date();
     const pendente = pedidoAvaliacaoAtual && String(pedidoAvaliacaoAtual.estado || "").toLowerCase() === "pendente";
+    const confirmado = pedidoAvaliacaoAtual && String(pedidoAvaliacaoAtual.estado || "").toLowerCase() === "confirmado";
     const podePedir = !proxima || proxima.getTime() <= agora.getTime();
-    if (pendente) {
+    if (confirmado) {
+      const marcada = dataValidaAvaliacao(pedidoAvaliacaoAtual.dataMarcada);
+      texto.textContent = marcada ? "A tua avaliação está marcada para " + textoDataCurtaAvaliacao(marcada) + "." : "A tua avaliação foi confirmada pelo André.";
+      estado.textContent = marcada ? "Consulta a Agenda para ver a hora e o local." : "O André confirma contigo os detalhes.";
+    } else if (pendente) {
       texto.textContent = "O teu pedido foi enviado. O André confirma contigo a melhor data.";
       estado.textContent = "Pedido enviado em " + textoDataCurtaAvaliacao(dataValidaAvaliacao(pedidoAvaliacaoAtual.criadoEm) || agora) + ".";
     } else if (podePedir) {
@@ -2430,8 +2446,8 @@
       texto.textContent = "A próxima avaliação pode ser pedida a partir de " + textoDataCurtaAvaliacao(proxima) + ".";
       estado.textContent = "";
     }
-    botao.disabled = pendente || !podePedir;
-    botao.textContent = pendente ? "Pedido enviado" : "Enviar pedido";
+    botao.disabled = pendente || confirmado || !podePedir;
+    botao.textContent = confirmado ? "Avaliação marcada" : (pendente ? "Pedido enviado" : "Enviar pedido");
   }
   function renderHistoricoAvaliacoes() {
     const opcoes = document.getElementById("avaliacaoGraficoOpcoes"), destino = document.getElementById("avaliacaoGrafico");
@@ -2447,14 +2463,12 @@
     destino.innerHTML = '<div class="avaliacao-grafico-topo"><strong>' + ultimo.valor.toLocaleString("pt-PT") + ' ' + METRICAS_HISTORICO_AVALIACAO[metricaHistoricoAvaliacao][1] + '</strong><span>' + dados.length + (dados.length === 1 ? " avaliação" : " avaliações") + '</span></div><svg viewBox="0 0 300 122" role="img" aria-label="Evolução de ' + METRICAS_HISTORICO_AVALIACAO[metricaHistoricoAvaliacao][0] + '"><line class="avaliacao-grafico-eixo" x1="16" y1="95" x2="284" y2="95"/><polyline class="avaliacao-grafico-linha" points="' + pontos + '"/>' + dados.map(function (item, indice) { return '<circle class="avaliacao-grafico-ponto" cx="' + x(indice) + '" cy="' + y(item.valor) + '" r="4"/><text class="avaliacao-grafico-data" x="' + x(indice) + '" y="114" text-anchor="middle">' + item.data.toLocaleDateString("pt-PT", { day: "2-digit", month: "2-digit" }) + '</text>'; }).join("") + '</svg>';
   }
   function aplicarBloqueioAvaliacao() {
-    const podePreencher = !!AVALIACAO_PODE_SER_PREENCHIDA;
-    document.querySelectorAll("#perfilAvaliacoes .avaliacao-campos input, #btnGuardarAvaliacao").forEach(function (el) { el.disabled = !podePreencher; });
     const sync = document.getElementById("avaliacaoSync");
-    if (!podePreencher && sync) sync.textContent = AVALIACAO_MARCADA_EM ? "O preenchimento abre na data da avaliação marcada." : "Pede uma avaliação para receberes uma data.";
+    if (sync) sync.textContent = "As medidas são registadas pelo teu treinador no dia da avaliação.";
   }
   function renderAvaliacaoFisica() {
-    Object.keys(CAMPOS_AVALIACAO).forEach(function (campo) { const el = document.getElementById(CAMPOS_AVALIACAO[campo]); if (el && document.activeElement !== el) el.value = avaliacaoFisica[campo] || ""; });
-    document.getElementById("avaliacaoAtualizacao").textContent = textoDataAvaliacao(avaliacaoFisica.atualizadoEm);
+    const atualizacao = document.getElementById("avaliacaoAtualizacao");
+    if (atualizacao) atualizacao.textContent = textoDataAvaliacao(avaliacaoFisica.atualizadoEm);
     aplicarBloqueioAvaliacao(); atualizarEstadoPedidoAvaliacao(); renderHistoricoAvaliacoes();
   }
   function abrirPerfilAvaliacoes() {
@@ -2488,6 +2502,44 @@
   }
   function carregarHistoricoAvaliacoes() { return chamarApi("getHistoricoAvaliacoesFisicasPortal", {}).then(function (resp) { if (resp && resp.ok && Array.isArray(resp.dados)) { historicoAvaliacoesFisicas = resp.dados; renderAvaliacaoFisica(); } }).catch(function () {}); }
   function carregarPedidoAvaliacao() { return chamarApi("getPedidoAvaliacaoPortal", {}).then(function (resp) { if (resp && resp.ok) pedidoAvaliacaoAtual = resp.dados || null; atualizarEstadoPedidoAvaliacao(); }).catch(function () {}); }
+  // ---------- Perfil: peso diário e evolução ----------
+  let pesosDiarios = [];
+  let pesoPeriodo = "registos";
+  let evolucaoTipo = "medicoes";
+  let evolucaoMetrica = "cinturaCm";
+  const METRICAS_EVOLUCAO = {
+    medicoes: { cinturaCm:["Cintura","cm"], abdomenCm:["Abdómen","cm"], bracoDireitoCm:["Braço direito","cm"], bracoEsquerdoCm:["Braço esquerdo","cm"], pernaDireitaCm:["Perna direita","cm"], pernaEsquerdaCm:["Perna esquerda","cm"] },
+    bioimpedancia: { pesoKg:["Peso","kg"], massaGordaPercent:["Massa gorda","%"], alturaCm:["Altura","cm"] }
+  };
+  function serieAgrupadaPeso() {
+    const grupos = {};
+    pesosDiarios.forEach(function (item) {
+      const d = dataValidaAvaliacao(item.data); if (!d || !Number.isFinite(Number(item.pesoKg))) return;
+      let chave = item.data;
+      if (pesoPeriodo === "semanal") { const inicio = new Date(d); inicio.setDate(d.getDate() - ((d.getDay() + 6) % 7)); chave = inicio.toISOString().slice(0,10); }
+      if (pesoPeriodo === "mensal") chave = item.data.slice(0,7) + "-01";
+      (grupos[chave] || (grupos[chave] = [])).push(Number(item.pesoKg));
+    });
+    return Object.keys(grupos).sort().map(function (chave) { const valores = grupos[chave]; return { data:dataValidaAvaliacao(chave), valor:valores.reduce((a,b)=>a+b,0)/valores.length }; });
+  }
+  function renderGraficoSerie(destino, dados, unidade, vazio) {
+    if (!destino) return;
+    if (!dados.length) { destino.innerHTML = '<p class="avaliacao-grafico-vazio">' + vazio + '</p>'; return; }
+    const valores = dados.map(item => item.valor), baseMin = Math.min.apply(null,valores), baseMax = Math.max.apply(null,valores), margem = Math.max((baseMax-baseMin)*.18,.5), minimo = baseMin-margem, maximo=baseMax+margem;
+    const x = i => dados.length === 1 ? 150 : 16 + i * 268 / (dados.length-1), y = valor => 18 + (maximo-valor)/(maximo-minimo||1)*76;
+    const pontos = dados.map((item,i)=>x(i)+','+y(item.valor)).join(' '), ultimo=dados[dados.length-1];
+    destino.innerHTML = '<div class="avaliacao-grafico-topo"><strong>' + ultimo.valor.toLocaleString('pt-PT',{maximumFractionDigits:1}) + ' ' + unidade + '</strong><span>' + dados.length + (dados.length===1?' registo':' registos') + '</span></div><svg viewBox="0 0 300 122" role="img"><line class="avaliacao-grafico-eixo" x1="16" y1="95" x2="284" y2="95"/><polyline class="avaliacao-grafico-linha" points="' + pontos + '"/>' + dados.map((item,i)=>'<circle class="avaliacao-grafico-ponto" cx="'+x(i)+'" cy="'+y(item.valor)+'" r="4"/><text class="avaliacao-grafico-data" x="'+x(i)+'" y="114" text-anchor="middle">'+item.data.toLocaleDateString('pt-PT',{day:'2-digit',month:'2-digit'})+'</text>').join('') + '</svg>';
+  }
+  function renderPesoDiario() { renderGraficoSerie(document.getElementById('pesoDiarioGrafico'), serieAgrupadaPeso(), 'kg', 'Ainda não há pesos registados.'); document.querySelectorAll('[data-peso-periodo]').forEach(btn=>btn.classList.toggle('ativo',btn.dataset.pesoPeriodo===pesoPeriodo)); }
+  function carregarPesosDiarios() { return chamarApi('getPesosDiariosPortal',{}).then(function(resp){ if(resp&&resp.ok&&Array.isArray(resp.dados)){ pesosDiarios=resp.dados; renderPesoDiario(); renderEvolucao(); } }).catch(function(){}); }
+  function abrirPerfilPesoDiario() { document.body.classList.add('perfil-detalhe-aberto'); document.getElementById('perfilPesoDiario').classList.remove('oculto'); document.getElementById('pesoDiarioData').value=dataLocalHoje(); renderPesoDiario(); window.scrollTo({top:0,behavior:'smooth'}); }
+  function fecharPerfilPesoDiario() { document.body.classList.remove('perfil-detalhe-aberto'); document.getElementById('perfilPesoDiario').classList.add('oculto'); }
+  function guardarPesoDiario() { const data=document.getElementById('pesoDiarioData').value, peso=document.getElementById('pesoDiarioValor').value, sync=document.getElementById('pesoDiarioSync'); if(!data||!peso){sync.textContent='Indica a data e o peso.';return;} sync.textContent='A sincronizar…'; chamarApi('guardarPesoDiarioPortal',{data:data,pesoKg:peso}).then(function(resp){if(!resp||!resp.ok)throw new Error();pesosDiarios=resp.dados||[];document.getElementById('pesoDiarioValor').value='';sync.textContent='Peso guardado.';renderPesoDiario();renderEvolucao();}).catch(function(){sync.textContent='Não foi possível guardar. Tenta novamente com ligação.';}); }
+  function atualizarOpcoesEvolucao() { const seletor=document.getElementById('evolucaoMetrica'), metricas=METRICAS_EVOLUCAO[evolucaoTipo]; if(evolucaoMetrica!=="__todas"&&!metricas[evolucaoMetrica]) evolucaoMetrica=Object.keys(metricas)[0]; seletor.innerHTML='<option value="__todas">Mostrar todas</option>'+Object.keys(metricas).map(chave=>'<option value="'+chave+'">'+metricas[chave][0]+'</option>').join(''); seletor.value=evolucaoMetrica; }
+  function dadosEvolucao(chave,inicio,fim) { const origem=chave==='pesoKg'&&pesosDiarios.length?pesosDiarios.map(item=>({atualizadoEm:item.data,pesoKg:item.pesoKg})):historicoAvaliacoesFisicas; return origem.filter(item=>!inicio||String(item.atualizadoEm).slice(0,10)>=inicio).filter(item=>!fim||String(item.atualizadoEm).slice(0,10)<=fim).map(item=>({data:dataValidaAvaliacao(item.atualizadoEm),valor:Number(String(item[chave]||'').replace(',','.'))})).filter(item=>item.data&&Number.isFinite(item.valor)); }
+  function renderEvolucao() { const destino=document.getElementById('evolucaoGrafico'), resumo=document.getElementById('evolucaoResumo'); if(!destino||!resumo)return; const inicio=document.getElementById('evolucaoInicio').value, fim=document.getElementById('evolucaoFim').value, metricas=METRICAS_EVOLUCAO[evolucaoTipo]; if(evolucaoMetrica==="__todas"){const chaves=Object.keys(metricas); resumo.innerHTML=chaves.map(chave=>{const dados=dadosEvolucao(chave,inicio,fim),ultimo=dados[dados.length-1];return '<div><strong>'+ (ultimo?ultimo.valor.toLocaleString('pt-PT',{maximumFractionDigits:1})+' '+metricas[chave][1]:'—') +'</strong><span>'+metricas[chave][0]+'</span></div>';}).join(''); destino.innerHTML=chaves.map(chave=>'<section class="evolucao-grafico-item"><h3>'+metricas[chave][0]+'</h3><div class="avaliacao-grafico" id="evolucao-grafico-'+chave+'"></div></section>').join(''); chaves.forEach(chave=>renderGraficoSerie(document.getElementById('evolucao-grafico-'+chave),dadosEvolucao(chave,inicio,fim),metricas[chave][1],'Sem registos.')); return;} const dados=dadosEvolucao(evolucaoMetrica,inicio,fim), meta=metricas[evolucaoMetrica]; resumo.innerHTML='<div><strong>'+dados.length+'</strong><span>avaliações no período</span></div>'+(dados.length?'<div><strong>'+dados[dados.length-1].valor.toLocaleString('pt-PT',{maximumFractionDigits:1})+' '+meta[1]+'</strong><span>último valor</span></div>':''); renderGraficoSerie(destino,dados,meta[1],'Ainda não há registos desta métrica no período escolhido.'); }
+  function abrirPerfilEvolucao() { document.body.classList.add('perfil-detalhe-aberto'); document.getElementById('perfilEvolucao').classList.remove('oculto'); atualizarOpcoesEvolucao(); renderEvolucao(); window.scrollTo({top:0,behavior:'smooth'}); }
+  function fecharPerfilEvolucao() { document.body.classList.remove('perfil-detalhe-aberto'); document.getElementById('perfilEvolucao').classList.add('oculto'); }
   function enviarPedidoAvaliacao() {
     const dias = Array.from(document.querySelectorAll("#pedidoAvaliacaoDias input:checked")).map(function (input) { return input.value; });
     const estado = document.getElementById("avaliacaoPedidoEstado");
@@ -2497,11 +2549,20 @@
     chamarApi("guardarPedidoAvaliacaoPortal", dados).then(function (resp) { if (!resp || !resp.ok) throw new Error(); pedidoAvaliacaoAtual = resp.dados || Object.assign({}, dados, { estado: "Pendente", criadoEm: new Date().toISOString() }); atualizarEstadoPedidoAvaliacao(); }).catch(function () { estado.textContent = "Não foi possível enviar. Tenta novamente com ligação à internet."; });
   }
   Object.keys(CAMPOS_AVALIACAO).forEach(function (campo) { const el = document.getElementById(CAMPOS_AVALIACAO[campo]); if (el) el.addEventListener("input", function () { lerCamposAvaliacao(); guardarAvaliacaoFisicaLocal(); }); });
-  document.getElementById("btnGuardarAvaliacao").addEventListener("click", guardarAvaliacaoFisica);
   document.getElementById("btnPedirAvaliacao").addEventListener("click", enviarPedidoAvaliacao);
   document.getElementById("btnVoltarAvaliacoes").addEventListener("click", fecharPerfilAvaliacoes);
   document.querySelectorAll("[data-avaliacao-icone]").forEach(function (el) { trocarIconeDentro(el, "avaliacao"); });
-  document.querySelectorAll("[data-abrir-perfil]").forEach(function (btn) { btn.addEventListener("click", function () { if (btn.dataset.abrirPerfil === "avaliacoes") abrirPerfilAvaliacoes(); else abrirPerfilMetricas(btn.dataset.abrirPerfil); }); });
+  document.querySelectorAll("[data-peso-icone]").forEach(function (el) { trocarIconeDentro(el, el.getAttribute("data-peso-icone")); });
+  document.querySelectorAll("[data-evolucao-icone]").forEach(function (el) { trocarIconeDentro(el, el.getAttribute("data-evolucao-icone")); });
+  document.querySelectorAll("[data-abrir-perfil]").forEach(function (btn) { btn.addEventListener("click", function () { if (btn.dataset.abrirPerfil === "avaliacoes") abrirPerfilAvaliacoes(); else if (btn.dataset.abrirPerfil === "peso") abrirPerfilPesoDiario(); else if (btn.dataset.abrirPerfil === "evolucao") abrirPerfilEvolucao(); else abrirPerfilMetricas(btn.dataset.abrirPerfil); }); });
+  document.getElementById("btnVoltarPesoDiario").addEventListener("click", fecharPerfilPesoDiario);
+  document.getElementById("btnVoltarEvolucao").addEventListener("click", fecharPerfilEvolucao);
+  document.getElementById("btnGuardarPesoDiario").addEventListener("click", guardarPesoDiario);
+  document.querySelectorAll("[data-peso-periodo]").forEach(function (botao) { botao.addEventListener("click", function(){ pesoPeriodo=botao.dataset.pesoPeriodo; renderPesoDiario(); }); });
+  document.querySelectorAll("[data-evolucao-tipo]").forEach(function (botao) { botao.addEventListener("click", function(){ evolucaoTipo=botao.dataset.evolucaoTipo; document.querySelectorAll("[data-evolucao-tipo]").forEach(item=>item.classList.toggle("ativo",item===botao)); atualizarOpcoesEvolucao(); renderEvolucao(); }); });
+  document.getElementById("evolucaoMetrica").addEventListener("change", function(e){ evolucaoMetrica=e.target.value; renderEvolucao(); });
+  document.getElementById("evolucaoInicio").addEventListener("change", renderEvolucao);
+  document.getElementById("evolucaoFim").addEventListener("change", renderEvolucao);
   document.getElementById("btnVoltarPerfil").addEventListener("click", fecharPerfilMetricas);
 
   // ---------- Barra "O teu percurso de hoje" ----------
@@ -3383,8 +3444,10 @@
     let html = "";
     PLANO_ATIVO.treinos.forEach(function (treino, idx) {
       const numExercicios = treino.exercicios ? treino.exercicios.length : 0;
+      const dataRealizacao = treino.dataRealizacao ? new Date(treino.dataRealizacao) : null;
+      const dataRealizacaoTexto = dataRealizacao && !Number.isNaN(dataRealizacao.getTime()) ? dataRealizacao.toLocaleDateString("pt-PT", { day:"2-digit", month:"2-digit", year:"numeric" }) + " · " + dataRealizacao.toLocaleTimeString("pt-PT", { hour:"2-digit", minute:"2-digit" }) : "";
       const badge = treino.feitoAntes
-        ? '<span class="treino-card-badge">' + (treino.diasDesde === 0 ? "REALIZADO HOJE" : "REALIZADO HÁ " + treino.diasDesde + "D") + ' ' + iconeNativoSvg("check") + '</span>'
+        ? '<span class="treino-card-badge">' + iconeNativoSvg("check") + ' ' + (treino.diasDesde === 0 ? "Realizado hoje" : "Realizado há " + treino.diasDesde + " dia" + (treino.diasDesde === 1 ? "" : "s")) + '</span>' + (dataRealizacaoTexto ? '<span class="treino-card-concluido-em">' + dataRealizacaoTexto + '</span>' : '')
         : "";
       html +=
         '<div class="treino-card' + (treino.feitoAntes ? " feito-hoje" : "") + '">' +
@@ -4238,6 +4301,8 @@
     cardEscolherTreino.classList.add("oculto");
     cardExecucaoTreino.classList.add("oculto");
     document.getElementById("treinoConcluidoNome").textContent = workout.nomeTreino || "";
+    const fim = new Date(workout.endedAt || "");
+    document.getElementById("treinoConcluidoEm").textContent = Number.isNaN(fim.getTime()) ? "" : "Concluído em " + fim.toLocaleDateString("pt-PT", { day:"2-digit", month:"long", year:"numeric" }) + " às " + fim.toLocaleTimeString("pt-PT", { hour:"2-digit", minute:"2-digit" });
     document.getElementById("treinoConcluidoVolume").textContent = (workout.volume || 0) + " kg";
     document.getElementById("treinoConcluidoDuracao").textContent = formatarDuracao(workout.duracaoSegundos || 0);
     const recordesEl = document.getElementById("treinoConcluidoRecordes");
@@ -4345,6 +4410,7 @@
   // ---------- Arranque: pergunta ao servidor o estado de hoje ----------
   iniciarMetricasAtividade();
   iniciarAvaliacoesFisicas();
+  carregarPesosDiarios();
   iniciarAgendaPortal();
   renderTreinoAtivoInicio();
   renderFluxoHoje();
@@ -4478,5 +4544,8 @@
 </script>
 </body>
 </html>
+
+
+
 
 
