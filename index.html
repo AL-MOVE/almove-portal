@@ -4325,8 +4325,17 @@
 
   // ---------- Service worker ----------
   if ("serviceWorker" in navigator) {
+    let recarregarPorAtualizacao = false;
+    let recarregamentoAgendado = false;
+    navigator.serviceWorker.addEventListener("controllerchange", function () {
+      if (recarregarPorAtualizacao && !recarregamentoAgendado) {
+        recarregamentoAgendado = true;
+        window.location.reload();
+      }
+    });
     window.addEventListener("load", function () {
       navigator.serviceWorker.register("/sw.js").then(function (registo) {
+        if (registo.waiting && navigator.serviceWorker.controller) mostrarAvisoAtualizacao(registo.waiting);
         registo.addEventListener("updatefound", function () {
           const novoWorker = registo.installing;
           novoWorker.addEventListener("statechange", function () {
@@ -4343,14 +4352,22 @@
   }
 
   function mostrarAvisoAtualizacao(novoWorker) {
+    if (document.querySelector(".toast-atualizacao")) return;
     const aviso = document.createElement("div");
-    aviso.className = "toast";
+    aviso.className = "toast toast-atualizacao";
     aviso.innerHTML = '<span>Há uma versão nova da app.</span><button>Atualizar</button>';
     aviso.querySelector("button").onclick = function () {
-      novoWorker.postMessage("SKIP_WAITING");
-      novoWorker.addEventListener("statechange", function () {
-        if (novoWorker.state === "activated") window.location.reload();
-      });
+      const botao = aviso.querySelector("button");
+      botao.disabled = true;
+      botao.textContent = "A atualizar…";
+      recarregarPorAtualizacao = true;
+      if (novoWorker) novoWorker.postMessage("SKIP_WAITING");
+      window.setTimeout(function () {
+        if (!recarregamentoAgendado) {
+          recarregamentoAgendado = true;
+          window.location.reload();
+        }
+      }, 350);
     };
     document.body.appendChild(aviso);
   }
