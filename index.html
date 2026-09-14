@@ -3580,7 +3580,10 @@
   function textoPrescricaoExercicio(ex) {
     const porTempo = ex.tipoPrescricao === "TEMPO" || /(?:seg|sec|min|tempo|\d\s*s\b|:)/i.test(String(ex.repsMin || "") + " " + String(ex.repsMax || ""));
     const unidade = porTempo ? "seg" : "reps";
-    return (ex.series || "-") + " séries · " + (ex.repsMin || "-") + "–" + (ex.repsMax || "-") + " " + unidade + " · RIR " + (ex.rir || "-");
+    const etiquetas = [];
+    if (ex.aquecimento === true || String(ex.aquecimento).toLowerCase() === "true") etiquetas.push("Aquecimento");
+    if (String(ex.grupoSuperserie || "").trim()) etiquetas.push("Supersérie " + String(ex.grupoSuperserie).trim().toUpperCase());
+    return (etiquetas.length ? etiquetas.join(" · ") + " · " : "") + (ex.series || "-") + " séries · " + (ex.repsMin || "-") + "–" + (ex.repsMax || "-") + " " + unidade + " · RIR " + (ex.rir || "-");
   }
 
   function escaparTextoExercicio(valor) {
