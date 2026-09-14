@@ -1150,6 +1150,20 @@
     .avaliacao-dia:nth-child(4) input:checked+span { background:rgba(217,70,239,.22); border-color:#d946ef; color:#fdeeff; }
     .avaliacao-dia:nth-child(5) input:checked+span { background:rgba(251,191,36,.22); border-color:#fbbf24; color:#fff9df; }
     .avaliacao-dia:nth-child(6) input:checked+span { background:rgba(251,113,133,.22); border-color:#fb7185; color:#fff0f3; }
+  </style>  <style id="ajuste-pedido-avaliacao-almove">
+    /* Seletores do pedido seguem a linguagem escura do portal. */
+    .pedido-seletor { position:relative; }
+    .pedido-seletor-botao { width:100%; min-height:40px; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:0 10px; border:1px solid rgba(45,212,191,.38); border-radius:10px; background:linear-gradient(135deg,#10213a,#15223b); color:#f4f9ff; font:inherit; font-size:12px; font-weight:800; text-align:left; cursor:pointer; }
+    .pedido-seletor-botao > span:last-child { color:#5eead4; font-size:16px; line-height:1; }
+    .pedido-gaveta { position:absolute; z-index:90; top:calc(100% + 6px); left:0; right:0; padding:6px; border:1px solid rgba(45,212,191,.34); border-radius:13px; background:#091827; box-shadow:0 18px 34px rgba(0,0,0,.46); }
+    .pedido-gaveta button { width:100%; display:flex; align-items:baseline; justify-content:space-between; gap:8px; padding:10px 8px; border:1px solid transparent; border-radius:9px; background:transparent; color:#e8f4ff; font:inherit; text-align:left; cursor:pointer; }
+    .pedido-gaveta button span { font-size:12px; font-weight:850; }
+    .pedido-gaveta button small { color:#8fa5bb; font-size:10px; font-weight:700; }
+    .pedido-gaveta button.ativo { border-color:rgba(45,212,191,.38); background:rgba(45,212,191,.12); color:#7ff4e3; }
+    .avaliacao-pedido-acoes { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px; }
+    .avaliacao-pedido-acoes .metricas-guardar { margin:0; }
+    .btn-pedido-whatsapp { border-color:rgba(74,222,128,.42); background:rgba(34,197,94,.12); color:#a7f3bd; }
+    @media (max-width:390px) { .avaliacao-pedido-acoes { grid-template-columns:1fr; } }
   </style></head>
 <body>
 
@@ -1615,14 +1629,14 @@
         <h3 id="pedidoAvaliacaoTitulo">Pedir avaliação física</h3>
         <p id="avaliacaoElegibilidade">A verificar quando podes pedir a próxima avaliação.</p>
         <div class="avaliacao-pedido-grid">
-          <label>Período preferido<select id="pedidoAvaliacaoPeriodo"><option value="manhã">Manhã</option><option value="tarde">Tarde</option><option value="final do dia">Final do dia</option></select></label>
+          <label>Período preferido<div class="pedido-seletor"><button type="button" class="pedido-seletor-botao" id="btnPedidoPeriodo" aria-haspopup="listbox" aria-expanded="false"><span id="pedidoPeriodoTexto">Manhã</span><span aria-hidden="true">⌄</span></button><div class="pedido-gaveta oculto" id="pedidoPeriodoGaveta" role="listbox" aria-label="Escolher período"></div></div></label>
           <label>Hora ideal<input id="pedidoAvaliacaoHora" type="time"></label>
           <label class="largo">Dias disponíveis<div class="avaliacao-dias" id="pedidoAvaliacaoDias"><label class="avaliacao-dia"><input type="checkbox" value="Seg"><span>Seg</span></label><label class="avaliacao-dia"><input type="checkbox" value="Ter"><span>Ter</span></label><label class="avaliacao-dia"><input type="checkbox" value="Qua"><span>Qua</span></label><label class="avaliacao-dia"><input type="checkbox" value="Qui"><span>Qui</span></label><label class="avaliacao-dia"><input type="checkbox" value="Sex"><span>Sex</span></label><label class="avaliacao-dia"><input type="checkbox" value="Sáb"><span>Sáb</span></label></div></label>
           <label>Hora alternativa<input id="pedidoAvaliacaoHoraAlternativa" type="time"></label>
-          <label>O que queres rever?<select id="pedidoAvaliacaoObjetivo"><option value="Avaliação geral">Avaliação geral</option><option value="Peso e composição corporal">Peso e composição corporal</option><option value="Medidas e progresso">Medidas e progresso</option><option value="Ajuste de plano">Ajuste de plano</option></select></label>
+          <label>O que queres rever?<div class="pedido-seletor"><button type="button" class="pedido-seletor-botao" id="btnPedidoObjetivo" aria-haspopup="listbox" aria-expanded="false"><span id="pedidoObjetivoTexto">Avaliação geral</span><span aria-hidden="true">⌄</span></button><div class="pedido-gaveta oculto" id="pedidoObjetivoGaveta" role="listbox" aria-label="Escolher objetivo"></div></div></label>
           <label class="largo">Nota ou indisponibilidade<textarea id="pedidoAvaliacaoNota" placeholder="Ex.: não consigo à quarta-feira."></textarea></label>
         </div>
-        <button type="button" class="btn-secundario metricas-guardar" id="btnPedirAvaliacao">Enviar pedido</button>
+        <div class="avaliacao-pedido-acoes"><button type="button" class="btn-secundario metricas-guardar" id="btnPedirAvaliacao">Enviar pedido</button><button type="button" class="btn-secundario metricas-guardar btn-pedido-whatsapp" id="btnPedirAvaliacaoWhatsApp">Enviar pedido por WhatsApp</button></div>
         <p class="avaliacao-pedido-estado" id="avaliacaoPedidoEstado"></p>
       </section>
       <section class="avaliacao-resultados-cliente">
@@ -2604,16 +2618,90 @@
   function renderEvolucao() { const destino=document.getElementById('evolucaoGrafico'), resumo=document.getElementById('evolucaoResumo'); if(!destino||!resumo)return; const inicio=document.getElementById('evolucaoInicio').value, fim=document.getElementById('evolucaoFim').value, metricas=METRICAS_EVOLUCAO[evolucaoTipo]; if(evolucaoMetrica==="__todas"){const chaves=Object.keys(metricas); resumo.innerHTML=chaves.map(chave=>{const dados=dadosEvolucao(chave,inicio,fim),ultimo=dados[dados.length-1];return '<div><strong>'+ (ultimo?ultimo.valor.toLocaleString('pt-PT',{maximumFractionDigits:1})+' '+metricas[chave][1]:'—') +'</strong><span>'+metricas[chave][0]+'</span></div>';}).join(''); destino.innerHTML=chaves.map(chave=>'<section class="evolucao-grafico-item"><h3>'+metricas[chave][0]+'</h3><div class="avaliacao-grafico" id="evolucao-grafico-'+chave+'"></div></section>').join(''); chaves.forEach(chave=>renderGraficoSerie(document.getElementById('evolucao-grafico-'+chave),dadosEvolucao(chave,inicio,fim),metricas[chave][1],'Sem registos.')); return;} const dados=dadosEvolucao(evolucaoMetrica,inicio,fim), meta=metricas[evolucaoMetrica]; resumo.innerHTML='<div><strong>'+dados.length+'</strong><span>avaliações no período</span></div>'+(dados.length?'<div><strong>'+dados[dados.length-1].valor.toLocaleString('pt-PT',{maximumFractionDigits:1})+' '+meta[1]+'</strong><span>último valor</span></div>':''); renderGraficoSerie(destino,dados,meta[1],'Ainda não há registos desta métrica no período escolhido.'); }
   function abrirPerfilEvolucao() { document.body.classList.add('perfil-detalhe-aberto'); document.getElementById('perfilEvolucao').classList.remove('oculto'); atualizarOpcoesEvolucao(); renderEvolucao(); window.scrollTo({top:0,behavior:'smooth'}); }
   function fecharPerfilEvolucao() { document.body.classList.remove('perfil-detalhe-aberto'); document.getElementById('perfilEvolucao').classList.add('oculto'); }
-  function enviarPedidoAvaliacao() {
+  const OPCOES_PERIODO_AVALIACAO = [
+    { valor: "manhã", nome: "Manhã", detalhe: "07:00 – 12:30", inicio: "07:00", fim: "12:30" },
+    { valor: "tarde", nome: "Tarde", detalhe: "13:00 – 18:30", inicio: "13:00", fim: "18:30" },
+    { valor: "final do dia", nome: "Final do dia", detalhe: "19:00 – 21:30", inicio: "19:00", fim: "21:30" }
+  ];
+  const OPCOES_OBJETIVO_AVALIACAO = [
+    { valor: "Avaliação geral", nome: "Avaliação geral", detalhe: "Visão completa" },
+    { valor: "Peso e composição corporal", nome: "Peso e composição", detalhe: "Balança e composição" },
+    { valor: "Medidas e progresso", nome: "Medidas e progresso", detalhe: "Perímetros e evolução" },
+    { valor: "Ajuste de plano", nome: "Ajuste de plano", detalhe: "Rever o treino atual" }
+  ];
+  let pedidoPeriodoAvaliacao = "manhã";
+  let pedidoObjetivoAvaliacao = "Avaliação geral";
+
+  function fecharGavetasPedidoAvaliacao() {
+    document.querySelectorAll('.pedido-gaveta').forEach(function(gaveta) { gaveta.classList.add('oculto'); });
+    document.querySelectorAll('.pedido-seletor-botao').forEach(function(botao) { botao.setAttribute('aria-expanded', 'false'); });
+  }
+  function aplicarHorarioPeriodoAvaliacao() {
+    const periodo = OPCOES_PERIODO_AVALIACAO.find(function(item) { return item.valor === pedidoPeriodoAvaliacao; }) || OPCOES_PERIODO_AVALIACAO[0];
+    ['pedidoAvaliacaoHora', 'pedidoAvaliacaoHoraAlternativa'].forEach(function(id) {
+      const campo = document.getElementById(id);
+      if (!campo) return;
+      campo.min = periodo.inicio;
+      campo.max = periodo.fim;
+      if (campo.value && (campo.value < periodo.inicio || campo.value > periodo.fim)) campo.value = '';
+    });
+  }
+  function renderGavetaPedidoAvaliacao(gavetaId, textoId, opcoes, valorAtual, aoEscolher) {
+    const gaveta = document.getElementById(gavetaId);
+    const texto = document.getElementById(textoId);
+    const selecionada = opcoes.find(function(item) { return item.valor === valorAtual; }) || opcoes[0];
+    texto.textContent = selecionada.nome;
+    gaveta.innerHTML = opcoes.map(function(item) {
+      return '<button type="button" role="option" aria-selected="' + (item.valor === valorAtual) + '" class="' + (item.valor === valorAtual ? 'ativo' : '') + '" data-pedido-valor="' + item.valor + '"><span>' + item.nome + '</span><small>' + item.detalhe + '</small></button>';
+    }).join('');
+    gaveta.querySelectorAll('[data-pedido-valor]').forEach(function(botao) {
+      botao.addEventListener('click', function() { aoEscolher(botao.dataset.pedidoValor); fecharGavetasPedidoAvaliacao(); });
+    });
+  }
+  function prepararGavetasPedidoAvaliacao() {
+    renderGavetaPedidoAvaliacao('pedidoPeriodoGaveta', 'pedidoPeriodoTexto', OPCOES_PERIODO_AVALIACAO, pedidoPeriodoAvaliacao, function(valor) {
+      pedidoPeriodoAvaliacao = valor;
+      aplicarHorarioPeriodoAvaliacao();
+      prepararGavetasPedidoAvaliacao();
+    });
+    renderGavetaPedidoAvaliacao('pedidoObjetivoGaveta', 'pedidoObjetivoTexto', OPCOES_OBJETIVO_AVALIACAO, pedidoObjetivoAvaliacao, function(valor) {
+      pedidoObjetivoAvaliacao = valor;
+      prepararGavetasPedidoAvaliacao();
+    });
+    aplicarHorarioPeriodoAvaliacao();
+  }
+  function dadosPedidoAvaliacao() {
     const dias = Array.from(document.querySelectorAll("#pedidoAvaliacaoDias input:checked")).map(function (input) { return input.value; });
+    if (!dias.length) return null;
+    return { periodo: pedidoPeriodoAvaliacao, diasDisponiveis: dias, horaPreferida: document.getElementById("pedidoAvaliacaoHora").value, horaAlternativa: document.getElementById("pedidoAvaliacaoHoraAlternativa").value, objetivo: pedidoObjetivoAvaliacao, nota: document.getElementById("pedidoAvaliacaoNota").value.trim() };
+  }
+  function mensagemWhatsAppPedidoAvaliacao(dados) {
+    return ['Olá André, gostaria de pedir uma avaliação física.', '', 'Período: ' + dados.periodo, 'Dias disponíveis: ' + dados.diasDisponiveis.join(', '), 'Hora ideal: ' + (dados.horaPreferida || 'a combinar'), 'Hora alternativa: ' + (dados.horaAlternativa || 'a combinar'), 'Objetivo: ' + dados.objetivo, dados.nota ? 'Nota: ' + dados.nota : ''].filter(Boolean).join('\n');
+  }
+  function enviarPedidoAvaliacao(porWhatsApp) {
     const estado = document.getElementById("avaliacaoPedidoEstado");
-    if (!dias.length) { estado.textContent = "Escolhe pelo menos um dia disponível."; return; }
-    const dados = { periodo: document.getElementById("pedidoAvaliacaoPeriodo").value, diasDisponiveis: dias, horaPreferida: document.getElementById("pedidoAvaliacaoHora").value, horaAlternativa: document.getElementById("pedidoAvaliacaoHoraAlternativa").value, objetivo: document.getElementById("pedidoAvaliacaoObjetivo").value, nota: document.getElementById("pedidoAvaliacaoNota").value.trim() };
+    const dados = dadosPedidoAvaliacao();
+    if (!dados) { estado.textContent = "Escolhe pelo menos um dia disponível."; return; }
+    const janelaWhatsApp = porWhatsApp && opcoesContactoPTNumero ? window.open('about:blank', '_blank') : null;
     estado.textContent = "A enviar pedido…";
-    chamarApi("guardarPedidoAvaliacaoPortal", dados).then(function (resp) { if (!resp || !resp.ok) throw new Error(); pedidoAvaliacaoAtual = resp.dados || Object.assign({}, dados, { estado: "Pendente", criadoEm: new Date().toISOString() }); atualizarEstadoPedidoAvaliacao(); }).catch(function () { estado.textContent = "Não foi possível enviar. Tenta novamente com ligação à internet."; });
+    chamarApi("guardarPedidoAvaliacaoPortal", dados).then(function (resp) {
+      if (!resp || !resp.ok) throw new Error();
+      pedidoAvaliacaoAtual = resp.dados || Object.assign({}, dados, { estado: "Pendente", criadoEm: new Date().toISOString() });
+      atualizarEstadoPedidoAvaliacao();
+      if (porWhatsApp) {
+        if (!opcoesContactoPTNumero) { estado.textContent = "Pedido enviado. O contacto WhatsApp do treinador ainda não está disponível."; return; }
+        const url = 'https://wa.me/' + opcoesContactoPTNumero + '?text=' + encodeURIComponent(mensagemWhatsAppPedidoAvaliacao(dados));
+        if (janelaWhatsApp) janelaWhatsApp.location.href = url; else window.open(url, '_blank');
+      }
+    }).catch(function () { if (janelaWhatsApp) janelaWhatsApp.close(); estado.textContent = "Não foi possível enviar. Tenta novamente com ligação à internet."; });
   }
   Object.keys(CAMPOS_AVALIACAO).forEach(function (campo) { const el = document.getElementById(CAMPOS_AVALIACAO[campo]); if (el) el.addEventListener("input", function () { lerCamposAvaliacao(); guardarAvaliacaoFisicaLocal(); }); });
-  document.getElementById("btnPedirAvaliacao").addEventListener("click", enviarPedidoAvaliacao);
+  prepararGavetasPedidoAvaliacao();
+  document.getElementById("btnPedidoPeriodo").addEventListener("click", function() { const gaveta=document.getElementById('pedidoPeriodoGaveta'); const abre=gaveta.classList.contains('oculto'); fecharGavetasPedidoAvaliacao(); gaveta.classList.toggle('oculto',!abre); this.setAttribute('aria-expanded',String(abre)); });
+  document.getElementById("btnPedidoObjetivo").addEventListener("click", function() { const gaveta=document.getElementById('pedidoObjetivoGaveta'); const abre=gaveta.classList.contains('oculto'); fecharGavetasPedidoAvaliacao(); gaveta.classList.toggle('oculto',!abre); this.setAttribute('aria-expanded',String(abre)); });
+  document.addEventListener("click", function(evento) { if (!evento.target.closest('.pedido-seletor')) fecharGavetasPedidoAvaliacao(); });
+  document.getElementById("btnPedirAvaliacao").addEventListener("click", function() { enviarPedidoAvaliacao(false); });
+  document.getElementById("btnPedirAvaliacaoWhatsApp").addEventListener("click", function() { enviarPedidoAvaliacao(true); });
   document.getElementById("btnVoltarAvaliacoes").addEventListener("click", fecharPerfilAvaliacoes);
   document.querySelectorAll("[data-avaliacao-icone]").forEach(function (el) { trocarIconeDentro(el, "avaliacao"); });
   document.querySelectorAll("[data-peso-icone]").forEach(function (el) { trocarIconeDentro(el, el.getAttribute("data-peso-icone")); });
@@ -4612,6 +4700,7 @@
 </script>
 </body>
 </html>
+
 
 
 
