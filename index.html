@@ -1095,6 +1095,7 @@
     .pos-treino-nota-label{display:grid;gap:6px;margin-top:16px;color:var(--text-soft);font-size:11px;font-weight:800}.pos-treino-nota-label textarea{width:100%;min-height:82px;resize:vertical;padding:10px 11px;border:1px solid var(--border);border-radius:11px;outline:0;background:rgba(255,255,255,.055);color:#fff;font:inherit;font-size:12px;line-height:1.4}.pos-treino-nota-label textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(45,212,191,.1)}
     .treino-recordes{display:inline-flex;margin:9px auto 0;padding:6px 9px;border:1px solid rgba(251,191,36,.34);border-radius:999px;background:rgba(245,158,11,.12);color:#fde68a!important;font-size:10px!important;font-weight:850}
     .agenda-inicio-card{background:linear-gradient(135deg,rgba(14,165,233,.12),rgba(45,212,191,.05))}.agenda-inicio-lista{display:grid;gap:8px;margin-top:13px}.agenda-inicio-item{display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:9px;padding:10px;border:1px solid var(--border-soft);border-radius:13px;background:rgba(255,255,255,.035)}.agenda-inicio-data{display:grid;place-items:center;min-height:40px;border-radius:10px;background:rgba(56,189,248,.12);color:#7dd3fc;font-size:11px;font-weight:900;text-align:center;line-height:1.05}.agenda-inicio-item strong{display:block;color:#fff;font-size:12px}.agenda-inicio-item small{display:block;margin-top:3px;color:var(--text-muted);font-size:10px}.agenda-remarcar{border:0;background:transparent;color:var(--accent);font:inherit;font-size:10px;font-weight:850;cursor:pointer}.agenda-inicio-vazio{margin:0;padding:6px 0;color:var(--text-muted);font-size:11px}
+    .perfil-acesso:disabled{opacity:.58;cursor:not-allowed;filter:saturate(.6)}.perfil-acesso:disabled .perfil-acesso-seta{opacity:.35}
   </style>
 </head>
 <body>
@@ -1541,7 +1542,7 @@
         </div>
       </div>
       <div class="perfil-acessos">
-        <button type="button" class="perfil-acesso" data-abrir-perfil="avaliacoes"><span class="perfil-acesso-icone avaliacao" data-perfil-icone="avaliacao"></span><span><strong>Avaliações físicas</strong><small>Peso, medidas e composição corporal</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" id="btnAbrirAvaliacoes" data-abrir-perfil="avaliacoes" disabled><span class="perfil-acesso-icone avaliacao" data-perfil-icone="avaliacao"></span><span><strong>Avaliações físicas</strong><small id="avaliacaoAcessoEstado">A aguardar marcação do André</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
         <button type="button" class="perfil-acesso" data-abrir-perfil="caminhada"><span class="perfil-acesso-icone" data-perfil-icone="caminhar"></span><span><strong>Métricas de caminhada</strong><small>Passos, distância, duração e calorias</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
         <button type="button" class="perfil-acesso" data-abrir-perfil="corrida"><span class="perfil-acesso-icone corrida" data-perfil-icone="foguetao"></span><span><strong>Calculadora de corrida</strong><small>Estimativa por distância e velocidade</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
       </div>
@@ -2187,6 +2188,28 @@
   });
 
   // ---------- Agenda semanal ----------
+  var AGENDA_PORTAL = [];
+  function atualizarAcessoAvaliacao(lista) {
+    const botao = document.getElementById("btnAbrirAvaliacoes");
+    const estado = document.getElementById("avaliacaoAcessoEstado");
+    const avaliacao = (lista || []).find(function (item) { return /avalia/i.test(String(item.titulo || item.tipo || "")); });
+    if (!avaliacao) {
+      botao.disabled = true;
+      estado.textContent = "A aguardar marcação do André";
+      return;
+    }
+    const data = new Date(avaliacao.dataHora || avaliacao.data || "");
+    if (Number.isNaN(data.getTime())) {
+      botao.disabled = true;
+      estado.textContent = "Data da avaliação por confirmar";
+      return;
+    }
+    const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+    const diaAvaliacao = new Date(data); diaAvaliacao.setHours(0, 0, 0, 0);
+    const textoData = data.toLocaleDateString("pt-PT", { day: "2-digit", month: "long" });
+    botao.disabled = diaAvaliacao.getTime() > hoje.getTime();
+    estado.textContent = botao.disabled ? "Disponível em " + textoData : "Avaliação disponível desde " + textoData;
+  }
   function formatarCompromissoAgenda(item, indice) {
     const data = new Date(item.dataHora || item.data || "");
     const temData = !Number.isNaN(data.getTime());
@@ -2200,6 +2223,8 @@
   function renderAgendaInicio(lista, indisponivel) {
     const destino = document.getElementById("agendaInicioLista");
     const itens = Array.isArray(lista) ? lista : [];
+    AGENDA_PORTAL = itens;
+    atualizarAcessoAvaliacao(itens);
     if (!itens.length) {
       destino.innerHTML = '<p class="agenda-inicio-vazio">' + (indisponivel ? 'A agenda ainda não está ligada ao Apps Script. Adiciona o código de Agenda e publica uma nova implementação.' : 'Não tens sessões ou avaliações marcadas para os próximos dias.') + '</p>';
       return;
