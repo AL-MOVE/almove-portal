@@ -1633,8 +1633,7 @@
           <label>Hora ideal<input id="pedidoAvaliacaoHora" type="time"></label>
           <label class="largo">Dias disponíveis<div class="avaliacao-dias" id="pedidoAvaliacaoDias"><label class="avaliacao-dia"><input type="checkbox" value="Seg"><span>Seg</span></label><label class="avaliacao-dia"><input type="checkbox" value="Ter"><span>Ter</span></label><label class="avaliacao-dia"><input type="checkbox" value="Qua"><span>Qua</span></label><label class="avaliacao-dia"><input type="checkbox" value="Qui"><span>Qui</span></label><label class="avaliacao-dia"><input type="checkbox" value="Sex"><span>Sex</span></label><label class="avaliacao-dia"><input type="checkbox" value="Sáb"><span>Sáb</span></label></div></label>
           <label>Hora alternativa<input id="pedidoAvaliacaoHoraAlternativa" type="time"></label>
-          <label>O que queres rever?<div class="pedido-seletor"><button type="button" class="pedido-seletor-botao" id="btnPedidoObjetivo" aria-haspopup="listbox" aria-expanded="false"><span id="pedidoObjetivoTexto">Avaliação geral</span><span aria-hidden="true">⌄</span></button><div class="pedido-gaveta oculto" id="pedidoObjetivoGaveta" role="listbox" aria-label="Escolher objetivo"></div></div></label>
-          <label class="largo">Nota ou indisponibilidade<textarea id="pedidoAvaliacaoNota" placeholder="Ex.: não consigo à quarta-feira."></textarea></label>
+          <label class="largo">Notas<textarea id="pedidoAvaliacaoNota" placeholder="Escreve aqui uma nota opcional."></textarea></label>
         </div>
         <div class="avaliacao-pedido-acoes"><button type="button" class="btn-secundario metricas-guardar" id="btnPedirAvaliacao">Enviar pedido</button><button type="button" class="btn-secundario metricas-guardar btn-pedido-whatsapp" id="btnPedirAvaliacaoWhatsApp">Enviar pedido por WhatsApp</button></div>
         <p class="avaliacao-pedido-estado" id="avaliacaoPedidoEstado"></p>
@@ -2623,14 +2622,7 @@
     { valor: "tarde", nome: "Tarde", detalhe: "13:00 – 18:30", inicio: "13:00", fim: "18:30" },
     { valor: "final do dia", nome: "Final do dia", detalhe: "19:00 – 21:30", inicio: "19:00", fim: "21:30" }
   ];
-  const OPCOES_OBJETIVO_AVALIACAO = [
-    { valor: "Avaliação geral", nome: "Avaliação geral", detalhe: "Visão completa" },
-    { valor: "Peso e composição corporal", nome: "Peso e composição", detalhe: "Balança e composição" },
-    { valor: "Medidas e progresso", nome: "Medidas e progresso", detalhe: "Perímetros e evolução" },
-    { valor: "Ajuste de plano", nome: "Ajuste de plano", detalhe: "Rever o treino atual" }
-  ];
   let pedidoPeriodoAvaliacao = "manhã";
-  let pedidoObjetivoAvaliacao = "Avaliação geral";
 
   function fecharGavetasPedidoAvaliacao() {
     document.querySelectorAll('.pedido-gaveta').forEach(function(gaveta) { gaveta.classList.add('oculto'); });
@@ -2664,19 +2656,15 @@
       aplicarHorarioPeriodoAvaliacao();
       prepararGavetasPedidoAvaliacao();
     });
-    renderGavetaPedidoAvaliacao('pedidoObjetivoGaveta', 'pedidoObjetivoTexto', OPCOES_OBJETIVO_AVALIACAO, pedidoObjetivoAvaliacao, function(valor) {
-      pedidoObjetivoAvaliacao = valor;
-      prepararGavetasPedidoAvaliacao();
-    });
     aplicarHorarioPeriodoAvaliacao();
   }
   function dadosPedidoAvaliacao() {
     const dias = Array.from(document.querySelectorAll("#pedidoAvaliacaoDias input:checked")).map(function (input) { return input.value; });
     if (!dias.length) return null;
-    return { periodo: pedidoPeriodoAvaliacao, diasDisponiveis: dias, horaPreferida: document.getElementById("pedidoAvaliacaoHora").value, horaAlternativa: document.getElementById("pedidoAvaliacaoHoraAlternativa").value, objetivo: pedidoObjetivoAvaliacao, nota: document.getElementById("pedidoAvaliacaoNota").value.trim() };
+    return { periodo: pedidoPeriodoAvaliacao, diasDisponiveis: dias, horaPreferida: document.getElementById("pedidoAvaliacaoHora").value, horaAlternativa: document.getElementById("pedidoAvaliacaoHoraAlternativa").value, nota: document.getElementById("pedidoAvaliacaoNota").value.trim() };
   }
   function mensagemWhatsAppPedidoAvaliacao(dados) {
-    return ['Olá André, gostaria de pedir uma avaliação física.', '', 'Período: ' + dados.periodo, 'Dias disponíveis: ' + dados.diasDisponiveis.join(', '), 'Hora ideal: ' + (dados.horaPreferida || 'a combinar'), 'Hora alternativa: ' + (dados.horaAlternativa || 'a combinar'), 'Objetivo: ' + dados.objetivo, dados.nota ? 'Nota: ' + dados.nota : ''].filter(Boolean).join('\n');
+    return ['Olá André, gostaria de pedir uma avaliação física.', '', 'Período: ' + dados.periodo, 'Dias disponíveis: ' + dados.diasDisponiveis.join(', '), 'Hora ideal: ' + (dados.horaPreferida || 'a combinar'), 'Hora alternativa: ' + (dados.horaAlternativa || 'a combinar'), dados.nota ? 'Notas: ' + dados.nota : ''].filter(Boolean).join('\n');
   }
   function enviarPedidoAvaliacao(porWhatsApp) {
     const estado = document.getElementById("avaliacaoPedidoEstado");
@@ -2685,7 +2673,7 @@
     const janelaWhatsApp = porWhatsApp && opcoesContactoPTNumero ? window.open('about:blank', '_blank') : null;
     estado.textContent = "A enviar pedido…";
     chamarApi("guardarPedidoAvaliacaoPortal", dados).then(function (resp) {
-      if (!resp || !resp.ok) throw new Error();
+      if (!resp || !resp.ok) throw new Error((resp && resp.erro) || 'O pedido não foi aceite pelo servidor.');
       pedidoAvaliacaoAtual = resp.dados || Object.assign({}, dados, { estado: "Pendente", criadoEm: new Date().toISOString() });
       atualizarEstadoPedidoAvaliacao();
       if (porWhatsApp) {
@@ -2693,12 +2681,11 @@
         const url = 'https://wa.me/' + opcoesContactoPTNumero + '?text=' + encodeURIComponent(mensagemWhatsAppPedidoAvaliacao(dados));
         if (janelaWhatsApp) janelaWhatsApp.location.href = url; else window.open(url, '_blank');
       }
-    }).catch(function () { if (janelaWhatsApp) janelaWhatsApp.close(); estado.textContent = "Não foi possível enviar. Tenta novamente com ligação à internet."; });
+    }).catch(function (erro) { if (janelaWhatsApp) janelaWhatsApp.close(); estado.textContent = (erro && erro.message) ? erro.message : "Não foi possível enviar o pedido."; });
   }
   Object.keys(CAMPOS_AVALIACAO).forEach(function (campo) { const el = document.getElementById(CAMPOS_AVALIACAO[campo]); if (el) el.addEventListener("input", function () { lerCamposAvaliacao(); guardarAvaliacaoFisicaLocal(); }); });
   prepararGavetasPedidoAvaliacao();
   document.getElementById("btnPedidoPeriodo").addEventListener("click", function() { const gaveta=document.getElementById('pedidoPeriodoGaveta'); const abre=gaveta.classList.contains('oculto'); fecharGavetasPedidoAvaliacao(); gaveta.classList.toggle('oculto',!abre); this.setAttribute('aria-expanded',String(abre)); });
-  document.getElementById("btnPedidoObjetivo").addEventListener("click", function() { const gaveta=document.getElementById('pedidoObjetivoGaveta'); const abre=gaveta.classList.contains('oculto'); fecharGavetasPedidoAvaliacao(); gaveta.classList.toggle('oculto',!abre); this.setAttribute('aria-expanded',String(abre)); });
   document.addEventListener("click", function(evento) { if (!evento.target.closest('.pedido-seletor')) fecharGavetasPedidoAvaliacao(); });
   document.getElementById("btnPedirAvaliacao").addEventListener("click", function() { enviarPedidoAvaliacao(false); });
   document.getElementById("btnPedirAvaliacaoWhatsApp").addEventListener("click", function() { enviarPedidoAvaliacao(true); });
@@ -2835,15 +2822,18 @@
     return "ck_" + Date.now() + "_" + Math.random().toString(36).slice(2, 9);
   }
 
-  // ---------- Chamadas à API (via o estafeta /api/almove) ----------
+  // ---------- Chamadas à API (Apps Script publicado) ----------
+  // O portal é estático no GitHub; por isso não existe uma rota /api/almove no servidor.
+  const ENDPOINT_API = "https://script.google.com/macros/s/AKfycbyiOl7KkXMYSFv9lKKVb2sMspvwER2P5IMlpNQcr9csLyEDnzJqvVqisE-XVuAHgeUV/exec";
   function chamarApi(fn, dados) {
     const corpo = Object.assign({ fn: fn, token: TOKEN }, dados || {});
-    return fetch("/api/almove", {
+    return fetch(ENDPOINT_API, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(corpo)
     }).then(function (resposta) {
-      return resposta.json();
+      if (!resposta.ok) throw new Error("O servidor respondeu com erro " + resposta.status + ".");
+      return resposta.json().catch(function () { throw new Error("O servidor devolveu uma resposta inválida."); });
     });
   }
 
