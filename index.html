@@ -1164,6 +1164,10 @@
     .avaliacao-pedido-acoes .metricas-guardar { margin:0; }
     .btn-pedido-whatsapp { border-color:rgba(74,222,128,.42); background:rgba(34,197,94,.12); color:#a7f3bd; }
     @media (max-width:390px) { .avaliacao-pedido-acoes { grid-template-columns:1fr; } }
+  </style>
+  <style id="estado-ligacao-estilo">
+    .estado-ligacao-portal{position:fixed;z-index:310;left:50%;top:72px;transform:translateX(-50%);width:min(610px,calc(100vw - 24px));display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid rgba(251,191,36,.34);border-radius:13px;background:rgba(17,24,39,.96);box-shadow:0 14px 32px rgba(0,0,0,.34);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+    .estado-ligacao-portal.oculto{display:none}.estado-ligacao-ponto{width:9px;height:9px;flex:0 0 auto;border-radius:50%;background:#fbbf24;box-shadow:0 0 12px rgba(251,191,36,.6)}.estado-ligacao-portal.offline .estado-ligacao-ponto{background:#fb7185;box-shadow:0 0 12px rgba(251,113,133,.55)}.estado-ligacao-texto{min-width:0;flex:1;color:#dce8f5;font-size:11px;font-weight:750;line-height:1.35}.estado-ligacao-acao{min-height:32px;padding:0 10px;border:1px solid rgba(45,212,191,.36);border-radius:9px;background:rgba(45,212,191,.10);color:#7ff4e3;font:inherit;font-size:10px;font-weight:850;cursor:pointer}.versao-portal{margin:18px 0 92px;color:#53677c;font-size:9px;font-weight:750;letter-spacing:.08em;text-align:center;text-transform:uppercase}
   </style></head>
 <body>
 
@@ -1200,6 +1204,12 @@
     <button type="button" class="btn-ativar-notificacoes" id="btnAtivarNotificacoes">Ativar notificações</button>
     <div class="lista-notificacoes" id="listaNotificacoes"><p class="notificacoes-vazio">Não tens notificações novas.</p></div>
   </section>
+
+  <div class="estado-ligacao-portal oculto" id="estadoLigacaoPortal" role="status" aria-live="polite">
+    <span class="estado-ligacao-ponto" aria-hidden="true"></span>
+    <span class="estado-ligacao-texto" id="estadoLigacaoTexto">A ligar ao acompanhamento…</span>
+    <button type="button" class="estado-ligacao-acao" id="btnRepetirLigacao">Tentar novamente</button>
+  </div>
 
   <div id="ecraSemToken" class="card oculto">
     <div class="card-title">Link inválido</div>
@@ -1879,6 +1889,123 @@
     return;
   }
 
+  // ---------- Arranque consolidado e recuperação de ligação ----------
+  const CHAVE_BOOTSTRAP_PORTAL = "ALMOVE_BOOTSTRAP_" + TOKEN;
+  const CHAVE_PROGRESSO_PORTAL = "ALMOVE_PROGRESSO_" + TOKEN;
+  let bootstrapPortalPromise = null;
+  let progressoPortalPromise = null;
+  let perfilDadosIniciados = false;
+  const estadoLigacaoPortalEl = document.getElementById("estadoLigacaoPortal");
+  const estadoLigacaoTextoEl = document.getElementById("estadoLigacaoTexto");
+  const btnRepetirLigacaoEl = document.getElementById("btnRepetirLigacao");
+
+  function mostrarEstadoLigacao(tipo, texto) {
+    if (!estadoLigacaoPortalEl) return;
+    estadoLigacaoPortalEl.classList.remove("oculto", "offline");
+    if (tipo === "offline") estadoLigacaoPortalEl.classList.add("offline");
+    if (estadoLigacaoTextoEl) estadoLigacaoTextoEl.textContent = texto;
+  }
+
+  function ocultarEstadoLigacao() {
+    if (estadoLigacaoPortalEl) estadoLigacaoPortalEl.classList.add("oculto");
+  }
+
+  function guardarBootstrapLocal(dados) {
+    try {
+      localStorage.setItem(CHAVE_BOOTSTRAP_PORTAL, JSON.stringify({ dados: dados, guardadoEm: Date.now() }));
+    } catch (erro) {}
+  }
+
+  function lerBootstrapLocal() {
+    try {
+      const guardado = JSON.parse(localStorage.getItem(CHAVE_BOOTSTRAP_PORTAL) || "null");
+      return guardado && guardado.dados ? guardado.dados : null;
+    } catch (erro) { return null; }
+  }
+
+  function obterBootstrapPortal(forcar) {
+    if (forcar) bootstrapPortalPromise = null;
+    if (bootstrapPortalPromise) return bootstrapPortalPromise;
+    const avisoDemora = window.setTimeout(function () {
+      mostrarEstadoLigacao("a-ligar", "A sincronizar o teu acompanhamento…");
+    }, 900);
+    const blocos = [
+      ["inicio", "getResumoInicioPortal", {}],
+      ["conquistas", "getResumoConquistasPortal", {}],
+      ["opcoes", "getResumoOpcoesPortal", {}],
+      ["agenda", "getAgendaPortal", []],
+      ["notificacoes", "getNotificacoesPortal", []],
+      ["estadoHoje", "getEstadoPortalHoje", {}]
+    ];
+    bootstrapPortalPromise = Promise.allSettled(blocos.map(function (bloco) {
+      return chamarApi(bloco[1], {});
+    }))
+      .then(function (resultados) {
+        window.clearTimeout(avisoDemora);
+        const local = lerBootstrapLocal() || {};
+        const dados = Object.assign({ geradoEm: new Date().toISOString(), erros: [] }, local);
+        let sucessos = 0;
+        resultados.forEach(function (resultado, indice) {
+          const bloco = blocos[indice];
+          if (resultado.status === "fulfilled" && resultado.value && resultado.value.ok) {
+            dados[bloco[0]] = resultado.value.dados === undefined ? bloco[2] : resultado.value.dados;
+            sucessos += 1;
+          } else {
+            dados.erros.push({ bloco: bloco[0], mensagem: resultado.status === "rejected" ? String(resultado.reason || "Erro de ligação") : String((resultado.value && resultado.value.erro) || "Resposta inválida") });
+            if (dados[bloco[0]] === undefined) dados[bloco[0]] = bloco[2];
+          }
+        });
+        if (!sucessos && !Object.keys(local).length) throw new Error("Não foi possível carregar os dados do portal.");
+        guardarBootstrapLocal(dados);
+        if (sucessos === blocos.length) ocultarEstadoLigacao();
+        else mostrarEstadoLigacao("offline", "Alguns dados não atualizaram. Podes tentar novamente.");
+        return dados;
+      })
+      .catch(function (erro) {
+        window.clearTimeout(avisoDemora);
+        bootstrapPortalPromise = null;
+        const local = lerBootstrapLocal();
+        if (local) {
+          mostrarEstadoLigacao("offline", "Sem ligação. A mostrar a última atualização guardada.");
+          return local;
+        }
+        mostrarEstadoLigacao("offline", "Não foi possível carregar os dados. Tenta novamente.");
+        throw erro;
+      });
+    return bootstrapPortalPromise;
+  }
+
+  function obterProgressoPortal(forcar) {
+    if (forcar) progressoPortalPromise = null;
+    if (progressoPortalPromise) return progressoPortalPromise;
+    progressoPortalPromise = chamarApi("getProgressoBootstrapPortal", {})
+      .then(function (resp) {
+        if (!resp || !resp.ok || !resp.dados) throw new Error((resp && resp.erro) || "Não foi possível carregar a evolução.");
+        try { localStorage.setItem(CHAVE_PROGRESSO_PORTAL, JSON.stringify(resp.dados)); } catch (erro) {}
+        return resp.dados;
+      })
+      .catch(function (erro) {
+        progressoPortalPromise = null;
+        try {
+          const local = JSON.parse(localStorage.getItem(CHAVE_PROGRESSO_PORTAL) || "null");
+          if (local) return local;
+        } catch (erroLocal) {}
+        throw erro;
+      });
+    return progressoPortalPromise;
+  }
+
+  if (btnRepetirLigacaoEl) {
+    btnRepetirLigacaoEl.addEventListener("click", function () { window.location.reload(); });
+  }
+  window.addEventListener("offline", function () {
+    mostrarEstadoLigacao("offline", "Sem ligação. Os dados guardados continuam disponíveis.");
+  });
+  window.addEventListener("online", function () {
+    mostrarEstadoLigacao("a-ligar", "Ligação recuperada. A atualizar…");
+    obterBootstrapPortal(true).then(aplicarBootstrapPortal).catch(function () {});
+  });
+
   // ---------- Navegação por separadores (Início / Hoje / Conquistas / Planos) ----------
   const TABS = ["inicio", "hoje", "conquistas", "planos"];
   function mudarTab(nome) {
@@ -1886,12 +2013,17 @@
       document.getElementById("tab" + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle("oculto", t !== nome);
       document.getElementById("tabBtn" + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle("ativo", t === nome);
     });
+    if (nome === "planos") iniciarDadosPerfil();
     window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
   }
   document.querySelectorAll(".tab-btn").forEach(function (btn) {
     btn.addEventListener("click", function () { mudarTab(btn.getAttribute("data-tab")); });
   });
   normalizarIconesFixos();
+  const versaoPortalEl = document.createElement("div");
+  versaoPortalEl.className = "versao-portal";
+  versaoPortalEl.textContent = "AL MOVE · versão 43";
+  document.getElementById("tabPlanos").appendChild(versaoPortalEl);
 
   // ---------- Puxar para atualizar ----------
   // Só ativa junto ao cabeçalho e no início da página, para não interferir
@@ -2009,9 +2141,9 @@
     atualizarEstadoNotificacoes();
   });
   atualizarEstadoNotificacoes();
-  chamarApi("getNotificacoesPortal", {})
-    .then(function (resp) {
-      if (resp && resp.ok && resp.dados) renderNotificacoes(resp.dados);
+  obterBootstrapPortal()
+    .then(function (dados) {
+      renderNotificacoes(dados.notificacoes || []);
     })
     .catch(function () {
       // A área continua vazia até o Apps Script disponibilizar as notificações.
@@ -2095,9 +2227,9 @@
     inicioSemanaBarraEl.style.width = percent + "%";
   }
 
-  chamarApi("getResumoInicioPortal", {})
-    .then(function (resp) {
-      if (resp && resp.ok && resp.dados) renderInicio(resp.dados);
+  obterBootstrapPortal()
+    .then(function (dados) {
+      renderInicio(dados.inicio || {});
     })
     .catch(function () {
       // Sem ligação — o ecrã Início fica com os valores por omissão até haver rede.
@@ -2196,9 +2328,9 @@
   }
 
   renderConquistas({});
-  chamarApi("getResumoConquistasPortal", {})
-    .then(function (resp) {
-      if (resp && resp.ok && resp.dados) renderConquistas(resp.dados);
+  obterBootstrapPortal()
+    .then(function (dados) {
+      renderConquistas(dados.conquistas || {});
     })
     .catch(function () {
       // Mantém a estrutura a zero até a ligação voltar.
@@ -2342,14 +2474,14 @@
     });
   }
   function iniciarAgendaPortal() {
-    chamarApi("getAgendaPortal", {})
-      .then(function (resp) { renderAgendaInicio(resp && resp.ok ? resp.dados : [], !(resp && resp.ok)); })
+    obterBootstrapPortal()
+      .then(function (dados) { renderAgendaInicio(dados.agenda || [], false); })
       .catch(function () { renderAgendaInicio([], true); });
   }
 
-  chamarApi("getResumoOpcoesPortal", {})
-    .then(function (resp) {
-      if (resp && resp.ok && resp.dados) renderOpcoes(resp.dados);
+  obterBootstrapPortal()
+    .then(function (dados) {
+      renderOpcoes(dados.opcoes || {});
     })
     .catch(function () {
       // Sem ligação — o ecrã Opções fica com os valores por omissão até haver rede.
@@ -2554,11 +2686,21 @@
     if (sync) sync.textContent = "A sincronizar…";
     chamarApi("guardarMetricasAtividadePortal", metricasAtividade).catch(function () {});
     chamarApi("guardarAvaliacaoFisicaPortal", avaliacaoFisica)
-      .then(function (resp) { if (!resp || !resp.ok) throw new Error(); if (resp.dados) { avaliacaoFisica = Object.assign({}, avaliacaoFisica, resp.dados); guardarAvaliacaoFisicaLocal(); } carregarHistoricoAvaliacoes(); renderAvaliacaoFisica(); if (sync) sync.textContent = "Avaliação sincronizada."; })
+      .then(function (resp) { if (!resp || !resp.ok) throw new Error(); if (resp.dados) { avaliacaoFisica = Object.assign({}, avaliacaoFisica, resp.dados); guardarAvaliacaoFisicaLocal(); } carregarHistoricoAvaliacoes(true); renderAvaliacaoFisica(); if (sync) sync.textContent = "Avaliação sincronizada."; })
       .catch(function () { if (sync) sync.textContent = "Guardada neste dispositivo. A sincronização fica pendente."; });
   }
-  function carregarHistoricoAvaliacoes() { return chamarApi("getHistoricoAvaliacoesFisicasPortal", {}).then(function (resp) { if (resp && resp.ok && Array.isArray(resp.dados)) { historicoAvaliacoesFisicas = resp.dados; renderAvaliacaoFisica(); } }).catch(function () {}); }
-  function carregarPedidoAvaliacao() { return chamarApi("getPedidoAvaliacaoPortal", {}).then(function (resp) { if (resp && resp.ok) pedidoAvaliacaoAtual = resp.dados || null; atualizarEstadoPedidoAvaliacao(); }).catch(function () {}); }
+  function carregarHistoricoAvaliacoes(forcar) {
+    const pedido = forcar
+      ? chamarApi("getHistoricoAvaliacoesFisicasPortal", {})
+      : obterProgressoPortal().then(function (dados) { return { ok: true, dados: dados.historicoAvaliacoes || [] }; });
+    return pedido.then(function (resp) { if (resp && resp.ok && Array.isArray(resp.dados)) { historicoAvaliacoesFisicas = resp.dados; renderAvaliacaoFisica(); } }).catch(function () {});
+  }
+  function carregarPedidoAvaliacao() {
+    return obterProgressoPortal().then(function (dados) {
+      pedidoAvaliacaoAtual = dados.pedidoAvaliacao || null;
+      atualizarEstadoPedidoAvaliacao();
+    }).catch(function () {});
+  }
   // ---------- Perfil: peso diário e evolução ----------
   let pesosDiarios = [];
   let pesoPeriodo = "registos";
@@ -2588,7 +2730,7 @@
     destino.innerHTML = '<div class="avaliacao-grafico-topo"><strong>' + ultimo.valor.toLocaleString('pt-PT',{maximumFractionDigits:1}) + ' ' + unidade + '</strong><span>' + dados.length + (dados.length===1?' registo':' registos') + '</span></div><svg viewBox="0 0 300 122" role="img"><line class="avaliacao-grafico-eixo" x1="16" y1="95" x2="284" y2="95"/><polyline class="avaliacao-grafico-linha" points="' + pontos + '"/>' + dados.map((item,i)=>'<circle class="avaliacao-grafico-ponto" cx="'+x(i)+'" cy="'+y(item.valor)+'" r="4"/><text class="avaliacao-grafico-data" x="'+x(i)+'" y="114" text-anchor="middle">'+item.data.toLocaleDateString('pt-PT',{day:'2-digit',month:'2-digit'})+'</text>').join('') + '</svg>';
   }
   function renderPesoDiario() { renderGraficoSerie(document.getElementById('pesoDiarioGrafico'), serieAgrupadaPeso(), 'kg', 'Ainda não há pesos registados.'); document.querySelectorAll('[data-peso-periodo]').forEach(btn=>btn.classList.toggle('ativo',btn.dataset.pesoPeriodo===pesoPeriodo)); }
-  function carregarPesosDiarios() { return chamarApi('getPesosDiariosPortal',{}).then(function(resp){ if(resp&&resp.ok&&Array.isArray(resp.dados)){ pesosDiarios=resp.dados; renderPesoDiario(); renderEvolucao(); } }).catch(function(){}); }
+  function carregarPesosDiarios() { return obterProgressoPortal().then(function(dados){ if(Array.isArray(dados.pesosDiarios)){ pesosDiarios=dados.pesosDiarios; renderPesoDiario(); renderEvolucao(); } }).catch(function(){}); }
   function abrirPerfilPesoDiario() { document.body.classList.add('perfil-detalhe-aberto'); document.getElementById('perfilPesoDiario').classList.remove('oculto'); document.getElementById('pesoDiarioData').value=dataLocalHoje(); renderPesoDiario(); window.scrollTo({top:0,behavior:'smooth'}); }
   function fecharPerfilPesoDiario() { document.body.classList.remove('perfil-detalhe-aberto'); document.getElementById('perfilPesoDiario').classList.add('oculto'); }
   function guardarPesoDiario() { const data=document.getElementById('pesoDiarioData').value, peso=document.getElementById('pesoDiarioValor').value, sync=document.getElementById('pesoDiarioSync'); if(!data||!peso){sync.textContent='Indica a data e o peso.';return;} sync.textContent='A sincronizar…'; chamarApi('guardarPesoDiarioPortal',{data:data,pesoKg:peso}).then(function(resp){if(!resp||!resp.ok)throw new Error();pesosDiarios=resp.dados||[];document.getElementById('pesoDiarioValor').value='';sync.textContent='Peso guardado.';renderPesoDiario();renderEvolucao();}).catch(function(){sync.textContent='Não foi possível guardar. Tenta novamente com ligação.';}); }
@@ -4535,10 +4677,10 @@
 
   function iniciarMetricasAtividade() {
     renderMetricasAtividade();
-    chamarApi("getMetricasAtividadePortal", {})
-      .then(function (resp) {
-        if (resp && resp.ok && resp.dados) {
-          metricasAtividade = Object.assign({}, metricasAtividade, resp.dados);
+    obterProgressoPortal()
+      .then(function (dados) {
+        if (dados.metricas) {
+          metricasAtividade = Object.assign({}, metricasAtividade, dados.metricas);
           guardarMetricasLocais();
           renderMetricasAtividade();
         }
@@ -4550,28 +4692,69 @@
     const acesso = document.getElementById("btnAbrirAvaliacoes");
     if (acesso) acesso.disabled = false;
     renderAvaliacaoFisica();
-    carregarHistoricoAvaliacoes();
-    carregarPedidoAvaliacao();
-    chamarApi("getAvaliacaoFisicaPortal", {})
-      .then(function (resp) {
-        if (resp && resp.ok && resp.dados) {
-          avaliacaoFisica = Object.assign({}, avaliacaoFisica, resp.dados);
+    obterProgressoPortal()
+      .then(function (dados) {
+        if (dados.avaliacao) {
+          avaliacaoFisica = Object.assign({}, avaliacaoFisica, dados.avaliacao);
           guardarAvaliacaoFisicaLocal();
-          renderAvaliacaoFisica();
         }
+        historicoAvaliacoesFisicas = Array.isArray(dados.historicoAvaliacoes) ? dados.historicoAvaliacoes : [];
+        pedidoAvaliacaoAtual = dados.pedidoAvaliacao || null;
+        renderAvaliacaoFisica();
       })
       .catch(function () {});
   }
 
+  function aplicarBootstrapPortal(dados) {
+    if (!dados) return;
+    renderInicio(dados.inicio || {});
+    renderConquistas(dados.conquistas || {});
+    renderOpcoes(dados.opcoes || {});
+    renderAgendaInicio(dados.agenda || [], false);
+    renderNotificacoes(dados.notificacoes || []);
+  }
+
+  function aplicarProgressoPortal(dados) {
+    if (!dados) return;
+    if (dados.metricas) {
+      metricasAtividade = Object.assign({}, metricasAtividade, dados.metricas);
+      guardarMetricasLocais();
+      renderMetricasAtividade();
+    }
+    if (dados.avaliacao) {
+      avaliacaoFisica = Object.assign({}, avaliacaoFisica, dados.avaliacao);
+      guardarAvaliacaoFisicaLocal();
+    }
+    historicoAvaliacoesFisicas = Array.isArray(dados.historicoAvaliacoes) ? dados.historicoAvaliacoes : historicoAvaliacoesFisicas;
+    pesosDiarios = Array.isArray(dados.pesosDiarios) ? dados.pesosDiarios : pesosDiarios;
+    pedidoAvaliacaoAtual = dados.pedidoAvaliacao || null;
+    renderAvaliacaoFisica();
+    renderPesoDiario();
+    renderEvolucao();
+  }
+
+  function iniciarDadosPerfil() {
+    if (perfilDadosIniciados) return;
+    perfilDadosIniciados = true;
+    renderMetricasAtividade();
+    renderAvaliacaoFisica();
+    renderPesoDiario();
+    renderEvolucao();
+    obterProgressoPortal().then(aplicarProgressoPortal).catch(function () {
+      perfilDadosIniciados = false;
+    });
+  }
+
   // ---------- Arranque: pergunta ao servidor o estado de hoje ----------
-  iniciarMetricasAtividade();
-  iniciarAvaliacoesFisicas();
-  carregarPesosDiarios();
+  const bootstrapGuardado = lerBootstrapLocal();
+  if (bootstrapGuardado) aplicarBootstrapPortal(bootstrapGuardado);
   iniciarAgendaPortal();
   renderTreinoAtivoInicio();
   renderFluxoHoje();
-  chamarApi("getEstadoPortalHoje", {})
-    .then(function (resp) {
+  obterBootstrapPortal()
+    .then(function (bootstrap) {
+      aplicarBootstrapPortal(bootstrap);
+      const resp = { ok: true, dados: bootstrap.estadoHoje || {} };
       ecraCarregando.classList.add("oculto");
       cardCheckin.classList.remove("oculto");
 
