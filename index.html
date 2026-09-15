@@ -1955,6 +1955,7 @@
             if (dados[bloco[0]] === undefined) dados[bloco[0]] = bloco[2];
           }
         });
+        dados.geradoEm = new Date().toISOString();
         if (!sucessos && !Object.keys(local).length) throw new Error("Não foi possível carregar os dados do portal.");
         guardarBootstrapLocal(dados);
         if (sucessos === blocos.length) ocultarEstadoLigacao();
@@ -2022,7 +2023,7 @@
   normalizarIconesFixos();
   const versaoPortalEl = document.createElement("div");
   versaoPortalEl.className = "versao-portal";
-  versaoPortalEl.textContent = "AL MOVE · versão 43";
+  versaoPortalEl.textContent = "AL MOVE · versão 44";
   document.getElementById("tabPlanos").appendChild(versaoPortalEl);
 
   // ---------- Puxar para atualizar ----------
@@ -4747,7 +4748,23 @@
 
   // ---------- Arranque: pergunta ao servidor o estado de hoje ----------
   const bootstrapGuardado = lerBootstrapLocal();
-  if (bootstrapGuardado) aplicarBootstrapPortal(bootstrapGuardado);
+  if (bootstrapGuardado) {
+    aplicarBootstrapPortal(bootstrapGuardado);
+    const geradoEm = new Date(bootstrapGuardado.geradoEm || 0);
+    const cacheDoDia = !Number.isNaN(geradoEm.getTime()) && geradoEm.toDateString() === new Date().toDateString();
+    if (cacheDoDia) {
+      const estadoGuardadoHoje = bootstrapGuardado.estadoHoje || {};
+      ecraCarregando.classList.add("oculto");
+      cardCheckin.classList.remove("oculto");
+      if (estadoGuardadoHoje.passosPortal) aplicarResumoPassos(estadoGuardadoHoje.passosPortal);
+      if (estadoGuardadoHoje.testeProntidaoHoje) PRONTIDAO_HOJE_INICIAL = estadoGuardadoHoje.testeProntidaoHoje;
+      if (estadoGuardadoHoje.jaFezCheckinHoje && estadoGuardadoHoje.checkinHoje) {
+        mostrarResumo(estadoGuardadoHoje.checkinHoje);
+        mostrarCardProntidao();
+        CHECKIN_HOJE_CONFIRMADO = true;
+      }
+    }
+  }
   iniciarAgendaPortal();
   renderTreinoAtivoInicio();
   renderFluxoHoje();
