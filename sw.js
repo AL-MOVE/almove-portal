@@ -1,4 +1,4 @@
-const VERSAO_CACHE = 'almove-portal-v41';
+const VERSAO_CACHE = 'almove-portal-v42';
 
 const FICHEIROS_ESSENCIAIS = [
   '/',
