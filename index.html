@@ -1173,6 +1173,24 @@
   </style></head>
 <body>
 
+  <style id="entrada-portal-estilo">
+    .entrada-portal{position:fixed;z-index:360;inset:0;display:grid;place-items:center;min-height:100dvh;padding:24px;background:radial-gradient(circle at 88% 4%,rgba(45,212,191,.15),transparent 30%),radial-gradient(circle at 6% 92%,rgba(11,92,194,.32),transparent 34%),#06111e;color:#f7fbff}.entrada-portal::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(45,212,191,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(45,212,191,.025) 1px,transparent 1px);background-size:46px 46px;pointer-events:none}.entrada-portal-conteudo{position:relative;width:min(100%,480px)}.entrada-portal-marca{display:flex;align-items:center;gap:10px;margin-bottom:34px;color:#fff;font-size:15px;font-weight:900;letter-spacing:.03em}.entrada-portal-marca i{width:10px;height:10px;border-radius:50%;background:#2dd4bf;box-shadow:0 0 18px rgba(45,212,191,.86)}.entrada-portal-titulo{max-width:12ch;margin:0;color:#fff;font-size:clamp(38px,10vw,56px);line-height:.96;letter-spacing:-.065em}.entrada-portal-titulo span{color:#2dd4bf}.entrada-portal-sub{max-width:38ch;margin:18px 0 28px;color:#aab9ca;font-size:15px;line-height:1.55}.entrada-portal-form{padding:20px;border:1px solid rgba(45,212,191,.26);border-radius:18px;background:rgba(8,24,40,.82);box-shadow:0 20px 55px rgba(0,0,0,.26)}.entrada-portal-form label{display:block;margin-bottom:8px;color:#dbe7f4;font-size:12px;font-weight:850}.entrada-portal-form input{box-sizing:border-box;width:100%;min-height:52px;padding:0 14px;border:1px solid rgba(166,190,211,.28);border-radius:12px;outline:0;background:#0c1b2d;color:#fff;font:inherit;font-size:16px}.entrada-portal-form input:focus{border-color:#2dd4bf;box-shadow:0 0 0 3px rgba(45,212,191,.14)}.entrada-portal-form button{width:100%;min-height:52px;margin-top:11px;border:0;border-radius:12px;background:#2dd4bf;color:#03201d;font:inherit;font-size:14px;font-weight:900;cursor:pointer}.entrada-portal-form button:active{transform:scale(.985)}.entrada-portal-estado{min-height:22px;margin:12px 0 0;color:#aab9ca;font-size:12px;line-height:1.45}.entrada-portal-nota{margin:20px 0 0;color:#8294a9;font-size:11px;line-height:1.5}.entrada-portal-nota strong{color:#c8d6e5}@media(min-width:700px){.entrada-portal-conteudo{transform:translateX(-8vw)}}
+  </style>
+  <section class="entrada-portal oculto" id="ecraEntradaPortal" aria-labelledby="entradaPortalTitulo">
+    <div class="entrada-portal-conteudo">
+      <div class="entrada-portal-marca"><i aria-hidden="true"></i>AL MOVE</div>
+      <h1 class="entrada-portal-titulo" id="entradaPortalTitulo">O teu treino, <span>no teu ritmo.</span></h1>
+      <p class="entrada-portal-sub">Entra no Portal do Cliente com o email associado ao teu acompanhamento.</p>
+      <form class="entrada-portal-form" id="formEntradaPortal">
+        <label for="entradaPortalEmail">O teu email</label>
+        <input id="entradaPortalEmail" name="email" type="email" inputmode="email" autocomplete="email" placeholder="nome@email.com" required maxlength="160">
+        <button type="submit" id="btnEntradaPortal">Receber link de acesso</button>
+        <p class="entrada-portal-estado" id="entradaPortalEstado" aria-live="polite"></p>
+      </form>
+      <p class="entrada-portal-nota"><strong>Acesso seguro por email.</strong> O link expira ao fim de 15 minutos. Se não tens acesso ao email associado, fala com o teu treinador.</p>
+    </div>
+  </section>
+
   <section class="ecra-boas-vindas" id="ecraBoasVindas" aria-labelledby="boasVindasTitulo">
     <div class="boas-vindas-conteudo">
       <img class="boas-vindas-logo" src="/icons/icon-any-512.png" alt="AL MOVE">
@@ -1898,6 +1916,7 @@
   // ---------- Token do cliente ----------
   const params = new URLSearchParams(window.location.search);
   const TOKEN_LINK = params.get("token") || params.get("portal");
+  const CODIGO_LOGIN = params.get("login");
   let sessaoGuardada = null;
   try { sessaoGuardada = JSON.parse(sessionStorage.getItem("ALMOVE_SESSAO_PORTAL") || "null"); } catch (erro) {}
   if (sessaoGuardada && sessaoGuardada.expiraEm && new Date(sessaoGuardada.expiraEm).getTime() <= Date.now()) {
@@ -1913,8 +1932,8 @@
     });
     return "c" + (hash >>> 0).toString(36);
   }
-  const IDENTIDADE_CACHE = TOKEN_LINK
-    ? identificadorCacheSeguro(TOKEN_LINK)
+  const IDENTIDADE_CACHE = (TOKEN_LINK || CODIGO_LOGIN)
+    ? identificadorCacheSeguro(TOKEN_LINK || CODIGO_LOGIN)
     : (function () { try { return sessionStorage.getItem("ALMOVE_CACHE_ID") || identificadorCacheSeguro(TOKEN); } catch (erro) { return identificadorCacheSeguro(TOKEN); } })();
 
   const ecraBoasVindas = document.getElementById("ecraBoasVindas");
@@ -1923,6 +1942,11 @@
   const btnComecarPortal = document.getElementById("btnComecarPortal");
   const ecraCarregando = document.getElementById("ecraCarregando");
   const ecraSemToken = document.getElementById("ecraSemToken");
+  const ecraEntradaPortal = document.getElementById("ecraEntradaPortal");
+  const formEntradaPortal = document.getElementById("formEntradaPortal");
+  const entradaPortalEmail = document.getElementById("entradaPortalEmail");
+  const entradaPortalEstado = document.getElementById("entradaPortalEstado");
+  const btnEntradaPortal = document.getElementById("btnEntradaPortal");
   const cardCheckin = document.getElementById("cardCheckin");
   const checkinForm = document.getElementById("checkinForm");
   const checkinResumo = document.getElementById("checkinResumo");
@@ -1932,10 +1956,31 @@
   const estadoSync = document.getElementById("estadoSync");
   const estadoSyncTexto = document.getElementById("estadoSyncTexto");
 
-  if (!TOKEN) {
+  function mostrarEntradaPortal(mensagem) {
     ecraBoasVindas.classList.add("oculto");
     ecraCarregando.classList.add("oculto");
-    ecraSemToken.classList.remove("oculto");
+    ecraEntradaPortal.classList.remove("oculto");
+    if (mensagem) entradaPortalEstado.textContent = mensagem;
+  }
+  formEntradaPortal.addEventListener("submit", function (evento) {
+    evento.preventDefault();
+    const email = String(entradaPortalEmail.value || "").trim();
+    if (!email) return;
+    btnEntradaPortal.disabled = true;
+    entradaPortalEstado.textContent = "A enviar o link…";
+    fetch("/api/almove", {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ fn: "pedirLinkLoginPortal", email: email })
+    }).then(function (resposta) { return resposta.json(); }).then(function () {
+      entradaPortalEstado.textContent = "Se este email estiver associado a uma conta, receberás um link de acesso dentro de momentos.";
+    }).catch(function () {
+      entradaPortalEstado.textContent = "Não foi possível enviar agora. Verifica a ligação e tenta novamente.";
+    }).finally(function () { btnEntradaPortal.disabled = false; });
+  });
+
+  if (!TOKEN && !CODIGO_LOGIN) {
+    mostrarEntradaPortal();
     return;
   }
 
@@ -1962,6 +2007,25 @@
       const texto = ecraSemToken.querySelector(".card-sub");
       if (texto) texto.textContent = "Este link expirou ou foi revogado. Pede ao André um novo link do Portal.";
       throw erro;
+    });
+  } else if (CODIGO_LOGIN) {
+    ecraBoasVindas.classList.add("oculto");
+    SESSAO_PRONTA = fetch("/api/almove", {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ fn: "trocarCodigoLoginPortal", codigo: CODIGO_LOGIN, dispositivo: navigator.userAgent.slice(0, 180) })
+    }).then(function (resposta) {
+      if (!resposta.ok) throw new Error("Não foi possível validar o link de acesso.");
+      return resposta.json();
+    }).then(function (resp) {
+      if (!resp || !resp.ok || !resp.dados || !resp.dados.sessao) throw new Error((resp && resp.erro) || "Link de acesso expirado.");
+      TOKEN = resp.dados.sessao;
+      try { sessionStorage.setItem("ALMOVE_CACHE_ID", IDENTIDADE_CACHE); sessionStorage.setItem("ALMOVE_SESSAO_PORTAL", JSON.stringify(resp.dados)); } catch (erro) {}
+      history.replaceState({}, document.title, window.location.pathname);
+      return resp.dados;
+    }).catch(function () {
+      mostrarEntradaPortal("Este link expirou ou já foi usado. Introduz o teu email para receber outro.");
+      throw new Error("LINK_DE_ACESSO_EXPIRADO");
     });
   }
 
@@ -2155,7 +2219,7 @@
   normalizarIconesFixos();
   const versaoPortalEl = document.createElement("div");
   versaoPortalEl.className = "versao-portal";
-  versaoPortalEl.textContent = "AL MOVE · versão 45";
+  versaoPortalEl.textContent = "AL MOVE · versão 46";
   document.getElementById("tabPlanos").appendChild(versaoPortalEl);
 
   const painelPrivacidadeEl = document.getElementById("painelPrivacidade");
