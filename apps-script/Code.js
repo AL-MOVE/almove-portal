@@ -53,11 +53,13 @@ function registarCheckin(data) {
       return { sucesso: false, limiteAtingido: true, erro: 'Já existem dois check-ins hoje.' };
     }
 
-    const escalas = ['sono', 'stress', 'cansaco', 'refeicoes', 'doms'];
+    const escalas = ['sono', 'stress', 'cansaco', 'refeicoes'];
     escalas.forEach(campo => {
       const valor = Number(data[campo]);
       if (!Number.isFinite(valor) || valor < 1 || valor > 5) throw new Error('Valor inválido em ' + campo + '.');
     });
+    const doms = Number(data.doms);
+    if (!Number.isFinite(doms) || doms < 0 || doms > 4) throw new Error('Valor inválido em doms.');
     sheet.appendRow([
       info.idCliente, new Date(), Number(data.sono) || 0,
       Number(data.stress) || 0, Number(data.cansaco) || 0,
@@ -281,11 +283,14 @@ function getResumoPassosPortal_(idCliente) {
   const inicioSemana = new Date(hoje);
   inicioSemana.setDate(hoje.getDate() - ((hoje.getDay() + 6) % 7)); // segunda-feira
   let passosSemana = 0;
+  const diasSemana = [];
   for (let i = 0; i < 7; i++) {
     const dia = new Date(inicioSemana);
     dia.setDate(inicioSemana.getDate() + i);
-    const registo = porDia[dataISOPortal_(dia)];
+    const dataISO = dataISOPortal_(dia);
+    const registo = porDia[dataISO];
     passosSemana += registo ? registo.passos : 0;
+    diasSemana.push({ dataISO: dataISO, passos: registo ? registo.passos : 0, submetido: !!(registo && registo.submetido) });
   }
   const hojeISO = dataISOHojePortal_();
   return {
@@ -293,6 +298,7 @@ function getResumoPassosPortal_(idCliente) {
     passosHoje: porDia[hojeISO] ? porDia[hojeISO].passos : 0,
     passosHojeSubmetidos: porDia[hojeISO] ? porDia[hojeISO].submetido : false,
     passosSemana: passosSemana,
+    diasSemana: diasSemana,
     porDia: porDia
   };
 }
@@ -1972,6 +1978,15 @@ function mascararEmailPortal_(email) {
   return nome.slice(0, Math.min(2, nome.length)) + '•••@' + partes[1];
 }
 
+function escaparHtml_(valor) {
+  return String(valor == null ? '' : valor)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function registarAcessoPortal_(info, evento, detalhe) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -1999,7 +2014,7 @@ function criarSessaoParaInfo_(info, dados, evento) {
   const expiraEm = new Date(Date.now() + DURACAO_SESSAO_PORTAL_SEGUNDOS_ * 1000);
   const sessaoDados = Object.assign({}, info, {
     eSessao: true,
-    tokenPortalOriginal: tokenPortal,
+    tokenPortalOriginal: String(info.tokenPortalOriginal || ''),
     expiraEm: expiraEm.toISOString()
   });
   cache.put(chaveSeguraPortal_('sessao_portal_', sessao), JSON.stringify(sessaoDados), DURACAO_SESSAO_PORTAL_SEGUNDOS_);
@@ -2013,15 +2028,28 @@ function obterClientePorEmailPortal_(email) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('CLIENTES');
   if (!sheet || sheet.getLastRow() < 4) return null;
   const clientes = sheet.getRange('A4:Y' + sheet.getLastRow()).getValues();
-  for (let i = 0; i < clientes.length; i++) {
-    const row = clientes[i];
-    if (String(row[18] || '').trim().toLowerCase() !== emailLimpo) continue;
-    if (String(row[1] || 'Ativo') === 'Cancelado') return null;
-    const tokenPortal = String(row[23] || '').trim();
-    if (!tokenPortal || PropertiesService.getScriptProperties().getProperty(chaveSeguraPortal_('token_revogado_', tokenPortal))) return null;
-    return { idCliente: String(row[24] || ''), nome: String(row[0] || ''), email: emailLimpo, tokenPortalOriginal: tokenPortal, eSessao: false };
+  const correspondencias = clientes.map((row, indice) => ({ row: row, linha: indice + 4 }))
+    .filter(item => String(item.row[18] || '').trim().toLowerCase() === emailLimpo)
+    .filter(item => String(item.row[1] || 'Ativo').trim().toLowerCase() !== 'cancelado');
+  if (!correspondencias.length) return null;
+  if (correspondencias.length > 1) {
+    Logger.log('Login bloqueado: email duplicado em clientes ativos (' + emailLimpo + ').');
+    return { duplicado: true, email: emailLimpo };
   }
-  return null;
+
+  const item = correspondencias[0];
+  const row = item.row;
+  // Um cliente novo pode ainda não ter TOKEN_PORTAL na coluna X. O email
+  // validado identifica o cliente e permite criar o token na primeira entrada.
+  let tokenPortal = String(row[23] || '').trim();
+  const tokenRevogado = tokenPortal && PropertiesService.getScriptProperties()
+    .getProperty(chaveSeguraPortal_('token_revogado_', tokenPortal));
+  if (!tokenPortal || tokenRevogado) {
+    tokenPortal = Utilities.getUuid();
+    sheet.getRange(item.linha, 24).setValue(tokenPortal); // X = TOKEN_PORTAL
+    SpreadsheetApp.flush();
+  }
+  return { idCliente: String(row[24] || ''), nome: String(row[0] || ''), email: emailLimpo, tokenPortalOriginal: tokenPortal, eSessao: false };
 }
 
 const DURACAO_LINK_LOGIN_PORTAL_SEGUNDOS_ = 15 * 60;
@@ -2036,7 +2064,7 @@ function pedirLinkLoginPortal_(email) {
   if (cache.get(limite)) return respostaNeutra;
   cache.put(limite, '1', 60);
   const info = obterClientePorEmailPortal_(emailLimpo);
-  if (!info) return respostaNeutra;
+  if (!info || info.duplicado) return respostaNeutra;
   enviarLinkLoginPortalParaInfo_(info);
   return respostaNeutra;
 }
@@ -2046,10 +2074,22 @@ function enviarLinkLoginPortalParaInfo_(info) {
   const codigo = Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
   cache.put(chaveSeguraPortal_('login_portal_', codigo), JSON.stringify(info), DURACAO_LINK_LOGIN_PORTAL_SEGUNDOS_);
   const link = URL_PORTAL_LOGIN_PUBLICO_ + encodeURIComponent(codigo);
+  if (MailApp.getRemainingDailyQuota() < 1) {
+    cache.remove(chaveSeguraPortal_('login_portal_', codigo));
+    throw new Error('LIMITE_DIARIO_EMAIL_ATINGIDO');
+  }
   MailApp.sendEmail({
     to: info.email,
+    name: 'AL MOVE',
     subject: 'AL MOVE — entra no teu portal',
-    body: 'Olá ' + String(info.nome || '').split(' ')[0] + ',\n\nUsa este link para entrar no teu Portal AL MOVE:\n' + link + '\n\nEste link é válido durante 15 minutos e só pode ser usado uma vez.\n\nSe não pediste este acesso, ignora este email.'
+    body: 'Olá ' + String(info.nome || '').split(' ')[0] + ',\n\nUsa este link para entrar no teu Portal AL MOVE:\n' + link + '\n\nEste link é válido durante 15 minutos e só pode ser usado uma vez.\n\nSe não pediste este acesso, ignora este email.',
+    htmlBody: '<div style="font-family:Arial,sans-serif;color:#0b1b2e;line-height:1.6;max-width:520px">' +
+      '<h2 style="margin:0 0 12px">Entrar no Portal AL MOVE</h2>' +
+      '<p>Olá ' + escaparHtml_(String(info.nome || '').split(' ')[0]) + ',</p>' +
+      '<p>Carrega no botão para entrares na tua área de cliente.</p>' +
+      '<p style="margin:24px 0"><a href="' + link + '" style="display:inline-block;padding:13px 20px;border-radius:10px;background:#079bbf;color:#fff;text-decoration:none;font-weight:700">Entrar no portal</a></p>' +
+      '<p style="font-size:13px;color:#526275">Este link é válido durante 15 minutos e só pode ser usado uma vez.</p>' +
+      '<p style="font-size:12px;color:#718096">Se não pediste este acesso, ignora este email.</p></div>'
   });
   registarAcessoPortal_(info, 'LINK_LOGIN_ENVIADO', 'Link temporário válido durante 15 minutos');
   return { enviado: true, expiraEmMinutos: 15 };
@@ -2303,6 +2343,7 @@ function enviarConvitePortalCliente(idCliente) {
     if (String(row[24] || '') !== String(idCliente)) continue;
     const info = obterClientePorEmailPortal_(row[18]);
     if (!info) throw new Error('Este cliente não tem um email válido associado ao Portal.');
+    if (info.duplicado) throw new Error('Este email está associado a mais do que um cliente ativo. Corrige o email antes de enviar o convite.');
     return enviarLinkLoginPortalParaInfo_(info);
   }
   throw new Error('Cliente não encontrado');
@@ -7011,6 +7052,7 @@ function guardarPesoDiarioPortal(dados) {
   if (!info) throw new Error('Link inválido.');
   const dataTexto = String(dados.data || '').trim();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dataTexto)) throw new Error('Indica uma data válida.');
+  if (dataTexto > dataISOHojePortal_()) throw new Error('Não podes registar peso numa data futura.');
   const peso = numeroAvaliacaoPortal_(dados.pesoKg, 30, 300);
   if (peso === '') throw new Error('Indica o peso.');
   const sh = obterSheetPesosDiarios_();
