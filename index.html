@@ -3522,7 +3522,7 @@
       html += '<div class="resumo-linha"><span>' + linha[0] + "</span><span>" + linha[1] + "</span></div>";
     });
     if (valores.nota) {
-      html += '<div class="resumo-linha"><span>Nota</span><span>' + valores.nota + "</span></div>";
+      html += '<div class="resumo-linha"><span>Nota</span><span>' + escaparTextoExercicio(valores.nota) + "</span></div>";
     }
     checkinResumo.innerHTML = html;
     checkinResumo.classList.remove("oculto");
@@ -4737,7 +4737,9 @@
   function showToastTreino(texto) {
     const aviso = document.createElement("div");
     aviso.className = "toast";
-    aviso.innerHTML = "<span>" + texto + "</span>";
+    const conteudo = document.createElement("span");
+    conteudo.textContent = String(texto || "");
+    aviso.appendChild(conteudo);
     document.body.appendChild(aviso);
     setTimeout(function () { aviso.remove(); }, 4000);
   }
