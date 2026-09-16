@@ -9,10 +9,12 @@ const LEITURAS = new Set([
 
 const ESCRITAS = new Set([
   'criarSessaoPortal', 'pedirCodigoAcessoPortal', 'validarCodigoAcessoPortal', 'terminarSessaoPortal',
+  'pedirLinkLoginPortal', 'trocarCodigoLoginPortal',
   'guardarPedidoPrivacidadePortal', 'registarCheckin', 'guardarPesoDiarioPortal', 'guardarPedidoAvaliacaoPortal',
   'registarTesteProntidao', 'marcarNotificacoesLidasPortal', 'guardarMetricasAtividadePortal',
   'guardarPassosPortal', 'registarExecucaoTreino', 'registarPosTreino'
 ]);
+const PUBLICAS = new Set(['pedirLinkLoginPortal', 'trocarCodigoLoginPortal']);
 
 function responder(res, estado, corpo, requestId) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -47,7 +49,7 @@ export default async function handler(req, res) {
     if (!ESCRITAS.has(fn)) return responder(res, 405, { ok: false, erro: 'POST permite apenas gravações' }, requestId);
   }
 
-  if (!/^[A-Za-z][A-Za-z0-9_]{1,79}$/.test(fn) || !token || token.length > 200) {
+  if (!/^[A-Za-z][A-Za-z0-9_]{1,79}$/.test(fn) || (!PUBLICAS.has(fn) && !token) || token.length > 200) {
     return responder(res, 400, { ok: false, erro: 'Pedido inválido' }, requestId);
   }
 
