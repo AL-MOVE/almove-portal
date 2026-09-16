@@ -104,12 +104,14 @@
       background:rgba(255,255,255,.11);
       border:1px solid rgba(255,255,255,.22);
       border-radius:10px;
-      font-size:15px;font-weight:800;
+      font:inherit;font-size:15px;font-weight:800;
       color:#fff;
+      cursor:pointer;
       transition:transform .12s ease,background .15s ease,border-color .15s ease;
       user-select:none;
     }
     .opcao:active{transform:scale(.96);}
+    .opcao:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
     .opcao.selecionada{
       background:linear-gradient(135deg, var(--accent-old), var(--blue-dark));
       border-color:transparent;
@@ -216,9 +218,12 @@
     .tab-btn{
       flex:1;min-height:52px;
       display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;
+      border:0;
       border-radius:18px;
+      background:transparent;
       color:var(--text-muted);
-      font-size:10px;font-weight:750;
+      font:inherit;font-size:10px;font-weight:750;
+      cursor:pointer;
       user-select:none;
       transition:color .18s ease,background .18s ease,transform .18s ease;
     }
@@ -1200,13 +1205,13 @@
     </div>
   </section>
 
-  <div class="pull-refresh" id="pullRefresh" aria-live="polite" aria-label="Puxar para atualizar">
+  <div class="pull-refresh" id="pullRefresh" role="status" aria-live="polite">
     <img src="/icons/icon-any-512.png" alt="">
   </div>
 
   <div class="topo">
     <div class="topo-textos topo-marca-esquerda">
-      <div class="topo-titulo"><i class="topo-luz" aria-label="Sincronizado"></i>AL MOVE</div>
+      <div class="topo-titulo"><i class="topo-luz" aria-hidden="true"></i>AL MOVE</div>
       <div class="topo-sub">Portal do cliente</div>
     </div>
     <button type="button" class="btn-notificacoes" id="btnNotificacoes" aria-label="Abrir notificações" aria-expanded="false">
@@ -1215,7 +1220,7 @@
     </button>
   </div>
 
-  <section class="painel-notificacoes oculto" id="painelNotificacoes" aria-labelledby="notificacoesTitulo">
+  <section class="painel-notificacoes oculto" id="painelNotificacoes" role="dialog" aria-modal="true" aria-labelledby="notificacoesTitulo">
     <div class="painel-notificacoes-cabecalho">
       <div><div class="card-title" id="notificacoesTitulo">Notificações</div><p id="notificacoesEstado">Recebe avisos importantes do teu acompanhamento.</p></div>
       <button type="button" class="btn-fechar-notificacoes" id="btnFecharNotificacoes" aria-label="Fechar notificações">×</button>
@@ -1361,11 +1366,11 @@
       <div class="pergunta">
         <div class="pergunta-label">Como dormiste?</div>
         <div class="opcoes" data-campo="sono">
-          <div class="opcao" data-valor="1">1</div>
-          <div class="opcao" data-valor="2">2</div>
-          <div class="opcao" data-valor="3">3</div>
-          <div class="opcao" data-valor="4">4</div>
-          <div class="opcao" data-valor="5">5</div>
+          <button type="button" class="opcao" data-valor="1">1</button>
+          <button type="button" class="opcao" data-valor="2">2</button>
+          <button type="button" class="opcao" data-valor="3">3</button>
+          <button type="button" class="opcao" data-valor="4">4</button>
+          <button type="button" class="opcao" data-valor="5">5</button>
         </div>
         <div class="extremos"><span>Muito mal</span><span>Muito bem</span></div>
       </div>
@@ -1373,11 +1378,11 @@
       <div class="pergunta">
         <div class="pergunta-label">Nível de stress</div>
         <div class="opcoes" data-campo="stress">
-          <div class="opcao" data-valor="1">1</div>
-          <div class="opcao" data-valor="2">2</div>
-          <div class="opcao" data-valor="3">3</div>
-          <div class="opcao" data-valor="4">4</div>
-          <div class="opcao" data-valor="5">5</div>
+          <button type="button" class="opcao" data-valor="1">1</button>
+          <button type="button" class="opcao" data-valor="2">2</button>
+          <button type="button" class="opcao" data-valor="3">3</button>
+          <button type="button" class="opcao" data-valor="4">4</button>
+          <button type="button" class="opcao" data-valor="5">5</button>
         </div>
         <div class="extremos"><span>Baixo</span><span>Muito alto</span></div>
       </div>
@@ -1385,11 +1390,11 @@
       <div class="pergunta">
         <div class="pergunta-label">Energia hoje</div>
         <div class="opcoes" data-campo="cansaco">
-          <div class="opcao" data-valor="1">1</div>
-          <div class="opcao" data-valor="2">2</div>
-          <div class="opcao" data-valor="3">3</div>
-          <div class="opcao" data-valor="4">4</div>
-          <div class="opcao" data-valor="5">5</div>
+          <button type="button" class="opcao" data-valor="1">1</button>
+          <button type="button" class="opcao" data-valor="2">2</button>
+          <button type="button" class="opcao" data-valor="3">3</button>
+          <button type="button" class="opcao" data-valor="4">4</button>
+          <button type="button" class="opcao" data-valor="5">5</button>
         </div>
         <div class="extremos"><span>Sem energia</span><span>Muita energia</span></div>
       </div>
@@ -1397,11 +1402,11 @@
       <div class="pergunta">
         <div class="pergunta-label">Como tens comido</div>
         <div class="opcoes" data-campo="refeicoes">
-          <div class="opcao" data-valor="1">1</div>
-          <div class="opcao" data-valor="2">2</div>
-          <div class="opcao" data-valor="3">3</div>
-          <div class="opcao" data-valor="4">4</div>
-          <div class="opcao" data-valor="5">5</div>
+          <button type="button" class="opcao" data-valor="1">1</button>
+          <button type="button" class="opcao" data-valor="2">2</button>
+          <button type="button" class="opcao" data-valor="3">3</button>
+          <button type="button" class="opcao" data-valor="4">4</button>
+          <button type="button" class="opcao" data-valor="5">5</button>
         </div>
         <div class="extremos"><span>Mal</span><span>Muito bem</span></div>
       </div>
@@ -1409,11 +1414,11 @@
       <div class="pergunta">
         <div class="pergunta-label">Dor muscular (DOMS)</div>
         <div class="opcoes" data-campo="doms">
-          <div class="opcao" data-valor="0">0</div>
-          <div class="opcao" data-valor="1">1</div>
-          <div class="opcao" data-valor="2">2</div>
-          <div class="opcao" data-valor="3">3</div>
-          <div class="opcao" data-valor="4">4</div>
+          <button type="button" class="opcao" data-valor="0">0</button>
+          <button type="button" class="opcao" data-valor="1">1</button>
+          <button type="button" class="opcao" data-valor="2">2</button>
+          <button type="button" class="opcao" data-valor="3">3</button>
+          <button type="button" class="opcao" data-valor="4">4</button>
         </div>
         <div class="extremos"><span>Nenhuma</span><span>Muito intensa</span></div>
       </div>
@@ -1493,11 +1498,11 @@
     <div class="pergunta">
       <div class="pergunta-label">Energia no final</div>
       <div class="opcoes" data-campo-pos="energia">
-        <div class="opcao" data-valor="1">1</div>
-        <div class="opcao" data-valor="2">2</div>
-        <div class="opcao" data-valor="3">3</div>
-        <div class="opcao" data-valor="4">4</div>
-        <div class="opcao" data-valor="5">5</div>
+        <button type="button" class="opcao" data-valor="1">1</button>
+        <button type="button" class="opcao" data-valor="2">2</button>
+        <button type="button" class="opcao" data-valor="3">3</button>
+        <button type="button" class="opcao" data-valor="4">4</button>
+        <button type="button" class="opcao" data-valor="5">5</button>
       </div>
       <div class="extremos"><span>Esgotada</span><span>Cheia de energia</span></div>
     </div>
@@ -1505,11 +1510,11 @@
     <div class="pergunta">
       <div class="pergunta-label">Esforço percebido</div>
       <div class="opcoes" data-campo-pos="esforco">
-        <div class="opcao" data-valor="1">1</div>
-        <div class="opcao" data-valor="2">2</div>
-        <div class="opcao" data-valor="3">3</div>
-        <div class="opcao" data-valor="4">4</div>
-        <div class="opcao" data-valor="5">5</div>
+        <button type="button" class="opcao" data-valor="1">1</button>
+        <button type="button" class="opcao" data-valor="2">2</button>
+        <button type="button" class="opcao" data-valor="3">3</button>
+        <button type="button" class="opcao" data-valor="4">4</button>
+        <button type="button" class="opcao" data-valor="5">5</button>
       </div>
       <div class="extremos"><span>Leve</span><span>Ao máximo</span></div>
     </div>
@@ -1517,11 +1522,11 @@
     <div class="pergunta">
       <div class="pergunta-label">Dificuldade sentida</div>
       <div class="opcoes" data-campo-pos="dificuldade">
-        <div class="opcao" data-valor="1">1</div>
-        <div class="opcao" data-valor="2">2</div>
-        <div class="opcao" data-valor="3">3</div>
-        <div class="opcao" data-valor="4">4</div>
-        <div class="opcao" data-valor="5">5</div>
+        <button type="button" class="opcao" data-valor="1">1</button>
+        <button type="button" class="opcao" data-valor="2">2</button>
+        <button type="button" class="opcao" data-valor="3">3</button>
+        <button type="button" class="opcao" data-valor="4">4</button>
+        <button type="button" class="opcao" data-valor="5">5</button>
       </div>
       <div class="extremos"><span>Fácil</span><span>Muito difícil</span></div>
     </div>
@@ -1766,28 +1771,6 @@
     </div>
 
     <div class="card">
-      <div class="card-title">Documentos e faturação<span class="selo-exemplo">Exemplo</span></div>
-      <div class="opcoes-lista">
-        <div class="opcoes-item">
-          <div class="opcoes-item-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></svg></div>
-          <div class="opcoes-item-corpo">
-            <div class="opcoes-item-titulo">Contrato</div>
-            <div class="opcoes-item-sub">Ver o teu contrato assinado</div>
-          </div>
-          <div class="opcoes-item-seta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
-        </div>
-        <div class="opcoes-item">
-          <div class="opcoes-item-icone" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-2-1.5L14 21l-2-1.5L10 21l-2-1.5L6 21V3Z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg></div>
-          <div class="opcoes-item-corpo">
-            <div class="opcoes-item-titulo">Faturas</div>
-            <div class="opcoes-item-sub">Histórico de pagamentos</div>
-          </div>
-          <div class="opcoes-item-seta"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
       <div class="card-title">Preferências</div>
       <div class="opcoes-lista">
         <button type="button" class="opcoes-item" id="btnPreferenciasNotificacoes">
@@ -1825,24 +1808,24 @@
   </div>
 
   <!-- ============ NAVEGAÇÃO INFERIOR ============ -->
-  <div class="tabs-nav">
-    <div class="tab-btn" id="tabBtnInicio" data-tab="inicio">
+  <nav class="tabs-nav" aria-label="Navegação principal">
+    <button type="button" class="tab-btn" id="tabBtnInicio" data-tab="inicio" aria-selected="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
       Início
-    </div>
-    <div class="tab-btn ativo" id="tabBtnHoje" data-tab="hoje">
+    </button>
+    <button type="button" class="tab-btn ativo" id="tabBtnHoje" data-tab="hoje" aria-selected="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="m8.5 15 2.2 2.2 4.8-5"/></svg>
       Treinos
-    </div>
-    <div class="tab-btn" id="tabBtnConquistas" data-tab="conquistas">
+    </button>
+    <button type="button" class="tab-btn" id="tabBtnConquistas" data-tab="conquistas" aria-selected="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h2a2 2 0 0 1 0 4h-1M7 5H5a2 2 0 0 0 0 4h1"/></svg>
       Conquistas
-    </div>
-    <div class="tab-btn" id="tabBtnPlanos" data-tab="planos">
+    </button>
+    <button type="button" class="tab-btn" id="tabBtnPlanos" data-tab="planos" aria-selected="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       Perfil
-    </div>
-  </div>
+    </button>
+  </nav>
 
 <script>
 (function () {
@@ -1956,10 +1939,29 @@
   const estadoSync = document.getElementById("estadoSync");
   const estadoSyncTexto = document.getElementById("estadoSyncTexto");
 
+  function definirCamadaExclusiva(camada, ativa) {
+    Array.from(document.body.children).forEach(function (elemento) {
+      if (elemento === camada || ["SCRIPT", "STYLE"].includes(elemento.tagName)) return;
+      if (ativa) {
+        elemento.dataset.camadaInertAnterior = elemento.inert ? "1" : "0";
+        elemento.dataset.camadaAriaAnterior = elemento.hasAttribute("aria-hidden") ? elemento.getAttribute("aria-hidden") : "__ausente__";
+        elemento.inert = true;
+        elemento.setAttribute("aria-hidden", "true");
+      } else if (elemento.dataset.camadaInertAnterior !== undefined) {
+        elemento.inert = elemento.dataset.camadaInertAnterior === "1";
+        if (elemento.dataset.camadaAriaAnterior === "__ausente__") elemento.removeAttribute("aria-hidden");
+        else elemento.setAttribute("aria-hidden", elemento.dataset.camadaAriaAnterior);
+        delete elemento.dataset.camadaInertAnterior;
+        delete elemento.dataset.camadaAriaAnterior;
+      }
+    });
+  }
+
   function mostrarEntradaPortal(mensagem) {
     ecraBoasVindas.classList.add("oculto");
     ecraCarregando.classList.add("oculto");
     ecraEntradaPortal.classList.remove("oculto");
+    definirCamadaExclusiva(ecraEntradaPortal, true);
     if (mensagem) entradaPortalEstado.textContent = mensagem;
   }
   formEntradaPortal.addEventListener("submit", function (evento) {
@@ -2009,6 +2011,7 @@
       ecraBoasVindas.classList.add("oculto");
       ecraCarregando.classList.add("oculto");
       ecraSemToken.classList.remove("oculto");
+      definirCamadaExclusiva(ecraSemToken, true);
       const texto = ecraSemToken.querySelector(".card-sub");
       if (texto) texto.textContent = "Este link expirou ou foi revogado. Pede ao André um novo link do Portal.";
       throw erro;
@@ -2046,8 +2049,9 @@
   } catch (erro) {}
 
   try {
-    if (localStorage.getItem("ALMOVE_BOAS_VINDAS_VISTA") === "1") ecraBoasVindas.remove();
-  } catch (erro) {}
+    if (localStorage.getItem("ALMOVE_BOAS_VINDAS_VISTA") === "1" || ecraBoasVindas.classList.contains("oculto")) ecraBoasVindas.remove();
+    else definirCamadaExclusiva(ecraBoasVindas, true);
+  } catch (erro) { definirCamadaExclusiva(ecraBoasVindas, true); }
 
   // ---------- Arranque consolidado e recuperação de ligação ----------
   const CHAVE_BOOTSTRAP_PORTAL = "ALMOVE_BOOTSTRAP_" + IDENTIDADE_CACHE;
@@ -2093,37 +2097,14 @@
     const avisoDemora = window.setTimeout(function () {
       mostrarEstadoLigacao("a-ligar", "A sincronizar o teu acompanhamento…");
     }, 900);
-    const blocos = [
-      ["inicio", "getResumoInicioPortal", {}],
-      ["conquistas", "getResumoConquistasPortal", {}],
-      ["opcoes", "getResumoOpcoesPortal", {}],
-      ["agenda", "getAgendaPortal", []],
-      ["notificacoes", "getNotificacoesPortal", []],
-      ["estadoHoje", "getEstadoPortalHoje", {}]
-    ];
-    bootstrapPortalPromise = Promise.allSettled(blocos.map(function (bloco) {
-      return chamarApi(bloco[1], {});
-    }))
-      .then(function (resultados) {
+    bootstrapPortalPromise = chamarApi("getBootstrapPortal", {})
+      .then(function (resp) {
         window.clearTimeout(avisoDemora);
-        const local = lerBootstrapLocal() || {};
-        const dados = Object.assign({ geradoEm: new Date().toISOString(), erros: [] }, local);
-        let sucessos = 0;
-        resultados.forEach(function (resultado, indice) {
-          const bloco = blocos[indice];
-          if (resultado.status === "fulfilled" && resultado.value && resultado.value.ok) {
-            dados[bloco[0]] = resultado.value.dados === undefined ? bloco[2] : resultado.value.dados;
-            sucessos += 1;
-          } else {
-            dados.erros.push({ bloco: bloco[0], mensagem: resultado.status === "rejected" ? String(resultado.reason || "Erro de ligação") : String((resultado.value && resultado.value.erro) || "Resposta inválida") });
-            if (dados[bloco[0]] === undefined) dados[bloco[0]] = bloco[2];
-          }
-        });
-        dados.geradoEm = new Date().toISOString();
-        if (!sucessos && !Object.keys(local).length) throw new Error("Não foi possível carregar os dados do portal.");
+        if (!resp || !resp.ok || !resp.dados) throw new Error((resp && resp.erro) || "Não foi possível carregar os dados do portal.");
+        const dados = resp.dados;
         guardarBootstrapLocal(dados);
-        if (sucessos === blocos.length) ocultarEstadoLigacao();
-        else mostrarEstadoLigacao("offline", "Alguns dados não atualizaram. Podes tentar novamente.");
+        if (Array.isArray(dados.erros) && dados.erros.length) mostrarEstadoLigacao("offline", "Alguns dados não atualizaram. Podes tentar novamente.");
+        else ocultarEstadoLigacao();
         return dados;
       })
       .catch(function (erro) {
@@ -2167,11 +2148,66 @@
   const acessoSensivelEl = document.getElementById("acessoSensivel");
   const acessoSensivelEstadoEl = document.getElementById("acessoSensivelEstado");
   const acessoSensivelCodigoEl = document.getElementById("acessoSensivelCodigo");
+  let dialogoAtivo = null;
+  let fecharDialogoAtivo = null;
+  let focoAntesDialogo = null;
+  let fundoDialogo = [];
+
+  function abrirDialogoAcessivel(dialogo, focoInicial, aoFechar) {
+    focoAntesDialogo = document.activeElement;
+    dialogoAtivo = dialogo;
+    fecharDialogoAtivo = aoFechar;
+    fundoDialogo = Array.from(document.body.children).filter(function (elemento) {
+      return elemento !== dialogo && !["SCRIPT", "STYLE"].includes(elemento.tagName);
+    }).map(function (elemento) {
+      const estado = { elemento: elemento, inert: elemento.inert, ariaHidden: elemento.getAttribute("aria-hidden") };
+      elemento.inert = true;
+      elemento.setAttribute("aria-hidden", "true");
+      return estado;
+    });
+    window.setTimeout(function () { (focoInicial || dialogo.querySelector("button, input, [tabindex]"))?.focus(); }, 50);
+  }
+
+  function fecharDialogoAcessivel(dialogo) {
+    if (dialogoAtivo !== dialogo) return;
+    fundoDialogo.forEach(function (estado) {
+      estado.elemento.inert = estado.inert;
+      if (estado.ariaHidden === null) estado.elemento.removeAttribute("aria-hidden");
+      else estado.elemento.setAttribute("aria-hidden", estado.ariaHidden);
+    });
+    fundoDialogo = [];
+    dialogoAtivo = null;
+    fecharDialogoAtivo = null;
+    if (focoAntesDialogo && document.contains(focoAntesDialogo)) focoAntesDialogo.focus();
+    focoAntesDialogo = null;
+  }
+
+  document.addEventListener("keydown", function (evento) {
+    if (!dialogoAtivo) return;
+    if (evento.key === "Escape" && fecharDialogoAtivo) {
+      evento.preventDefault();
+      fecharDialogoAtivo();
+      return;
+    }
+    if (evento.key !== "Tab") return;
+    const focaveis = Array.from(dialogoAtivo.querySelectorAll('button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')).filter(function (elemento) {
+      return elemento.offsetParent !== null;
+    });
+    if (!focaveis.length) { evento.preventDefault(); dialogoAtivo.focus(); return; }
+    const primeiro = focaveis[0];
+    const ultimo = focaveis[focaveis.length - 1];
+    if (evento.shiftKey && document.activeElement === primeiro) { evento.preventDefault(); ultimo.focus(); }
+    else if (!evento.shiftKey && document.activeElement === ultimo) { evento.preventDefault(); primeiro.focus(); }
+  });
+
   function abrirAcessoSensivel() {
     acessoSensivelEl.classList.remove("oculto");
-    window.setTimeout(function () { acessoSensivelCodigoEl.focus(); }, 80);
+    abrirDialogoAcessivel(acessoSensivelEl, acessoSensivelCodigoEl, fecharAcessoSensivel);
   }
-  function fecharAcessoSensivel() { acessoSensivelEl.classList.add("oculto"); }
+  function fecharAcessoSensivel() {
+    acessoSensivelEl.classList.add("oculto");
+    fecharDialogoAcessivel(acessoSensivelEl);
+  }
   document.getElementById("btnEnviarCodigo").addEventListener("click", function () {
     acessoSensivelEstadoEl.textContent = "A enviar…";
     chamarApi("pedirCodigoAcessoPortal", {}).then(function (resp) {
@@ -2213,7 +2249,9 @@
   function mudarTab(nome) {
     TABS.forEach(function (t) {
       document.getElementById("tab" + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle("oculto", t !== nome);
-      document.getElementById("tabBtn" + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle("ativo", t === nome);
+      const botao = document.getElementById("tabBtn" + t.charAt(0).toUpperCase() + t.slice(1));
+      botao.classList.toggle("ativo", t === nome);
+      botao.setAttribute("aria-selected", String(t === nome));
     });
     if (nome === "planos") iniciarDadosPerfil();
     window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
@@ -2224,7 +2262,7 @@
   normalizarIconesFixos();
   const versaoPortalEl = document.createElement("div");
   versaoPortalEl.className = "versao-portal";
-  versaoPortalEl.textContent = "AL MOVE · versão 46";
+  versaoPortalEl.textContent = "AL MOVE · versão 47";
   document.getElementById("tabPlanos").appendChild(versaoPortalEl);
 
   const painelPrivacidadeEl = document.getElementById("painelPrivacidade");
@@ -2233,6 +2271,7 @@
     painelNotificacoesEl.classList.remove("oculto");
     btnNotificacoesEl.setAttribute("aria-expanded", "true");
     atualizarEstadoNotificacoes();
+    abrirDialogoAcessivel(painelNotificacoesEl, btnFecharNotificacoesEl, fecharNotificacoes);
   });
   document.getElementById("btnPreferenciasPrivacidade").addEventListener("click", function () {
     painelPrivacidadeEl.classList.toggle("oculto");
@@ -2307,6 +2346,7 @@
   btnComecarPortal.addEventListener("click", function () {
     try { localStorage.setItem("ALMOVE_BOAS_VINDAS_VISTA", "1"); } catch (erro) {}
     mudarTab("inicio");
+    definirCamadaExclusiva(ecraBoasVindas, false);
     ecraBoasVindas.classList.add("a-sair");
     window.setTimeout(function () { ecraBoasVindas.remove(); }, 450);
   });
@@ -2362,6 +2402,7 @@
   function fecharNotificacoes() {
     painelNotificacoesEl.classList.add("oculto");
     btnNotificacoesEl.setAttribute("aria-expanded", "false");
+    fecharDialogoAcessivel(painelNotificacoesEl);
   }
 
   btnNotificacoesEl.addEventListener("click", function () {
@@ -2370,10 +2411,11 @@
     btnNotificacoesEl.setAttribute("aria-expanded", String(vaiAbrir));
     atualizarEstadoNotificacoes();
     if (vaiAbrir) {
+      abrirDialogoAcessivel(painelNotificacoesEl, btnFecharNotificacoesEl, fecharNotificacoes);
       chamarApi("marcarNotificacoesLidasPortal", {}).then(function (resp) {
         if (resp && resp.ok) notificacoesPontoEl.classList.add("oculto");
       }).catch(function () {});
-    }
+    } else fecharDialogoAcessivel(painelNotificacoesEl);
   });
   btnFecharNotificacoesEl.addEventListener("click", fecharNotificacoes);
   btnAtivarNotificacoesEl.addEventListener("click", async function () {
@@ -2584,7 +2626,7 @@
       return {
         icone: meta === 1 ? "semente" : meta === 4 ? "chama" : meta === 8 ? "trofeu" : "diamante",
         titulo: meta === 1 ? "Primeira semana" : meta === 4 ? "Mês consistente" : meta === 8 ? "Hábito criado" : "Trimestre forte",
-        desc: meta === 1 ? "Completa pelo menos 1 treino esta semana." : meta + " semanas seguidas de treino.",
+        desc: meta === 1 ? "Completa pelo menos 1 treino numa semana." : meta + " semanas seguidas de treino.",
         atual: streakAtual,
         meta: meta,
         concluido: melhorStreak >= meta,
@@ -3281,8 +3323,10 @@
         body: JSON.stringify(corpo)
       });
     }).then(function (resposta) {
-      if (!resposta.ok) throw new Error("O servidor respondeu com erro " + resposta.status + ".");
-      return resposta.json().catch(function () { throw new Error("O servidor devolveu uma resposta inválida."); });
+      return resposta.json().catch(function () { throw new Error("O servidor devolveu uma resposta inválida."); }).then(function (corpo) {
+        if (!resposta.ok || !corpo || corpo.ok === false) throw new Error((corpo && corpo.erro) || ("O servidor respondeu com erro " + resposta.status + "."));
+        return corpo;
+      });
     });
   }
   function chamarApi(fn, dados) { return chamarApiNoEndpoint("/api/almove", fn, dados); }
@@ -3332,10 +3376,7 @@
   }
 
   function obterPassosSemana() {
-    const passosLocais = obterEstadoPassos();
-    const remotoHoje = numeroPassos(PASSOS_PORTAL.passosHoje);
-    const remotoSemana = numeroPassos(PASSOS_PORTAL.passosSemana);
-    return Math.max(0, remotoSemana + (passosLocais ? obterPassosHoje() - remotoHoje : 0));
+    return diasPassosSemana().reduce(function (total, dia) { return total + numeroPassos(dia.passos); }, 0);
   }
 
   function guardarPassosLocais(valor, submetido, synced) {
@@ -3379,16 +3420,17 @@
       const data = String(dia.dataISO || dia.data || dia.dia || "");
       if (data) porData[data] = numeroPassos(dia.passos !== undefined ? dia.passos : dia.valor);
     });
+    Object.keys(PASSOS_PORTAL.porDia || {}).forEach(function (data) {
+      const registo = PASSOS_PORTAL.porDia[data] || {};
+      porData[data] = numeroPassos(registo.passos !== undefined ? registo.passos : registo);
+    });
+    const inicioSemana = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+    inicioSemana.setDate(inicioSemana.getDate() - ((inicioSemana.getDay() + 6) % 7));
     const resultado = [];
-    for (let atraso = 6; atraso >= 0; atraso--) {
-      const data = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate() - atraso);
+    for (let indice = 0; indice < 7; indice++) {
+      const data = new Date(inicioSemana.getFullYear(), inicioSemana.getMonth(), inicioSemana.getDate() + indice);
       const iso = data.getFullYear() + "-" + String(data.getMonth() + 1).padStart(2, "0") + "-" + String(data.getDate()).padStart(2, "0");
-      let passosLocais = null;
-      try {
-        const estadoGuardado = JSON.parse(localStorage.getItem("ALMOVE_DAILY_" + IDENTIDADE_CACHE + "_" + iso) || "null");
-        if (estadoGuardado && estadoGuardado.steps && estadoGuardado.steps.value !== undefined) passosLocais = numeroPassos(estadoGuardado.steps.value);
-      } catch (e) {}
-      resultado.push({ dataISO: iso, data: data, passos: iso === dataLocalHoje() ? obterPassosHoje() : (passosLocais === null ? numeroPassos(porData[iso]) : passosLocais) });
+      resultado.push({ dataISO: iso, data: data, passos: iso === dataLocalHoje() ? obterPassosHoje() : numeroPassos(porData[iso]) });
     }
     return resultado;
   }
@@ -3540,15 +3582,25 @@
   function selecionarOpcaoEscala(grupo, opcao, campo) {
     grupo.querySelectorAll(".opcao").forEach(function (el) {
       el.classList.remove("selecionada");
+      el.setAttribute("aria-checked", "false");
+      el.tabIndex = opcao ? -1 : (el === grupo.querySelector(".opcao") ? 0 : -1);
       CLASSES_ESCALA.forEach(function (classe) { el.classList.remove(classe); });
     });
     if (!opcao) return;
     opcao.classList.add("selecionada", classeQualidadeEscala(campo, Number(opcao.getAttribute("data-valor"))));
+    opcao.setAttribute("aria-checked", "true");
+    opcao.tabIndex = 0;
   }
 
   const respostas = {};
 
   document.querySelectorAll(".opcoes").forEach(function (grupo) {
+    grupo.setAttribute("role", "radiogroup");
+    grupo.querySelectorAll(".opcao").forEach(function (opcao, indice) {
+      opcao.setAttribute("role", "radio");
+      opcao.setAttribute("aria-checked", "false");
+      opcao.tabIndex = indice === 0 ? 0 : -1;
+    });
     grupo.addEventListener("click", function (evento) {
       const opcao = evento.target.closest(".opcao");
       if (!opcao) return;
@@ -3556,6 +3608,18 @@
       respostas[campo] = Number(opcao.getAttribute("data-valor"));
       selecionarOpcaoEscala(grupo, opcao, campo);
       checkinErro.style.display = "none";
+    });
+    grupo.addEventListener("keydown", function (evento) {
+      const opcoes = Array.from(grupo.querySelectorAll(".opcao"));
+      const atual = evento.target.closest(".opcao");
+      if (!atual || !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(evento.key)) return;
+      evento.preventDefault();
+      let indice = opcoes.indexOf(atual);
+      if (evento.key === "Home") indice = 0;
+      else if (evento.key === "End") indice = opcoes.length - 1;
+      else indice = (indice + (["ArrowRight", "ArrowDown"].includes(evento.key) ? 1 : -1) + opcoes.length) % opcoes.length;
+      opcoes[indice].focus();
+      opcoes[indice].click();
     });
   });
 
