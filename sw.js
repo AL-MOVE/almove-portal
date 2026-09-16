@@ -2,7 +2,7 @@
 // A versão sobe com esta atualização visual para que instalações existentes
 // recebam o novo index.html em vez de manterem a versão anterior em cache.
 
-const VERSAO_CACHE = 'almove-portal-v44';
+const VERSAO_CACHE = 'almove-portal-v45';
 
 const FICHEIROS_ESSENCIAIS = [
   '/',
@@ -75,4 +75,28 @@ self.addEventListener('fetch', (evento) => {
 
 self.addEventListener('message', (evento) => {
   if (evento.data === 'SKIP_WAITING') self.skipWaiting();
+});
+
+// Compatível com uma futura subscrição Web Push. O temporizador também usa
+// showNotification através deste service worker enquanto existe uma sessão.
+self.addEventListener('push', (evento) => {
+  let dados = {};
+  try { dados = evento.data ? evento.data.json() : {}; } catch (erro) { dados = { body: evento.data ? evento.data.text() : '' }; }
+  evento.waitUntil(self.registration.showNotification(dados.title || 'AL MOVE', {
+    body: dados.body || 'Tens uma atualização no teu acompanhamento.',
+    icon: '/icons/icon-192.png',
+    badge: '/icons/icon-192.png',
+    tag: dados.tag || 'almove-aviso',
+    data: { url: dados.url || '/' }
+  }));
+});
+
+self.addEventListener('notificationclick', (evento) => {
+  evento.notification.close();
+  const destino = (evento.notification.data && evento.notification.data.url) || '/';
+  evento.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then((janelas) => {
+    const aberta = janelas.find((janela) => 'focus' in janela);
+    if (aberta) { aberta.navigate(destino); return aberta.focus(); }
+    return clients.openWindow(destino);
+  }));
 });

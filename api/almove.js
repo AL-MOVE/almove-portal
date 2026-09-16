@@ -1,48 +1,80 @@
-// Este ficheiro vive em /api/almove.js no projecto da Vercel.
-// É o "estafeta": recebe o pedido do browser (no mesmo domínio, sem CORS),
-// fala com o Apps Script por trás (servidor-para-servidor, sem CORS),
-// e devolve a resposta ao browser tal como veio.
-
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyiOl7KkXMYSFv9lKKVb2sMspvwER2P5IMlpNQcr9csLyEDnzJqvVqisE-XVuAHgeUV/exec';
 
+const LEITURAS = new Set([
+  'getBootstrapPortal', 'getProgressoBootstrapPortal', 'getEstadoPortalHoje', 'getAvaliacaoFisicaPortal',
+  'getHistoricoAvaliacoesFisicasPortal', 'getPesosDiariosPortal', 'getPedidoAvaliacaoPortal', 'getAgendaPortal',
+  'getPlanoAtivoPortal', 'getResumoInicioPortal', 'getResumoConquistasPortal', 'getMetricasAtividadePortal',
+  'getNotificacoesPortal', 'getResumoPassosPortal', 'getResumoOpcoesPortal', 'getHistoricoExercicio'
+]);
+
+const ESCRITAS = new Set([
+  'criarSessaoPortal', 'pedirCodigoAcessoPortal', 'validarCodigoAcessoPortal', 'terminarSessaoPortal',
+  'guardarPedidoPrivacidadePortal', 'registarCheckin', 'guardarPesoDiarioPortal', 'guardarPedidoAvaliacaoPortal',
+  'registarTesteProntidao', 'marcarNotificacoesLidasPortal', 'guardarMetricasAtividadePortal',
+  'guardarPassosPortal', 'registarExecucaoTreino', 'registarPosTreino'
+]);
+
+function responder(res, estado, corpo, requestId) {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
+  res.setHeader('X-Request-Id', requestId);
+  return res.status(estado).json(corpo);
+}
+
 export default async function handler(req, res) {
+  const requestId = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  if (!['GET', 'POST'].includes(req.method)) {
+    res.setHeader('Allow', 'GET, POST');
+    return responder(res, 405, { ok: false, erro: 'Método não permitido' }, requestId);
+  }
+
+  let fn = '';
+  let token = '';
+  let dados = {};
+  if (req.method === 'GET') {
+    fn = String(req.query.fn || '');
+    token = String(req.headers['x-almove-session'] || '');
+    try { dados = req.query.data ? JSON.parse(String(req.query.data).slice(0, 8000)) : {}; }
+    catch { return responder(res, 400, { ok: false, erro: 'Dados inválidos' }, requestId); }
+    if (!LEITURAS.has(fn)) return responder(res, 405, { ok: false, erro: 'GET permite apenas leituras' }, requestId);
+  } else {
+    const comprimento = Number(req.headers['content-length'] || 0);
+    if (comprimento > 50000) return responder(res, 413, { ok: false, erro: 'Pedido demasiado grande' }, requestId);
+    try { dados = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); }
+    catch { return responder(res, 400, { ok: false, erro: 'JSON inválido' }, requestId); }
+    fn = String(dados.fn || '');
+    token = String(dados.token || '');
+    if (!ESCRITAS.has(fn)) return responder(res, 405, { ok: false, erro: 'POST permite apenas gravações' }, requestId);
+  }
+
+  if (!/^[A-Za-z][A-Za-z0-9_]{1,79}$/.test(fn) || !token || token.length > 200) {
+    return responder(res, 400, { ok: false, erro: 'Pedido inválido' }, requestId);
+  }
+
+  const controlador = new AbortController();
+  const timeout = setTimeout(() => controlador.abort(), 18000);
   try {
-    let respostaGoogle;
-
+    let url = APPS_SCRIPT_URL;
+    const opcoes = { redirect: 'follow', signal: controlador.signal, headers: { Accept: 'application/json' } };
     if (req.method === 'GET') {
-      const params = new URLSearchParams(req.query);
-      params.set('api', '1'); // <-- diz ao doGet para entrar no modo API
-      respostaGoogle = await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`);
-    } else if (req.method === 'POST') {
-      // Enviamos como texto simples de propósito — evita que o browser peça
-      // autorização prévia (preflight) ao Apps Script, que não sabe responder a isso.
-      // Só que, por causa disso, a Vercel NÃO faz parsing automático de JSON em
-      // req.body (só faz quando o Content-Type é application/json) — chega-nos
-      // como uma string em bruto. Temos de a converter para objeto nós mesmos
-      // antes de lhe juntar o "api: '1'".
-      let corpoRecebido = req.body;
-      if (typeof corpoRecebido === 'string') {
-        try {
-          corpoRecebido = corpoRecebido ? JSON.parse(corpoRecebido) : {};
-        } catch (erroParse) {
-          corpoRecebido = {};
-        }
-      }
-      const corpo = Object.assign({}, corpoRecebido, { api: '1' });
-      respostaGoogle = await fetch(APPS_SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(corpo),
-      });
+      const query = new URLSearchParams({ api: '1', fn, token, data: JSON.stringify(dados || {}) });
+      url += `?${query.toString()}`;
+      opcoes.method = 'GET';
     } else {
-      res.status(405).json({ ok: false, erro: 'Método não suportado' });
-      return;
+      opcoes.method = 'POST';
+      opcoes.headers['Content-Type'] = 'text/plain;charset=utf-8';
+      opcoes.body = JSON.stringify({ ...dados, fn, token });
     }
-
-    const texto = await respostaGoogle.text();
-    res.setHeader('Content-Type', 'application/json; charset=utf-8');
-    res.status(200).send(texto);
+    const resposta = await fetch(url, opcoes);
+    const texto = await resposta.text();
+    let json;
+    try { json = JSON.parse(texto); }
+    catch { return responder(res, 502, { ok: false, erro: 'Resposta inválida do serviço de dados' }, requestId); }
+    return responder(res, resposta.ok ? 200 : 502, json, requestId);
   } catch (erro) {
-    res.status(500).json({ ok: false, erro: String(erro) });
+    const mensagem = erro && erro.name === 'AbortError' ? 'O serviço de dados excedeu o tempo limite' : 'Não foi possível contactar o serviço de dados';
+    return responder(res, 504, { ok: false, erro: mensagem }, requestId);
+  } finally {
+    clearTimeout(timeout);
   }
 }
