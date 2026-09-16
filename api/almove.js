@@ -23,6 +23,16 @@ function responder(res, estado, corpo, requestId) {
   return res.status(estado).json(corpo);
 }
 
+function estadoErroAplicacao(erro) {
+  const mensagem = String(erro || '');
+  if (/SESSAO_INVALIDA|Link inválido|Falta o token|Token inválido/i.test(mensagem)) return 401;
+  if (/ACESSO_PROTEGIDO|código/i.test(mensagem)) return 403;
+  if (/LIMITE|Aguarda/i.test(mensagem)) return 429;
+  if (/duplicado|já existe|limiteAtingido/i.test(mensagem)) return 409;
+  if (/inválid|Indica |Não podes|exige POST|Função desconhecida|demasiad/i.test(mensagem)) return 400;
+  return 502;
+}
+
 export default async function handler(req, res) {
   const requestId = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   if (!['GET', 'POST'].includes(req.method)) {
@@ -72,7 +82,9 @@ export default async function handler(req, res) {
     let json;
     try { json = JSON.parse(texto); }
     catch { return responder(res, 502, { ok: false, erro: 'Resposta inválida do serviço de dados' }, requestId); }
-    return responder(res, resposta.ok ? 200 : 502, json, requestId);
+    if (!resposta.ok) return responder(res, 502, json, requestId);
+    if (json && json.ok === false) return responder(res, estadoErroAplicacao(json.erro), json, requestId);
+    return responder(res, 200, json, requestId);
   } catch (erro) {
     const mensagem = erro && erro.name === 'AbortError' ? 'O serviço de dados excedeu o tempo limite' : 'Não foi possível contactar o serviço de dados';
     return responder(res, 504, { ok: false, erro: mensagem }, requestId);
