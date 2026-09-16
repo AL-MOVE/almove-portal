@@ -1743,6 +1743,12 @@ function getProgressoPlanoRecente(idCliente, planosPreCarregados) {
 }
 
 const API_FUNCOES_PORTAL = {
+  pedirLinkLoginPortal: function (token, corpoPost) {
+    return pedirLinkLoginPortal_(corpoPost && corpoPost.email);
+  },
+  trocarCodigoLoginPortal: function (token, corpoPost) {
+    return trocarCodigoLoginPortal_(corpoPost && corpoPost.codigo, corpoPost || {});
+  },
   criarSessaoPortal: function (token, corpoPost) {
     return criarSessaoPortal_(token, corpoPost || {});
   },
@@ -1984,6 +1990,10 @@ function registarAcessoPortal_(info, evento, detalhe) {
 function criarSessaoPortal_(tokenPortal, dados) {
   const info = obterClientePorTokenPortal_(tokenPortal);
   if (!info || info.eSessao) throw new Error('LINK_INVALIDO');
+  return criarSessaoParaInfo_(info, dados, 'SESSAO_INICIADA');
+}
+
+function criarSessaoParaInfo_(info, dados, evento) {
   const cache = CacheService.getScriptCache();
   const sessao = Utilities.getUuid() + Utilities.getUuid().replace(/-/g, '');
   const expiraEm = new Date(Date.now() + DURACAO_SESSAO_PORTAL_SEGUNDOS_ * 1000);
@@ -1993,8 +2003,71 @@ function criarSessaoPortal_(tokenPortal, dados) {
     expiraEm: expiraEm.toISOString()
   });
   cache.put(chaveSeguraPortal_('sessao_portal_', sessao), JSON.stringify(sessaoDados), DURACAO_SESSAO_PORTAL_SEGUNDOS_);
-  registarAcessoPortal_(info, 'SESSAO_INICIADA', String((dados && dados.dispositivo) || 'Portal web').slice(0, 180));
+  registarAcessoPortal_(info, evento || 'SESSAO_INICIADA', String((dados && dados.dispositivo) || 'Portal web').slice(0, 180));
   return { sessao: sessao, expiraEm: expiraEm.toISOString(), primeiroNome: String(info.nome || '').split(' ')[0] };
+}
+
+function obterClientePorEmailPortal_(email) {
+  const emailLimpo = String(email || '').trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailLimpo)) return null;
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('CLIENTES');
+  if (!sheet || sheet.getLastRow() < 4) return null;
+  const clientes = sheet.getRange('A4:Y' + sheet.getLastRow()).getValues();
+  for (let i = 0; i < clientes.length; i++) {
+    const row = clientes[i];
+    if (String(row[18] || '').trim().toLowerCase() !== emailLimpo) continue;
+    if (String(row[1] || 'Ativo') === 'Cancelado') return null;
+    const tokenPortal = String(row[23] || '').trim();
+    if (!tokenPortal || PropertiesService.getScriptProperties().getProperty(chaveSeguraPortal_('token_revogado_', tokenPortal))) return null;
+    return { idCliente: String(row[24] || ''), nome: String(row[0] || ''), email: emailLimpo, tokenPortalOriginal: tokenPortal, eSessao: false };
+  }
+  return null;
+}
+
+const DURACAO_LINK_LOGIN_PORTAL_SEGUNDOS_ = 15 * 60;
+const URL_PORTAL_LOGIN_PUBLICO_ = 'https://portal.almove.pt/?login=';
+
+function pedirLinkLoginPortal_(email) {
+  const emailLimpo = String(email || '').trim().toLowerCase().slice(0, 160);
+  const respostaNeutra = { enviado: true, mensagem: 'Se o email estiver associado a uma conta, receberás um link de acesso.' };
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailLimpo)) return respostaNeutra;
+  const cache = CacheService.getScriptCache();
+  const limite = chaveSeguraPortal_('login_email_limite_', emailLimpo);
+  if (cache.get(limite)) return respostaNeutra;
+  cache.put(limite, '1', 60);
+  const info = obterClientePorEmailPortal_(emailLimpo);
+  if (!info) return respostaNeutra;
+  enviarLinkLoginPortalParaInfo_(info);
+  return respostaNeutra;
+}
+
+function enviarLinkLoginPortalParaInfo_(info) {
+  const cache = CacheService.getScriptCache();
+  const codigo = Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
+  cache.put(chaveSeguraPortal_('login_portal_', codigo), JSON.stringify(info), DURACAO_LINK_LOGIN_PORTAL_SEGUNDOS_);
+  const link = URL_PORTAL_LOGIN_PUBLICO_ + encodeURIComponent(codigo);
+  MailApp.sendEmail({
+    to: info.email,
+    subject: 'AL MOVE — entra no teu portal',
+    body: 'Olá ' + String(info.nome || '').split(' ')[0] + ',\n\nUsa este link para entrar no teu Portal AL MOVE:\n' + link + '\n\nEste link é válido durante 15 minutos e só pode ser usado uma vez.\n\nSe não pediste este acesso, ignora este email.'
+  });
+  registarAcessoPortal_(info, 'LINK_LOGIN_ENVIADO', 'Link temporário válido durante 15 minutos');
+  return { enviado: true, expiraEmMinutos: 15 };
+}
+
+function trocarCodigoLoginPortal_(codigo, dados) {
+  const codigoLimpo = String(codigo || '').trim();
+  if (!/^[a-f0-9]{64}$/i.test(codigoLimpo)) throw new Error('LINK_DE_ACESSO_INVALIDO');
+  const cache = CacheService.getScriptCache();
+  const chave = chaveSeguraPortal_('login_portal_', codigoLimpo);
+  const guardado = cache.get(chave);
+  if (!guardado) throw new Error('LINK_DE_ACESSO_EXPIRADO');
+  cache.remove(chave);
+  let info;
+  try { info = JSON.parse(guardado); } catch (erro) { throw new Error('LINK_DE_ACESSO_INVALIDO'); }
+  if (!info || !info.idCliente || !info.tokenPortalOriginal) throw new Error('LINK_DE_ACESSO_INVALIDO');
+  if (PropertiesService.getScriptProperties().getProperty(chaveSeguraPortal_('token_revogado_', info.tokenPortalOriginal))) throw new Error('LINK_DE_ACESSO_EXPIRADO');
+  return criarSessaoParaInfo_(info, dados, 'LOGIN_POR_EMAIL');
 }
 
 function terminarSessaoPortal_(sessao) {
@@ -2116,6 +2189,7 @@ const FUNCOES_LEITURA_PORTAL_ = new Set([
   'getResumoInicioPortal', 'getResumoConquistasPortal', 'getMetricasAtividadePortal',
   'getNotificacoesPortal', 'getResumoPassosPortal', 'getResumoOpcoesPortal', 'getHistoricoExercicio'
 ]);
+const FUNCOES_PUBLICAS_PORTAL_ = new Set(['pedirLinkLoginPortal', 'trocarCodigoLoginPortal']);
 
 function tratarPedidoApi_(e) {
   try {
@@ -2135,12 +2209,12 @@ function tratarPedidoApi_(e) {
 
     const funcao = API_FUNCOES_PORTAL[nomeFuncao];
     if (!funcao) return responderApiJSON_({ ok: false, erro: 'Função desconhecida: ' + nomeFuncao });
-    if (!token) return responderApiJSON_({ ok: false, erro: 'Falta o token do cliente' });
+    if (!token && !FUNCOES_PUBLICAS_PORTAL_.has(nomeFuncao)) return responderApiJSON_({ ok: false, erro: 'Falta o token do cliente' });
     const eLeituraGet = !conteudoPost;
     if (eLeituraGet && !FUNCOES_LEITURA_PORTAL_.has(nomeFuncao)) {
       return responderApiJSON_({ ok: false, erro: 'Esta operação exige POST' });
     }
-    verificarLimitePortal_(token, nomeFuncao);
+    verificarLimitePortal_(token || corpoPost.email || corpoPost.codigo || 'publico', nomeFuncao);
 
     const dados = funcao(token, corpoPost);
     if (!FUNCOES_LEITURA_PORTAL_.has(nomeFuncao) && !/^(criarSessao|pedirCodigo|validarCodigo|terminarSessao)/.test(nomeFuncao)) {
@@ -2219,6 +2293,20 @@ function obterOuCriarTokenPortal_(idCliente) {
  * cliente) — devolve o URL completo, criando o token se ainda não existir.
  */
 const URL_PORTAL_CLIENTE_PUBLICO_ = 'https://portal.almove.pt/?portal=';
+
+function enviarConvitePortalCliente(idCliente) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('CLIENTES');
+  if (!sheet || sheet.getLastRow() < 4) throw new Error('Cliente não encontrado');
+  const clientes = sheet.getRange('A4:Y' + sheet.getLastRow()).getValues();
+  for (let i = 0; i < clientes.length; i++) {
+    const row = clientes[i];
+    if (String(row[24] || '') !== String(idCliente)) continue;
+    const info = obterClientePorEmailPortal_(row[18]);
+    if (!info) throw new Error('Este cliente não tem um email válido associado ao Portal.');
+    return enviarLinkLoginPortalParaInfo_(info);
+  }
+  throw new Error('Cliente não encontrado');
+}
 
 function obterLinkPortalCliente(idCliente) {
   try {
