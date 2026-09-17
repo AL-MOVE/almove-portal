@@ -14,12 +14,12 @@ const saude = await fetch(`${base}/api/health`, { cache: 'no-store' });
 assert.equal(saude.status, 200, 'O endpoint de saúde deve responder');
 const estadoSaude = await saude.json();
 assert.equal(estadoSaude.ok, true, 'O endpoint de saúde deve indicar ok');
-assert.equal(estadoSaude.version ?? estadoSaude.versao, 53, 'O domínio deve estar na versão 53');
+assert.equal(estadoSaude.version ?? estadoSaude.versao, 54, 'O domínio deve estar na versão 54');
 
-// O Avatar e o Mapa são módulos separados. Sem estes ficheiros as respetivas
+// O Mapa são módulos separados. Sem estes ficheiros as respetivas
 // páginas parecem abrir, mas ficam vazias — uma falha fácil de não notar num
 // deploy manual pela interface do GitHub.
-for (const ficheiro of ['/js/avatar-studio.js', '/js/activity-heatmap.js']) {
+for (const ficheiro of ['/js/activity-heatmap.js']) {
   const modulo = await fetch(`${base}${ficheiro}`, { cache: 'no-store' });
   assert.equal(modulo.status, 200, `${ficheiro} deve estar publicado`);
   assert.match(await modulo.text(), /window\.ALMove/, `${ficheiro} deve expor o módulo esperado`);

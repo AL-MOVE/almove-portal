@@ -1919,11 +1919,6 @@ const API_FUNCOES_PORTAL = {
     if (!info) throw new Error('Link inválido.');
     return getDadosPessoaisPortal_(info.idCliente);
   },
-  getAvatarPortal: function (token) {
-    const info = obterClientePorTokenPortal_(token);
-    if (!info) throw new Error('Link inválido.');
-    return getAvatarPortal_(info.idCliente);
-  },
   getMapaAtividadePortal: function (token, corpoPost) {
     const info = obterClientePorTokenPortal_(token);
     if (!info) throw new Error('Link inválido.');
@@ -1945,9 +1940,6 @@ const API_FUNCOES_PORTAL = {
   },
   registarSessaoMinimaPortal: function (token, corpoPost) {
     return registarSessaoMinimaPortal_(token, corpoPost);
-  },
-  guardarAvatarPortal: function (token, corpoPost) {
-    return guardarAvatarPortal_(token, corpoPost);
   }
 };
 
@@ -2697,7 +2689,7 @@ const FUNCOES_LEITURA_PORTAL_ = new Set([
   'getPedidoAvaliacaoPortal', 'getAgendaPortal', 'getPlanoAtivoPortal',
   'getResumoInicioPortal', 'getResumoConquistasPortal', 'getMetricasAtividadePortal',
   'getNotificacoesPortal', 'getResumoPassosPortal', 'getResumoOpcoesPortal', 'getDadosPessoaisPortal',
-  'getAvatarPortal', 'getMapaAtividadePortal', 'getPassaporteTecnicoPortal', 'getHistoricoExercicio'
+  'getMapaAtividadePortal', 'getPassaporteTecnicoPortal', 'getHistoricoExercicio'
 ]);
 const FUNCOES_PUBLICAS_PORTAL_ = new Set(['pedirLinkLoginPortal', 'trocarCodigoLoginPortal']);
 
@@ -2716,12 +2708,8 @@ function tratarPedidoApi_(e) {
     }
     const limiteToken = String(token || '').indexOf('fb1.') === 0 ? 1200 : 200;
     if (String(token || '').length > limiteToken) return responderApiJSON_({ ok: false, erro: 'Token inválido' });
-    if (nomeFuncao === 'guardarAvatarPortal') {
-      if (!corpoPost || Object.keys(corpoPost).length > 14 || String(corpoPost.fotoData || '').length > 160000) throw new Error('Avatar inválido ou demasiado grande');
-    } else {
-      if (conteudoPost.length > 50000) throw new Error('Pedido demasiado grande');
-      validarEstruturaPedidoPortal_(corpoPost, 0);
-    }
+    if (conteudoPost.length > 50000) throw new Error('Pedido demasiado grande');
+    validarEstruturaPedidoPortal_(corpoPost, 0);
 
     const funcao = API_FUNCOES_PORTAL[nomeFuncao];
     if (!funcao) return responderApiJSON_({ ok: false, erro: 'Função desconhecida: ' + nomeFuncao });

@@ -1202,7 +1202,7 @@
     .acesso-sensivel{position:fixed;z-index:400;inset:0;display:grid;place-items:center;padding:20px;background:rgba(2,7,14,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}.acesso-sensivel.oculto{display:none}.acesso-sensivel-card{width:min(100%,410px);padding:22px;border:1px solid rgba(45,212,191,.35);border-radius:22px;background:#091522;box-shadow:0 24px 70px rgba(0,0,0,.52)}.acesso-sensivel-card h2{margin:0;color:#fff;font-size:21px}.acesso-sensivel-card p{margin:9px 0 16px;color:#9db0c4;font-size:13px;line-height:1.5}.acesso-sensivel-card input{width:100%;min-height:52px;padding:0 14px;border:1px solid #34465c;border-radius:12px;background:#111f31;color:#fff;font:inherit;font-size:20px;font-weight:900;letter-spacing:.25em;text-align:center}.acesso-sensivel-acoes{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.acesso-sensivel-acoes button{min-height:48px;border-radius:12px;font:inherit;font-size:12px;font-weight:900}.acesso-secundario{border:1px solid #34465c;background:transparent;color:#c3d1df}.acesso-primario{border:0;background:linear-gradient(100deg,#2dd4bf,#0b82d8);color:#04211f}.acesso-sensivel-estado{min-height:18px;margin-top:10px;color:#7dd3fc;font-size:12px}
   </style>
   <style id="almove-mapa-avatar-plano">
-    .perfil-avatar{overflow:hidden;border:1px solid rgba(45,212,191,.34);background:#0b1c2d}.perfil-avatar .avatar-ilustracao,.perfil-avatar .avatar-foto{display:block;width:100%;height:100%;object-fit:cover}.perfil-avatar-editavel{position:relative;width:58px;height:58px;padding:0;border-radius:18px;cursor:pointer}.perfil-avatar-editavel::after{content:"Editar";position:absolute;right:-7px;bottom:-7px;padding:3px 6px;border:2px solid #081424;border-radius:999px;background:#2dd4bf;color:#03201d;font-size:8px;font-weight:900}
+    .perfil-avatar{overflow:hidden;border:1px solid rgba(45,212,191,.34);background:#0b1c2d}.perfil-avatar .avatar-ilustracao,.perfil-avatar .avatar-foto{display:block;width:100%;height:100%;object-fit:cover}#perfilAvatar[hidden]{display:none!important}
     .avatar-editor-topo{display:grid;grid-template-columns:88px 1fr;align-items:center;gap:16px;margin:16px 0}.avatar-preview{width:88px;height:88px;overflow:hidden;border:1px solid rgba(45,212,191,.36);border-radius:26px;background:#0b1c2d}.avatar-preview .avatar-ilustracao,.avatar-preview .avatar-foto{width:100%;height:100%;object-fit:cover}.avatar-editor-topo p{margin:5px 0 0;color:var(--text-muted);font-size:11px;line-height:1.5}.avatar-presets{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.avatar-preset{min-width:0;padding:4px;border:1px solid var(--border-soft);border-radius:14px;background:rgba(255,255,255,.035);color:#fff;font:inherit;cursor:pointer}.avatar-preset .avatar-ilustracao{display:block;width:100%;height:auto}.avatar-preset span{display:block;overflow:hidden;margin:4px 0 2px;font-size:8px;font-weight:800;text-overflow:ellipsis}.avatar-preset.ativo{border-color:#2dd4bf;box-shadow:0 0 0 2px rgba(45,212,191,.12)}.avatar-personalizar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}.avatar-personalizar label{display:grid;gap:6px;color:var(--text-soft);font-size:10px;font-weight:800}.avatar-personalizar input,.avatar-personalizar select{width:100%;min-height:42px;border:1px solid var(--border);border-radius:11px;background:#101c2e;color:#fff;padding:0 9px}.avatar-personalizar input[type=color]{padding:4px}.avatar-foto-acoes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.avatar-foto-acoes label,.avatar-foto-acoes button{display:grid;place-items:center;min-height:44px;border:1px solid rgba(45,212,191,.3);border-radius:12px;background:rgba(45,212,191,.08);color:#b7fff4;font:inherit;font-size:11px;font-weight:850;cursor:pointer}.avatar-foto-acoes input{position:absolute;width:1px;height:1px;opacity:0}.avatar-privacidade{margin:12px 0 0;color:var(--text-muted);font-size:10px;line-height:1.5}
     .plano-visual{position:relative;overflow:hidden;margin-top:14px;padding:18px;border:1px solid rgba(45,212,191,.25);border-radius:20px;background:radial-gradient(circle at 92% 5%,rgba(45,212,191,.18),transparent 37%),linear-gradient(135deg,rgba(11,92,194,.20),rgba(5,18,31,.82))}.plano-visual-topo{display:grid;grid-template-columns:1fr 112px;align-items:center;gap:16px}.plano-servico-label{color:#7ff4e3;font-size:10px;font-weight:900;letter-spacing:.11em;text-transform:uppercase}.plano-servico-nome{margin-top:5px;color:#fff;font-size:22px;font-weight:900;line-height:1.05;letter-spacing:-.045em}.plano-validade{margin-top:9px;color:var(--text-muted);font-size:11px}.plano-anel{--plano-progresso:0;display:grid;place-items:center;width:108px;height:108px;border-radius:50%;background:conic-gradient(#2dd4bf calc(var(--plano-progresso)*1%),rgba(255,255,255,.08) 0);box-shadow:0 0 26px rgba(45,212,191,.13)}.plano-anel::before{content:"";grid-area:1/1;width:82px;height:82px;border-radius:50%;background:#091727}.plano-anel-centro{z-index:1;grid-area:1/1;text-align:center}.plano-anel-centro strong{display:block;color:#fff;font-size:24px;line-height:1}.plano-anel-centro span{display:block;margin-top:4px;color:var(--text-muted);font-size:8px;font-weight:800;text-transform:uppercase}.plano-metricas{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:17px}.plano-metrica{padding:12px;border:1px solid rgba(255,255,255,.09);border-radius:13px;background:rgba(2,9,17,.30)}.plano-metrica strong{display:block;color:#fff;font-size:20px}.plano-metrica span{display:block;margin-top:4px;color:var(--text-muted);font-size:9px;line-height:1.3}.plano-origem{padding-left:2px}
     .mapa-card{background:linear-gradient(145deg,rgba(11,92,194,.12),rgba(45,212,191,.045))}.mapa-controlos{display:flex;gap:6px;margin:14px 0 12px;overflow:auto}.mapa-controlos button{flex:0 0 auto;min-height:38px;padding:0 11px;border:1px solid var(--border-soft);border-radius:999px;background:rgba(255,255,255,.035);color:var(--text-muted);font:inherit;font-size:10px;font-weight:850}.mapa-controlos button.ativo{border-color:rgba(45,212,191,.55);background:rgba(45,212,191,.12);color:#dffffa}.mapa-scroll{overflow-x:auto;padding:4px 0 8px}.mapa-grelha{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,25px);grid-auto-columns:25px;gap:5px;min-width:max-content}.mapa-dia{display:grid;place-items:center;width:25px;height:25px;padding:0;border:1px solid rgba(255,255,255,.08);border-radius:7px;background:rgba(255,255,255,.035);color:#dffcf7;font:inherit;font-size:7px;font-weight:900}.mapa-dia.nivel-1{background:rgba(45,212,191,.18)}.mapa-dia.nivel-2{background:rgba(45,212,191,.36)}.mapa-dia.nivel-3{background:rgba(14,165,233,.58)}.mapa-dia.nivel-4{background:#2dd4bf;color:#03201d;box-shadow:0 0 12px rgba(45,212,191,.3)}.mapa-legenda{display:flex;flex-wrap:wrap;gap:8px 13px;margin-top:9px;color:var(--text-muted);font-size:9px}.mapa-legenda b{color:#dffcf7}.mapa-vazio{margin:0;color:var(--text-muted);font-size:11px}
@@ -1697,7 +1697,7 @@
 
     <div class="card" data-perfil-raiz>
       <div class="perfil-topo">
-        <button type="button" class="perfil-avatar perfil-avatar-editavel" id="opcoesAvatarInicial" data-abrir-perfil="avatar" aria-label="Escolher avatar">A</button>
+        <div class="perfil-avatar" id="opcoesAvatarInicial" aria-hidden="true">A</div>
         <div class="perfil-corpo">
           <div class="perfil-nome" id="opcoesNomeCliente">A carregar…</div>
           <span class="perfil-estado-pill oculto" id="opcoesEstadoPill"></span>
@@ -1705,7 +1705,6 @@
       </div>
       <div class="perfil-acessos">
         <button type="button" class="perfil-acesso" data-abrir-perfil="dados"><span class="perfil-acesso-icone" data-perfil-icone="perfil"></span><span><strong>Os meus dados</strong><small>Consulta os teus dados e pede alterações</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
-        <button type="button" class="perfil-acesso" data-abrir-perfil="avatar"><span class="perfil-acesso-icone" data-perfil-icone="imagem"></span><span><strong>O meu avatar</strong><small>Escolhe, personaliza ou usa uma fotografia</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
         <button type="button" class="perfil-acesso" data-abrir-perfil="plano"><span class="perfil-acesso-icone" data-perfil-icone="treinos"></span><span><strong>O teu plano</strong><small>Serviço, validade e sessões presenciais</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
         <button type="button" class="perfil-acesso" data-abrir-perfil="mapa"><span class="perfil-acesso-icone" data-perfil-icone="grafico"></span><span><strong>Mapa AL MOVE</strong><small>Consistência, carga e recuperação</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
         <button type="button" class="perfil-acesso" data-abrir-perfil="passaporte"><span class="perfil-acesso-icone" data-perfil-icone="medalha"></span><span><strong>Passaporte técnico</strong><small>Competências validadas pelo teu PT</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
@@ -1746,7 +1745,7 @@
       <p class="metricas-sync" id="dadosPessoaisEstado" aria-live="polite"></p>
     </section>
 
-    <section class="card oculto" id="perfilAvatar" aria-labelledby="perfilAvatarTitulo">
+    <section class="card oculto" id="perfilAvatar" aria-labelledby="perfilAvatarTitulo" hidden aria-hidden="true">
       <button type="button" class="perfil-voltar" id="btnVoltarAvatar"><span aria-hidden="true"></span> Perfil</button>
       <div class="metricas-cabecalho"><div><span class="metricas-eyebrow">Identidade</span><div class="card-title" id="perfilAvatarTitulo">O meu avatar</div><p>Escolhe uma personagem, personaliza-a ou usa uma fotografia tua.</p></div><span class="metricas-icone" data-perfil-detalhe-icone="imagem"></span></div>
       <div class="avatar-editor-topo"><div class="avatar-preview" id="avatarPreview"></div><div><strong>Uma identidade só tua</strong><p>A fotografia é reduzida para 192 × 192 px e os metadados do ficheiro são removidos antes do envio.</p></div></div>
@@ -1937,7 +1936,6 @@
     </button>
   </nav>
 
-<script src="/js/avatar-studio.js"></script>
 <script src="/js/activity-heatmap.js"></script>
 <script>
 (function () {
@@ -2392,7 +2390,7 @@
   normalizarIconesFixos();
   const versaoPortalEl = document.createElement("div");
   versaoPortalEl.className = "versao-portal";
-  versaoPortalEl.textContent = "AL MOVE · versão 53";
+  versaoPortalEl.textContent = "AL MOVE · versão 54";
   document.getElementById("tabPlanos").appendChild(versaoPortalEl);
 
   const painelPrivacidadeEl = document.getElementById("painelPrivacidade");
@@ -2816,8 +2814,6 @@
   var opcoesContactoPTNumero = "";
   var dadosPessoaisAtuais = {};
   var dadosPessoaisPromise = null;
-  var avatarAtual = { tipo:"preset", preset:"onda" };
-  var avatarCarregado = false;
   var mapaAtividadeAtual = { dias:[] };
   var mapaModoAtual = "consistencia";
   var passaporteTecnicoAtual = { exercicios:[], total:0, dominados:0 };
@@ -2835,8 +2831,7 @@
     const nome = String(dados.nome || "").trim();
     if (nome) {
       opcoesNomeClienteEl.textContent = nome;
-      if (window.ALMoveAvatar) window.ALMoveAvatar.render(opcoesAvatarInicialEl, avatarAtual, nome);
-      else opcoesAvatarInicialEl.textContent = nome.charAt(0).toUpperCase();
+      opcoesAvatarInicialEl.textContent = nome.charAt(0).toUpperCase();
       atualizarIdentidadeCliente(nome.split(" ")[0]);
     }
 
@@ -2890,91 +2885,6 @@
   function nomeClienteAtual() {
     return String(opcoesNomeClienteEl.textContent || "Cliente").replace(/A carregar…/g, "Cliente");
   }
-
-  function renderAvatarEditor() {
-    if (!window.ALMoveAvatar) return;
-    const preview = document.getElementById("avatarPreview");
-    window.ALMoveAvatar.render(opcoesAvatarInicialEl, avatarAtual, nomeClienteAtual());
-    window.ALMoveAvatar.render(preview, avatarAtual, nomeClienteAtual());
-    ["Pele","Cabelo","Camisola","Fundo"].forEach(function (campo) {
-      const el = document.getElementById("avatar" + campo);
-      const chave = campo.charAt(0).toLowerCase() + campo.slice(1);
-      if (el && avatarAtual[chave]) el.value = avatarAtual[chave];
-    });
-    if (document.getElementById("avatarEstilo")) document.getElementById("avatarEstilo").value = avatarAtual.estilo || "curto";
-    document.querySelectorAll(".avatar-preset").forEach(function (botao) { botao.classList.toggle("ativo", botao.dataset.avatarPreset === avatarAtual.preset && avatarAtual.tipo === "preset"); });
-  }
-
-  function prepararAvatarEditor() {
-    if (!window.ALMoveAvatar) return;
-    const lista = document.getElementById("avatarPresets");
-    if (lista && !lista.children.length) {
-      window.ALMoveAvatar.presets.forEach(function (preset) {
-        const botao = document.createElement("button");
-        botao.type = "button";
-        botao.className = "avatar-preset";
-        botao.dataset.avatarPreset = preset.id;
-        const imagem = document.createElement("span");
-        imagem.innerHTML = '<span class="avatar-preview-mini"></span>';
-        window.ALMoveAvatar.render(imagem.firstElementChild, preset, preset.nome);
-        const nome = document.createElement("span");
-        nome.textContent = preset.nome;
-        botao.appendChild(imagem.firstElementChild);
-        botao.appendChild(nome);
-        botao.addEventListener("click", function () { avatarAtual = window.ALMoveAvatar.normalizar(Object.assign({ tipo:"preset", preset:preset.id }, preset)); renderAvatarEditor(); });
-        lista.appendChild(botao);
-      });
-    }
-    renderAvatarEditor();
-  }
-
-  function carregarAvatarPortal(forcar) {
-    if (avatarCarregado && !forcar) return Promise.resolve(avatarAtual);
-    prepararAvatarEditor();
-    return chamarApi("getAvatarPortal", {}).then(function (resp) {
-      if (!resp || !resp.ok || !resp.dados) throw new Error((resp && resp.erro) || "Não foi possível carregar o avatar.");
-      avatarAtual = window.ALMoveAvatar.normalizar(resp.dados);
-      avatarCarregado = true;
-      renderAvatarEditor();
-      return avatarAtual;
-    }).catch(function () { renderAvatarEditor(); return avatarAtual; });
-  }
-
-  function atualizarAvatarPersonalizado() {
-    if (!window.ALMoveAvatar) return;
-    avatarAtual = window.ALMoveAvatar.normalizar({
-      tipo:"personalizado", preset:avatarAtual.preset || "onda", pele:document.getElementById("avatarPele").value,
-      cabelo:document.getElementById("avatarCabelo").value, camisola:document.getElementById("avatarCamisola").value,
-      fundo:document.getElementById("avatarFundo").value, estilo:document.getElementById("avatarEstilo").value
-    });
-    renderAvatarEditor();
-  }
-
-  ["avatarPele","avatarCabelo","avatarCamisola","avatarFundo","avatarEstilo"].forEach(function (id) {
-    const campo = document.getElementById(id);
-    if (campo) campo.addEventListener("input", atualizarAvatarPersonalizado);
-  });
-  document.getElementById("avatarFoto").addEventListener("change", function () {
-    const estado = document.getElementById("avatarEstado");
-    estado.textContent = "A preparar a fotografia…";
-    window.ALMoveAvatar.processarFoto(this.files && this.files[0]).then(function (fotoData) {
-      avatarAtual = window.ALMoveAvatar.normalizar(Object.assign({}, avatarAtual, { tipo:"foto", fotoData:fotoData }));
-      renderAvatarEditor();
-      estado.textContent = "Fotografia pronta. Falta guardar.";
-    }).catch(function (erro) { estado.textContent = erro.message || "Não foi possível preparar a fotografia."; });
-  });
-  document.getElementById("btnAvatarIlustrado").addEventListener("click", function () { avatarAtual.tipo = "personalizado"; avatarAtual.fotoData = ""; renderAvatarEditor(); });
-  document.getElementById("btnGuardarAvatar").addEventListener("click", function () {
-    const estado = document.getElementById("avatarEstado");
-    estado.textContent = "A guardar…";
-    chamarApi("guardarAvatarPortal", avatarAtual).then(function (resp) {
-      if (!resp || !resp.ok || !resp.dados) throw new Error((resp && resp.erro) || "Não foi possível guardar.");
-      avatarAtual = window.ALMoveAvatar.normalizar(resp.dados);
-      avatarCarregado = true;
-      renderAvatarEditor();
-      estado.textContent = "Avatar atualizado.";
-    }).catch(function (erro) { estado.textContent = erro.message || "Não foi possível guardar o avatar."; });
-  });
 
   function renderMapaAtividade() {
     if (window.ALMoveHeatmap) window.ALMoveHeatmap.render(document.getElementById("mapaAtividade"), mapaAtividadeAtual, { modo:mapaModoAtual });
@@ -3100,11 +3010,26 @@
     document.body.classList.add("perfil-detalhe-aberto");
     document.querySelectorAll("#perfilDadosPessoais,#perfilPlano,#perfilAvatar,#perfilMapa,#perfilPassaporte").forEach(function (painel) { painel.classList.add("oculto"); });
     const painel = document.getElementById(id);
-    if (painel) painel.classList.remove("oculto");
+    if (painel) {
+      painel.hidden = false;
+      painel.removeAttribute("aria-hidden");
+      painel.classList.remove("oculto");
+    }
     if (id === "perfilDadosPessoais") carregarDadosPessoais(false).catch(function () {});
-    if (id === "perfilAvatar") carregarAvatarPortal(false).catch(function () {});
-    if (id === "perfilMapa") carregarMapaAtividadePortal().catch(function () { renderMapaAtividade(); });
-    if (id === "perfilPassaporte") carregarPassaporteTecnicoPortal().catch(function () { renderPassaporteTecnico(); });
+    if (id === "perfilMapa") {
+      const destino = document.getElementById("mapaAtividade");
+      if (destino) destino.textContent = "A carregar o teu percurso…";
+      carregarMapaAtividadePortal().catch(function () {
+        if (destino) destino.innerHTML = '<p class="mapa-vazio">Ainda não foi possível carregar o mapa. Tenta novamente dentro de momentos.</p>';
+      });
+    }
+    if (id === "perfilPassaporte") {
+      const lista = document.getElementById("passaporteLista");
+      if (lista) lista.innerHTML = '<p class="mapa-vazio">A carregar o teu passaporte…</p>';
+      carregarPassaporteTecnicoPortal().catch(function () {
+        if (lista) lista.innerHTML = '<p class="mapa-vazio">Ainda não foi possível carregar o passaporte. Tenta novamente dentro de momentos.</p>';
+      });
+    }
     window.scrollTo({ top:0, behavior:"smooth" });
   }
 
@@ -3708,7 +3633,7 @@
     "getHistoricoAvaliacoesFisicasPortal", "getPesosDiariosPortal", "getPedidoAvaliacaoPortal", "getAgendaPortal",
     "getPlanoAtivoPortal", "getResumoInicioPortal", "getResumoConquistasPortal", "getMetricasAtividadePortal",
     "getNotificacoesPortal", "getResumoPassosPortal", "getResumoOpcoesPortal", "getHistoricoExercicio",
-    "getDadosPessoaisPortal", "getAvatarPortal", "getMapaAtividadePortal", "getPassaporteTecnicoPortal"
+    "getDadosPessoaisPortal", "getMapaAtividadePortal", "getPassaporteTecnicoPortal"
   ]);
   function chamarApiNoEndpoint(endpoint, fn, dados) {
     return SESSAO_PRONTA.then(function () {
@@ -5636,7 +5561,7 @@
   // ---------- Service worker ----------
   // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
   // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
-  const VERSAO_CLIENTE_PORTAL = "53";
+  const VERSAO_CLIENTE_PORTAL = "54";
   const CHAVE_AVISO_SW = "ALMOVE_SW_AVISO_" + VERSAO_CLIENTE_PORTAL;
   let recarregarPorAtualizacao = false;
   let recarregamentoAgendado = false;

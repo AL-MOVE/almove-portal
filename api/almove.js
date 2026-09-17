@@ -7,7 +7,7 @@ const LEITURAS = new Set([
   'getHistoricoAvaliacoesFisicasPortal', 'getPesosDiariosPortal', 'getPedidoAvaliacaoPortal', 'getAgendaPortal',
   'getPlanoAtivoPortal', 'getResumoInicioPortal', 'getResumoConquistasPortal', 'getMetricasAtividadePortal',
   'getNotificacoesPortal', 'getResumoPassosPortal', 'getResumoOpcoesPortal', 'getDadosPessoaisPortal',
-  'getAvatarPortal', 'getMapaAtividadePortal', 'getPassaporteTecnicoPortal', 'getHistoricoExercicio'
+  'getMapaAtividadePortal', 'getPassaporteTecnicoPortal', 'getHistoricoExercicio'
 ]);
 
 const ESCRITAS = new Set([
@@ -15,7 +15,7 @@ const ESCRITAS = new Set([
   'pedirLinkLoginPortal', 'trocarCodigoLoginPortal',
   'guardarPedidoPrivacidadePortal', 'guardarPedidoAtualizacaoDadosPortal', 'registarCheckin', 'guardarPesoDiarioPortal', 'guardarPedidoAvaliacaoPortal',
   'registarTesteProntidao', 'marcarNotificacoesLidasPortal', 'guardarMetricasAtividadePortal',
-  'guardarPassosPortal', 'registarExecucaoTreino', 'registarPosTreino', 'guardarAvatarPortal',
+  'guardarPassosPortal', 'registarExecucaoTreino', 'registarPosTreino',
   'registarSessaoMinimaPortal'
 ]);
 const PUBLICAS = new Set(['pedirLinkLoginPortal', 'trocarCodigoLoginPortal']);
@@ -62,7 +62,7 @@ export default async function handler(req, res) {
     catch { return responder(res, 400, { ok: false, erro: 'JSON inválido' }, requestId); }
     fn = String(dados.fn || '');
     token = String(dados.token || '');
-    if (fn !== 'guardarAvatarPortal' && comprimento > 50000) return responder(res, 413, { ok: false, erro: 'Pedido demasiado grande' }, requestId);
+    if (comprimento > 50000) return responder(res, 413, { ok: false, erro: 'Pedido demasiado grande' }, requestId);
     if (!ESCRITAS.has(fn)) return responder(res, 405, { ok: false, erro: 'POST permite apenas gravações' }, requestId);
   }
 
