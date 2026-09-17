@@ -64,9 +64,17 @@ function registarCheckin(data) {
       info.idCliente, new Date(), Number(data.sono) || 0,
       Number(data.stress) || 0, Number(data.cansaco) || 0,
       Number(data.refeicoes) || 0, Number(data.doms) || 0,
-      data.nota ? String(data.nota).trim().slice(0, 500) : '', requestId
+      textoSeguroParaFolhaPortal_(data.nota || '', 500), textoSeguroParaFolhaPortal_(requestId, 120)
     ]);
     registarAlertaCheckin_(info, data, requestId);
+    const recuperacao = Math.round(((Number(data.sono) + (6 - Number(data.stress)) + Number(data.cansaco) + Number(data.refeicoes) + (5 - doms)) / 5) * 10) / 10;
+    registarEventoPortal_(info, {
+      eventId: requestId || ('checkin-' + Utilities.getUuid()),
+      tipo: 'CHECKIN',
+      subtipo: 'BEM_ESTAR',
+      titulo: 'Check-in diário',
+      metadados: { sono: Number(data.sono), stress: Number(data.stress), energia: Number(data.cansaco), doms: doms, recuperacao: recuperacao }
+    });
     return { sucesso: true, tentativasHoje: checkinsHoje.length + 1 };
   } catch (error) {
     Logger.log('Erro registarCheckin: ' + error.toString());
@@ -1254,13 +1262,13 @@ function registarPosTreino(data) {
     }
     sheet.appendRow([
       info.idCliente,
-      data.nomePlano || '',
-      data.nomeTreino || '',
+      textoSeguroParaFolhaPortal_(data.nomePlano || '', 160),
+      textoSeguroParaFolhaPortal_(data.nomeTreino || '', 160),
       new Date(),
       Number(data.energia) || '',
       Number(data.esforco) || '',
       Number(data.dificuldade) || '',
-      requestId
+      textoSeguroParaFolhaPortal_(requestId, 120)
     ]);
 
     Logger.log('Pós-treino registado: ' + info.idCliente + ' — ' + data.nomeTreino);
@@ -1512,14 +1520,35 @@ function registarExecucaoTreino(data) {
     if (!info) throw new Error('Link inválido.');
     if (!data.nomePlano || !data.nomeTreino) throw new Error('Treino não identificado.');
 
-    const exercicios = Array.isArray(data.exercicios) ? data.exercicios.slice(0, 80) : [];
+    // A sessão só pode conter o treino realmente prescrito ao cliente. O
+    // browser é uma interface não confiável e não decide nomes, exercícios ou
+    // quantidade máxima de séries.
+    const prescricao = getTreinoDetalhe(info.idCliente, String(data.nomePlano), String(data.nomeTreino));
+    if (!prescricao || prescricao.error || !Array.isArray(prescricao.exercicios) || !prescricao.exercicios.length || prescricao.visibilidade === 'PT') {
+      throw new Error('TREINO_NAO_PRESCRITO');
+    }
+    const prescritosPorNome = {};
+    prescricao.exercicios.forEach(ex => { prescritosPorNome[String(ex.exercicio || '').trim()] = ex; });
+    const recebidos = Array.isArray(data.exercicios) ? data.exercicios.slice(0, prescricao.exercicios.length) : [];
+    const exercicios = recebidos.map(ex => {
+      const nome = String(ex && ex.exercicio || '').trim();
+      const prescrito = prescritosPorNome[nome];
+      if (!prescrito) throw new Error('EXERCICIO_NAO_PRESCRITO');
+      const maxSeries = Math.max(1, Math.min(20, Number(prescrito.series) || 1));
+      return {
+        exercicio: nome,
+        notas: textoSeguroParaFolhaPortal_(ex.notas || '', 500),
+        series: (Array.isArray(ex.series) ? ex.series : []).slice(0, maxSeries)
+      };
+    });
+    if (!exercicios.length) throw new Error('TREINO_SEM_SERIES');
     const sheet = obterOuCriarSheetExecucoes_();
     const requestId = String(data.eventId || data.idempotencyKey || '').trim();
     const idSessao = String(data.idSessao || requestId || Utilities.getUuid());
     if (requestId && sheet.getLastRow() >= 2) {
       const pedidos = sheet.getRange(2, 12, sheet.getLastRow() - 1, 1).getValues();
       if (pedidos.some(row => String(row[0] || '') === requestId)) {
-        return { sucesso: true, repetido: true, repeticaoForaDeOrdem: false, outrosPorFazer: [] };
+        return { sucesso: true, repetido: true, idSessao: idSessao, seriesRegistadas: 0, repeticaoForaDeOrdem: false, outrosPorFazer: [] };
       }
     }
     const agora = new Date();
@@ -1537,17 +1566,17 @@ function registarExecucaoTreino(data) {
       series.forEach((s, idx) => {
         linhas.push([
           info.idCliente,
-          data.nomePlano,
-          data.nomeTreino,
+          textoSeguroParaFolhaPortal_(data.nomePlano, 160),
+          textoSeguroParaFolhaPortal_(data.nomeTreino, 160),
           hojeData,
-          String(ex.exercicio || '').slice(0, 160),
+          textoSeguroParaFolhaPortal_(ex.exercicio, 160),
           idx + 1,
-          String(s.reps || '').slice(0, 30),
-          String(s.carga || '').slice(0, 30),
-          (idx === 0 ? String(ex.notas || '').slice(0, 500) : '') + (idx === 0 && repeticaoForaDeOrdem ? ' [repetição — ainda faltava: ' + outrosPorFazer.map(t => t.nome).join(', ') + ']' : ''),
+          textoSeguroParaFolhaPortal_(s.reps || '', 30),
+          textoSeguroParaFolhaPortal_(s.carga || '', 30),
+          textoSeguroParaFolhaPortal_((idx === 0 ? ex.notas : '') + (idx === 0 && repeticaoForaDeOrdem ? ' [repetição — ainda faltava: ' + outrosPorFazer.map(t => t.nome).join(', ') + ']' : ''), 650),
           agora,
-          String(s.velocidade || ''),
-          requestId,
+          textoSeguroParaFolhaPortal_(s.velocidade || '', 40),
+          textoSeguroParaFolhaPortal_(requestId, 120),
           'AUTONOMO',
           'CLIENTE',
           idSessao
@@ -1559,8 +1588,22 @@ function registarExecucaoTreino(data) {
       sheet.getRange(sheet.getLastRow() + 1, 1, linhas.length, 15).setValues(linhas);
     }
 
+    const inicioSessao = data.startedAt ? new Date(data.startedAt) : null;
+    const duracaoMin = inicioSessao && !isNaN(inicioSessao.getTime())
+      ? Math.max(1, Math.min(360, Math.round((Date.now() - inicioSessao.getTime()) / 60000)))
+      : '';
+    registarEventoPortal_(info, {
+      eventId: requestId || idSessao,
+      tipo: 'TREINO_AUTONOMO',
+      subtipo: 'PLANO',
+      duracaoMin: duracaoMin,
+      referenciaId: idSessao,
+      titulo: data.nomeTreino,
+      metadados: { plano: data.nomePlano, seriesRegistadas: linhas.length }
+    });
+
     Logger.log('Execução registada: ' + info.idCliente + ' — ' + data.nomePlano + '/' + data.nomeTreino + (repeticaoForaDeOrdem ? ' (REPETIÇÃO fora de ordem)' : ''));
-    return { sucesso: true, repeticaoForaDeOrdem: repeticaoForaDeOrdem, outrosPorFazer: outrosPorFazer.map(t => t.nome) };
+    return { sucesso: true, idSessao: idSessao, seriesRegistadas: linhas.length, guardadoEm: agora.toISOString(), repeticaoForaDeOrdem: repeticaoForaDeOrdem, outrosPorFazer: outrosPorFazer.map(t => t.nome) };
   } catch (error) {
     Logger.log('Erro registarExecucaoTreino: ' + error.toString());
     throw error;
@@ -1767,6 +1810,9 @@ const API_FUNCOES_PORTAL = {
   guardarPedidoPrivacidadePortal: function (token, corpoPost) {
     return guardarPedidoPrivacidadePortal_(token, corpoPost && corpoPost.tipo);
   },
+  guardarPedidoAtualizacaoDadosPortal: function (token, corpoPost) {
+    return guardarPedidoAtualizacaoDadosPortal_(token, corpoPost || {});
+  },
   getBootstrapPortal: function (token) {
     return getBootstrapPortal_(token);
   },
@@ -1863,10 +1909,30 @@ const API_FUNCOES_PORTAL = {
   guardarPassosPortal: function (token, corpoPost) {
     return guardarPassosPortal(Object.assign({}, corpoPost, { token: token }));
   },
-    getResumoOpcoesPortal: function (token) {
+  getResumoOpcoesPortal: function (token) {
     const info = obterClientePorTokenPortal_(token);
     if (!info) throw new Error('Link inválido.');
     return getResumoOpcoesPortal_(info.idCliente);
+  },
+  getDadosPessoaisPortal: function (token) {
+    const info = obterClientePorTokenPortal_(token);
+    if (!info) throw new Error('Link inválido.');
+    return getDadosPessoaisPortal_(info.idCliente);
+  },
+  getAvatarPortal: function (token) {
+    const info = obterClientePorTokenPortal_(token);
+    if (!info) throw new Error('Link inválido.');
+    return getAvatarPortal_(info.idCliente);
+  },
+  getMapaAtividadePortal: function (token, corpoPost) {
+    const info = obterClientePorTokenPortal_(token);
+    if (!info) throw new Error('Link inválido.');
+    return getMapaAtividadePortal_(info.idCliente, corpoPost.semanas || 12);
+  },
+  getPassaporteTecnicoPortal: function (token) {
+    const info = obterClientePorTokenPortal_(token);
+    if (!info) throw new Error('Link inválido.');
+    return getPassaporteTecnicoPortal_(info.idCliente);
   },
   getHistoricoExercicio: function (token, corpoPost) {
     return getHistoricoExercicio(token, corpoPost.nomeExercicio, corpoPost.limite || 3);
@@ -1876,6 +1942,12 @@ const API_FUNCOES_PORTAL = {
   },
   registarPosTreino: function (token, corpoPost) {
     return registarPosTreino(Object.assign({}, corpoPost, { token: token }));
+  },
+  registarSessaoMinimaPortal: function (token, corpoPost) {
+    return registarSessaoMinimaPortal_(token, corpoPost);
+  },
+  guardarAvatarPortal: function (token, corpoPost) {
+    return guardarAvatarPortal_(token, corpoPost);
   }
 };
 
@@ -1931,7 +2003,7 @@ function registarAlertaCheckin_(info, dados, requestId) {
     const ids = sheet.getRange(2, 6, sheet.getLastRow() - 1, 1).getDisplayValues().flat();
     if (ids.includes(requestId)) return;
   }
-  sheet.appendRow([new Date(), info.idCliente, info.nome, sinais.join(', '), String(dados.nota || '').slice(0, 500), requestId || '', false]);
+  sheet.appendRow([new Date(), info.idCliente, textoSeguroParaFolhaPortal_(info.nome, 120), sinais.join(', '), textoSeguroParaFolhaPortal_(dados.nota || '', 500), textoSeguroParaFolhaPortal_(requestId || '', 120), false]);
 }
 
 /** Dados mais pesados, pedidos apenas quando o cliente abre o Perfil. */
@@ -1954,6 +2026,8 @@ function getProgressoBootstrapPortal_(token) {
     historicoAvaliacoes: seguro('historicoAvaliacoes', () => getHistoricoAvaliacoesFisicasPortal_(info.idCliente), []),
     pesosDiarios: seguro('pesosDiarios', () => getPesosDiariosPortal_(info.idCliente), []),
     pedidoAvaliacao: seguro('pedidoAvaliacao', () => getPedidoAvaliacaoPortal_(info.idCliente), null),
+    mapaAtividade: seguro('mapaAtividade', () => getMapaAtividadePortal_(info.idCliente, 12), { dias: [], semanas: 12 }),
+    passaporteTecnico: seguro('passaporteTecnico', () => getPassaporteTecnicoPortal_(info.idCliente), { exercicios: [] }),
     erros: erros
   };
 }
@@ -1961,11 +2035,54 @@ function getProgressoBootstrapPortal_(token) {
 const DURACAO_SESSAO_PORTAL_SEGUNDOS_ = 6 * 60 * 60;
 const DURACAO_CODIGO_PORTAL_SEGUNDOS_ = 10 * 60;
 const DURACAO_ACESSO_SENSIVEL_SEGUNDOS_ = 30 * 60;
+const MAX_TENTATIVAS_CODIGO_PORTAL_ = 5;
+const BLOQUEIO_CODIGO_PORTAL_SEGUNDOS_ = 15 * 60;
 
 function chaveSeguraPortal_(prefixo, valor) {
   const digest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, String(valor || ''));
   const hex = digest.map(byte => ('0' + ((byte + 256) % 256).toString(16)).slice(-2)).join('');
   return prefixo + hex.slice(0, 48);
+}
+
+/**
+ * CacheService acelera as leituras, mas não é armazenamento durável e pode
+ * expulsar sessões antes do prazo. Esta pequena camada usa ScriptProperties
+ * como fonte de verdade e o cache apenas como aceleração. Para 50 clientes a
+ * superfície continua pequena e pode ser migrada depois para Firebase Auth.
+ */
+function guardarTemporarioPortal_(chave, valor, duracaoSegundos) {
+  const registo = JSON.stringify({
+    valor: valor,
+    expiraEmMs: Date.now() + Math.max(1, Number(duracaoSegundos) || 1) * 1000
+  });
+  PropertiesService.getScriptProperties().setProperty(chave, registo);
+  CacheService.getScriptCache().put(chave, registo, Math.min(21600, Math.max(1, Number(duracaoSegundos) || 1)));
+}
+
+function lerTemporarioPortal_(chave) {
+  const cache = CacheService.getScriptCache();
+  const propriedades = PropertiesService.getScriptProperties();
+  const bruto = cache.get(chave) || propriedades.getProperty(chave);
+  if (!bruto) return null;
+  try {
+    const registo = JSON.parse(bruto);
+    if (!registo.expiraEmMs || Number(registo.expiraEmMs) <= Date.now()) {
+      cache.remove(chave);
+      propriedades.deleteProperty(chave);
+      return null;
+    }
+    if (!cache.get(chave)) cache.put(chave, bruto, Math.min(21600, Math.max(1, Math.floor((Number(registo.expiraEmMs) - Date.now()) / 1000))));
+    return registo.valor;
+  } catch (erro) {
+    cache.remove(chave);
+    propriedades.deleteProperty(chave);
+    return null;
+  }
+}
+
+function removerTemporarioPortal_(chave) {
+  CacheService.getScriptCache().remove(chave);
+  PropertiesService.getScriptProperties().deleteProperty(chave);
 }
 
 function mascararEmailPortal_(email) {
@@ -1993,14 +2110,13 @@ function registarAcessoPortal_(info, evento, detalhe) {
       sheet.getRange(1, 1, 1, 5).setValues([['DATA_HORA', 'ID_CLIENTE', 'CLIENTE', 'EVENTO', 'DETALHE']]);
       sheet.setFrozenRows(1);
     }
-    sheet.appendRow([new Date(), info.idCliente || '', info.nome || '', evento || '', String(detalhe || '').slice(0, 500)]);
+    sheet.appendRow([new Date(), info.idCliente || '', textoSeguroParaFolhaPortal_(info.nome || '', 120), textoSeguroParaFolhaPortal_(evento || '', 100), textoSeguroParaFolhaPortal_(detalhe || '', 500)]);
   } catch (erro) {
     Logger.log('Não foi possível registar o acesso ao portal: ' + erro.toString());
   }
 }
 
 function criarSessaoParaInfo_(info, dados, evento) {
-  const cache = CacheService.getScriptCache();
   const sessao = Utilities.getUuid() + Utilities.getUuid().replace(/-/g, '');
   const expiraEm = new Date(Date.now() + DURACAO_SESSAO_PORTAL_SEGUNDOS_ * 1000);
   const sessaoDados = Object.assign({}, info, {
@@ -2008,7 +2124,7 @@ function criarSessaoParaInfo_(info, dados, evento) {
     tokenPortalOriginal: String(info.tokenPortalOriginal || ''),
     expiraEm: expiraEm.toISOString()
   });
-  cache.put(chaveSeguraPortal_('sessao_portal_', sessao), JSON.stringify(sessaoDados), DURACAO_SESSAO_PORTAL_SEGUNDOS_);
+  guardarTemporarioPortal_(chaveSeguraPortal_('sessao_portal_', sessao), sessaoDados, DURACAO_SESSAO_PORTAL_SEGUNDOS_);
   registarAcessoPortal_(info, evento || 'SESSAO_INICIADA', String((dados && dados.dispositivo) || 'Portal web').slice(0, 180));
   return { sessao: sessao, expiraEm: expiraEm.toISOString(), primeiroNome: String(info.nome || '').split(' ')[0] };
 }
@@ -2061,12 +2177,12 @@ function pedirLinkLoginPortal_(email) {
 }
 
 function enviarLinkLoginPortalParaInfo_(info) {
-  const cache = CacheService.getScriptCache();
   const codigo = Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
-  cache.put(chaveSeguraPortal_('login_portal_', codigo), JSON.stringify(info), DURACAO_LINK_LOGIN_PORTAL_SEGUNDOS_);
+  const chaveLogin = chaveSeguraPortal_('login_portal_', codigo);
+  guardarTemporarioPortal_(chaveLogin, info, DURACAO_LINK_LOGIN_PORTAL_SEGUNDOS_);
   const link = URL_PORTAL_LOGIN_PUBLICO_ + encodeURIComponent(codigo);
   if (MailApp.getRemainingDailyQuota() < 1) {
-    cache.remove(chaveSeguraPortal_('login_portal_', codigo));
+    removerTemporarioPortal_(chaveLogin);
     throw new Error('LIMITE_DIARIO_EMAIL_ATINGIDO');
   }
   MailApp.sendEmail({
@@ -2089,13 +2205,11 @@ function enviarLinkLoginPortalParaInfo_(info) {
 function trocarCodigoLoginPortal_(codigo, dados) {
   const codigoLimpo = String(codigo || '').trim();
   if (!/^[a-f0-9]{64}$/i.test(codigoLimpo)) throw new Error('LINK_DE_ACESSO_INVALIDO');
-  const cache = CacheService.getScriptCache();
   const chave = chaveSeguraPortal_('login_portal_', codigoLimpo);
-  const guardado = cache.get(chave);
+  const guardado = lerTemporarioPortal_(chave);
   if (!guardado) throw new Error('LINK_DE_ACESSO_EXPIRADO');
-  cache.remove(chave);
-  let info;
-  try { info = JSON.parse(guardado); } catch (erro) { throw new Error('LINK_DE_ACESSO_INVALIDO'); }
+  removerTemporarioPortal_(chave);
+  const info = guardado;
   if (!info || !info.idCliente || !info.tokenPortalOriginal) throw new Error('LINK_DE_ACESSO_INVALIDO');
   if (PropertiesService.getScriptProperties().getProperty(chaveSeguraPortal_('token_revogado_', info.tokenPortalOriginal))) throw new Error('LINK_DE_ACESSO_EXPIRADO');
   return criarSessaoParaInfo_(info, dados, 'LOGIN_POR_EMAIL');
@@ -2103,10 +2217,10 @@ function trocarCodigoLoginPortal_(codigo, dados) {
 
 function terminarSessaoPortal_(sessao) {
   const info = obterClientePorTokenPortal_(sessao);
-  const cache = CacheService.getScriptCache();
-  cache.remove(chaveSeguraPortal_('sessao_portal_', sessao));
-  cache.remove(chaveSeguraPortal_('acesso_sensivel_', sessao));
-  cache.remove(chaveSeguraPortal_('codigo_portal_', sessao));
+  removerTemporarioPortal_(chaveSeguraPortal_('sessao_portal_', sessao));
+  removerTemporarioPortal_(chaveSeguraPortal_('acesso_sensivel_', sessao));
+  removerTemporarioPortal_(chaveSeguraPortal_('codigo_portal_', sessao));
+  removerTemporarioPortal_(chaveSeguraPortal_('codigo_tentativas_', sessao));
   if (info) registarAcessoPortal_(info, 'SESSAO_TERMINADA', 'Terminado pelo cliente');
   return { sucesso: true };
 }
@@ -2133,6 +2247,357 @@ function guardarPedidoPrivacidadePortal_(sessao, tipo) {
   return { guardado: true, tipo: tipoLimpo };
 }
 
+function textoSeguroParaFolhaPortal_(valor, limite) {
+  const texto = String(valor == null ? '' : valor).trim().slice(0, limite || 500);
+  return /^[=+\-@]/.test(texto) ? "'" + texto : texto;
+}
+
+/**
+ * Registo canónico de atividade do Portal. O resto do CRM pode continuar a
+ * usar as folhas existentes; novas experiências leem esta interface estável.
+ */
+function obterSheetEventosPortal_(criarSeFaltar) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName('DB_EVENTOS_PORTAL');
+  const cabecalhos = ['EventId', 'IdCliente', 'Tipo', 'Subtipo', 'OcorreuEm', 'Origem', 'Estado', 'DuracaoMin', 'RPE', 'Carga', 'ReferenciaId', 'Titulo', 'MetadadosJson', 'CriadoEm'];
+  if (!sheet && criarSeFaltar) {
+    sheet = ss.insertSheet('DB_EVENTOS_PORTAL');
+    sheet.getRange(1, 1, 1, cabecalhos.length).setValues([cabecalhos]).setFontWeight('bold');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function registarEventoPortal_(info, evento) {
+  if (!info || !info.idCliente || !evento || !evento.tipo) return null;
+  const sheet = obterSheetEventosPortal_(true);
+  const eventId = String(evento.eventId || Utilities.getUuid()).trim().slice(0, 120);
+  if (sheet.getLastRow() >= 2) {
+    const ids = sheet.getRange(2, 1, sheet.getLastRow() - 1, 1).getDisplayValues().flat();
+    if (ids.indexOf(eventId) !== -1) return { eventId: eventId, repetido: true };
+  }
+  const duracao = evento.duracaoMin === '' || evento.duracaoMin == null ? '' : Math.max(0, Math.min(1440, Number(evento.duracaoMin) || 0));
+  const rpe = evento.rpe === '' || evento.rpe == null ? '' : Math.max(0, Math.min(10, Number(evento.rpe) || 0));
+  const carga = duracao !== '' && rpe !== '' ? Math.round(duracao * rpe) : '';
+  const metadados = evento.metadados && typeof evento.metadados === 'object' ? JSON.stringify(evento.metadados).slice(0, 1500) : '';
+  sheet.appendRow([
+    textoSeguroParaFolhaPortal_(eventId, 120), info.idCliente,
+    textoSeguroParaFolhaPortal_(String(evento.tipo).toUpperCase(), 50), textoSeguroParaFolhaPortal_(evento.subtipo || '', 80),
+    evento.ocorreuEm instanceof Date ? evento.ocorreuEm : new Date(evento.ocorreuEm || Date.now()),
+    textoSeguroParaFolhaPortal_(evento.origem || 'PORTAL', 30), textoSeguroParaFolhaPortal_(evento.estado || 'CONCLUIDO', 30),
+    duracao, rpe, carga, textoSeguroParaFolhaPortal_(evento.referenciaId || '', 120),
+    textoSeguroParaFolhaPortal_(evento.titulo || '', 160), textoSeguroParaFolhaPortal_(metadados, 1500), new Date()
+  ]);
+  return { eventId: eventId, repetido: false };
+}
+
+function dataISOEventoPortal_(valor) {
+  const data = valor instanceof Date ? valor : new Date(valor);
+  return isNaN(data.getTime()) ? '' : Utilities.formatDate(data, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+}
+
+function getMapaAtividadePortal_(idCliente, semanas) {
+  const totalSemanas = Math.max(4, Math.min(52, Number(semanas) || 12));
+  const hoje = new Date();
+  hoje.setHours(12, 0, 0, 0);
+  const inicio = new Date(hoje);
+  // O mapa começa sempre numa segunda-feira para manter as colunas semanais
+  // alinhadas em telemóvel, tablet e desktop.
+  const diaSemana = inicio.getDay() || 7;
+  inicio.setDate(inicio.getDate() - (diaSemana - 1) - (totalSemanas - 1) * 7);
+  const porData = {};
+  function adicionar(dataISO, evento) {
+    if (!dataISO || dataISO < Utilities.formatDate(inicio, Session.getScriptTimeZone(), 'yyyy-MM-dd')) return;
+    if (!porData[dataISO]) porData[dataISO] = { data: dataISO, tipos: [], sessoes: 0, duracaoMin: 0, carga: 0, rpe: null, recuperacao: null, titulos: [] };
+    const dia = porData[dataISO];
+    const tipo = String(evento.tipo || 'TREINO').toUpperCase();
+    if (dia.tipos.indexOf(tipo) === -1) dia.tipos.push(tipo);
+    const contaComoSessao = /^(TREINO_|SESSAO_MINIMA)/.test(tipo);
+    dia.sessoes += contaComoSessao ? Number(evento.sessoes == null ? 1 : evento.sessoes) : 0;
+    dia.duracaoMin += Number(evento.duracaoMin || 0);
+    dia.carga += Number(evento.carga || 0);
+    if (evento.rpe !== '' && evento.rpe != null && isFinite(Number(evento.rpe))) dia.rpe = Math.max(Number(dia.rpe || 0), Number(evento.rpe));
+    if (evento.recuperacao !== '' && evento.recuperacao != null && isFinite(Number(evento.recuperacao))) dia.recuperacao = Number(evento.recuperacao);
+    if (evento.titulo && dia.titulos.indexOf(String(evento.titulo)) === -1) dia.titulos.push(String(evento.titulo).slice(0, 80));
+  }
+
+  const referenciasCanonicas = {};
+  const eventos = obterSheetEventosPortal_(false);
+  if (eventos && eventos.getLastRow() >= 2) {
+    eventos.getRange(2, 1, eventos.getLastRow() - 1, 14).getValues().forEach(row => {
+      if (String(row[1]) !== String(idCliente)) return;
+      if (row[0]) referenciasCanonicas[String(row[0])] = true;
+      if (row[10]) referenciasCanonicas[String(row[10])] = true;
+      let metadados = {};
+      try { metadados = row[12] ? JSON.parse(String(row[12])) : {}; } catch (erro) {}
+      adicionar(dataISOEventoPortal_(row[4]), { tipo: row[2], duracaoMin: row[7], rpe: row[8], carga: row[9], titulo: row[11], recuperacao: metadados.recuperacao });
+    });
+  }
+
+  // Compatibilidade: preenche o mapa com sessões existentes ainda não
+  // migradas para DB_EVENTOS_PORTAL, deduplicadas por IdSessao/data.
+  const execucoes = obterOuCriarSheetExecucoes_();
+  const vistos = {};
+  if (execucoes.getLastRow() >= 2) {
+    execucoes.getRange(2, 1, execucoes.getLastRow() - 1, 15).getValues().forEach(row => {
+      if (String(row[0]) !== String(idCliente)) return;
+      const dataISO = dataISOEventoPortal_(row[3]);
+      const chave = String(row[14] || row[11] || (dataISO + '|' + row[2]));
+      if (vistos[chave] || referenciasCanonicas[chave] || referenciasCanonicas[String(row[11] || '')]) return;
+      vistos[chave] = true;
+      adicionar(dataISO, { tipo: String(row[12] || 'AUTONOMO').toUpperCase() === 'PT' ? 'TREINO_PT' : 'TREINO_AUTONOMO', titulo: row[2] });
+    });
+  }
+
+  const dias = [];
+  for (let data = new Date(inicio); data <= hoje; data.setDate(data.getDate() + 1)) {
+    const iso = Utilities.formatDate(data, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+    dias.push(porData[iso] || { data: iso, tipos: [], sessoes: 0, duracaoMin: 0, carga: 0, rpe: null, recuperacao: null, titulos: [] });
+  }
+  return { semanas: totalSemanas, inicio: dias.length ? dias[0].data : '', fim: dias.length ? dias[dias.length - 1].data : '', dias: dias };
+}
+
+function obterSheetPassaporteTecnicoPortal_(criarSeFaltar) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName('DB_PASSAPORTE_TECNICO');
+  const cabecalhos = ['IdCliente','Exercicio','Estado','Setup','Amplitude','Controlo','Respiracao','ValidadoEm','Nota','AtualizadoEm'];
+  if (!sheet && criarSeFaltar) {
+    sheet = ss.insertSheet('DB_PASSAPORTE_TECNICO');
+    sheet.getRange(1, 1, 1, cabecalhos.length).setValues([cabecalhos]).setFontWeight('bold');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+/**
+ * Passaporte técnico do cliente. A prescrição continua a ser a fonte de
+ * verdade dos exercícios; a folha guarda apenas a avaliação técnica do PT.
+ */
+function getPassaporteTecnicoPortal_(idCliente) {
+  const prescritos = {};
+  const planos = (getListaPlanosCliente(idCliente).planos || []).filter(plano => plano.visibilidade !== 'PT');
+  planos.forEach(plano => {
+    const treinos = getTreinosDoPlano(idCliente, plano.nome).treinos || [];
+    treinos.forEach(treino => {
+      const detalhe = getTreinoDetalhe(idCliente, plano.nome, treino.nome);
+      (detalhe.exercicios || []).forEach(exercicio => {
+        const nome = String(exercicio.exercicio || '').trim();
+        if (nome) prescritos[nome.toLowerCase()] = nome;
+      });
+    });
+  });
+
+  const avaliados = {};
+  const sheet = obterSheetPassaporteTecnicoPortal_(false);
+  if (sheet && sheet.getLastRow() >= 2) {
+    sheet.getRange(2, 1, sheet.getLastRow() - 1, 10).getValues().forEach(row => {
+      if (String(row[0]) !== String(idCliente) || !String(row[1] || '').trim()) return;
+      avaliados[String(row[1]).trim().toLowerCase()] = {
+        exercicio: String(row[1]).trim(), estado: String(row[2] || 'EM_PRATICA').toUpperCase(),
+        setup: Math.max(0, Math.min(3, Number(row[3]) || 0)), amplitude: Math.max(0, Math.min(3, Number(row[4]) || 0)),
+        controlo: Math.max(0, Math.min(3, Number(row[5]) || 0)), respiracao: Math.max(0, Math.min(3, Number(row[6]) || 0)),
+        validadoEm: dataISOEventoPortal_(row[7]), nota: String(row[8] || '').slice(0, 300)
+      };
+    });
+  }
+
+  const chaves = Object.keys(prescritos);
+  Object.keys(avaliados).forEach(chave => { if (chaves.indexOf(chave) === -1) chaves.push(chave); });
+  const exercicios = chaves.slice(0, 60).map(chave => {
+    const item = avaliados[chave] || { exercicio: prescritos[chave], estado:'EM_PRATICA', setup:0, amplitude:0, controlo:0, respiracao:0, validadoEm:'', nota:'' };
+    item.pontuacao = item.setup + item.amplitude + item.controlo + item.respiracao;
+    item.percentagem = Math.round(item.pontuacao / 12 * 100);
+    return item;
+  });
+  const dominados = exercicios.filter(item => item.estado === 'DOMINADO' || item.percentagem >= 85).length;
+  return { exercicios: exercicios, total: exercicios.length, dominados: dominados };
+}
+
+function registarSessaoMinimaPortal_(token, dados) {
+  const info = obterClientePorTokenPortal_(token);
+  if (!info) throw new Error('SESSAO_INVALIDA');
+  const temPlanoPrescrito = (getListaPlanosCliente(info.idCliente).planos || []).some(plano => plano.visibilidade !== 'PT');
+  if (!temPlanoPrescrito) throw new Error('SESSAO_MINIMA_SEM_PLANO_PRESCRITO');
+  const minutos = [12, 20].indexOf(Number(dados.minutos)) !== -1 ? Number(dados.minutos) : 12;
+  const rpe = Math.max(1, Math.min(10, Number(dados.rpe) || 4));
+  return Object.assign({ sucesso: true }, registarEventoPortal_(info, {
+    eventId: dados.eventId,
+    tipo: 'SESSAO_MINIMA',
+    subtipo: minutos + '_MIN',
+    duracaoMin: minutos,
+    rpe: rpe,
+    titulo: minutos + ' min · sessão adaptada',
+    metadados: { motivo: String(dados.motivo || '').slice(0, 120) }
+  }));
+}
+
+const AVATARES_PORTAL_IDS_ = ['onda','pulso','norte','ritmo','foco','atlas','terra','zenite','brava','vector'];
+const AVATARES_PORTAL_ESTILOS_ = ['curto','fade','longo','caracois','coque'];
+
+function obterSheetAvataresPortal_(criarSeFaltar) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName('DB_AVATARES_PORTAL');
+  if (!sheet && criarSeFaltar) {
+    sheet = ss.insertSheet('DB_AVATARES_PORTAL');
+    sheet.getRange(1, 1, 1, 9).setValues([['IdCliente','Tipo','Preset','Pele','Cabelo','Camisola','Fundo','Estilo','FileId']]).setFontWeight('bold');
+    sheet.getRange(1, 10).setValue('AtualizadoEm');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function obterPastaAvataresPortal_() {
+  const nome = 'AL MOVE - Avatares clientes';
+  const existentes = DriveApp.getFoldersByName(nome);
+  return existentes.hasNext() ? existentes.next() : DriveApp.createFolder(nome);
+}
+
+function normalizarCorAvatarPortal_(valor, alternativa) {
+  const texto = String(valor || '');
+  return /^#[0-9a-f]{6}$/i.test(texto) ? texto.toLowerCase() : alternativa;
+}
+
+function getAvatarPortal_(idCliente) {
+  const sheet = obterSheetAvataresPortal_(false);
+  if (!sheet || sheet.getLastRow() < 2) return { tipo:'preset', preset:'onda' };
+  const linhas = sheet.getRange(2, 1, sheet.getLastRow() - 1, 10).getValues();
+  const row = linhas.slice().reverse().find(linha => String(linha[0]) === String(idCliente));
+  if (!row) return { tipo:'preset', preset:'onda' };
+  const resposta = {
+    tipo: String(row[1] || 'preset'), preset: String(row[2] || 'onda'), pele: String(row[3] || ''),
+    cabelo: String(row[4] || ''), camisola: String(row[5] || ''), fundo: String(row[6] || ''), estilo: String(row[7] || '')
+  };
+  if (resposta.tipo === 'foto' && row[8]) {
+    try {
+      const blob = DriveApp.getFileById(String(row[8])).getBlob();
+      resposta.fotoData = 'data:' + (blob.getContentType() || 'image/webp') + ';base64,' + Utilities.base64Encode(blob.getBytes());
+    } catch (erro) {
+      Logger.log('Avatar sem ficheiro disponível: ' + erro.toString());
+      resposta.tipo = 'preset';
+    }
+  }
+  return resposta;
+}
+
+function guardarAvatarPortal_(token, dados) {
+  const info = obterClientePorTokenPortal_(token);
+  if (!info) throw new Error('SESSAO_INVALIDA');
+  const tipo = ['preset','personalizado','foto'].indexOf(String(dados.tipo)) >= 0 ? String(dados.tipo) : 'preset';
+  const preset = AVATARES_PORTAL_IDS_.indexOf(String(dados.preset)) >= 0 ? String(dados.preset) : 'onda';
+  const estilo = AVATARES_PORTAL_ESTILOS_.indexOf(String(dados.estilo)) >= 0 ? String(dados.estilo) : 'curto';
+  const sheet = obterSheetAvataresPortal_(true);
+  const linhas = sheet.getLastRow() >= 2 ? sheet.getRange(2, 1, sheet.getLastRow() - 1, 10).getValues() : [];
+  const indice = linhas.findIndex(linha => String(linha[0]) === String(info.idCliente));
+  const anterior = indice >= 0 ? linhas[indice] : null;
+  let fileId = anterior ? String(anterior[8] || '') : '';
+
+  if (tipo === 'foto') {
+    const correspondencia = String(dados.fotoData || '').match(/^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/=]+)$/i);
+    if (!correspondencia || correspondencia[2].length > 160000) throw new Error('FOTO_INVALIDA_OU_DEMASIADO_GRANDE');
+    const bytes = Utilities.base64Decode(correspondencia[2]);
+    if (bytes.length > 120000) throw new Error('FOTO_DEMASIADO_GRANDE');
+    const mime = 'image/' + correspondencia[1].toLowerCase();
+    const extensao = correspondencia[1].toLowerCase() === 'jpeg' ? 'jpg' : correspondencia[1].toLowerCase();
+    const blob = Utilities.newBlob(bytes, mime, 'avatar-' + info.idCliente + '.' + extensao);
+    const ficheiro = obterPastaAvataresPortal_().createFile(blob);
+    if (fileId) { try { DriveApp.getFileById(fileId).setTrashed(true); } catch (erro) {} }
+    fileId = ficheiro.getId();
+  } else if (fileId) {
+    try { DriveApp.getFileById(fileId).setTrashed(true); } catch (erro) {}
+    fileId = '';
+  }
+
+  const registo = [
+    info.idCliente, tipo, preset,
+    normalizarCorAvatarPortal_(dados.pele, '#f2c6a0'), normalizarCorAvatarPortal_(dados.cabelo, '#18273d'),
+    normalizarCorAvatarPortal_(dados.camisola, '#19c8b1'), normalizarCorAvatarPortal_(dados.fundo, '#0b5cc2'),
+    estilo, fileId, new Date()
+  ];
+  if (indice >= 0) sheet.getRange(indice + 2, 1, 1, registo.length).setValues([registo]);
+  else sheet.appendRow(registo);
+  registarAcessoPortal_(info, 'AVATAR_ATUALIZADO', tipo === 'foto' ? 'Fotografia reduzida no dispositivo' : tipo);
+  return getAvatarPortal_(info.idCliente);
+}
+
+function guardarPedidoAtualizacaoDadosPortal_(sessao, dados) {
+  const info = obterClientePorTokenPortal_(sessao);
+  if (!info || !info.eSessao) throw new Error('SESSAO_INVALIDA');
+
+  const nome = String(dados.nome || '').trim();
+  const contacto = String(dados.contacto || '').trim();
+  const email = String(dados.email || '').trim().toLowerCase();
+  const dataNascimento = String(dados.dataNascimento || '').trim();
+  const genero = String(dados.genero || '').trim();
+  const morada = String(dados.morada || '').trim();
+  const nota = String(dados.nota || '').trim();
+  const requestId = String(dados.eventId || '').trim().slice(0, 120);
+
+  if (nome.length < 2 || nome.length > 120) throw new Error('NOME_INVALIDO');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 160) throw new Error('EMAIL_INVALIDO');
+  if (contacto.length > 30 || morada.length > 240 || nota.length > 500) throw new Error('DADOS_DEMASIADO_LONGOS');
+  if (dataNascimento && !/^\d{4}-\d{2}-\d{2}$/.test(dataNascimento)) throw new Error('DATA_NASCIMENTO_INVALIDA');
+  if (genero && ['Feminino', 'Masculino', 'Outro'].indexOf(genero) === -1) throw new Error('GENERO_INVALIDO');
+
+  const cache = CacheService.getScriptCache();
+  const limiteKey = chaveSeguraPortal_('pedido_dados_', info.idCliente);
+  if (cache.get(limiteKey)) throw new Error('AGUARDA_ANTES_DE_REENVIAR');
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = ss.getSheetByName('PEDIDOS_ATUALIZACAO_DADOS');
+    if (!sheet) {
+      sheet = ss.insertSheet('PEDIDOS_ATUALIZACAO_DADOS');
+      sheet.appendRow(['DATA_HORA', 'ID_CLIENTE', 'CLIENTE_ATUAL', 'EMAIL_ATUAL', 'NOME_PEDIDO', 'CONTACTO_PEDIDO', 'EMAIL_PEDIDO', 'DATA_NASCIMENTO_PEDIDO', 'GENERO_PEDIDO', 'MORADA_PEDIDO', 'NOTA', 'ESTADO', 'REQUEST_ID']);
+      sheet.setFrozenRows(1);
+    }
+    if (requestId && sheet.getLastRow() >= 2) {
+      const ids = sheet.getRange(2, 13, sheet.getLastRow() - 1, 1).getDisplayValues().flat();
+      if (ids.indexOf(requestId) !== -1) return { guardado:true, repetido:true, estado:'PENDENTE' };
+    }
+    sheet.appendRow([
+      new Date(), info.idCliente, textoSeguroParaFolhaPortal_(info.nome, 120), textoSeguroParaFolhaPortal_(info.email, 160),
+      textoSeguroParaFolhaPortal_(nome, 120), textoSeguroParaFolhaPortal_(contacto, 30), textoSeguroParaFolhaPortal_(email, 160),
+      textoSeguroParaFolhaPortal_(dataNascimento, 10), textoSeguroParaFolhaPortal_(genero, 20), textoSeguroParaFolhaPortal_(morada, 240),
+      textoSeguroParaFolhaPortal_(nota, 500), 'PENDENTE', textoSeguroParaFolhaPortal_(requestId, 120)
+    ]);
+    cache.put(limiteKey, '1', 60);
+
+    let emailEnviado = false;
+    const destino = Session.getEffectiveUser().getEmail() || Session.getActiveUser().getEmail();
+    if (destino) {
+      try {
+        MailApp.sendEmail({
+          to: destino,
+          subject: 'AL MOVE — pedido de alteração de dados: ' + nome,
+          body: [
+            'Cliente: ' + info.nome,
+            'ID: ' + info.idCliente,
+            '',
+            'Nome pedido: ' + nome,
+            'Contacto pedido: ' + (contacto || '—'),
+            'Email pedido: ' + email,
+            'Data de nascimento: ' + (dataNascimento || '—'),
+            'Género: ' + (genero || '—'),
+            'Morada: ' + (morada || '—'),
+            'Notas: ' + (nota || '—'),
+            '',
+            'Confirma os dados antes de os aplicares na ficha do cliente.'
+          ].join('\n')
+        });
+        emailEnviado = true;
+      } catch (erroEmail) {
+        Logger.log('Pedido de dados guardado, mas o email falhou: ' + erroEmail.toString());
+      }
+    }
+    registarAcessoPortal_(info, 'PEDIDO_ATUALIZACAO_DADOS', 'Pedido pendente de confirmação');
+    return { guardado:true, estado:'PENDENTE', emailEnviado:emailEnviado };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
 function pedirCodigoAcessoPortal_(sessao) {
   const info = obterClientePorTokenPortal_(sessao);
   if (!info || !info.eSessao) throw new Error('SESSAO_INVALIDA');
@@ -2140,8 +2605,11 @@ function pedirCodigoAcessoPortal_(sessao) {
   const cache = CacheService.getScriptCache();
   const limiteKey = chaveSeguraPortal_('codigo_limite_', info.idCliente);
   if (cache.get(limiteKey)) throw new Error('AGUARDA_ANTES_DE_REENVIAR');
+  const bloqueio = lerTemporarioPortal_(chaveSeguraPortal_('codigo_bloqueio_', sessao));
+  if (bloqueio) throw new Error('CODIGO_TEMPORARIAMENTE_BLOQUEADO');
   const codigo = String(Math.floor(100000 + Math.random() * 900000));
-  cache.put(chaveSeguraPortal_('codigo_portal_', sessao), chaveSeguraPortal_('hash_', codigo), DURACAO_CODIGO_PORTAL_SEGUNDOS_);
+  guardarTemporarioPortal_(chaveSeguraPortal_('codigo_portal_', sessao), chaveSeguraPortal_('hash_', codigo), DURACAO_CODIGO_PORTAL_SEGUNDOS_);
+  removerTemporarioPortal_(chaveSeguraPortal_('codigo_tentativas_', sessao));
   cache.put(limiteKey, '1', 60);
   MailApp.sendEmail({
     to: info.email,
@@ -2157,15 +2625,26 @@ function validarCodigoAcessoPortal_(sessao, codigo) {
   if (!info || !info.eSessao) throw new Error('SESSAO_INVALIDA');
   const codigoLimpo = String(codigo || '').replace(/\D/g, '');
   if (!/^\d{6}$/.test(codigoLimpo)) throw new Error('CODIGO_INVALIDO');
-  const cache = CacheService.getScriptCache();
+  if (lerTemporarioPortal_(chaveSeguraPortal_('codigo_bloqueio_', sessao))) throw new Error('CODIGO_TEMPORARIAMENTE_BLOQUEADO');
   const chaveCodigo = chaveSeguraPortal_('codigo_portal_', sessao);
-  const esperado = cache.get(chaveCodigo);
+  const esperado = lerTemporarioPortal_(chaveCodigo);
   if (!esperado || esperado !== chaveSeguraPortal_('hash_', codigoLimpo)) {
+    const chaveTentativas = chaveSeguraPortal_('codigo_tentativas_', sessao);
+    const tentativas = Number(lerTemporarioPortal_(chaveTentativas) || 0) + 1;
+    if (tentativas >= MAX_TENTATIVAS_CODIGO_PORTAL_) {
+      removerTemporarioPortal_(chaveCodigo);
+      removerTemporarioPortal_(chaveTentativas);
+      guardarTemporarioPortal_(chaveSeguraPortal_('codigo_bloqueio_', sessao), '1', BLOQUEIO_CODIGO_PORTAL_SEGUNDOS_);
+      registarAcessoPortal_(info, 'CODIGO_BLOQUEADO', 'Cinco tentativas incorretas');
+      throw new Error('CODIGO_TEMPORARIAMENTE_BLOQUEADO');
+    }
+    guardarTemporarioPortal_(chaveTentativas, tentativas, DURACAO_CODIGO_PORTAL_SEGUNDOS_);
     registarAcessoPortal_(info, 'CODIGO_REJEITADO', 'Código incorreto ou expirado');
     throw new Error('CODIGO_INVALIDO_OU_EXPIRADO');
   }
-  cache.remove(chaveCodigo);
-  cache.put(chaveSeguraPortal_('acesso_sensivel_', sessao), '1', DURACAO_ACESSO_SENSIVEL_SEGUNDOS_);
+  removerTemporarioPortal_(chaveCodigo);
+  removerTemporarioPortal_(chaveSeguraPortal_('codigo_tentativas_', sessao));
+  guardarTemporarioPortal_(chaveSeguraPortal_('acesso_sensivel_', sessao), '1', DURACAO_ACESSO_SENSIVEL_SEGUNDOS_);
   registarAcessoPortal_(info, 'ACESSO_SENSIVEL_VALIDADO', 'Válido durante 30 minutos');
   return { validado: true, validoDuranteMinutos: 30 };
 }
@@ -2173,7 +2652,7 @@ function validarCodigoAcessoPortal_(sessao, codigo) {
 function exigirAcessoSensivelPortal_(sessao) {
   const info = obterClientePorTokenPortal_(sessao);
   if (!info || !info.eSessao) throw new Error('SESSAO_INVALIDA');
-  if (!CacheService.getScriptCache().get(chaveSeguraPortal_('acesso_sensivel_', sessao))) {
+  if (!lerTemporarioPortal_(chaveSeguraPortal_('acesso_sensivel_', sessao))) {
     throw new Error('ACESSO_PROTEGIDO_POR_CODIGO');
   }
   return info;
@@ -2217,14 +2696,15 @@ const FUNCOES_LEITURA_PORTAL_ = new Set([
   'getAvaliacaoFisicaPortal', 'getHistoricoAvaliacoesFisicasPortal', 'getPesosDiariosPortal',
   'getPedidoAvaliacaoPortal', 'getAgendaPortal', 'getPlanoAtivoPortal',
   'getResumoInicioPortal', 'getResumoConquistasPortal', 'getMetricasAtividadePortal',
-  'getNotificacoesPortal', 'getResumoPassosPortal', 'getResumoOpcoesPortal', 'getHistoricoExercicio'
+  'getNotificacoesPortal', 'getResumoPassosPortal', 'getResumoOpcoesPortal', 'getDadosPessoaisPortal',
+  'getAvatarPortal', 'getMapaAtividadePortal', 'getPassaporteTecnicoPortal', 'getHistoricoExercicio'
 ]);
 const FUNCOES_PUBLICAS_PORTAL_ = new Set(['pedirLinkLoginPortal', 'trocarCodigoLoginPortal']);
 
 function tratarPedidoApi_(e) {
   try {
     const conteudoPost = (e.postData && e.postData.contents) ? String(e.postData.contents) : '';
-    if (conteudoPost.length > 50000) return responderApiJSON_({ ok: false, erro: 'Pedido demasiado grande' });
+    if (conteudoPost.length > 180000) return responderApiJSON_({ ok: false, erro: 'Pedido demasiado grande' });
     const corpoPost = conteudoPost
       ? JSON.parse(conteudoPost)
       : ((e.parameter && e.parameter.data) ? JSON.parse(String(e.parameter.data).slice(0, 8000)) : {});
@@ -2235,7 +2715,12 @@ function tratarPedidoApi_(e) {
       return responderApiJSON_({ ok: false, erro: 'Função inválida' });
     }
     if (String(token || '').length > 200) return responderApiJSON_({ ok: false, erro: 'Token inválido' });
-    validarEstruturaPedidoPortal_(corpoPost, 0);
+    if (nomeFuncao === 'guardarAvatarPortal') {
+      if (!corpoPost || Object.keys(corpoPost).length > 14 || String(corpoPost.fotoData || '').length > 160000) throw new Error('Avatar inválido ou demasiado grande');
+    } else {
+      if (conteudoPost.length > 50000) throw new Error('Pedido demasiado grande');
+      validarEstruturaPedidoPortal_(corpoPost, 0);
+    }
 
     const funcao = API_FUNCOES_PORTAL[nomeFuncao];
     if (!funcao) return responderApiJSON_({ ok: false, erro: 'Função desconhecida: ' + nomeFuncao });
@@ -2382,10 +2867,10 @@ function getHistoricoAcessosPortal(idCliente, limite) {
 function obterClientePorTokenPortal_(token) {
   const tokenLimpo = String(token || '').trim();
   if (!tokenLimpo) return null;
-  const sessaoCache = CacheService.getScriptCache().get(chaveSeguraPortal_('sessao_portal_', tokenLimpo));
-  if (sessaoCache) {
+  const sessaoGuardada = lerTemporarioPortal_(chaveSeguraPortal_('sessao_portal_', tokenLimpo));
+  if (sessaoGuardada) {
     try {
-      const sessao = JSON.parse(sessaoCache);
+      const sessao = typeof sessaoGuardada === 'string' ? JSON.parse(sessaoGuardada) : sessaoGuardada;
       if (sessao.tokenPortalOriginal && PropertiesService.getScriptProperties().getProperty(chaveSeguraPortal_('token_revogado_', sessao.tokenPortalOriginal))) return null;
       if (!sessao.expiraEm || new Date(sessao.expiraEm).getTime() > Date.now()) return sessao;
     } catch (erro) {
@@ -6665,7 +7150,7 @@ function TESTE_opcoes() {
 // Substitui integralmente a função getResumoOpcoesPortal_ existente.
 // Lê as colunas da folha CLIENTES pelo texto do cabeçalho, para não depender
 // da sua posição. Mantém a API e o formato que o frontend já consome.
-function getResumoOpcoesPortal_(idCliente) {
+function getResumoOpcoesPortalCompleto_(idCliente) {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sheet = ss.getSheetByName('CLIENTES');
   if (!sheet) throw new Error('Folha CLIENTES não encontrada.');
@@ -6689,7 +7174,7 @@ function getResumoOpcoesPortal_(idCliente) {
   const primeirasLinhas = sheet
     .getRange(1, 1, linhasParaProcurar, ultimaColuna)
     .getValues();
-  const camposObrigatorios = ['nome', 'estado', 'servicoatual', 'sessoesrestam', 'idcliente'];
+  const camposObrigatorios = ['nome', 'estado', 'servicoatual', 'idcliente'];
 
   let linhaCabecalho = -1;
   let cabecalho = [];
@@ -6711,12 +7196,16 @@ function getResumoOpcoesPortal_(idCliente) {
   const iValidade = indiceColuna('Validade até');
   const iSessoesRestam = indiceColuna('Sessões restam');
   const iIdCliente = indiceColuna('ID_CLIENTE');
+  const iContacto = indiceColuna('Contacto');
+  const iEmail = indiceColuna('Email');
+  const iMorada = indiceColuna('Morada');
+  const iDataNascimento = indiceColuna('Data nascimento');
+  const iGenero = indiceColuna('Género');
 
   const emFalta = [];
   if (iNome === -1) emFalta.push('Nome');
   if (iEstado === -1) emFalta.push('Estado');
   if (iServico === -1) emFalta.push('Serviço atual');
-  if (iSessoesRestam === -1) emFalta.push('Sessões restam');
   if (iIdCliente === -1) emFalta.push('ID_CLIENTE');
   if (emFalta.length) {
     throw new Error('Cabeçalhos não encontrados em CLIENTES: ' + emFalta.join(', '));
@@ -6755,8 +7244,8 @@ function getResumoOpcoesPortal_(idCliente) {
     ? String(servicoLegado).trim()
     : String(servicoNaColunaAtual || '').trim();
 
-  const sessoesRestamNaColunaAtual = linhaCliente[iSessoesRestam];
-  const sessoesRestamLegado = linhaCliente[iSessoesRestam + 2];
+  const sessoesRestamNaColunaAtual = iSessoesRestam === -1 ? null : linhaCliente[iSessoesRestam];
+  const sessoesRestamLegado = iSessoesRestam === -1 ? null : linhaCliente[iSessoesRestam + 2];
   const sessoesRestam = temValor(sessoesRestamNaColunaAtual)
     ? sessoesRestamNaColunaAtual
     : (usaLayoutLegado ? sessoesRestamLegado : null);
@@ -6765,27 +7254,59 @@ function getResumoOpcoesPortal_(idCliente) {
       ? null
       : sessoesRestam;
   let sessoesPTFeitas = 0;
+  let sessoesPTTotal = null;
+  let origemSessoes = 'ficha-cliente';
   try {
-    sessoesPTFeitas = getHistoricoAtividadeCliente(idCliente, 50).sessoes
-      .filter(sessao => sessao.tipo === 'PT' && sessao.estado === 'REALIZADA')
-      .length;
+    const mesAtual = getMesAnoAtual();
+    const sessoesSheet = ss.getSheetByName('DB_SESSOES');
+    if (sessoesSheet && sessoesSheet.getLastRow() >= 2) {
+      const sessoesMes = sessoesSheet.getRange(2, 1, sessoesSheet.getLastRow() - 1, Math.min(6, sessoesSheet.getLastColumn())).getValues()
+        .filter(linha => String(linha[0]) === String(idCliente) && normalizarMesAno(linha[1]) === mesAtual);
+      sessoesPTFeitas = sessoesMes.filter(linha => String(linha[4] || '').toLowerCase() === 'confirmada').length;
+    }
+    const packsSheet = ss.getSheetByName('DB_PACKS_ATIVOS');
+    if (packsSheet && packsSheet.getLastRow() >= 2) {
+      const packs = packsSheet.getRange(2, 1, packsSheet.getLastRow() - 1, Math.min(10, packsSheet.getLastColumn())).getValues();
+      const packAtual = packs.find(linha => String(linha[0]) === String(idCliente) && normalizarMesAno(linha[1]) === mesAtual);
+      if (packAtual) {
+        sessoesPTTotal = Number(packAtual[3]) || calcularSessoesTotalPorFrequencia_(String(packAtual[2] || '')) || null;
+        origemSessoes = 'pack-ativo';
+      }
+    }
   } catch (erro) {
-    Logger.log('Não foi possível contar as sessões PT realizadas: ' + erro.toString());
+    Logger.log('Não foi possível calcular o saldo do pack ativo: ' + erro.toString());
   }
   const restantesNumero = Number(String(sessoesRestantes === null ? '' : sessoesRestantes).replace(',', '.'));
   const restantesNormalizados = /^0\.[1-9]\d*$/.test(String(sessoesRestantes || ''))
     ? Number(String(sessoesRestantes).split('.')[1])
     : (isFinite(restantesNumero) ? Math.max(0, Math.round(restantesNumero)) : null);
+  const restantesFinais = sessoesPTTotal === null
+    ? restantesNormalizados
+    : Math.max(0, sessoesPTTotal - sessoesPTFeitas);
   const perfilPT = getPerfilPT();
+  const lerCampoOpcional = (indice, indiceLegado) => {
+    if (indice !== -1 && temValor(linhaCliente[indice])) return String(linhaCliente[indice]).trim();
+    return indiceLegado >= 0 && temValor(linhaCliente[indiceLegado]) ? String(linhaCliente[indiceLegado]).trim() : '';
+  };
+  const nascimentoRaw = iDataNascimento === -1 ? '' : linhaCliente[iDataNascimento];
+  const dataNascimento = nascimentoRaw instanceof Date
+    ? Utilities.formatDate(nascimentoRaw, Session.getScriptTimeZone(), 'yyyy-MM-dd')
+    : String(nascimentoRaw || '').trim();
 
   return {
     nome: String(linhaCliente[iNome] || '').trim(),
     estado: String(linhaCliente[iEstado] || '').trim(),
+    contacto: lerCampoOpcional(iContacto, 2),
+    email: lerCampoOpcional(iEmail, 18),
+    morada: lerCampoOpcional(iMorada, 17),
+    dataNascimento: dataNascimento,
+    genero: lerCampoOpcional(iGenero, -1),
     servicoAtual: servicoAtual,
     validadeAte: validadeAte,
-    sessoesRestantes: sessoesRestantes,
+    sessoesRestantes: restantesFinais,
     sessoesPTFeitas: sessoesPTFeitas,
-    sessoesPTTotal: restantesNormalizados === null ? null : sessoesPTFeitas + restantesNormalizados,
+    sessoesPTTotal: sessoesPTTotal === null && restantesFinais !== null ? sessoesPTFeitas + restantesFinais : sessoesPTTotal,
+    origemSessoes: origemSessoes,
     contactoPTNome: perfilPT.nome || 'André',
     contactoPTNumero: perfilPT.contacto || ''
   };
@@ -6911,6 +7432,36 @@ function getNotificacoesPortal_(idCliente) {
     .sort((a, b) => new Date(b[4]).getTime() - new Date(a[4]).getTime())
     .slice(0, 8)
     .map(linha => ({ titulo: linha[1] || 'Atualização AL MOVE', mensagem: linha[2] || '' }));
+}
+
+/** Resumo seguro para o arranque. Não inclui contacto, email, morada ou nascimento. */
+function getResumoOpcoesPortal_(idCliente) {
+  const dados = getResumoOpcoesPortalCompleto_(idCliente);
+  return {
+    nome: dados.nome,
+    estado: dados.estado,
+    servicoAtual: dados.servicoAtual,
+    validadeAte: dados.validadeAte,
+    sessoesRestantes: dados.sessoesRestantes,
+    sessoesPTFeitas: dados.sessoesPTFeitas,
+    sessoesPTTotal: dados.sessoesPTTotal,
+    origemSessoes: dados.origemSessoes,
+    contactoPTNome: dados.contactoPTNome,
+    contactoPTNumero: dados.contactoPTNumero
+  };
+}
+
+/** Dados pessoais pedidos apenas quando o cliente abre “Os meus dados”. */
+function getDadosPessoaisPortal_(idCliente) {
+  const dados = getResumoOpcoesPortalCompleto_(idCliente);
+  return {
+    nome: dados.nome,
+    contacto: dados.contacto,
+    email: dados.email,
+    morada: dados.morada,
+    dataNascimento: dados.dataNascimento,
+    genero: dados.genero
+  };
 }
 
 function marcarNotificacoesLidasPortal_(idCliente) {
@@ -7101,7 +7652,7 @@ function guardarPedidoAvaliacaoPortal(dados) {
   if (existente && ['pendente', 'confirmado'].indexOf(String(existente.estado).toLowerCase()) >= 0) return existente;
   const registo = [
     info.idCliente, String(dados.periodo || ''), dias.join(', '), String(dados.horaPreferida || ''),
-    String(dados.horaAlternativa || ''), String(dados.objetivo || ''), String(dados.nota || '').slice(0, 500), 'Pendente', new Date()
+    String(dados.horaAlternativa || ''), textoSeguroParaFolhaPortal_(dados.objetivo || '', 160), textoSeguroParaFolhaPortal_(dados.nota || '', 500), 'Pendente', new Date()
   ];
   obterSheetPedidosAvaliacao_().appendRow(registo);
   const pedido = getPedidoAvaliacaoPortal_(info.idCliente);
