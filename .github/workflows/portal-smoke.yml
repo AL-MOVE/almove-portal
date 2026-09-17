@@ -19,8 +19,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Validar contratos locais
+        run: node tests/hotfix-contracts.mjs
       - name: Testar portal publicado
         env:
-          PORTAL_BASE_URL: https://almove-portal.vercel.app
-          PORTAL_TEST_TOKEN: ${{ secrets.PORTAL_TEST_TOKEN }}
+          PORTAL_BASE_URL: https://portal.almove.pt
+          PORTAL_TEST_EMAIL: ${{ secrets.PORTAL_TEST_EMAIL }}
         run: node tests/portal-smoke.mjs
