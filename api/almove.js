@@ -1,3 +1,5 @@
+import { obterAssertacaoFirebasePortal } from './_firebase.js';
+
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyiOl7KkXMYSFv9lKKVb2sMspvwER2P5IMlpNQcr9csLyEDnzJqvVqisE-XVuAHgeUV/exec';
 
 const LEITURAS = new Set([
@@ -27,6 +29,8 @@ function responder(res, estado, corpo, requestId) {
 
 function estadoErroAplicacao(erro) {
   const mensagem = String(erro || '');
+  if (/^FIREBASE_NAO_CONFIGURADO|^FIREBASE_CREDENCIAL_INVALIDA/.test(mensagem)) return 503;
+  if (/^FIREBASE_/.test(mensagem)) return 401;
   if (/SESSAO_INVALIDA|Link inválido|Falta o token|Token inválido/i.test(mensagem)) return 401;
   if (/ACESSO_PROTEGIDO|código/i.test(mensagem)) return 403;
   if (/LIMITE|Aguarda/i.test(mensagem)) return 429;
@@ -62,7 +66,18 @@ export default async function handler(req, res) {
     if (!ESCRITAS.has(fn)) return responder(res, 405, { ok: false, erro: 'POST permite apenas gravações' }, requestId);
   }
 
-  if (!/^[A-Za-z][A-Za-z0-9_]{1,79}$/.test(fn) || (!PUBLICAS.has(fn) && !token) || token.length > 200) {
+  // O token Firebase nunca segue para o Apps Script. A Vercel valida-o e
+  // troca-o por uma autorização HMAC curta, assinada apenas no servidor.
+  if (!PUBLICAS.has(fn) && req.headers.authorization) {
+    try {
+      token = await obterAssertacaoFirebasePortal(req);
+    } catch (erro) {
+      return responder(res, estadoErroAplicacao(erro.code || erro.message), { ok: false, erro: 'Sessão Firebase inválida ou expirada' }, requestId);
+    }
+  }
+
+  const limiteToken = token.startsWith('fb1.') ? 1200 : 200;
+  if (!/^[A-Za-z][A-Za-z0-9_]{1,79}$/.test(fn) || (!PUBLICAS.has(fn) && !token) || token.length > limiteToken) {
     return responder(res, 400, { ok: false, erro: 'Pedido inválido' }, requestId);
   }
 

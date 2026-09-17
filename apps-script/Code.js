@@ -2714,7 +2714,8 @@ function tratarPedidoApi_(e) {
     if (!/^[A-Za-z][A-Za-z0-9_]{1,79}$/.test(String(nomeFuncao || ''))) {
       return responderApiJSON_({ ok: false, erro: 'Função inválida' });
     }
-    if (String(token || '').length > 200) return responderApiJSON_({ ok: false, erro: 'Token inválido' });
+    const limiteToken = String(token || '').indexOf('fb1.') === 0 ? 1200 : 200;
+    if (String(token || '').length > limiteToken) return responderApiJSON_({ ok: false, erro: 'Token inválido' });
     if (nomeFuncao === 'guardarAvatarPortal') {
       if (!corpoPost || Object.keys(corpoPost).length > 14 || String(corpoPost.fotoData || '').length > 160000) throw new Error('Avatar inválido ou demasiado grande');
     } else {
@@ -2867,6 +2868,8 @@ function getHistoricoAcessosPortal(idCliente, limite) {
 function obterClientePorTokenPortal_(token) {
   const tokenLimpo = String(token || '').trim();
   if (!tokenLimpo) return null;
+  const clienteFirebase = obterClientePorAssertacaoFirebasePortal_(tokenLimpo);
+  if (clienteFirebase) return clienteFirebase;
   const sessaoGuardada = lerTemporarioPortal_(chaveSeguraPortal_('sessao_portal_', tokenLimpo));
   if (sessaoGuardada) {
     try {
@@ -2880,6 +2883,60 @@ function obterClientePorTokenPortal_(token) {
   }
   // Só sessões criadas a partir do link temporário de email podem autenticar
   // pedidos. Um token permanente copiado de uma URL deixou de dar acesso.
+  return null;
+}
+
+/**
+ * A Vercel valida o ID token Firebase e envia para aqui apenas uma assertacao
+ * de cinco minutos, assinada com PORTAL_APPS_SCRIPT_HMAC_SECRET. Assim o Apps
+ * Script nao precisa de chaves de servico Firebase nem aceita tokens do browser.
+ */
+function obterClientePorAssertacaoFirebasePortal_(token) {
+  const partes = String(token || '').match(/^fb1\.([A-Za-z0-9_-]{20,1000})\.([A-Za-z0-9_-]{20,100})$/);
+  if (!partes) return null;
+  const segredo = PropertiesService.getScriptProperties().getProperty('PORTAL_APPS_SCRIPT_HMAC_SECRET');
+  if (!segredo || String(segredo).length < 32) return null;
+  const corpo = partes[1];
+  const assinaturaRecebida = partes[2];
+  const assinaturaEsperada = Utilities.base64EncodeWebSafe(
+    Utilities.computeHmacSha256Signature(corpo, segredo)
+  ).replace(/=+$/g, '');
+  if (assinaturaRecebida !== assinaturaEsperada) return null;
+
+  try {
+    const dados = JSON.parse(Utilities.newBlob(Utilities.base64DecodeWebSafe(corpo)).getDataAsString('UTF-8'));
+    const agora = Math.floor(Date.now() / 1000);
+    const idCliente = String(dados.idCliente || '');
+    const email = String(dados.email || '').trim().toLowerCase();
+    if (
+      dados.v !== 1 ||
+      !dados.exp || Number(dados.exp) < agora ||
+      !dados.iat || Number(dados.iat) > agora + 60 ||
+      !/^[A-Za-z0-9_-]{6,128}$/.test(String(dados.uid || '')) ||
+      !/^[A-Za-z0-9_-]{1,80}$/.test(idCliente) ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+    ) return null;
+
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('CLIENTES');
+    if (!sheet || sheet.getLastRow() < 4) return null;
+    const clientes = sheet.getRange('A4:Y' + sheet.getLastRow()).getValues();
+    for (let indice = 0; indice < clientes.length; indice++) {
+      const row = clientes[indice];
+      if (String(row[24] || '') !== idCliente) continue;
+      if (String(row[1] || 'Ativo').trim().toLowerCase() === 'cancelado') return null;
+      if (String(row[18] || '').trim().toLowerCase() !== email) return null;
+      return {
+        idCliente: idCliente,
+        nome: String(row[0] || ''),
+        email: email,
+        tokenPortalOriginal: 'firebase:' + String(dados.uid),
+        eSessao: true,
+        autenticacao: 'firebase'
+      };
+    }
+  } catch (erro) {
+    Logger.log('Assertacao Firebase inválida: ' + erro.toString());
+  }
   return null;
 }
 

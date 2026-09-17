@@ -1,0 +1,31 @@
+# Migração para Firebase Auth — AL MOVE
+
+Esta preparação não altera o login atual. O portal continua com link temporário por email até uma conta Firebase de teste estar validada.
+
+## O que fica no Firebase
+
+- Email e palavra-passe, confirmação de email, recuperação de palavra-passe e sessões persistentes.
+- A revogação de sessões do Firebase passa a ser confirmada pela Vercel em cada pedido autenticado.
+- Uma conta Firebase tem exatamente um cliente CRM através da *custom claim* `clientId`.
+
+O Apps Script não recebe palavras-passe, nem chaves Firebase, nem ID tokens. Recebe uma autorização HMAC de cinco minutos emitida pela Vercel depois de validar o token Firebase.
+
+## Configuração única
+
+1. Criar o projeto **almove-portal** no Firebase Console.
+2. Em **Authentication > Sign-in method**, ativar **Email/Password** e confirmação de email.
+3. Em **Project settings > Your apps**, criar a app Web `portal.almove.pt`.
+4. Em **Service accounts**, criar uma chave para a Vercel. Guardar o JSON apenas nos Environment Variables da Vercel como `FIREBASE_SERVICE_ACCOUNT_JSON`.
+5. Na Vercel criar:
+   - `FIREBASE_PROJECT_ID`
+   - `FIREBASE_SERVICE_ACCOUNT_JSON`
+   - `PORTAL_APPS_SCRIPT_HMAC_SECRET` (um segredo aleatório com pelo menos 32 caracteres)
+6. No Apps Script, em **Project Settings > Script properties**, criar `PORTAL_APPS_SCRIPT_HMAC_SECRET` com exatamente o mesmo valor.
+7. Para cada cliente, criar a conta Firebase e definir as *custom claims*:
+   `{ clientId: "ID_DO_CRM", portalRole: "client" }`.
+
+Nunca colocar a chave de serviço, o segredo HMAC ou palavras-passe no GitHub, no HTML ou numa folha de cálculo.
+
+## Piloto
+
+Criar uma conta Firebase de teste ligada a um único ID de cliente do CRM. Validar: login, fechar/reabrir PWA, recuperação de palavra-passe, revogar sessão, leitura de treinos e gravação de check-in. Só depois ligamos a interface Firebase no `index.html` e desativamos o link temporário.
