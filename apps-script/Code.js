@@ -1755,9 +1755,6 @@ const API_FUNCOES_PORTAL = {
   trocarCodigoLoginPortal: function (token, corpoPost) {
     return trocarCodigoLoginPortal_(corpoPost && corpoPost.codigo, corpoPost || {});
   },
-  criarSessaoPortal: function (token, corpoPost) {
-    return criarSessaoPortal_(token, corpoPost || {});
-  },
   pedirCodigoAcessoPortal: function (token) {
     return pedirCodigoAcessoPortal_(token);
   },
@@ -2002,12 +1999,6 @@ function registarAcessoPortal_(info, evento, detalhe) {
   }
 }
 
-function criarSessaoPortal_(tokenPortal, dados) {
-  const info = obterClientePorTokenPortal_(tokenPortal);
-  if (!info || info.eSessao) throw new Error('LINK_INVALIDO');
-  return criarSessaoParaInfo_(info, dados, 'SESSAO_INICIADA');
-}
-
 function criarSessaoParaInfo_(info, dados, evento) {
   const cache = CacheService.getScriptCache();
   const sessao = Utilities.getUuid() + Utilities.getUuid().replace(/-/g, '');
@@ -2189,7 +2180,6 @@ function exigirAcessoSensivelPortal_(sessao) {
 }
 
 function verificarLimitePortal_(token, nomeFuncao) {
-  if (nomeFuncao === 'criarSessaoPortal') return;
   const cache = CacheService.getScriptCache();
   const janela = Math.floor(Date.now() / 60000);
   const chave = chaveSeguraPortal_('limite_' + janela + '_' + nomeFuncao + '_', token);
@@ -2257,7 +2247,7 @@ function tratarPedidoApi_(e) {
     verificarLimitePortal_(token || corpoPost.email || corpoPost.codigo || 'publico', nomeFuncao);
 
     const dados = funcao(token, corpoPost);
-    if (!FUNCOES_LEITURA_PORTAL_.has(nomeFuncao) && !/^(criarSessao|pedirCodigo|validarCodigo|terminarSessao)/.test(nomeFuncao)) {
+    if (!FUNCOES_LEITURA_PORTAL_.has(nomeFuncao) && !/^(pedirCodigo|validarCodigo|terminarSessao)/.test(nomeFuncao)) {
       const info = obterClientePorTokenPortal_(token);
       if (info) registarAcessoPortal_(info, 'ALTERACAO_' + nomeFuncao.toUpperCase(), 'Operação guardada no portal');
     }
@@ -2283,10 +2273,14 @@ function doGet(e) {
       return servirPaginaAssinatura_(e.parameter.assinar);
     }
 
-    // Se o link tiver ?portal=TOKEN, mostra o Portal do Cliente — página
-    // pública, só de leitura, sem login, com o resumo do próprio cliente.
+    // Os links permanentes do portal foram retirados. Mantemos uma página de
+    // transição para que favoritos antigos conduzam ao acesso por email.
     if (e && e.parameter && e.parameter.portal) {
-      return servirPortalCliente_(e.parameter.portal);
+      return HtmlService.createHtmlOutput(
+        '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">' +
+        '<script>location.replace("https://portal.almove.pt/");</script>' +
+        '<p>Abre <a href="https://portal.almove.pt/">portal.almove.pt</a> e entra com o teu email.</p>'
+      ).setTitle('AL MOVE');
     }
 
     return HtmlService.createTemplateFromFile('Index')
@@ -2350,13 +2344,7 @@ function enviarConvitePortalCliente(idCliente) {
 }
 
 function obterLinkPortalCliente(idCliente) {
-  try {
-    const token = obterOuCriarTokenPortal_(idCliente);
-    return URL_PORTAL_CLIENTE_PUBLICO_ + encodeURIComponent(token);
-  } catch (error) {
-    Logger.log('Erro obterLinkPortalCliente: ' + error.toString());
-    throw error;
-  }
+  return 'https://portal.almove.pt/';
 }
 
 function revogarERegenerarTokenPortal(idCliente) {
@@ -2374,7 +2362,7 @@ function revogarERegenerarTokenPortal(idCliente) {
       if (tokenAntigo) PropertiesService.getScriptProperties().setProperty(chaveSeguraPortal_('token_revogado_', tokenAntigo), new Date().toISOString());
       const info = { idCliente: String(idCliente), nome: String(dados[i][0] || '') };
       registarAcessoPortal_(info, 'LINK_REGENERADO', tokenAntigo ? 'O link anterior foi revogado.' : 'Primeiro link criado.');
-      return { link: URL_PORTAL_CLIENTE_PUBLICO_ + encodeURIComponent(novoToken), criadoEm: new Date().toISOString() };
+      return { link: 'https://portal.almove.pt/', criadoEm: new Date().toISOString(), acesso: 'Envia um convite por email para iniciar sessão.' };
     }
     throw new Error('Cliente não encontrado');
   } finally {
@@ -2405,25 +2393,8 @@ function obterClientePorTokenPortal_(token) {
     }
     return null;
   }
-  if (PropertiesService.getScriptProperties().getProperty(chaveSeguraPortal_('token_revogado_', tokenLimpo))) return null;
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const sheet = ss.getSheetByName('CLIENTES');
-  const clientesData = sheet.getRange('A4:Y' + sheet.getLastRow()).getValues();
-
-  for (let i = 0; i < clientesData.length; i++) {
-    const row = clientesData[i];
-    if (row[23] && String(row[23]).trim() === tokenLimpo) {
-      return {
-        idCliente: String(row[24]),
-        nome: String(row[0]),
-        email: String(row[18] || '').trim(),
-        tokenPortalOriginal: tokenLimpo,
-        eSessao: false,
-        contratoFileId: row[16] ? String(row[16]).trim() : '',
-        assinaturaAceiteEmRaw: row[20]
-      };
-    }
-  }
+  // Só sessões criadas a partir do link temporário de email podem autenticar
+  // pedidos. Um token permanente copiado de uma URL deixou de dar acesso.
   return null;
 }
 
