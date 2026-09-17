@@ -181,6 +181,17 @@
       text-align:center;color:var(--text-muted);
       font-size:13px;padding:30px 0;
     }
+    .carregando-orb{
+      width:34px;height:34px;margin:0 auto 12px;border-radius:50%;
+      background:radial-gradient(circle at 30% 28%, #67f4e5 0 7%, #18cfc0 25%, #0874c9 61%, #07172b 100%);
+      box-shadow:0 0 0 5px rgba(38,209,193,.08), 0 0 26px rgba(38,209,193,.26);
+      animation:orb-flutuar 2.4s ease-in-out infinite;
+    }
+    @keyframes orb-flutuar{
+      0%,100%{transform:translateY(0) scale(1);filter:saturate(1)}
+      50%{transform:translateY(-5px) scale(1.05);filter:saturate(1.2)}
+    }
+    @media (prefers-reduced-motion:reduce){.carregando-orb{animation:none;}}
 
     .oculto{display:none !important;}
 
@@ -1365,6 +1376,7 @@
   <div id="tabHoje" class="tab-conteudo oculto">
 
     <div id="ecraCarregando" class="card carregando">
+      <div class="carregando-orb" aria-hidden="true"></div>
       A carregar o teu check-in de hoje…
     </div>
 
@@ -2193,12 +2205,17 @@
   function obterBootstrapPortal(forcar) {
     if (forcar) bootstrapPortalPromise = null;
     if (bootstrapPortalPromise) return bootstrapPortalPromise;
-    const avisoDemora = window.setTimeout(function () {
-      mostrarEstadoLigacao("a-ligar", "A sincronizar o teu acompanhamento…");
-    }, 900);
-    bootstrapPortalPromise = chamarApi("getBootstrapPortal", {})
+    let avisoDemora = null;
+    // Não apresentamos um falso problema de sincronização enquanto o link de
+    // email ainda está a ser trocado por uma sessão autenticada.
+    bootstrapPortalPromise = SESSAO_PRONTA.then(function () {
+      avisoDemora = window.setTimeout(function () {
+        mostrarEstadoLigacao("a-ligar", "A sincronizar o teu acompanhamento…");
+      }, 1800);
+      return chamarApi("getBootstrapPortal", {});
+    })
       .then(function (resp) {
-        window.clearTimeout(avisoDemora);
+        if (avisoDemora) window.clearTimeout(avisoDemora);
         if (!resp || !resp.ok || !resp.dados) throw new Error((resp && resp.erro) || "Não foi possível carregar os dados do portal.");
         const dados = resp.dados;
         guardarBootstrapLocal(dados);
@@ -2207,7 +2224,7 @@
         return dados;
       })
       .catch(function (erro) {
-        window.clearTimeout(avisoDemora);
+        if (avisoDemora) window.clearTimeout(avisoDemora);
         bootstrapPortalPromise = null;
         const local = lerBootstrapLocal();
         if (local) {
@@ -2369,7 +2386,7 @@
   normalizarIconesFixos();
   const versaoPortalEl = document.createElement("div");
   versaoPortalEl.className = "versao-portal";
-  versaoPortalEl.textContent = "AL MOVE · versão 51";
+  versaoPortalEl.textContent = "AL MOVE · versão 52";
   document.getElementById("tabPlanos").appendChild(versaoPortalEl);
 
   const painelPrivacidadeEl = document.getElementById("painelPrivacidade");
@@ -5607,26 +5624,34 @@
     });
 
   // ---------- Service worker ----------
+  // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
+  // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
+  const VERSAO_CLIENTE_PORTAL = "52";
+  const CHAVE_AVISO_SW = "ALMOVE_SW_AVISO_" + VERSAO_CLIENTE_PORTAL;
+  let recarregarPorAtualizacao = false;
+  let recarregamentoAgendado = false;
+  let workerAtualizacaoPendente = null;
   if ("serviceWorker" in navigator) {
-    let recarregarPorAtualizacao = false;
-    let recarregamentoAgendado = false;
     navigator.serviceWorker.addEventListener("controllerchange", function () {
       if (recarregarPorAtualizacao && !recarregamentoAgendado) {
         recarregamentoAgendado = true;
+        try { sessionStorage.removeItem(CHAVE_AVISO_SW); } catch (erro) {}
         window.location.reload();
       }
     });
     window.addEventListener("load", function () {
-      navigator.serviceWorker.register("/sw.js").then(function (registo) {
+      navigator.serviceWorker.register("/sw.js", { updateViaCache:"none" }).then(function (registo) {
         if (registo.waiting && navigator.serviceWorker.controller) mostrarAvisoAtualizacao(registo.waiting);
         registo.addEventListener("updatefound", function () {
           const novoWorker = registo.installing;
+          if (!novoWorker) return;
           novoWorker.addEventListener("statechange", function () {
             if (novoWorker.state === "installed" && navigator.serviceWorker.controller) {
               mostrarAvisoAtualizacao(novoWorker);
             }
           });
         });
+        registo.update().catch(function () {});
       }).catch(function () {
         // Ambientes sem suporte a service worker (ex.: teste local via file://)
         // não devem impedir o resto da app de funcionar.
@@ -5635,7 +5660,9 @@
   }
 
   function mostrarAvisoAtualizacao(novoWorker) {
-    if (document.querySelector(".toast-atualizacao")) return;
+    if (!novoWorker || document.querySelector(".toast-atualizacao")) return;
+    try { if (sessionStorage.getItem(CHAVE_AVISO_SW) === "1") return; } catch (erro) {}
+    workerAtualizacaoPendente = novoWorker;
     const aviso = document.createElement("div");
     aviso.className = "toast toast-atualizacao";
     aviso.innerHTML = '<span>Há uma versão nova da app.</span><button>Atualizar</button>';
@@ -5644,13 +5671,15 @@
       botao.disabled = true;
       botao.textContent = "A atualizar…";
       recarregarPorAtualizacao = true;
-      if (novoWorker) novoWorker.postMessage("SKIP_WAITING");
+      try { sessionStorage.setItem(CHAVE_AVISO_SW, "1"); } catch (erro) {}
+      if (workerAtualizacaoPendente) workerAtualizacaoPendente.postMessage("SKIP_WAITING");
       window.setTimeout(function () {
         if (!recarregamentoAgendado) {
-          recarregamentoAgendado = true;
-          window.location.reload();
+          botao.disabled = false;
+          botao.textContent = "Atualizar";
+          aviso.querySelector("span").textContent = "A atualização está a concluir. Fecha outras abas do portal se continuar pendente.";
         }
-      }, 350);
+      }, 4000);
     };
     document.body.appendChild(aviso);
   }
