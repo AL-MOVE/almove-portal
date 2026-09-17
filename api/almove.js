@@ -4,7 +4,8 @@ const LEITURAS = new Set([
   'getBootstrapPortal', 'getProgressoBootstrapPortal', 'getEstadoPortalHoje', 'getAvaliacaoFisicaPortal',
   'getHistoricoAvaliacoesFisicasPortal', 'getPesosDiariosPortal', 'getPedidoAvaliacaoPortal', 'getAgendaPortal',
   'getPlanoAtivoPortal', 'getResumoInicioPortal', 'getResumoConquistasPortal', 'getMetricasAtividadePortal',
-  'getNotificacoesPortal', 'getResumoPassosPortal', 'getResumoOpcoesPortal', 'getHistoricoExercicio'
+  'getNotificacoesPortal', 'getResumoPassosPortal', 'getResumoOpcoesPortal', 'getDadosPessoaisPortal',
+  'getAvatarPortal', 'getMapaAtividadePortal', 'getPassaporteTecnicoPortal', 'getHistoricoExercicio'
 ]);
 
 const ESCRITAS = new Set([
@@ -12,7 +13,8 @@ const ESCRITAS = new Set([
   'pedirLinkLoginPortal', 'trocarCodigoLoginPortal',
   'guardarPedidoPrivacidadePortal', 'guardarPedidoAtualizacaoDadosPortal', 'registarCheckin', 'guardarPesoDiarioPortal', 'guardarPedidoAvaliacaoPortal',
   'registarTesteProntidao', 'marcarNotificacoesLidasPortal', 'guardarMetricasAtividadePortal',
-  'guardarPassosPortal', 'registarExecucaoTreino', 'registarPosTreino'
+  'guardarPassosPortal', 'registarExecucaoTreino', 'registarPosTreino', 'guardarAvatarPortal',
+  'registarSessaoMinimaPortal'
 ]);
 const PUBLICAS = new Set(['pedirLinkLoginPortal', 'trocarCodigoLoginPortal']);
 
@@ -51,11 +53,12 @@ export default async function handler(req, res) {
     if (!LEITURAS.has(fn)) return responder(res, 405, { ok: false, erro: 'GET permite apenas leituras' }, requestId);
   } else {
     const comprimento = Number(req.headers['content-length'] || 0);
-    if (comprimento > 50000) return responder(res, 413, { ok: false, erro: 'Pedido demasiado grande' }, requestId);
+    if (comprimento > 180000) return responder(res, 413, { ok: false, erro: 'Pedido demasiado grande' }, requestId);
     try { dados = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {}); }
     catch { return responder(res, 400, { ok: false, erro: 'JSON inválido' }, requestId); }
     fn = String(dados.fn || '');
     token = String(dados.token || '');
+    if (fn !== 'guardarAvatarPortal' && comprimento > 50000) return responder(res, 413, { ok: false, erro: 'Pedido demasiado grande' }, requestId);
     if (!ESCRITAS.has(fn)) return responder(res, 405, { ok: false, erro: 'POST permite apenas gravações' }, requestId);
   }
 
@@ -68,15 +71,12 @@ export default async function handler(req, res) {
   try {
     let url = APPS_SCRIPT_URL;
     const opcoes = { redirect: 'follow', signal: controlador.signal, headers: { Accept: 'application/json' } };
-    if (req.method === 'GET') {
-      const query = new URLSearchParams({ api: '1', fn, token, data: JSON.stringify(dados || {}) });
-      url += `?${query.toString()}`;
-      opcoes.method = 'GET';
-    } else {
-      opcoes.method = 'POST';
-      opcoes.headers['Content-Type'] = 'text/plain;charset=utf-8';
-      opcoes.body = JSON.stringify({ ...dados, fn, token });
-    }
+    // O browser mantém semântica GET/POST perante a Vercel. Entre a Vercel e
+    // o Apps Script usamos sempre POST para a sessão nunca aparecer no URL,
+    // em históricos de proxy ou em ferramentas de observabilidade.
+    opcoes.method = 'POST';
+    opcoes.headers['Content-Type'] = 'text/plain;charset=utf-8';
+    opcoes.body = JSON.stringify({ ...dados, fn, token, metodoOriginal: req.method });
     const resposta = await fetch(url, opcoes);
     const texto = await resposta.text();
     let json;

@@ -2324,6 +2324,12 @@
     acessoSensivelEl.classList.add("oculto");
     fecharDialogoAcessivel(acessoSensivelEl);
   }
+  function pedirCodigoSeNecessario(erro, estado) {
+    if (!String(erro && erro.message || erro || "").includes("ACESSO_PROTEGIDO_POR_CODIGO")) return false;
+    if (estado) estado.textContent = "Confirma o código de segurança para guardar estes dados.";
+    abrirAcessoSensivel();
+    return true;
+  }
   document.getElementById("btnEnviarCodigo").addEventListener("click", function () {
     const botao = this;
     const textoOriginal = botao.textContent;
@@ -2386,7 +2392,7 @@
   normalizarIconesFixos();
   const versaoPortalEl = document.createElement("div");
   versaoPortalEl.className = "versao-portal";
-  versaoPortalEl.textContent = "AL MOVE · versão 52";
+  versaoPortalEl.textContent = "AL MOVE · versão 53";
   document.getElementById("tabPlanos").appendChild(versaoPortalEl);
 
   const painelPrivacidadeEl = document.getElementById("painelPrivacidade");
@@ -2975,6 +2981,15 @@
     document.querySelectorAll("[data-mapa-modo]").forEach(function (botao) { botao.classList.toggle("ativo", botao.dataset.mapaModo === mapaModoAtual); });
   }
 
+  function carregarMapaAtividadePortal() {
+    return chamarApi("getMapaAtividadePortal", { semanas: 12 }).then(function (resp) {
+      if (!resp || !resp.ok) throw new Error((resp && resp.erro) || "Não foi possível carregar o mapa.");
+      mapaAtividadeAtual = resp.dados || { dias: [] };
+      renderMapaAtividade();
+      return mapaAtividadeAtual;
+    });
+  }
+
   function renderPassaporteTecnico() {
     const dados = passaporteTecnicoAtual || { exercicios:[] };
     document.getElementById("passaporteTotal").textContent = Number(dados.total || (dados.exercicios || []).length);
@@ -2985,6 +3000,15 @@
       const estado = item.estado === "DOMINADO" || Number(item.percentagem) >= 85 ? "Dominado" : (item.estado === "VALIDADO" ? "Validado" : "Em prática");
       return '<article class="passaporte-item"><div class="passaporte-item-topo"><h3>' + escaparTextoExercicio(item.exercicio) + '</h3><small>' + estado + ' · ' + Number(item.percentagem || 0) + '%</small></div><div class="passaporte-barra"><i style="width:' + Number(item.percentagem || 0) + '%"></i></div><div class="passaporte-criterios"><span><b>' + Number(item.setup || 0) + '/3</b>Setup</span><span><b>' + Number(item.amplitude || 0) + '/3</b>Amplitude</span><span><b>' + Number(item.controlo || 0) + '/3</b>Controlo</span><span><b>' + Number(item.respiracao || 0) + '/3</b>Respiração</span></div>' + (item.nota ? '<p class="passaporte-nota">' + escaparTextoExercicio(item.nota) + '</p>' : '') + '</article>';
     }).join("");
+  }
+
+  function carregarPassaporteTecnicoPortal() {
+    return chamarApi("getPassaporteTecnicoPortal", {}).then(function (resp) {
+      if (!resp || !resp.ok) throw new Error((resp && resp.erro) || "Não foi possível carregar o passaporte.");
+      passaporteTecnicoAtual = resp.dados || { exercicios: [] };
+      renderPassaporteTecnico();
+      return passaporteTecnicoAtual;
+    });
   }
 
   document.querySelectorAll("[data-mapa-modo]").forEach(function (botao) { botao.addEventListener("click", function () { mapaModoAtual = botao.dataset.mapaModo; renderMapaAtividade(); }); });
@@ -3079,7 +3103,8 @@
     if (painel) painel.classList.remove("oculto");
     if (id === "perfilDadosPessoais") carregarDadosPessoais(false).catch(function () {});
     if (id === "perfilAvatar") carregarAvatarPortal(false).catch(function () {});
-    if (id === "perfilMapa" || id === "perfilPassaporte") obterProgressoPortal(false).then(aplicarProgressoPortal).catch(function () {});
+    if (id === "perfilMapa") carregarMapaAtividadePortal().catch(function () { renderMapaAtividade(); });
+    if (id === "perfilPassaporte") carregarPassaporteTecnicoPortal().catch(function () { renderPassaporteTecnico(); });
     window.scrollTo({ top:0, behavior:"smooth" });
   }
 
@@ -3272,7 +3297,10 @@
     if (sync) sync.textContent = "A sincronizar…";
     chamarApi("guardarMetricasAtividadePortal", metricasAtividade)
       .then(function (resp) { if (!resp || !resp.ok) throw new Error(); if (resp.dados) { metricasAtividade = Object.assign({}, metricasAtividade, resp.dados); guardarMetricasLocais(); renderMetricasAtividade(); } if (sync) sync.textContent = "Métricas sincronizadas."; })
-      .catch(function () { if (sync) sync.textContent = "Guardado neste dispositivo. A sincronização fica pendente."; });
+      .catch(function (erro) {
+        if (pedirCodigoSeNecessario(erro, sync)) return;
+        if (sync) sync.textContent = "Guardado neste dispositivo. A sincronização fica pendente.";
+      });
   }
   document.querySelectorAll(".metricas-modo-btn").forEach(function (btn) { btn.addEventListener("click", function () { metricasAtividade.atividade = btn.dataset.atividade; guardarMetricasLocais(); renderMetricasAtividade(); }); });
   ["metricasPeso", "metricasAltura", "metricasPassadaCaminhada", "metricasPassadaCorrida", "metricasGenero", "metricasCorridaDistancia", "metricasCorridaVelocidade"].forEach(function (id) { const el = document.getElementById(id); if (el) el.addEventListener("input", function () { lerCamposMetricas(); guardarMetricasLocais(); atualizarResultadoMetricas(); }); });
@@ -3373,30 +3401,13 @@
     document.body.classList.add("perfil-detalhe-aberto");
     perfilAvaliacoesEl.classList.remove("oculto");
     renderAvaliacaoFisica();
+    obterProgressoPortal(false).then(aplicarProgressoPortal).catch(function () {});
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
   function fecharPerfilAvaliacoes() {
     document.body.classList.remove("perfil-detalhe-aberto");
     perfilAvaliacoesEl.classList.add("oculto");
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-  function guardarAvaliacaoFisica() {
-    if (!AVALIACAO_PODE_SER_PREENCHIDA) { document.getElementById("avaliacaoSync").textContent = "O preenchimento fica disponível na data marcada."; return; }
-    lerCamposAvaliacao();
-    avaliacaoFisica.atualizadoEm = new Date().toISOString();
-    guardarAvaliacaoFisicaLocal();
-    metricasAtividade.pesoKg = avaliacaoFisica.pesoKg || metricasAtividade.pesoKg;
-    metricasAtividade.alturaCm = avaliacaoFisica.alturaCm || metricasAtividade.alturaCm;
-    guardarMetricasLocais();
-    atualizarMetricasDiariasInicio();
-    renderAvaliacaoFisica();
-    const sync = document.getElementById("avaliacaoSync");
-    if (!navigator.onLine) { if (sync) sync.textContent = "Guardada neste dispositivo. Será sincronizada quando houver ligação."; return; }
-    if (sync) sync.textContent = "A sincronizar…";
-    chamarApi("guardarMetricasAtividadePortal", metricasAtividade).catch(function () {});
-    chamarApi("guardarAvaliacaoFisicaPortal", avaliacaoFisica)
-      .then(function (resp) { if (!resp || !resp.ok) throw new Error(); if (resp.dados) { avaliacaoFisica = Object.assign({}, avaliacaoFisica, resp.dados); guardarAvaliacaoFisicaLocal(); } carregarHistoricoAvaliacoes(true); renderAvaliacaoFisica(); if (sync) sync.textContent = "Avaliação sincronizada."; })
-      .catch(function () { if (sync) sync.textContent = "Guardada neste dispositivo. A sincronização fica pendente."; });
   }
   function carregarHistoricoAvaliacoes(forcar) {
     const pedido = forcar
@@ -3440,9 +3451,9 @@
   }
   function renderPesoDiario() { renderGraficoSerie(document.getElementById('pesoDiarioGrafico'), serieAgrupadaPeso(), 'kg', 'Ainda não há pesos registados.'); document.querySelectorAll('[data-peso-periodo]').forEach(btn=>btn.classList.toggle('ativo',btn.dataset.pesoPeriodo===pesoPeriodo)); }
   function carregarPesosDiarios() { return obterProgressoPortal().then(function(dados){ if(Array.isArray(dados.pesosDiarios)){ pesosDiarios=dados.pesosDiarios; renderPesoDiario(); renderEvolucao(); } }).catch(function(){}); }
-  function abrirPerfilPesoDiario() { document.body.classList.add('perfil-detalhe-aberto'); document.getElementById('perfilPesoDiario').classList.remove('oculto'); document.getElementById('pesoDiarioData').value=dataLocalHoje(); renderPesoDiario(); window.scrollTo({top:0,behavior:'smooth'}); }
+  function abrirPerfilPesoDiario() { document.body.classList.add('perfil-detalhe-aberto'); document.getElementById('perfilPesoDiario').classList.remove('oculto'); document.getElementById('pesoDiarioData').value=dataLocalHoje(); renderPesoDiario(); obterProgressoPortal(false).then(aplicarProgressoPortal).catch(function(){}); window.scrollTo({top:0,behavior:'smooth'}); }
   function fecharPerfilPesoDiario() { document.body.classList.remove('perfil-detalhe-aberto'); document.getElementById('perfilPesoDiario').classList.add('oculto'); }
-  function guardarPesoDiario() { const data=document.getElementById('pesoDiarioData').value, peso=document.getElementById('pesoDiarioValor').value, sync=document.getElementById('pesoDiarioSync'); if(!data||!peso){sync.textContent='Indica a data e o peso.';return;} sync.textContent='A sincronizar…'; chamarApi('guardarPesoDiarioPortal',{data:data,pesoKg:peso}).then(function(resp){if(!resp||!resp.ok)throw new Error();pesosDiarios=resp.dados||[];document.getElementById('pesoDiarioValor').value='';sync.textContent='Peso guardado.';renderPesoDiario();renderEvolucao();}).catch(function(){sync.textContent='Não foi possível guardar. Tenta novamente com ligação.';}); }
+  function guardarPesoDiario() { const data=document.getElementById('pesoDiarioData').value, peso=document.getElementById('pesoDiarioValor').value, sync=document.getElementById('pesoDiarioSync'); if(!data||!peso){sync.textContent='Indica a data e o peso.';return;} sync.textContent='A sincronizar…'; chamarApi('guardarPesoDiarioPortal',{data:data,pesoKg:peso}).then(function(resp){if(!resp||!resp.ok)throw new Error();pesosDiarios=resp.dados||[];document.getElementById('pesoDiarioValor').value='';sync.textContent='Peso guardado.';renderPesoDiario();renderEvolucao();}).catch(function(erro){if(pedirCodigoSeNecessario(erro,sync))return;sync.textContent='Não foi possível guardar. Tenta novamente com ligação.';}); }
   function atualizarOpcoesEvolucao() {
     const gaveta = document.getElementById('evolucaoGaveta');
     const texto = document.getElementById('evolucaoMetricaTexto');
@@ -3466,7 +3477,7 @@
   }
   function dadosEvolucao(chave,inicio,fim) { const origem=chave==='pesoKg'&&pesosDiarios.length?pesosDiarios.map(item=>({atualizadoEm:item.data,pesoKg:item.pesoKg})):historicoAvaliacoesFisicas; return origem.filter(item=>!inicio||String(item.atualizadoEm).slice(0,10)>=inicio).filter(item=>!fim||String(item.atualizadoEm).slice(0,10)<=fim).map(item=>({data:dataValidaAvaliacao(item.atualizadoEm),valor:Number(String(item[chave]||'').replace(',','.'))})).filter(item=>item.data&&Number.isFinite(item.valor)); }
   function renderEvolucao() { const destino=document.getElementById('evolucaoGrafico'), resumo=document.getElementById('evolucaoResumo'); if(!destino||!resumo)return; const inicio=document.getElementById('evolucaoInicio').value, fim=document.getElementById('evolucaoFim').value, metricas=METRICAS_EVOLUCAO[evolucaoTipo]; if(evolucaoMetrica==="__todas"){const chaves=Object.keys(metricas); resumo.innerHTML=chaves.map(chave=>{const dados=dadosEvolucao(chave,inicio,fim),ultimo=dados[dados.length-1];return '<div><strong>'+ (ultimo?ultimo.valor.toLocaleString('pt-PT',{maximumFractionDigits:1})+' '+metricas[chave][1]:'—') +'</strong><span>'+metricas[chave][0]+'</span></div>';}).join(''); destino.innerHTML=chaves.map(chave=>'<section class="evolucao-grafico-item"><h3>'+metricas[chave][0]+'</h3><div class="avaliacao-grafico" id="evolucao-grafico-'+chave+'"></div></section>').join(''); chaves.forEach(chave=>renderGraficoSerie(document.getElementById('evolucao-grafico-'+chave),dadosEvolucao(chave,inicio,fim),metricas[chave][1],'Sem registos.')); return;} const dados=dadosEvolucao(evolucaoMetrica,inicio,fim), meta=metricas[evolucaoMetrica]; resumo.innerHTML='<div><strong>'+dados.length+'</strong><span>avaliações no período</span></div>'+(dados.length?'<div><strong>'+dados[dados.length-1].valor.toLocaleString('pt-PT',{maximumFractionDigits:1})+' '+meta[1]+'</strong><span>último valor</span></div>':''); renderGraficoSerie(destino,dados,meta[1],'Ainda não há registos desta métrica no período escolhido.'); }
-  function abrirPerfilEvolucao() { document.body.classList.add('perfil-detalhe-aberto'); document.getElementById('perfilEvolucao').classList.remove('oculto'); atualizarOpcoesEvolucao(); renderEvolucao(); window.scrollTo({top:0,behavior:'smooth'}); }
+  function abrirPerfilEvolucao() { document.body.classList.add('perfil-detalhe-aberto'); document.getElementById('perfilEvolucao').classList.remove('oculto'); atualizarOpcoesEvolucao(); renderEvolucao(); obterProgressoPortal(false).then(aplicarProgressoPortal).catch(function(){}); window.scrollTo({top:0,behavior:'smooth'}); }
   function fecharPerfilEvolucao() { document.body.classList.remove('perfil-detalhe-aberto'); document.getElementById('perfilEvolucao').classList.add('oculto'); }
   const OPCOES_PERIODO_AVALIACAO = [
     { valor: "manhã", nome: "Manhã", detalhe: "07:00 – 12:30", inicio: "07:00", fim: "12:30" },
@@ -3540,7 +3551,7 @@
         const url = 'https://wa.me/' + opcoesContactoPTNumero + '?text=' + encodeURIComponent(mensagemWhatsAppPedidoAvaliacao(dados));
         if (janelaWhatsApp) janelaWhatsApp.location.href = url; else window.open(url, '_blank');
       }
-    }).catch(function (erro) { if (janelaWhatsApp) janelaWhatsApp.close(); estado.textContent = (erro && erro.message) ? erro.message : "Não foi possível enviar o pedido."; });
+    }).catch(function (erro) { if (janelaWhatsApp) janelaWhatsApp.close(); if (pedirCodigoSeNecessario(erro, estado)) return; estado.textContent = (erro && erro.message) ? erro.message : "Não foi possível enviar o pedido."; });
   }
   Object.keys(CAMPOS_AVALIACAO).forEach(function (campo) { const el = document.getElementById(CAMPOS_AVALIACAO[campo]); if (el) el.addEventListener("input", function () { lerCamposAvaliacao(); guardarAvaliacaoFisicaLocal(); }); });
   prepararGavetasPedidoAvaliacao();
@@ -5516,9 +5527,8 @@
     renderAvaliacaoFisica();
     renderPesoDiario();
     renderEvolucao();
-    obterProgressoPortal().then(aplicarProgressoPortal).catch(function () {
-      perfilDadosIniciados = false;
-    });
+    // Perfil, plano, avatar, mapa e passaporte não devem obrigar a receber
+    // um código. Os dados físicos são carregados só quando essa área é aberta.
   }
 
   // ---------- Arranque: pergunta ao servidor o estado de hoje ----------
@@ -5626,7 +5636,7 @@
   // ---------- Service worker ----------
   // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
   // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
-  const VERSAO_CLIENTE_PORTAL = "52";
+  const VERSAO_CLIENTE_PORTAL = "53";
   const CHAVE_AVISO_SW = "ALMOVE_SW_AVISO_" + VERSAO_CLIENTE_PORTAL;
   let recarregarPorAtualizacao = false;
   let recarregamentoAgendado = false;

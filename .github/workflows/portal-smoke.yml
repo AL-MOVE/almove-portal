@@ -20,7 +20,10 @@ jobs:
         with:
           node-version: '20'
       - name: Validar contratos locais
-        run: node tests/hotfix-contracts.mjs
+        run: |
+          node tests/hotfix-contracts.mjs
+          node tests/perfil-contracts.mjs
+          node tests/api-contracts.mjs
       - name: Testar portal publicado
         env:
           PORTAL_BASE_URL: https://portal.almove.pt

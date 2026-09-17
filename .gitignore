@@ -1,0 +1,23 @@
+# Local tooling and browser profiles
+dogfood-output/
+.tmp-*
+*.log
+
+# Google Apps Script local configuration
+.clasp.json
+
+# QA captures and temporary prototypes
+audit-*.png
+qa-*.png
+patch-*.js
+
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Dependencies and generated reports
+node_modules/
+coverage/
+lighthouse-*.html
+

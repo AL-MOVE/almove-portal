@@ -7288,6 +7288,14 @@ function getResumoOpcoesPortalCompleto_(idCliente) {
     if (indice !== -1 && temValor(linhaCliente[indice])) return String(linhaCliente[indice]).trim();
     return indiceLegado >= 0 && temValor(linhaCliente[indiceLegado]) ? String(linhaCliente[indiceLegado]).trim() : '';
   };
+  const emailValido = (valor) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(valor || '').trim());
+  // Em folhas antigas o cabeçalho "Email" pode estar deslocado. Nunca se
+  // devolve um serviço (por exemplo "PT - 1x30 min") como se fosse email.
+  const candidatosEmail = [18, iEmail]
+    .concat(linhaCliente.map((_, indice) => indice))
+    .filter((indice, posicao, lista) => indice >= 0 && lista.indexOf(indice) === posicao)
+    .map(indice => String(linhaCliente[indice] || '').trim());
+  const email = candidatosEmail.find(emailValido) || '';
   const nascimentoRaw = iDataNascimento === -1 ? '' : linhaCliente[iDataNascimento];
   const dataNascimento = nascimentoRaw instanceof Date
     ? Utilities.formatDate(nascimentoRaw, Session.getScriptTimeZone(), 'yyyy-MM-dd')
@@ -7297,7 +7305,7 @@ function getResumoOpcoesPortalCompleto_(idCliente) {
     nome: String(linhaCliente[iNome] || '').trim(),
     estado: String(linhaCliente[iEstado] || '').trim(),
     contacto: lerCampoOpcional(iContacto, 2),
-    email: lerCampoOpcional(iEmail, 18),
+    email: email,
     morada: lerCampoOpcional(iMorada, 17),
     dataNascimento: dataNascimento,
     genero: lerCampoOpcional(iGenero, -1),
