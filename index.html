@@ -2170,9 +2170,13 @@
         entradaPortalEstado.textContent = "Este endereço ainda não está autorizado para criar contas. Contacta o teu treinador.";
       } else if (modoEntradaFirebase === "criar" && codigo === "auth/weak-password") {
         entradaPortalEstado.textContent = "Escolhe uma palavra-passe mais forte, com pelo menos 8 caracteres.";
+      } else if (codigo === "auth/network-request-failed") {
+        entradaPortalEstado.textContent = "Não foi possível contactar o Firebase. Confirma a ligação à internet e tenta novamente.";
+      } else if (codigo === "auth/too-many-requests") {
+        entradaPortalEstado.textContent = "O Firebase bloqueou temporariamente novas tentativas neste dispositivo. Aguarda alguns minutos antes de voltares a tentar.";
       } else {
         entradaPortalEstado.textContent = modoEntradaFirebase === "criar"
-          ? "Não foi possível criar este acesso agora. Tenta novamente dentro de momentos."
+          ? "O Firebase recusou a criação deste acesso (" + (codigo || "erro sem código") + "). Envia esta mensagem ao André."
           : "Email ou palavra-passe inválidos. Se necessário, recupera a palavra-passe.";
       }
     } finally { btnEntradaPortal.disabled = false; }
@@ -5640,7 +5644,7 @@
   // ---------- Service worker ----------
   // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
   // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
-  const VERSAO_CLIENTE_PORTAL = "57";
+  const VERSAO_CLIENTE_PORTAL = "58";
   const CHAVE_AVISO_SW = "ALMOVE_SW_AVISO_" + VERSAO_CLIENTE_PORTAL;
   let recarregarPorAtualizacao = false;
   let recarregamentoAgendado = false;
