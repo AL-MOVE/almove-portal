@@ -6,7 +6,7 @@ Esta preparação não altera o login atual. O portal continua com link temporá
 
 - Email e palavra-passe, confirmação de email, recuperação de palavra-passe e sessões persistentes.
 - A revogação de sessões do Firebase passa a ser confirmada pela Vercel em cada pedido autenticado.
-- Uma conta Firebase tem exatamente um cliente CRM através da *custom claim* `clientId`.
+- No piloto, uma conta Firebase confirmada é ligada ao único cliente CRM com o mesmo email; emails duplicados ou cancelados são recusados.
 
 O Apps Script não recebe palavras-passe, nem chaves Firebase, nem ID tokens. Recebe uma autorização HMAC de cinco minutos emitida pela Vercel depois de validar o token Firebase.
 
@@ -21,8 +21,7 @@ O Apps Script não recebe palavras-passe, nem chaves Firebase, nem ID tokens. Re
    - `FIREBASE_SERVICE_ACCOUNT_JSON`
    - `PORTAL_APPS_SCRIPT_HMAC_SECRET` (um segredo aleatório com pelo menos 32 caracteres)
 6. No Apps Script, em **Project Settings > Script properties**, criar `PORTAL_APPS_SCRIPT_HMAC_SECRET` com exatamente o mesmo valor.
-7. Para cada cliente, criar a conta Firebase e definir as *custom claims*:
-   `{ clientId: "ID_DO_CRM", portalRole: "client" }`.
+7. Para o piloto, criar a conta Firebase com o mesmo email que está na ficha única e ativa do cliente no CRM. A aplicação exige confirmação desse email.
 
 Nunca colocar a chave de serviço, o segredo HMAC ou palavras-passe no GitHub, no HTML ou numa folha de cálculo.
 

@@ -62,13 +62,10 @@ export async function obterAssertacaoFirebasePortal(req) {
   }
 
   const agora = Math.floor(Date.now() / 1000);
-  const idCliente = String(token.clientId || '');
   const email = String(token.email || '').trim().toLowerCase();
   if (
     token.aud !== projeto ||
-    token.portalRole !== 'client' ||
     !token.email_verified ||
-    !/^[A-Za-z0-9_-]{1,80}$/.test(idCliente) ||
     !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   ) {
     throw erroFirebase('FIREBASE_CONTA_SEM_ACESSO');
@@ -77,7 +74,6 @@ export async function obterAssertacaoFirebasePortal(req) {
   return assinarAssertacao({
     v: 1,
     uid: String(token.uid),
-    idCliente,
     email,
     iat: agora,
     exp: agora + DURACAO_ASSERTACAO_SEGUNDOS,

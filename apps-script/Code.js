@@ -2894,34 +2894,24 @@ function obterClientePorAssertacaoFirebasePortal_(token) {
   try {
     const dados = JSON.parse(Utilities.newBlob(Utilities.base64DecodeWebSafe(corpo)).getDataAsString('UTF-8'));
     const agora = Math.floor(Date.now() / 1000);
-    const idCliente = String(dados.idCliente || '');
     const email = String(dados.email || '').trim().toLowerCase();
     if (
       dados.v !== 1 ||
       !dados.exp || Number(dados.exp) < agora ||
       !dados.iat || Number(dados.iat) > agora + 60 ||
       !/^[A-Za-z0-9_-]{6,128}$/.test(String(dados.uid || '')) ||
-      !/^[A-Za-z0-9_-]{1,80}$/.test(idCliente) ||
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
     ) return null;
-
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('CLIENTES');
-    if (!sheet || sheet.getLastRow() < 4) return null;
-    const clientes = sheet.getRange('A4:Y' + sheet.getLastRow()).getValues();
-    for (let indice = 0; indice < clientes.length; indice++) {
-      const row = clientes[indice];
-      if (String(row[24] || '') !== idCliente) continue;
-      if (String(row[1] || 'Ativo').trim().toLowerCase() === 'cancelado') return null;
-      if (String(row[18] || '').trim().toLowerCase() !== email) return null;
-      return {
-        idCliente: idCliente,
-        nome: String(row[0] || ''),
-        email: email,
-        tokenPortalOriginal: 'firebase:' + String(dados.uid),
-        eSessao: true,
-        autenticacao: 'firebase'
-      };
-    }
+    // No piloto o email Firebase confirmado identifica o cliente. A função
+    // recusa duplicados e clientes cancelados; assim uma conta só entra se o
+    // email existir uma única vez no CRM.
+    const cliente = obterClientePorEmailPortal_(email);
+    if (!cliente || cliente.duplicado || !cliente.idCliente) return null;
+    return Object.assign({}, cliente, {
+      tokenPortalOriginal: 'firebase:' + String(dados.uid),
+      eSessao: true,
+      autenticacao: 'firebase'
+    });
   } catch (erro) {
     Logger.log('Assertacao Firebase inválida: ' + erro.toString());
   }

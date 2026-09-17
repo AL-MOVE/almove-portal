@@ -1217,19 +1217,28 @@
 
   <style id="entrada-portal-estilo">
     .entrada-portal{position:fixed;z-index:360;inset:0;display:grid;place-items:center;min-height:100dvh;padding:24px;background:radial-gradient(circle at 88% 4%,rgba(45,212,191,.15),transparent 30%),radial-gradient(circle at 6% 92%,rgba(11,92,194,.32),transparent 34%),#06111e;color:#f7fbff}.entrada-portal::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(45,212,191,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(45,212,191,.025) 1px,transparent 1px);background-size:46px 46px;pointer-events:none}.entrada-portal-conteudo{position:relative;width:min(100%,480px)}.entrada-portal-marca{display:flex;align-items:center;gap:10px;margin-bottom:34px;color:#fff;font-size:15px;font-weight:900;letter-spacing:.03em}.entrada-portal-marca i{width:10px;height:10px;border-radius:50%;background:#2dd4bf;box-shadow:0 0 18px rgba(45,212,191,.86)}.entrada-portal-titulo{max-width:12ch;margin:0;color:#fff;font-size:clamp(38px,10vw,56px);line-height:.96;letter-spacing:-.065em}.entrada-portal-titulo span{color:#2dd4bf}.entrada-portal-sub{max-width:38ch;margin:18px 0 28px;color:#aab9ca;font-size:15px;line-height:1.55}.entrada-portal-form{padding:20px;border:1px solid rgba(45,212,191,.26);border-radius:18px;background:rgba(8,24,40,.82);box-shadow:0 20px 55px rgba(0,0,0,.26)}.entrada-portal-form label{display:block;margin-bottom:8px;color:#dbe7f4;font-size:12px;font-weight:850}.entrada-portal-form input{box-sizing:border-box;width:100%;min-height:52px;padding:0 14px;border:1px solid rgba(166,190,211,.28);border-radius:12px;outline:0;background:#0c1b2d;color:#fff;font:inherit;font-size:16px}.entrada-portal-form input:focus{border-color:#2dd4bf;box-shadow:0 0 0 3px rgba(45,212,191,.14)}.entrada-portal-form button{width:100%;min-height:52px;margin-top:11px;border:0;border-radius:12px;background:#2dd4bf;color:#03201d;font:inherit;font-size:14px;font-weight:900;cursor:pointer}.entrada-portal-form button:active{transform:scale(.985)}.entrada-portal-estado{min-height:22px;margin:12px 0 0;color:#aab9ca;font-size:12px;line-height:1.45}.entrada-portal-nota{margin:20px 0 0;color:#8294a9;font-size:11px;line-height:1.5}.entrada-portal-nota strong{color:#c8d6e5}@media(min-width:700px){.entrada-portal-conteudo{transform:translateX(-8vw)}}
+    .entrada-portal-form label{margin-top:14px}.entrada-portal-form label:first-child{margin-top:0}.entrada-portal-form button{margin-top:14px}.entrada-portal-acoes{display:flex;justify-content:space-between;gap:12px;margin-top:13px}.entrada-portal-acoes button{width:auto;min-height:44px;margin:0;padding:0;background:none;color:#9cdbd4;font-size:12px;text-align:left}.entrada-portal-acoes button:last-child{text-align:right}
   </style>
   <section class="entrada-portal oculto" id="ecraEntradaPortal" aria-labelledby="entradaPortalTitulo">
     <div class="entrada-portal-conteudo">
       <div class="entrada-portal-marca"><i aria-hidden="true"></i>AL MOVE</div>
       <h1 class="entrada-portal-titulo" id="entradaPortalTitulo">Entra no teu <span>acompanhamento.</span></h1>
-      <p class="entrada-portal-sub">Usa o email associado ao teu acompanhamento para receberes um link temporário e seguro.</p>
+      <p class="entrada-portal-sub" id="entradaPortalSub">Entra com o email associado ao teu acompanhamento e a tua palavra-passe.</p>
       <form class="entrada-portal-form" id="formEntradaPortal">
         <label for="entradaPortalEmail">O teu email</label>
         <input id="entradaPortalEmail" name="email" type="email" inputmode="email" autocomplete="email" placeholder="nome@email.com" required maxlength="160">
-        <button type="submit" id="btnEntradaPortal">Enviar link temporário</button>
+        <div id="entradaPortalPasswordGrupo">
+          <label for="entradaPortalPassword">Palavra-passe</label>
+          <input id="entradaPortalPassword" name="password" type="password" autocomplete="current-password" placeholder="A tua palavra-passe" required minlength="8" maxlength="128">
+        </div>
+        <button type="submit" id="btnEntradaPortal">Entrar</button>
+        <div class="entrada-portal-acoes">
+          <button type="button" id="btnMudarModoEntrada">Criar o primeiro acesso</button>
+          <button type="button" id="btnRecuperarPalavraPasse">Esqueci-me da palavra-passe</button>
+        </div>
         <p class="entrada-portal-estado" id="entradaPortalEstado" aria-live="polite"></p>
       </form>
-      <p class="entrada-portal-nota"><strong>Acesso seguro por email.</strong> Cada link é válido uma só vez, durante 15 minutos. Se não tens acesso ao email associado, fala com o teu treinador.</p>
+      <p class="entrada-portal-nota"><strong>Acesso protegido.</strong> O email tem de coincidir com o registado no teu acompanhamento. Se não tens acesso ao email associado, fala com o teu treinador.</p>
     </div>
   </section>
 
@@ -1937,6 +1946,8 @@
   </nav>
 
 <script src="/js/activity-heatmap.js"></script>
+<script src="/js/firebase-config.js"></script>
+<script src="/js/firebase-auth.js"></script>
 <script>
 (function () {
   "use strict";
@@ -2018,6 +2029,13 @@
     sessaoGuardada = null;
   }
   let TOKEN = (sessaoGuardada && sessaoGuardada.sessao) || "";
+  let SESSAO_PRONTA = Promise.resolve();
+  let FIREBASE_ATIVA = false;
+  let FIREBASE_EMAIL = "";
+  try {
+    FIREBASE_ATIVA = localStorage.getItem("ALMOVE_FIREBASE_SESSAO") === "1";
+    FIREBASE_EMAIL = String(localStorage.getItem("ALMOVE_FIREBASE_EMAIL") || "").trim().toLowerCase();
+  } catch (erro) {}
   function identificadorCacheSeguro(valor) {
     let hash = 2166136261;
     String(valor || "").split("").forEach(function (caractere) {
@@ -2028,7 +2046,9 @@
   }
   const IDENTIDADE_CACHE = CODIGO_LOGIN
     ? identificadorCacheSeguro(CODIGO_LOGIN)
-    : (function () { try { return sessionStorage.getItem("ALMOVE_CACHE_ID") || identificadorCacheSeguro(TOKEN); } catch (erro) { return identificadorCacheSeguro(TOKEN); } })();
+    : (FIREBASE_ATIVA && FIREBASE_EMAIL
+      ? identificadorCacheSeguro("firebase:" + FIREBASE_EMAIL)
+      : (function () { try { return sessionStorage.getItem("ALMOVE_CACHE_ID") || identificadorCacheSeguro(TOKEN); } catch (erro) { return identificadorCacheSeguro(TOKEN); } })());
 
   const ecraBoasVindas = document.getElementById("ecraBoasVindas");
   const boasVindasPrefixoEl = document.getElementById("boasVindasPrefixo");
@@ -2039,8 +2059,13 @@
   const ecraEntradaPortal = document.getElementById("ecraEntradaPortal");
   const formEntradaPortal = document.getElementById("formEntradaPortal");
   const entradaPortalEmail = document.getElementById("entradaPortalEmail");
+  const entradaPortalPassword = document.getElementById("entradaPortalPassword");
+  const entradaPortalPasswordGrupo = document.getElementById("entradaPortalPasswordGrupo");
+  const entradaPortalSub = document.getElementById("entradaPortalSub");
   const entradaPortalEstado = document.getElementById("entradaPortalEstado");
   const btnEntradaPortal = document.getElementById("btnEntradaPortal");
+  const btnMudarModoEntrada = document.getElementById("btnMudarModoEntrada");
+  const btnRecuperarPalavraPasse = document.getElementById("btnRecuperarPalavraPasse");
   const cardCheckin = document.getElementById("cardCheckin");
   const checkinForm = document.getElementById("checkinForm");
   const checkinResumo = document.getElementById("checkinResumo");
@@ -2075,27 +2100,75 @@
     definirCamadaExclusiva(ecraEntradaPortal, true);
     if (mensagem) entradaPortalEstado.textContent = mensagem;
   }
-  formEntradaPortal.addEventListener("submit", function (evento) {
+  let modoEntradaFirebase = "entrar";
+  function configurarEntradaFirebase() {
+    if (!window.AlMoveFirebaseAuth || !window.ALMOVE_FIREBASE_CONFIG) return Promise.reject(new Error("FIREBASE_NAO_CONFIGURADO"));
+    return window.AlMoveFirebaseAuth.configurar(window.ALMOVE_FIREBASE_CONFIG);
+  }
+  function atualizarModoEntradaFirebase() {
+    const criar = modoEntradaFirebase === "criar";
+    entradaPortalSub.textContent = criar
+      ? "Cria uma palavra-passe para entrares no teu acompanhamento sem dependeres de links por email."
+      : "Entra com o email associado ao teu acompanhamento e a tua palavra-passe.";
+    btnEntradaPortal.textContent = criar ? "Criar acesso" : "Entrar";
+    btnMudarModoEntrada.textContent = criar ? "Já tenho acesso" : "Criar o primeiro acesso";
+    entradaPortalPassword.autocomplete = criar ? "new-password" : "current-password";
+  }
+  btnMudarModoEntrada.addEventListener("click", function () {
+    modoEntradaFirebase = modoEntradaFirebase === "entrar" ? "criar" : "entrar";
+    entradaPortalEstado.textContent = "";
+    atualizarModoEntradaFirebase();
+    entradaPortalPassword.focus();
+  });
+  btnRecuperarPalavraPasse.addEventListener("click", async function () {
+    const email = String(entradaPortalEmail.value || "").trim();
+    if (!email) { entradaPortalEmail.focus(); entradaPortalEstado.textContent = "Indica primeiro o teu email."; return; }
+    btnRecuperarPalavraPasse.disabled = true;
+    entradaPortalEstado.textContent = "A preparar recuperação…";
+    try {
+      await configurarEntradaFirebase();
+      await window.AlMoveFirebaseAuth.enviarRecuperacao(email, window.location.origin + window.location.pathname);
+      entradaPortalEstado.textContent = "Se existe uma conta com este email, receberás as instruções para escolher uma nova palavra-passe.";
+    } catch (erro) {
+      entradaPortalEstado.textContent = "Não foi possível pedir a recuperação agora. Tenta novamente dentro de momentos.";
+    } finally { btnRecuperarPalavraPasse.disabled = false; }
+  });
+  formEntradaPortal.addEventListener("submit", async function (evento) {
     evento.preventDefault();
     const email = String(entradaPortalEmail.value || "").trim();
-    if (!email) return;
+    const palavraPasse = String(entradaPortalPassword.value || "");
+    if (!email || palavraPasse.length < 8) { entradaPortalEstado.textContent = "Indica o email e uma palavra-passe com pelo menos 8 caracteres."; return; }
     btnEntradaPortal.disabled = true;
-    entradaPortalEstado.textContent = "A enviar o link…";
-    fetch("/api/almove", {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ fn: "pedirLinkLoginPortal", email: email })
-    }).then(function (resposta) {
-      return resposta.json().catch(function () { return {}; }).then(function (corpo) {
-        if (!resposta.ok || corpo.ok === false) throw new Error(corpo.erro || "Não foi possível enviar o email.");
-        return corpo;
-      });
-    }).then(function () {
-      entradaPortalEstado.textContent = "Se este email estiver associado a uma conta, receberás um link de acesso dentro de momentos.";
-    }).catch(function () {
-      entradaPortalEstado.textContent = "Não foi possível enviar agora. Verifica a ligação e tenta novamente.";
-    }).finally(function () { btnEntradaPortal.disabled = false; });
+    entradaPortalEstado.textContent = modoEntradaFirebase === "criar" ? "A criar o acesso…" : "A entrar…";
+    try {
+      await configurarEntradaFirebase();
+      if (modoEntradaFirebase === "criar") {
+        await window.AlMoveFirebaseAuth.criarConta(email, palavraPasse);
+        await window.AlMoveFirebaseAuth.sair();
+        entradaPortalPassword.value = "";
+        modoEntradaFirebase = "entrar";
+        atualizarModoEntradaFirebase();
+        entradaPortalEstado.textContent = "Confirma o email que te enviámos. Depois volta aqui e entra com a tua palavra-passe.";
+        return;
+      }
+      const utilizador = await window.AlMoveFirebaseAuth.entrar(email, palavraPasse);
+      if (!utilizador.emailVerified) {
+        await window.AlMoveFirebaseAuth.sair();
+        entradaPortalEstado.textContent = "Confirma primeiro o email enviado para ativares o acesso.";
+        return;
+      }
+      try {
+        localStorage.setItem("ALMOVE_FIREBASE_SESSAO", "1");
+        localStorage.setItem("ALMOVE_FIREBASE_EMAIL", String(utilizador.email || email).trim().toLowerCase());
+      } catch (erro) {}
+      window.location.replace(window.location.pathname);
+    } catch (erro) {
+      entradaPortalEstado.textContent = modoEntradaFirebase === "criar"
+        ? "Não foi possível criar este acesso. Confirma os dados ou pede ajuda ao teu treinador."
+        : "Email ou palavra-passe inválidos. Se necessário, recupera a palavra-passe.";
+    } finally { btnEntradaPortal.disabled = false; }
   });
+  atualizarModoEntradaFirebase();
 
   if (LINK_PERMANENTE_LEGADO) {
     history.replaceState({}, document.title, window.location.pathname);
@@ -2103,12 +2176,24 @@
     return;
   }
 
-  if (!TOKEN && !CODIGO_LOGIN) {
+  if (FIREBASE_ATIVA) {
+    SESSAO_PRONTA = configurarEntradaFirebase().then(function () {
+      return window.AlMoveFirebaseAuth.token();
+    }).then(function (idToken) {
+      if (!idToken) throw new Error("SESSAO_FIREBASE_AUSENTE");
+      return idToken;
+    }).catch(function () {
+      try { localStorage.removeItem("ALMOVE_FIREBASE_SESSAO"); localStorage.removeItem("ALMOVE_FIREBASE_EMAIL"); } catch (erro) {}
+      window.location.replace(window.location.pathname);
+      return new Promise(function () {});
+    });
+  }
+
+  if (!TOKEN && !CODIGO_LOGIN && !FIREBASE_ATIVA) {
     mostrarEntradaPortal();
     return;
   }
 
-  let SESSAO_PRONTA = Promise.resolve();
   if (CODIGO_LOGIN) {
     ecraBoasVindas.classList.add("oculto");
     SESSAO_PRONTA = fetch("/api/almove", {
@@ -2418,7 +2503,9 @@
   });
   document.getElementById("btnTerminarSessao").addEventListener("click", function () {
     if (!window.confirm("Terminar a sessão e apagar deste dispositivo os dados guardados pelo Portal?")) return;
-    chamarApi("terminarSessaoPortal", {}).catch(function () {}).finally(function () {
+    chamarApi("terminarSessaoPortal", {}).catch(function () {}).then(function () {
+      return FIREBASE_ATIVA && window.AlMoveFirebaseAuth ? window.AlMoveFirebaseAuth.sair().catch(function () {}) : null;
+    }).finally(function () {
       try {
         sessionStorage.clear();
         Object.keys(localStorage).forEach(function (chave) { if (/^ALMOVE_/.test(chave)) localStorage.removeItem(chave); });
@@ -3636,19 +3723,25 @@
     "getDadosPessoaisPortal", "getMapaAtividadePortal", "getPassaporteTecnicoPortal"
   ]);
   function chamarApiNoEndpoint(endpoint, fn, dados) {
-    return SESSAO_PRONTA.then(function () {
+    return SESSAO_PRONTA.then(async function () {
       const corpo = Object.assign({ fn: fn, token: TOKEN }, dados || {});
+      const headersAutenticacao = {};
+      if (FIREBASE_ATIVA && endpoint === "/api/almove") {
+        const idToken = await window.AlMoveFirebaseAuth.token();
+        if (!idToken) throw new Error("A tua sessão terminou. Entra novamente.");
+        headersAutenticacao.Authorization = "Bearer " + idToken;
+      }
       if (endpoint === "/api/almove" && FUNCOES_LEITURA_PORTAL.has(fn)) {
         const query = new URLSearchParams({ fn: fn, data: JSON.stringify(dados || {}) });
         return fetch(endpoint + "?" + query.toString(), {
           method: "GET",
-          headers: { "X-ALMOVE-Session": TOKEN },
+          headers: Object.assign({ "X-ALMOVE-Session": TOKEN }, headersAutenticacao),
           cache: "no-store"
         });
       }
       return fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        headers: Object.assign({ "Content-Type": "text/plain;charset=utf-8" }, headersAutenticacao),
         body: JSON.stringify(corpo)
       });
     }).then(function (resposta) {
@@ -3659,7 +3752,7 @@
     });
   }
   function chamarApi(fn, dados) { return chamarApiNoEndpoint("/api/almove", fn, dados); }
-  function chamarApiDireta(fn, dados) { return chamarApiNoEndpoint("https://script.google.com/macros/s/AKfycbyiOl7KkXMYSFv9lKKVb2sMspvwER2P5IMlpNQcr9csLyEDnzJqvVqisE-XVuAHgeUV/exec", fn, dados); }
+  function chamarApiDireta(fn, dados) { return chamarApi(fn, dados); }
 
   // ---------- Passos: valor real, guardado no Apps Script ----------
   const META_PASSOS = 8000;
@@ -5561,7 +5654,7 @@
   // ---------- Service worker ----------
   // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
   // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
-  const VERSAO_CLIENTE_PORTAL = "54";
+  const VERSAO_CLIENTE_PORTAL = "55";
   const CHAVE_AVISO_SW = "ALMOVE_SW_AVISO_" + VERSAO_CLIENTE_PORTAL;
   let recarregarPorAtualizacao = false;
   let recarregamentoAgendado = false;
