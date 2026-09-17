@@ -10,7 +10,7 @@ const LEITURAS = new Set([
 const ESCRITAS = new Set([
   'pedirCodigoAcessoPortal', 'validarCodigoAcessoPortal', 'terminarSessaoPortal',
   'pedirLinkLoginPortal', 'trocarCodigoLoginPortal',
-  'guardarPedidoPrivacidadePortal', 'registarCheckin', 'guardarPesoDiarioPortal', 'guardarPedidoAvaliacaoPortal',
+  'guardarPedidoPrivacidadePortal', 'guardarPedidoAtualizacaoDadosPortal', 'registarCheckin', 'guardarPesoDiarioPortal', 'guardarPedidoAvaliacaoPortal',
   'registarTesteProntidao', 'marcarNotificacoesLidasPortal', 'guardarMetricasAtividadePortal',
   'guardarPassosPortal', 'registarExecucaoTreino', 'registarPosTreino'
 ]);
