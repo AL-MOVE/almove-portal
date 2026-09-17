@@ -2150,8 +2150,9 @@
       }
       const utilizador = await window.AlMoveFirebaseAuth.entrar(email, palavraPasse);
       if (!utilizador.emailVerified) {
+        await window.AlMoveFirebaseAuth.reenviarConfirmacao(window.location.origin + window.location.pathname);
         await window.AlMoveFirebaseAuth.sair();
-        entradaPortalEstado.textContent = "Confirma primeiro o email enviado para ativares o acesso.";
+        entradaPortalEstado.textContent = "A conta existe, mas ainda falta confirmá-la. Enviámos um novo email de confirmação.";
         return;
       }
       try {
@@ -5639,7 +5640,7 @@
   // ---------- Service worker ----------
   // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
   // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
-  const VERSAO_CLIENTE_PORTAL = "56";
+  const VERSAO_CLIENTE_PORTAL = "57";
   const CHAVE_AVISO_SW = "ALMOVE_SW_AVISO_" + VERSAO_CLIENTE_PORTAL;
   let recarregarPorAtualizacao = false;
   let recarregamentoAgendado = false;

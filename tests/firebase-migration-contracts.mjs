@@ -16,6 +16,7 @@ assert.match(appsScript, /obterClientePorEmailPortal_\(email\)/, 'O email Fireba
 assert.match(appsScript, /firebase:/, 'A assertação não pode ser confundida com o token legado.');
 assert.match(browserAdapter, /browserLocalPersistence/, 'A sessão Firebase deve sobreviver ao fecho normal da PWA.');
 assert.match(browserAdapter, /sendPasswordResetEmail/, 'A recuperação de palavra-passe tem de estar disponível.');
+assert.match(browserAdapter, /sendEmailVerification/, 'A confirmação do email tem de poder ser reenviada.');
 assert.match(browserConfig, /projectId: 'almove-portal'/, 'A app deve apontar para o projeto Firebase correto.');
 assert.doesNotMatch(browserConfig, /measurementId|getAnalytics/, 'O portal não deve carregar Analytics para autenticação.');
 console.log('Contratos de migração Firebase validados.');

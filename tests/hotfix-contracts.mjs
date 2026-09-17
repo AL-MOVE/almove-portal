@@ -33,7 +33,7 @@ assert.match(html, /id="perfilPassaporte"/, 'O Passaporte Técnico deve estar di
 assert.match(html, /<option value="rir" selected>RIR<\/option>/, 'RIR deve ser o método de intensidade predefinido');
 assert.match(html, /localStorage\.getItem\("ALMOVE_SESSAO_PORTAL"\)/, 'A sessão curta deve sobreviver ao fecho da PWA');
 assert.match(html, /bootstrapPortalPromise = SESSAO_PRONTA\.then/, 'O bootstrap deve aguardar pela autenticação antes de mostrar sincronização');
-assert.match(html, /VERSAO_CLIENTE_PORTAL = "56"/, 'O cliente deve identificar a versão da atualização');
+assert.match(html, /VERSAO_CLIENTE_PORTAL = "57"/, 'O cliente deve identificar a versão da atualização');
 assert.doesNotMatch(html, /\}, 350\);/, 'A atualização não deve forçar reload antes de o novo service worker ativar');
 
 assert.match(backend, /doms < 0 \|\| doms > 4/, 'O backend deve aceitar DOMS de 0 a 4');
@@ -57,7 +57,7 @@ assert.match(html, /icone = String\(proximo\.tipo/, 'O próximo compromisso deve
 assert.match(html, /botao\.disabled = true/, 'O envio de código deve impedir pedidos repetidos');
 assert.match(proxy, /controlador\.abort\(\), 27000/, 'O proxy deve tolerar a latência normal do Apps Script');
 assert.match(proxy, /guardarPedidoAtualizacaoDadosPortal/, 'O proxy deve permitir pedidos de alteração de dados');
-assert.match(sw, /almove-portal-v56/, 'A cache PWA deve avançar para v56');
+assert.match(sw, /almove-portal-v57/, 'A cache PWA deve avançar para v57');
 assert.doesNotMatch(sw, /\/js\/avatar-studio\.js/, 'O avatar removido não deve ocupar a cache offline');
 assert.match(sw, /\/js\/activity-heatmap\.js/, 'O Mapa AL MOVE deve estar disponível offline');
 const etapaInstalacao = sw.split("self.addEventListener('activate'")[0];
@@ -67,4 +67,4 @@ const manifesto = JSON.parse(manifest);
 assert.equal(manifesto.display, 'standalone', 'O manifest deve abrir a PWA em modo app');
 assert.equal(manifesto.icons[0].src, '/al-move-mark.png', 'O manifest deve usar o ícone entregue');
 
-console.log('Contratos do portal v56 validados.');
+console.log('Contratos do portal v57 validados.');

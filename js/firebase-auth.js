@@ -58,6 +58,13 @@
     return sdk.sendPasswordResetEmail(auth, String(email || '').trim(), opcoes);
   }
 
+  async function reenviarConfirmacao(continuarUrl) {
+    exigirAuth();
+    if (!auth.currentUser) throw new Error('FIREBASE_SESSAO_AUSENTE');
+    const opcoes = continuarUrl ? { url: continuarUrl, handleCodeInApp: false } : undefined;
+    return sdk.sendEmailVerification(auth.currentUser, opcoes);
+  }
+
   async function sair() {
     exigirAuth();
     return sdk.signOut(auth);
@@ -68,6 +75,7 @@
     entrar: entrar,
     criarConta: criarConta,
     enviarRecuperacao: enviarRecuperacao,
+    reenviarConfirmacao: reenviarConfirmacao,
     sair: sair,
     token: token,
     utilizador: function () { return auth && auth.currentUser ? auth.currentUser : null; },
