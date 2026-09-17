@@ -19,10 +19,15 @@ assert.equal(estadoSaude.version ?? estadoSaude.versao, 55, 'O domínio deve est
 // O Mapa são módulos separados. Sem estes ficheiros as respetivas
 // páginas parecem abrir, mas ficam vazias — uma falha fácil de não notar num
 // deploy manual pela interface do GitHub.
-for (const ficheiro of ['/js/activity-heatmap.js', '/js/firebase-auth.js', '/js/firebase-config.js']) {
+const modulos = {
+  '/js/activity-heatmap.js': /window\.ALMove/,
+  '/js/firebase-auth.js': /AlMoveFirebaseAuth/,
+  '/js/firebase-config.js': /ALMOVE_FIREBASE_CONFIG/
+};
+for (const [ficheiro, contrato] of Object.entries(modulos)) {
   const modulo = await fetch(`${base}${ficheiro}`, { cache: 'no-store' });
   assert.equal(modulo.status, 200, `${ficheiro} deve estar publicado`);
-  assert.match(await modulo.text(), /window\.ALMove/, `${ficheiro} deve expor o módulo esperado`);
+  assert.match(await modulo.text(), contrato, `${ficheiro} deve expor o módulo esperado`);
 }
 
 const escritaPorGet = await fetch(`${base}/api/almove?fn=registarCheckin`, { headers: { 'X-ALMOVE-Session': 'invalida' } });
