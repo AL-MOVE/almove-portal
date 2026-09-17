@@ -1,4 +1,4 @@
 export default function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
-  res.status(200).json({ ok: true, servico: 'almove-portal', versao: 46, data: new Date().toISOString() });
+  res.status(200).json({ ok: true, servico: 'almove-portal', versao: 52, data: new Date().toISOString() });
 }
