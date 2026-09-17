@@ -14,12 +14,12 @@ const saude = await fetch(`${base}/api/health`, { cache: 'no-store' });
 assert.equal(saude.status, 200, 'O endpoint de saúde deve responder');
 const estadoSaude = await saude.json();
 assert.equal(estadoSaude.ok, true, 'O endpoint de saúde deve indicar ok');
-assert.equal(estadoSaude.version ?? estadoSaude.versao, 54, 'O domínio deve estar na versão 54');
+assert.equal(estadoSaude.version ?? estadoSaude.versao, 55, 'O domínio deve estar na versão 55');
 
 // O Mapa são módulos separados. Sem estes ficheiros as respetivas
 // páginas parecem abrir, mas ficam vazias — uma falha fácil de não notar num
 // deploy manual pela interface do GitHub.
-for (const ficheiro of ['/js/activity-heatmap.js']) {
+for (const ficheiro of ['/js/activity-heatmap.js', '/js/firebase-auth.js', '/js/firebase-config.js']) {
   const modulo = await fetch(`${base}${ficheiro}`, { cache: 'no-store' });
   assert.equal(modulo.status, 200, `${ficheiro} deve estar publicado`);
   assert.match(await modulo.text(), /window\.ALMove/, `${ficheiro} deve expor o módulo esperado`);
