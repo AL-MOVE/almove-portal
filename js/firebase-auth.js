@@ -12,13 +12,10 @@
     if (!configuracao || !configuracao.apiKey || !configuracao.authDomain || !configuracao.projectId) {
       throw new Error('CONFIGURACAO_FIREBASE_EM_FALTA');
     }
-    pronto = Promise.all([
-      import('https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js'),
-      import('https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js')
-    ]).then(function (modulos) {
-      const appSdk = modulos[0];
-      sdk = modulos[1];
-      const app = appSdk.getApps().length ? appSdk.getApp() : appSdk.initializeApp(configuracao);
+    pronto = Promise.resolve().then(function () {
+      sdk = global.ALMOVE_FIREBASE_SDK;
+      if (!sdk || !sdk.initializeApp || !sdk.getAuth) throw new Error('FIREBASE_SDK_EM_FALTA');
+      const app = sdk.getApps().length ? sdk.getApp() : sdk.initializeApp(configuracao);
       auth = sdk.getAuth(app);
       return sdk.setPersistence(auth, sdk.browserLocalPersistence).then(function () {
         sdk.onAuthStateChanged(auth, function (utilizador) {

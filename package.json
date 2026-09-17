@@ -2,7 +2,12 @@
   "name": "almove-portal",
   "private": true,
   "type": "module",
+  "scripts": {
+    "build:firebase": "node scripts/build-firebase-sdk.mjs"
+  },
   "dependencies": {
+    "esbuild": "^0.28.2",
+    "firebase": "^12.19.0",
     "firebase-admin": "^13.0.0"
   }
 }

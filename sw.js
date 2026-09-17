@@ -2,13 +2,14 @@
 // A versão sobe com esta atualização visual para que instalações existentes
 // recebam o novo index.html em vez de manterem a versão anterior em cache.
 
-const VERSAO_CACHE = 'almove-portal-v58';
+const VERSAO_CACHE = 'almove-portal-v59';
 
 const FICHEIROS_ESSENCIAIS = [
   '/manifest.json',
   '/al-move-mark.png',
   '/js/activity-heatmap.js',
   '/js/firebase-config.js',
+  '/js/firebase-sdk.js',
   '/js/firebase-auth.js',
 ];
 

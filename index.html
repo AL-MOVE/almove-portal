@@ -1947,6 +1947,7 @@
 
 <script src="/js/activity-heatmap.js"></script>
 <script src="/js/firebase-config.js"></script>
+<script src="/js/firebase-sdk.js"></script>
 <script src="/js/firebase-auth.js"></script>
 <script>
 (function () {
@@ -5644,7 +5645,7 @@
   // ---------- Service worker ----------
   // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
   // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
-  const VERSAO_CLIENTE_PORTAL = "58";
+  const VERSAO_CLIENTE_PORTAL = "59";
   const CHAVE_AVISO_SW = "ALMOVE_SW_AVISO_" + VERSAO_CLIENTE_PORTAL;
   let recarregarPorAtualizacao = false;
   let recarregamentoAgendado = false;
