@@ -8,7 +8,7 @@ const LEITURAS = new Set([
 ]);
 
 const ESCRITAS = new Set([
-  'criarSessaoPortal', 'pedirCodigoAcessoPortal', 'validarCodigoAcessoPortal', 'terminarSessaoPortal',
+  'pedirCodigoAcessoPortal', 'validarCodigoAcessoPortal', 'terminarSessaoPortal',
   'pedirLinkLoginPortal', 'trocarCodigoLoginPortal',
   'guardarPedidoPrivacidadePortal', 'registarCheckin', 'guardarPesoDiarioPortal', 'guardarPedidoAvaliacaoPortal',
   'registarTesteProntidao', 'marcarNotificacoesLidasPortal', 'guardarMetricasAtividadePortal',
