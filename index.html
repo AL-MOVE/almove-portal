@@ -7,7 +7,7 @@
 
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#050810">
-  <link rel="apple-touch-icon" href="/icons/icon-any-512.png">
+  <link rel="apple-touch-icon" href="/al-move-mark.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="AL MOVE">
@@ -1198,7 +1198,7 @@
 
   <section class="ecra-boas-vindas" id="ecraBoasVindas" aria-labelledby="boasVindasTitulo">
     <div class="boas-vindas-conteudo">
-      <img class="boas-vindas-logo" src="/icons/icon-any-512.png" alt="AL MOVE">
+      <img class="boas-vindas-logo" src="/al-move-mark.png" alt="AL MOVE">
       <h1 class="boas-vindas-saudacao" id="boasVindasTitulo"><span id="boasVindasPrefixo">Olá</span><strong id="boasVindasNome" class="oculto"></strong></h1>
       <p class="boas-vindas-sub">O teu caminho começa aqui.</p>
       <button type="button" class="btn-comecar" id="btnComecarPortal">Começar</button>
@@ -1206,7 +1206,7 @@
   </section>
 
   <div class="pull-refresh" id="pullRefresh" role="status" aria-live="polite">
-    <img src="/icons/icon-any-512.png" alt="">
+    <img src="/al-move-mark.png" alt="">
   </div>
 
   <div class="topo">
@@ -1852,6 +1852,7 @@
     chama: '<path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0a5 5 0 0 1 1-3a1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"/>',
     grafico: '<path d="M4 19V5M4 19h16"/><path d="m7 15 3-3 3 2 5-6"/>',
     relogio: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></g>',
+    agenda: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="m8.5 15 2.2 2.2 4.8-5"/></g>',
     raio: '<path d="m13 2-8 12h6l-1 8 9-13h-6z"/>',
     parar: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><rect width="6" height="6" x="9" y="9" rx="1"/></g>',
     info: '<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></g>',
@@ -2056,6 +2057,14 @@
     if (estadoLigacaoPortalEl) estadoLigacaoPortalEl.classList.add("oculto");
   }
 
+  function mostrarFalhaBootstrap(temCache) {
+    const semInternet = navigator.onLine === false;
+    const mensagem = semInternet
+      ? (temCache ? "Sem ligação. A mostrar a última atualização guardada." : "Sem ligação. Tenta novamente quando tiveres rede.")
+      : (temCache ? "Não foi possível atualizar agora. A mostrar a última atualização guardada." : "O serviço está a demorar mais do que o esperado. Tenta novamente.");
+    mostrarEstadoLigacao(semInternet ? "offline" : "indisponivel", mensagem);
+  }
+
   function guardarBootstrapLocal(dados) {
     try {
       localStorage.setItem(CHAVE_BOOTSTRAP_PORTAL, JSON.stringify({ dados: dados, guardadoEm: Date.now() }));
@@ -2085,7 +2094,7 @@
         if (!resp || !resp.ok || !resp.dados) throw new Error((resp && resp.erro) || "Não foi possível carregar os dados do portal.");
         const dados = resp.dados;
         guardarBootstrapLocal(dados);
-        if (Array.isArray(dados.erros) && dados.erros.length) mostrarEstadoLigacao("offline", "Alguns dados não atualizaram. Podes tentar novamente.");
+        if (Array.isArray(dados.erros) && dados.erros.length) mostrarEstadoLigacao("indisponivel", "Alguns dados não atualizaram. Podes tentar novamente.");
         else ocultarEstadoLigacao();
         return dados;
       })
@@ -2094,10 +2103,10 @@
         bootstrapPortalPromise = null;
         const local = lerBootstrapLocal();
         if (local) {
-          mostrarEstadoLigacao("offline", "Sem ligação. A mostrar a última atualização guardada.");
+          mostrarFalhaBootstrap(true);
           return local;
         }
-        mostrarEstadoLigacao("offline", "Não foi possível carregar os dados. Tenta novamente.");
+        mostrarFalhaBootstrap(false);
         throw erro;
       });
     return bootstrapPortalPromise;
@@ -2191,6 +2200,10 @@
     fecharDialogoAcessivel(acessoSensivelEl);
   }
   document.getElementById("btnEnviarCodigo").addEventListener("click", function () {
+    const botao = this;
+    const textoOriginal = botao.textContent;
+    botao.disabled = true;
+    botao.textContent = "A enviar…";
     acessoSensivelEstadoEl.textContent = "A enviar…";
     chamarApi("pedirCodigoAcessoPortal", {}).then(function (resp) {
       if (!resp || !resp.ok) throw new Error((resp && resp.erro) || "Não foi possível enviar o código.");
@@ -2198,6 +2211,9 @@
     }).catch(function (erro) {
       const mensagem = String(erro && erro.message || erro);
       acessoSensivelEstadoEl.textContent = mensagem.includes("AGUARDA") ? "Aguarda um minuto antes de pedir outro código." : mensagem.includes("EMAIL_EM_FALTA") ? "Pede ao André para adicionar o teu email ao perfil." : "Não foi possível enviar o código agora.";
+    }).finally(function () {
+      botao.disabled = false;
+      botao.textContent = textoOriginal;
     });
   });
   document.getElementById("btnValidarCodigo").addEventListener("click", function () {
@@ -2432,9 +2448,11 @@
     let titulo = "Fazer check-in";
     let subtitulo = "Regista como estás antes do treino.";
     let destino = "hoje";
+    let icone = "dica";
     if (treino.status === "active") {
       titulo = "Continuar treino";
       subtitulo = treino.nomeTreino || "Retoma onde ficaste.";
+      icone = "halter";
     } else if (agenda.length) {
       const proximo = agenda[0];
       const data = new Date(proximo.dataHora || proximo.data || "");
@@ -2443,16 +2461,20 @@
         titulo = String(proximo.tipo || proximo.titulo || "Compromisso") + (horas <= 1 ? " em breve" : " amanhã");
         subtitulo = data.toLocaleString("pt-PT", { weekday: "long", hour: "2-digit", minute: "2-digit" });
         destino = "agenda";
+        icone = String(proximo.tipo || "").toUpperCase() === "AVALIACAO" ? "avaliacao" : "agenda";
       } else if (estado.jaFezCheckinHoje) {
         titulo = "Treinar agora";
         subtitulo = "O check-in de hoje já está concluído.";
+        icone = "halter";
       }
     } else if (estado.jaFezCheckinHoje) {
       titulo = "Treinar agora";
       subtitulo = "O check-in de hoje já está concluído.";
+      icone = "halter";
     }
     document.getElementById("inicioProximaTitulo").textContent = titulo;
     document.getElementById("inicioProximaSub").textContent = subtitulo;
+    trocarIconeDentro(inicioProximaAcaoEl.querySelector(".inicio-cta-play"), icone);
     inicioProximaAcaoEl.dataset.destino = destino;
   }
   inicioProximaAcaoEl.addEventListener("click", function () {
@@ -4555,7 +4577,7 @@
           const mostrar = function () {
             if (navigator.serviceWorker && navigator.serviceWorker.ready) {
               navigator.serviceWorker.ready.then(function (registo) {
-                registo.showNotification("Descanso concluído", { body: "Podes iniciar a próxima série.", icon: "/icons/icon-192.png", tag: "almove-descanso" });
+                registo.showNotification("Descanso concluído", { body: "Podes iniciar a próxima série.", icon: "/al-move-mark.png", tag: "almove-descanso" });
               }).catch(function () {});
             }
           };
@@ -5201,7 +5223,7 @@
     .catch(function () {
       ecraCarregando.classList.add("oculto");
       cardCheckin.classList.remove("oculto");
-      checkinErro.textContent = "Sem ligação. Tenta novamente quando tiveres rede.";
+      checkinErro.textContent = navigator.onLine === false ? "Sem ligação. Tenta novamente quando tiveres rede." : "Não foi possível carregar agora. Tenta novamente.";
       checkinErro.style.display = "block";
     });
 
