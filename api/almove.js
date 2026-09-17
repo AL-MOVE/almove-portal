@@ -64,7 +64,7 @@ export default async function handler(req, res) {
   }
 
   const controlador = new AbortController();
-  const timeout = setTimeout(() => controlador.abort(), 18000);
+  const timeout = setTimeout(() => controlador.abort(), 27000);
   try {
     let url = APPS_SCRIPT_URL;
     const opcoes = { redirect: 'follow', signal: controlador.signal, headers: { Accept: 'application/json' } };
