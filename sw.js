@@ -2,12 +2,14 @@
 // A versão sobe com esta atualização visual para que instalações existentes
 // recebam o novo index.html em vez de manterem a versão anterior em cache.
 
-const VERSAO_CACHE = 'almove-portal-v50';
+const VERSAO_CACHE = 'almove-portal-v51';
 
 const FICHEIROS_ESSENCIAIS = [
   '/',
   '/manifest.json',
   '/al-move-mark.png',
+  '/js/avatar-studio.js',
+  '/js/activity-heatmap.js',
 ];
 
 self.addEventListener('install', (evento) => {
