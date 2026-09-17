@@ -2,20 +2,20 @@
 // A versão sobe com esta atualização visual para que instalações existentes
 // recebam o novo index.html em vez de manterem a versão anterior em cache.
 
-const VERSAO_CACHE = 'almove-portal-v48';
+const VERSAO_CACHE = 'almove-portal-v49';
 
 const FICHEIROS_ESSENCIAIS = [
   '/',
   '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-any-512.png',
+  '/al-move-mark.png',
 ];
 
 self.addEventListener('install', (evento) => {
   evento.waitUntil(
     caches.open(VERSAO_CACHE).then((cache) => cache.addAll(FICHEIROS_ESSENCIAIS))
   );
-  self.skipWaiting();
+  // Uma atualização fica em espera até o cliente escolher “Atualizar”.
+  // Isto evita recarregamentos a meio de um treino ou formulário.
 });
 
 self.addEventListener('activate', (evento) => {
@@ -84,8 +84,8 @@ self.addEventListener('push', (evento) => {
   try { dados = evento.data ? evento.data.json() : {}; } catch (erro) { dados = { body: evento.data ? evento.data.text() : '' }; }
   evento.waitUntil(self.registration.showNotification(dados.title || 'AL MOVE', {
     body: dados.body || 'Tens uma atualização no teu acompanhamento.',
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
+    icon: '/al-move-mark.png',
+    badge: '/al-move-mark.png',
     tag: dados.tag || 'almove-aviso',
     data: { url: dados.url || '/' }
   }));
