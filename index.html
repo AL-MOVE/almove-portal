@@ -1058,7 +1058,21 @@
     .perfil-acesso-seta { width:9px; height:9px; border-top:2px solid var(--text-muted); border-right:2px solid var(--text-muted); transform:rotate(45deg); }
     .perfil-voltar { display:inline-flex; align-items:center; gap:8px; padding:0; margin-bottom:14px; border:0; background:transparent; color:var(--text-soft); font:inherit; font-size:12px; font-weight:850; cursor:pointer; }
     .perfil-voltar span { width:9px; height:9px; border-left:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(45deg); }
-    body.perfil-detalhe-aberto #tabPlanos > :not(#perfilMetricas):not(#perfilAvaliacoes):not(#perfilPesoDiario):not(#perfilEvolucao) { display:none; }
+    body.perfil-detalhe-aberto #tabPlanos > :not(#perfilMetricas):not(#perfilAvaliacoes):not(#perfilPesoDiario):not(#perfilEvolucao):not(#perfilDadosPessoais):not(#perfilPlano) { display:none; }
+    .dados-pessoais-form { display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-top:16px; }
+    .dados-pessoais-form label { display:grid; gap:6px; color:var(--text-soft); font-size:11px; font-weight:800; }
+    .dados-pessoais-form label.largo { grid-column:1/-1; }
+    .dados-pessoais-form input, .dados-pessoais-form select, .dados-pessoais-form textarea { width:100%; min-height:46px; padding:11px 12px; border:1px solid var(--border); border-radius:12px; outline:0; background:rgba(255,255,255,.055); color:#fff; font:inherit; font-size:13px; }
+    .dados-pessoais-form select option { background:#091421; }
+    .dados-pessoais-form textarea { min-height:82px; resize:vertical; line-height:1.45; }
+    .dados-pessoais-form input:focus, .dados-pessoais-form select:focus, .dados-pessoais-form textarea:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(45,212,191,.10); }
+    .dados-pessoais-aviso { margin:13px 0 0; padding:12px; border:1px solid rgba(56,189,248,.22); border-radius:13px; background:rgba(14,165,233,.07); color:var(--text-soft); font-size:11px; line-height:1.45; }
+    .dados-pessoais-acoes { margin-top:14px; }
+    .dados-pessoais-acoes .btn-secundario { width:100%; min-height:46px; }
+    .plano-estado-linha { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; padding-bottom:12px; border-bottom:1px solid var(--border-soft); }
+    .plano-estado-linha span:first-child { color:var(--text-muted); font-size:12px; }
+    .plano-origem { margin:13px 0 0; color:var(--text-muted); font-size:10px; line-height:1.45; }
+    @media (max-width:430px) { .dados-pessoais-form { grid-template-columns:1fr; } .dados-pessoais-form label.largo { grid-column:auto; } }
     .metricas-corrida-campos { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:13px; }
     .metricas-corrida-campos label { display:grid; gap:5px; color:var(--text-soft); font-size:10px; font-weight:800; }
     .metricas-corrida-campos input { width:100%; min-height:42px; padding:0 11px; border:1px solid var(--border); border-radius:11px; outline:0; background:rgba(255,255,255,.055); color:#fff; font:inherit; font-size:13px; }
@@ -1656,6 +1670,8 @@
         </div>
       </div>
       <div class="perfil-acessos">
+        <button type="button" class="perfil-acesso" data-abrir-perfil="dados"><span class="perfil-acesso-icone" data-perfil-icone="perfil"></span><span><strong>Os meus dados</strong><small>Consulta os teus dados e pede alterações</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="plano"><span class="perfil-acesso-icone" data-perfil-icone="treinos"></span><span><strong>O teu plano</strong><small>Serviço, validade e sessões presenciais</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
         <button type="button" class="perfil-acesso" data-abrir-perfil="evolucao"><span class="perfil-acesso-icone" data-perfil-icone="grafico"></span><span><strong>A minha evolução</strong><small>Gráficos, filtros e calendário</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
         <button type="button" class="perfil-acesso" data-abrir-perfil="peso"><span class="perfil-acesso-icone" data-perfil-icone="avaliacao"></span><span><strong>Registo de peso</strong><small>Regista o peso diário, se quiseres</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
         <button type="button" class="perfil-acesso" id="btnAbrirAvaliacoes" data-abrir-perfil="avaliacoes"><span class="perfil-acesso-icone avaliacao" data-perfil-icone="avaliacao"></span><span><strong>Avaliações físicas</strong><small id="avaliacaoAcessoEstado">Pedir avaliação e ver evolução</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
@@ -1672,6 +1688,42 @@
         </div>
       </div>
     </div>
+
+    <section class="card oculto" id="perfilDadosPessoais" aria-labelledby="dadosPessoaisTitulo">
+      <button type="button" class="perfil-voltar" id="btnVoltarDadosPessoais"><span aria-hidden="true"></span> Perfil</button>
+      <div class="metricas-cabecalho">
+        <div><span class="metricas-eyebrow">Perfil</span><div class="card-title" id="dadosPessoaisTitulo">Os meus dados</div><p>Confirma a informação associada à tua conta.</p></div>
+        <span class="metricas-icone" data-perfil-detalhe-icone="perfil"></span>
+      </div>
+      <form id="dadosPessoaisForm" class="dados-pessoais-form">
+        <label class="largo">Nome completo<input id="dadosPessoaisNome" name="nome" type="text" autocomplete="name" maxlength="120"></label>
+        <label>Telemóvel<input id="dadosPessoaisContacto" name="contacto" type="tel" autocomplete="tel" inputmode="tel" maxlength="30"></label>
+        <label>Email<input id="dadosPessoaisEmail" name="email" type="email" autocomplete="email" inputmode="email" maxlength="160"></label>
+        <label>Data de nascimento<input id="dadosPessoaisNascimento" name="dataNascimento" type="date"></label>
+        <label>Género<select id="dadosPessoaisGenero" name="genero"><option value="">Prefiro não indicar</option><option value="Feminino">Feminino</option><option value="Masculino">Masculino</option><option value="Outro">Outro</option></select></label>
+        <label class="largo">Morada<input id="dadosPessoaisMorada" name="morada" type="text" autocomplete="street-address" maxlength="240"></label>
+        <label class="largo">Notas<textarea id="dadosPessoaisNota" name="nota" maxlength="500"></textarea></label>
+      </form>
+      <p class="dados-pessoais-aviso">Por segurança, os dados da ficha não mudam automaticamente. O pedido é enviado ao André e só fica ativo depois de ser confirmado.</p>
+      <div class="dados-pessoais-acoes"><button type="button" class="btn-secundario" id="btnPedirAtualizacaoDados">Pedir alteração</button></div>
+      <p class="metricas-sync" id="dadosPessoaisEstado" aria-live="polite"></p>
+    </section>
+
+    <section class="card oculto" id="perfilPlano" aria-labelledby="perfilPlanoTitulo">
+      <button type="button" class="perfil-voltar" id="btnVoltarPlano"><span aria-hidden="true"></span> Perfil</button>
+      <div class="metricas-cabecalho">
+        <div><span class="metricas-eyebrow">Serviço</span><div class="card-title" id="perfilPlanoTitulo">O teu plano</div><p>Consulta o serviço ativo e o saldo de sessões presenciais.</p></div>
+        <span class="metricas-icone" data-perfil-detalhe-icone="treinos"></span>
+      </div>
+      <div class="plano-estado-linha"><span>Estado da conta</span><span class="perfil-estado-pill oculto" id="opcoesPlanoEstado">—</span></div>
+      <div id="opcoesPlanoConteudo">
+        <div class="plano-linha"><span class="plano-linha-label">Serviço</span><span class="plano-linha-valor" id="opcoesPlanoServico">—</span></div>
+        <div class="plano-linha oculto" id="opcoesPlanoValidadeLinha"><span class="plano-linha-label">Válido até</span><span class="plano-linha-valor" id="opcoesPlanoValidade">—</span></div>
+        <div class="plano-linha"><span class="plano-linha-label">Sessões PT presenciais feitas este mês</span><span class="plano-linha-valor" id="opcoesPlanoSessoesFeitas">—</span></div>
+        <div class="plano-linha"><span class="plano-linha-label">Sessões PT presenciais restantes este mês</span><span class="plano-linha-valor" id="opcoesPlanoSessoesRestantes">—</span></div>
+      </div>
+      <p class="plano-origem" id="opcoesPlanoOrigem">A carregar informação do CRM…</p>
+    </section>
 
     <section class="card avaliacao-fisica-card oculto" id="perfilAvaliacoes" aria-labelledby="avaliacaoFisicaTitulo">
       <button type="button" class="perfil-voltar" id="btnVoltarAvaliacoes"><span aria-hidden="true"></span> Perfil</button>
@@ -1745,16 +1797,6 @@
       <button type="button" class="btn-secundario metricas-guardar" id="btnGuardarMetricas">Guardar métricas</button>
       <p class="metricas-sync" id="metricasSync"></p>
     </section>
-
-    <div class="card">
-      <div class="card-title">O teu plano</div>
-      <div id="opcoesPlanoConteudo">
-        <div class="plano-linha"><span class="plano-linha-label">Serviço</span><span class="plano-linha-valor" id="opcoesPlanoServico">—</span></div>
-        <div class="plano-linha oculto" id="opcoesPlanoValidadeLinha"><span class="plano-linha-label">Válido até</span><span class="plano-linha-valor" id="opcoesPlanoValidade">—</span></div>
-        <div class="plano-linha"><span class="plano-linha-label">Sessões PT presenciais feitas</span><span class="plano-linha-valor" id="opcoesPlanoSessoesFeitas">—</span></div>
-        <div class="plano-linha"><span class="plano-linha-label">Sessões PT presenciais restantes</span><span class="plano-linha-valor" id="opcoesPlanoSessoesRestantes">—</span></div>
-      </div>
-    </div>
 
     <div class="card contacto-pt-card">
       <div class="contacto-pt-resumo">
@@ -2673,11 +2715,14 @@
   const opcoesPlanoValidadeEl = document.getElementById("opcoesPlanoValidade");
   const opcoesPlanoSessoesFeitasEl = document.getElementById("opcoesPlanoSessoesFeitas");
   const opcoesPlanoSessoesRestantesEl = document.getElementById("opcoesPlanoSessoesRestantes");
+  const opcoesPlanoEstadoEl = document.getElementById("opcoesPlanoEstado");
+  const opcoesPlanoOrigemEl = document.getElementById("opcoesPlanoOrigem");
   const opcoesBtnContactoPTEl = document.getElementById("opcoesBtnContactoPT");
   const opcoesContactoPTTituloEl = document.getElementById("opcoesContactoPTTitulo");
   const opcoesContactoPTSubEl = document.getElementById("opcoesContactoPTSub");
 
   var opcoesContactoPTNumero = "";
+  var dadosPessoaisAtuais = {};
 
   function normalizarNumeroSessoes(valor) {
     if (valor === null || valor === undefined || valor === "") return null;
@@ -2701,6 +2746,9 @@
       opcoesEstadoPillEl.textContent = dados.estado;
       opcoesEstadoPillEl.className = "perfil-estado-pill " + classe;
       opcoesEstadoPillEl.classList.remove("oculto");
+      opcoesPlanoEstadoEl.textContent = dados.estado;
+      opcoesPlanoEstadoEl.className = "perfil-estado-pill " + classe;
+      opcoesPlanoEstadoEl.classList.remove("oculto");
     }
 
     opcoesPlanoServicoEl.textContent = dados.servicoAtual || "A combinar com o André";
@@ -2716,6 +2764,18 @@
     const feitas = feitasDiretas !== null ? feitasDiretas : (total !== null && restantes !== null ? Math.max(0, total - restantes) : null);
     opcoesPlanoSessoesFeitasEl.textContent = feitas === null ? "—" : feitas;
     opcoesPlanoSessoesRestantesEl.textContent = restantes === null ? "—" : restantes;
+    opcoesPlanoOrigemEl.textContent = dados.origemSessoes === "pack-ativo"
+      ? "Saldo calculado pelo pack ativo e pelas sessões confirmadas no CRM."
+      : "Saldo apresentado a partir da ficha do cliente no CRM.";
+    dadosPessoaisAtuais = {
+      nome: dados.nome || "",
+      contacto: dados.contacto || "",
+      email: dados.email || "",
+      dataNascimento: dados.dataNascimento || "",
+      genero: dados.genero || "",
+      morada: dados.morada || ""
+    };
+    preencherDadosPessoais();
     renderNotificacoes(dados.notificacoes);
 
     if (dados.contactoPTNome) {
@@ -2738,6 +2798,66 @@
       window.open("https://wa.me/" + opcoesContactoPTNumero, "_blank");
     }
   });
+
+  function preencherDadosPessoais() {
+    const mapa = {
+      dadosPessoaisNome: "nome",
+      dadosPessoaisContacto: "contacto",
+      dadosPessoaisEmail: "email",
+      dadosPessoaisNascimento: "dataNascimento",
+      dadosPessoaisGenero: "genero",
+      dadosPessoaisMorada: "morada"
+    };
+    Object.keys(mapa).forEach(function (id) {
+      const campo = document.getElementById(id);
+      if (campo) campo.value = dadosPessoaisAtuais[mapa[id]] || "";
+    });
+    const nota = document.getElementById("dadosPessoaisNota");
+    if (nota) nota.value = "";
+  }
+
+  function abrirDetalhePerfilSimples(id) {
+    document.body.classList.add("perfil-detalhe-aberto");
+    document.querySelectorAll("#perfilDadosPessoais,#perfilPlano").forEach(function (painel) { painel.classList.add("oculto"); });
+    const painel = document.getElementById(id);
+    if (painel) painel.classList.remove("oculto");
+    if (id === "perfilDadosPessoais") preencherDadosPessoais();
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+
+  function fecharDetalhePerfilSimples(id) {
+    const painel = document.getElementById(id);
+    if (painel) painel.classList.add("oculto");
+    document.body.classList.remove("perfil-detalhe-aberto");
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+
+  function pedirAtualizacaoDadosPessoais() {
+    const botao = document.getElementById("btnPedirAtualizacaoDados");
+    const estado = document.getElementById("dadosPessoaisEstado");
+    const dados = {
+      nome: document.getElementById("dadosPessoaisNome").value.trim(),
+      contacto: document.getElementById("dadosPessoaisContacto").value.trim(),
+      email: document.getElementById("dadosPessoaisEmail").value.trim(),
+      dataNascimento: document.getElementById("dadosPessoaisNascimento").value,
+      genero: document.getElementById("dadosPessoaisGenero").value,
+      morada: document.getElementById("dadosPessoaisMorada").value.trim(),
+      nota: document.getElementById("dadosPessoaisNota").value.trim(),
+      eventId: "dados-" + Date.now() + "-" + Math.random().toString(36).slice(2,10)
+    };
+    if (!dados.nome || !dados.email) { estado.textContent = "Indica o nome e o email."; return; }
+    botao.disabled = true;
+    botao.textContent = "A enviar…";
+    estado.textContent = "";
+    chamarApi("guardarPedidoAtualizacaoDadosPortal", dados)
+      .then(function (resp) {
+        if (!resp || !resp.ok) throw new Error((resp && resp.erro) || "O pedido não foi aceite.");
+        estado.textContent = "Pedido enviado. O André confirma a alteração no CRM.";
+        document.getElementById("dadosPessoaisNota").value = "";
+      })
+      .catch(function (erro) { estado.textContent = (erro && erro.message) || "Não foi possível enviar o pedido agora."; })
+      .finally(function () { botao.disabled = false; botao.textContent = "Pedir alteração"; });
+  }
 
   // ---------- Agenda semanal ----------
   var AGENDA_PORTAL = [];
@@ -3172,7 +3292,12 @@
   document.querySelectorAll("[data-avaliacao-icone]").forEach(function (el) { trocarIconeDentro(el, "avaliacao"); });
   document.querySelectorAll("[data-peso-icone]").forEach(function (el) { trocarIconeDentro(el, el.getAttribute("data-peso-icone")); });
   document.querySelectorAll("[data-evolucao-icone]").forEach(function (el) { trocarIconeDentro(el, el.getAttribute("data-evolucao-icone")); });
-  document.querySelectorAll("[data-abrir-perfil]").forEach(function (btn) { btn.addEventListener("click", function () { if (btn.dataset.abrirPerfil === "avaliacoes") abrirPerfilAvaliacoes(); else if (btn.dataset.abrirPerfil === "peso") abrirPerfilPesoDiario(); else if (btn.dataset.abrirPerfil === "evolucao") abrirPerfilEvolucao(); else abrirPerfilMetricas(btn.dataset.abrirPerfil); }); });
+  document.querySelectorAll("[data-perfil-detalhe-icone]").forEach(function (el) { trocarIconeDentro(el, el.getAttribute("data-perfil-detalhe-icone")); });
+  document.querySelectorAll("[data-abrir-perfil]").forEach(function (btn) { btn.addEventListener("click", function () { if (btn.dataset.abrirPerfil === "dados") abrirDetalhePerfilSimples("perfilDadosPessoais"); else if (btn.dataset.abrirPerfil === "plano") abrirDetalhePerfilSimples("perfilPlano"); else if (btn.dataset.abrirPerfil === "avaliacoes") abrirPerfilAvaliacoes(); else if (btn.dataset.abrirPerfil === "peso") abrirPerfilPesoDiario(); else if (btn.dataset.abrirPerfil === "evolucao") abrirPerfilEvolucao(); else abrirPerfilMetricas(btn.dataset.abrirPerfil); }); });
+  document.getElementById("btnVoltarDadosPessoais").addEventListener("click", function () { fecharDetalhePerfilSimples("perfilDadosPessoais"); });
+  document.getElementById("btnVoltarPlano").addEventListener("click", function () { fecharDetalhePerfilSimples("perfilPlano"); });
+  document.getElementById("btnPedirAtualizacaoDados").addEventListener("click", pedirAtualizacaoDadosPessoais);
+  document.getElementById("dadosPessoaisForm").addEventListener("submit", function (evento) { evento.preventDefault(); pedirAtualizacaoDadosPessoais(); });
   document.getElementById("btnVoltarPesoDiario").addEventListener("click", fecharPerfilPesoDiario);
   document.getElementById("btnVoltarEvolucao").addEventListener("click", fecharPerfilEvolucao);
   document.getElementById("btnGuardarPesoDiario").addEventListener("click", guardarPesoDiario);
@@ -3716,6 +3841,7 @@
     chamarApi("registarCheckin", payload)
       .then(function (resp) {
         if (!resp || !resp.ok) throw new Error((resp && resp.erro) || "Falha desconhecida");
+        if (!resp.dados || resp.dados.sucesso !== true || !resp.dados.idSessao) throw new Error("O servidor não confirmou o registo do treino.");
         const estadoAtual = lerEstadoDiario();
         if (estadoAtual.checkin) estadoAtual.checkin.synced = true;
         guardarEstadoDiario(estadoAtual);
@@ -4794,6 +4920,7 @@
           volume: resumo.volume,
           duracaoSegundos: resumo.duracaoSegundos,
           recordes: recordesLocais,
+          idSessaoServidor: resp.dados.idSessao,
           synced: true
         };
         estado.postWorkout = { values: {}, submitted: false, synced: false };
@@ -4806,11 +4933,11 @@
         cardExecucaoTreino.classList.add("oculto");
         mostrarCardPosTreino();
       })
-      .catch(function () {
+      .catch(function (erro) {
         btnTerminarTreino.disabled = false;
         btnTerminarTreino.textContent = "Tentar terminar treino";
         marcarGuardadoLocalTreino();
-        showToastTreino(mensagemErroLigacao());
+        showToastTreino((erro && erro.message) || mensagemErroLigacao());
       });
   }
   function abrirConfirmacaoAbandono() {
