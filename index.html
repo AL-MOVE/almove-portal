@@ -1184,15 +1184,15 @@
   <section class="entrada-portal oculto" id="ecraEntradaPortal" aria-labelledby="entradaPortalTitulo">
     <div class="entrada-portal-conteudo">
       <div class="entrada-portal-marca"><i aria-hidden="true"></i>AL MOVE</div>
-      <h1 class="entrada-portal-titulo" id="entradaPortalTitulo">O teu treino, <span>no teu ritmo.</span></h1>
-      <p class="entrada-portal-sub">Entra no Portal do Cliente com o email associado ao teu acompanhamento.</p>
+      <h1 class="entrada-portal-titulo" id="entradaPortalTitulo">Entra no teu <span>acompanhamento.</span></h1>
+      <p class="entrada-portal-sub">Usa o email associado ao teu acompanhamento para receberes um link temporário e seguro.</p>
       <form class="entrada-portal-form" id="formEntradaPortal">
         <label for="entradaPortalEmail">O teu email</label>
         <input id="entradaPortalEmail" name="email" type="email" inputmode="email" autocomplete="email" placeholder="nome@email.com" required maxlength="160">
-        <button type="submit" id="btnEntradaPortal">Receber link de acesso</button>
+        <button type="submit" id="btnEntradaPortal">Enviar link temporário</button>
         <p class="entrada-portal-estado" id="entradaPortalEstado" aria-live="polite"></p>
       </form>
-      <p class="entrada-portal-nota"><strong>Acesso seguro por email.</strong> O link expira ao fim de 15 minutos. Se não tens acesso ao email associado, fala com o teu treinador.</p>
+      <p class="entrada-portal-nota"><strong>Acesso seguro por email.</strong> Cada link é válido uma só vez, durante 15 minutos. Se não tens acesso ao email associado, fala com o teu treinador.</p>
     </div>
   </section>
 
@@ -1255,7 +1255,7 @@
   </section>
 
   <!-- ============ TAB: INÍCIO ============ -->
-  <div id="tabInicio" class="tab-conteudo oculto">
+  <div id="tabInicio" class="tab-conteudo">
 
     <div class="card">
       <div class="inicio-topo">
@@ -1336,7 +1336,7 @@
   </div>
 
   <!-- ============ TAB: HOJE ============ -->
-  <div id="tabHoje" class="tab-conteudo">
+  <div id="tabHoje" class="tab-conteudo oculto">
 
     <div id="ecraCarregando" class="card carregando">
       A carregar o teu check-in de hoje…
@@ -1809,11 +1809,11 @@
 
   <!-- ============ NAVEGAÇÃO INFERIOR ============ -->
   <nav class="tabs-nav" aria-label="Navegação principal">
-    <button type="button" class="tab-btn" id="tabBtnInicio" data-tab="inicio" aria-selected="false">
+    <button type="button" class="tab-btn ativo" id="tabBtnInicio" data-tab="inicio" aria-selected="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
       Início
     </button>
-    <button type="button" class="tab-btn ativo" id="tabBtnHoje" data-tab="hoje" aria-selected="true">
+    <button type="button" class="tab-btn" id="tabBtnHoje" data-tab="hoje" aria-selected="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/><path d="m8.5 15 2.2 2.2 4.8-5"/></svg>
       Treinos
     </button>
@@ -1898,7 +1898,7 @@
 
   // ---------- Token do cliente ----------
   const params = new URLSearchParams(window.location.search);
-  const TOKEN_LINK = params.get("token") || params.get("portal");
+  const LINK_PERMANENTE_LEGADO = params.has("token") || params.has("portal");
   const CODIGO_LOGIN = params.get("login");
   let sessaoGuardada = null;
   try { sessaoGuardada = JSON.parse(sessionStorage.getItem("ALMOVE_SESSAO_PORTAL") || "null"); } catch (erro) {}
@@ -1906,7 +1906,7 @@
     sessionStorage.removeItem("ALMOVE_SESSAO_PORTAL");
     sessaoGuardada = null;
   }
-  let TOKEN = TOKEN_LINK || (sessaoGuardada && sessaoGuardada.sessao) || "";
+  let TOKEN = (sessaoGuardada && sessaoGuardada.sessao) || "";
   function identificadorCacheSeguro(valor) {
     let hash = 2166136261;
     String(valor || "").split("").forEach(function (caractere) {
@@ -1915,8 +1915,8 @@
     });
     return "c" + (hash >>> 0).toString(36);
   }
-  const IDENTIDADE_CACHE = (TOKEN_LINK || CODIGO_LOGIN)
-    ? identificadorCacheSeguro(TOKEN_LINK || CODIGO_LOGIN)
+  const IDENTIDADE_CACHE = CODIGO_LOGIN
+    ? identificadorCacheSeguro(CODIGO_LOGIN)
     : (function () { try { return sessionStorage.getItem("ALMOVE_CACHE_ID") || identificadorCacheSeguro(TOKEN); } catch (erro) { return identificadorCacheSeguro(TOKEN); } })();
 
   const ecraBoasVindas = document.getElementById("ecraBoasVindas");
@@ -1986,37 +1986,19 @@
     }).finally(function () { btnEntradaPortal.disabled = false; });
   });
 
+  if (LINK_PERMANENTE_LEGADO) {
+    history.replaceState({}, document.title, window.location.pathname);
+    mostrarEntradaPortal("Este link antigo já não dá acesso. Introduz o teu email para receberes um link temporário.");
+    return;
+  }
+
   if (!TOKEN && !CODIGO_LOGIN) {
     mostrarEntradaPortal();
     return;
   }
 
   let SESSAO_PRONTA = Promise.resolve();
-  if (TOKEN_LINK) {
-    try { sessionStorage.setItem("ALMOVE_CACHE_ID", IDENTIDADE_CACHE); } catch (erro) {}
-    SESSAO_PRONTA = fetch("/api/almove", {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ fn: "criarSessaoPortal", token: TOKEN_LINK, dispositivo: navigator.userAgent.slice(0, 180) })
-    }).then(function (resposta) {
-      if (!resposta.ok) throw new Error("Não foi possível iniciar uma sessão segura.");
-      return resposta.json();
-    }).then(function (resp) {
-      if (!resp || !resp.ok || !resp.dados || !resp.dados.sessao) throw new Error((resp && resp.erro) || "Link inválido ou revogado.");
-      TOKEN = resp.dados.sessao;
-      try { sessionStorage.setItem("ALMOVE_SESSAO_PORTAL", JSON.stringify(resp.dados)); } catch (erro) {}
-      history.replaceState({}, document.title, window.location.pathname);
-      return resp.dados;
-    }).catch(function (erro) {
-      ecraBoasVindas.classList.add("oculto");
-      ecraCarregando.classList.add("oculto");
-      ecraSemToken.classList.remove("oculto");
-      definirCamadaExclusiva(ecraSemToken, true);
-      const texto = ecraSemToken.querySelector(".card-sub");
-      if (texto) texto.textContent = "Este link expirou ou foi revogado. Pede ao André um novo link do Portal.";
-      throw erro;
-    });
-  } else if (CODIGO_LOGIN) {
+  if (CODIGO_LOGIN) {
     ecraBoasVindas.classList.add("oculto");
     SESSAO_PRONTA = fetch("/api/almove", {
       method: "POST",
