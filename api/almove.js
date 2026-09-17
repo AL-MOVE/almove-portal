@@ -12,13 +12,12 @@ const LEITURAS = new Set([
 
 const ESCRITAS = new Set([
   'pedirCodigoAcessoPortal', 'validarCodigoAcessoPortal', 'terminarSessaoPortal',
-  'pedirLinkLoginPortal', 'trocarCodigoLoginPortal',
   'guardarPedidoPrivacidadePortal', 'guardarPedidoAtualizacaoDadosPortal', 'registarCheckin', 'guardarPesoDiarioPortal', 'guardarPedidoAvaliacaoPortal',
   'registarTesteProntidao', 'marcarNotificacoesLidasPortal', 'guardarMetricasAtividadePortal',
   'guardarPassosPortal', 'registarExecucaoTreino', 'registarPosTreino',
   'registarSessaoMinimaPortal'
 ]);
-const PUBLICAS = new Set(['pedirLinkLoginPortal', 'trocarCodigoLoginPortal']);
+const PUBLICAS = new Set();
 
 function responder(res, estado, corpo, requestId) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');

@@ -2020,8 +2020,7 @@
 
   // ---------- Token do cliente ----------
   const params = new URLSearchParams(window.location.search);
-  const LINK_PERMANENTE_LEGADO = params.has("token") || params.has("portal");
-  const CODIGO_LOGIN = params.get("login");
+  const LINK_PERMANENTE_LEGADO = params.has("token") || params.has("portal") || params.has("login");
   let sessaoGuardada = null;
   try { sessaoGuardada = JSON.parse(localStorage.getItem("ALMOVE_SESSAO_PORTAL") || "null"); } catch (erro) {}
   if (sessaoGuardada && sessaoGuardada.expiraEm && new Date(sessaoGuardada.expiraEm).getTime() <= Date.now()) {
@@ -2044,11 +2043,9 @@
     });
     return "c" + (hash >>> 0).toString(36);
   }
-  const IDENTIDADE_CACHE = CODIGO_LOGIN
-    ? identificadorCacheSeguro(CODIGO_LOGIN)
-    : (FIREBASE_ATIVA && FIREBASE_EMAIL
+  const IDENTIDADE_CACHE = FIREBASE_ATIVA && FIREBASE_EMAIL
       ? identificadorCacheSeguro("firebase:" + FIREBASE_EMAIL)
-      : (function () { try { return sessionStorage.getItem("ALMOVE_CACHE_ID") || identificadorCacheSeguro(TOKEN); } catch (erro) { return identificadorCacheSeguro(TOKEN); } })());
+      : (function () { try { return sessionStorage.getItem("ALMOVE_CACHE_ID") || identificadorCacheSeguro(TOKEN); } catch (erro) { return identificadorCacheSeguro(TOKEN); } })();
 
   const ecraBoasVindas = document.getElementById("ecraBoasVindas");
   const boasVindasPrefixoEl = document.getElementById("boasVindasPrefixo");
@@ -2163,9 +2160,20 @@
       } catch (erro) {}
       window.location.replace(window.location.pathname);
     } catch (erro) {
-      entradaPortalEstado.textContent = modoEntradaFirebase === "criar"
-        ? "Não foi possível criar este acesso. Confirma os dados ou pede ajuda ao teu treinador."
-        : "Email ou palavra-passe inválidos. Se necessário, recupera a palavra-passe.";
+      const codigo = String((erro && erro.code) || "");
+      if (modoEntradaFirebase === "criar" && codigo === "auth/email-already-in-use") {
+        entradaPortalEstado.textContent = "Este email já tem acesso. Entra com a palavra-passe que escolheste ou usa “Esqueci-me da palavra-passe”.";
+      } else if (modoEntradaFirebase === "criar" && codigo === "auth/operation-not-allowed") {
+        entradaPortalEstado.textContent = "A criação por email ainda não está ativa. Contacta o teu treinador.";
+      } else if (modoEntradaFirebase === "criar" && codigo === "auth/unauthorized-domain") {
+        entradaPortalEstado.textContent = "Este endereço ainda não está autorizado para criar contas. Contacta o teu treinador.";
+      } else if (modoEntradaFirebase === "criar" && codigo === "auth/weak-password") {
+        entradaPortalEstado.textContent = "Escolhe uma palavra-passe mais forte, com pelo menos 8 caracteres.";
+      } else {
+        entradaPortalEstado.textContent = modoEntradaFirebase === "criar"
+          ? "Não foi possível criar este acesso agora. Tenta novamente dentro de momentos."
+          : "Email ou palavra-passe inválidos. Se necessário, recupera a palavra-passe.";
+      }
     } finally { btnEntradaPortal.disabled = false; }
   });
   atualizarModoEntradaFirebase();
@@ -2189,32 +2197,9 @@
     });
   }
 
-  if (!TOKEN && !CODIGO_LOGIN && !FIREBASE_ATIVA) {
+  if (!TOKEN && !FIREBASE_ATIVA) {
     mostrarEntradaPortal();
     return;
-  }
-
-  if (CODIGO_LOGIN) {
-    ecraBoasVindas.classList.add("oculto");
-    SESSAO_PRONTA = fetch("/api/almove", {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ fn: "trocarCodigoLoginPortal", codigo: CODIGO_LOGIN, dispositivo: navigator.userAgent.slice(0, 180) })
-    }).then(function (resposta) {
-      if (!resposta.ok) throw new Error("Não foi possível validar o link de acesso.");
-      return resposta.json();
-    }).then(function (resp) {
-      if (!resp || !resp.ok || !resp.dados || !resp.dados.sessao) throw new Error((resp && resp.erro) || "Link de acesso expirado.");
-      TOKEN = resp.dados.sessao;
-      // A sessão expira no servidor e no timestamp recebido. Guardá-la aqui
-      // evita obrigar o cliente a abrir o email sempre que fecha a PWA.
-      try { localStorage.setItem("ALMOVE_SESSAO_PORTAL", JSON.stringify(resp.dados)); } catch (erro) {}
-      history.replaceState({}, document.title, window.location.pathname);
-      return resp.dados;
-    }).catch(function () {
-      mostrarEntradaPortal("Este link expirou ou já foi usado. Introduz o teu email para receber outro.");
-      throw new Error("LINK_DE_ACESSO_EXPIRADO");
-    });
   }
 
   // Remove versões antigas que guardavam dados físicos e o token permanente no
@@ -5654,7 +5639,7 @@
   // ---------- Service worker ----------
   // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
   // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
-  const VERSAO_CLIENTE_PORTAL = "55";
+  const VERSAO_CLIENTE_PORTAL = "56";
   const CHAVE_AVISO_SW = "ALMOVE_SW_AVISO_" + VERSAO_CLIENTE_PORTAL;
   let recarregarPorAtualizacao = false;
   let recarregamentoAgendado = false;

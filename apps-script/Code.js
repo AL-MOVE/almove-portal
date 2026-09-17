@@ -1792,12 +1792,6 @@ function getProgressoPlanoRecente(idCliente, planosPreCarregados) {
 }
 
 const API_FUNCOES_PORTAL = {
-  pedirLinkLoginPortal: function (token, corpoPost) {
-    return pedirLinkLoginPortal_(corpoPost && corpoPost.email);
-  },
-  trocarCodigoLoginPortal: function (token, corpoPost) {
-    return trocarCodigoLoginPortal_(corpoPost && corpoPost.codigo, corpoPost || {});
-  },
   pedirCodigoAcessoPortal: function (token) {
     return pedirCodigoAcessoPortal_(token);
   },
@@ -2149,62 +2143,6 @@ function obterClientePorEmailPortal_(email) {
     SpreadsheetApp.flush();
   }
   return { idCliente: String(row[24] || ''), nome: String(row[0] || ''), email: emailLimpo, tokenPortalOriginal: tokenPortal, eSessao: false };
-}
-
-const DURACAO_LINK_LOGIN_PORTAL_SEGUNDOS_ = 15 * 60;
-const URL_PORTAL_LOGIN_PUBLICO_ = 'https://portal.almove.pt/?login=';
-
-function pedirLinkLoginPortal_(email) {
-  const emailLimpo = String(email || '').trim().toLowerCase().slice(0, 160);
-  const respostaNeutra = { enviado: true, mensagem: 'Se o email estiver associado a uma conta, receberás um link de acesso.' };
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailLimpo)) return respostaNeutra;
-  const cache = CacheService.getScriptCache();
-  const limite = chaveSeguraPortal_('login_email_limite_', emailLimpo);
-  if (cache.get(limite)) return respostaNeutra;
-  cache.put(limite, '1', 60);
-  const info = obterClientePorEmailPortal_(emailLimpo);
-  if (!info || info.duplicado) return respostaNeutra;
-  enviarLinkLoginPortalParaInfo_(info);
-  return respostaNeutra;
-}
-
-function enviarLinkLoginPortalParaInfo_(info) {
-  const codigo = Utilities.getUuid().replace(/-/g, '') + Utilities.getUuid().replace(/-/g, '');
-  const chaveLogin = chaveSeguraPortal_('login_portal_', codigo);
-  guardarTemporarioPortal_(chaveLogin, info, DURACAO_LINK_LOGIN_PORTAL_SEGUNDOS_);
-  const link = URL_PORTAL_LOGIN_PUBLICO_ + encodeURIComponent(codigo);
-  if (MailApp.getRemainingDailyQuota() < 1) {
-    removerTemporarioPortal_(chaveLogin);
-    throw new Error('LIMITE_DIARIO_EMAIL_ATINGIDO');
-  }
-  MailApp.sendEmail({
-    to: info.email,
-    name: 'AL MOVE',
-    subject: 'AL MOVE — entra no teu portal',
-    body: 'Olá ' + String(info.nome || '').split(' ')[0] + ',\n\nUsa este link para entrar no teu Portal AL MOVE:\n' + link + '\n\nEste link é válido durante 15 minutos e só pode ser usado uma vez.\n\nSe não pediste este acesso, ignora este email.',
-    htmlBody: '<div style="font-family:Arial,sans-serif;color:#0b1b2e;line-height:1.6;max-width:520px">' +
-      '<h2 style="margin:0 0 12px">Entrar no Portal AL MOVE</h2>' +
-      '<p>Olá ' + escaparHtml_(String(info.nome || '').split(' ')[0]) + ',</p>' +
-      '<p>Carrega no botão para entrares na tua área de cliente.</p>' +
-      '<p style="margin:24px 0"><a href="' + link + '" style="display:inline-block;padding:13px 20px;border-radius:10px;background:#079bbf;color:#fff;text-decoration:none;font-weight:700">Entrar no portal</a></p>' +
-      '<p style="font-size:13px;color:#526275">Este link é válido durante 15 minutos e só pode ser usado uma vez.</p>' +
-      '<p style="font-size:12px;color:#718096">Se não pediste este acesso, ignora este email.</p></div>'
-  });
-  registarAcessoPortal_(info, 'LINK_LOGIN_ENVIADO', 'Link temporário válido durante 15 minutos');
-  return { enviado: true, expiraEmMinutos: 15 };
-}
-
-function trocarCodigoLoginPortal_(codigo, dados) {
-  const codigoLimpo = String(codigo || '').trim();
-  if (!/^[a-f0-9]{64}$/i.test(codigoLimpo)) throw new Error('LINK_DE_ACESSO_INVALIDO');
-  const chave = chaveSeguraPortal_('login_portal_', codigoLimpo);
-  const guardado = lerTemporarioPortal_(chave);
-  if (!guardado) throw new Error('LINK_DE_ACESSO_EXPIRADO');
-  removerTemporarioPortal_(chave);
-  const info = guardado;
-  if (!info || !info.idCliente || !info.tokenPortalOriginal) throw new Error('LINK_DE_ACESSO_INVALIDO');
-  if (PropertiesService.getScriptProperties().getProperty(chaveSeguraPortal_('token_revogado_', info.tokenPortalOriginal))) throw new Error('LINK_DE_ACESSO_EXPIRADO');
-  return criarSessaoParaInfo_(info, dados, 'LOGIN_POR_EMAIL');
 }
 
 function terminarSessaoPortal_(sessao) {
@@ -2691,7 +2629,7 @@ const FUNCOES_LEITURA_PORTAL_ = new Set([
   'getNotificacoesPortal', 'getResumoPassosPortal', 'getResumoOpcoesPortal', 'getDadosPessoaisPortal',
   'getMapaAtividadePortal', 'getPassaporteTecnicoPortal', 'getHistoricoExercicio'
 ]);
-const FUNCOES_PUBLICAS_PORTAL_ = new Set(['pedirLinkLoginPortal', 'trocarCodigoLoginPortal']);
+const FUNCOES_PUBLICAS_PORTAL_ = new Set();
 
 function tratarPedidoApi_(e) {
   try {
@@ -2812,7 +2750,24 @@ function enviarConvitePortalCliente(idCliente) {
     const info = obterClientePorEmailPortal_(row[18]);
     if (!info) throw new Error('Este cliente não tem um email válido associado ao Portal.');
     if (info.duplicado) throw new Error('Este email está associado a mais do que um cliente ativo. Corrige o email antes de enviar o convite.');
-    return enviarLinkLoginPortalParaInfo_(info);
+    if (MailApp.getRemainingDailyQuota() < 1) throw new Error('LIMITE_DIARIO_EMAIL_ATINGIDO');
+    const nome = escaparHtml_(String(info.nome || '').split(' ')[0]);
+    const link = 'https://portal.almove.pt/';
+    MailApp.sendEmail({
+      to: info.email,
+      name: 'AL MOVE',
+      subject: 'AL MOVE — cria o teu acesso ao portal',
+      body: 'Olá ' + String(info.nome || '').split(' ')[0] + ',\n\nO teu acesso ao Portal AL MOVE está pronto. Abre ' + link + ' e escolhe “Criar o primeiro acesso”. Usa este email e cria a tua palavra-passe.\n\nDepois confirma o email enviado pelo portal e entra.\n\nSe não esperavas este convite, ignora este email.',
+      htmlBody: '<div style="font-family:Arial,sans-serif;color:#0b1b2e;line-height:1.6;max-width:520px">' +
+        '<h2 style="margin:0 0 12px">O teu Portal AL MOVE está pronto</h2>' +
+        '<p>Olá ' + nome + ',</p>' +
+        '<p>Cria o teu acesso pessoal para acompanhar treinos, agenda e progresso.</p>' +
+        '<p style="margin:24px 0"><a href="' + link + '" style="display:inline-block;padding:13px 20px;border-radius:10px;background:#079bbf;color:#fff;text-decoration:none;font-weight:700">Criar o meu acesso</a></p>' +
+        '<ol style="padding-left:20px"><li>Usa este email.</li><li>Escolhe <strong>Criar o primeiro acesso</strong>.</li><li>Cria uma palavra-passe e confirma o email recebido.</li></ol>' +
+        '<p style="font-size:12px;color:#718096">Se não esperavas este convite, ignora este email.</p></div>'
+    });
+    registarAcessoPortal_(info, 'CONVITE_FIREBASE_ENVIADO', 'Convite para criar acesso com palavra-passe');
+    return { enviado: true, email: info.email };
   }
   throw new Error('Cliente não encontrado');
 }
