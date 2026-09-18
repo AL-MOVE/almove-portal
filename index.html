@@ -1233,12 +1233,12 @@
         </div>
         <button type="submit" id="btnEntradaPortal">Entrar</button>
         <div class="entrada-portal-acoes">
-          <button type="button" id="btnMudarModoEntrada">Criar o primeiro acesso</button>
+          <button type="button" id="btnMudarModoEntrada">Ainda não recebi convite</button>
           <button type="button" id="btnRecuperarPalavraPasse">Esqueci-me da palavra-passe</button>
         </div>
         <p class="entrada-portal-estado" id="entradaPortalEstado" aria-live="polite"></p>
       </form>
-      <p class="entrada-portal-nota"><strong>Acesso protegido.</strong> O email tem de coincidir com o registado no teu acompanhamento. Se não tens acesso ao email associado, fala com o teu treinador.</p>
+      <p class="entrada-portal-nota"><strong>Primeiro acesso:</strong> abre o convite enviado pelo teu treinador e escolhe aí a tua palavra-passe. Depois regressa a este ecrã para entrar.</p>
     </div>
   </section>
 
@@ -2098,25 +2098,19 @@
     definirCamadaExclusiva(ecraEntradaPortal, true);
     if (mensagem) entradaPortalEstado.textContent = mensagem;
   }
-  let modoEntradaFirebase = "entrar";
+  const modoEntradaFirebase = "entrar";
   function configurarEntradaFirebase() {
     if (!window.AlMoveFirebaseAuth || !window.ALMOVE_FIREBASE_CONFIG) return Promise.reject(new Error("FIREBASE_NAO_CONFIGURADO"));
     return window.AlMoveFirebaseAuth.configurar(window.ALMOVE_FIREBASE_CONFIG);
   }
   function atualizarModoEntradaFirebase() {
-    const criar = modoEntradaFirebase === "criar";
-    entradaPortalSub.textContent = criar
-      ? "Cria uma palavra-passe para entrares no teu acompanhamento sem dependeres de links por email."
-      : "Entra com o email associado ao teu acompanhamento e a tua palavra-passe.";
-    btnEntradaPortal.textContent = criar ? "Criar acesso" : "Entrar";
-    btnMudarModoEntrada.textContent = criar ? "Já tenho acesso" : "Criar o primeiro acesso";
-    entradaPortalPassword.autocomplete = criar ? "new-password" : "current-password";
+    entradaPortalSub.textContent = "Entra com o email associado ao teu acompanhamento e a palavra-passe que escolheste no convite.";
+    btnEntradaPortal.textContent = "Entrar";
+    btnMudarModoEntrada.textContent = "Ainda não recebi convite";
+    entradaPortalPassword.autocomplete = "current-password";
   }
   btnMudarModoEntrada.addEventListener("click", function () {
-    modoEntradaFirebase = modoEntradaFirebase === "entrar" ? "criar" : "entrar";
-    entradaPortalEstado.textContent = "";
-    atualizarModoEntradaFirebase();
-    entradaPortalPassword.focus();
+    entradaPortalEstado.textContent = "Pede ao teu treinador para reenviar o convite pelo CRM. O primeiro acesso é criado através desse email.";
   });
   btnRecuperarPalavraPasse.addEventListener("click", async function () {
     const email = String(entradaPortalEmail.value || "").trim();
@@ -2126,7 +2120,7 @@
     try {
       await configurarEntradaFirebase();
       await window.AlMoveFirebaseAuth.enviarRecuperacao(email, window.location.origin + window.location.pathname);
-      entradaPortalEstado.textContent = "Se existe uma conta com este email, receberás as instruções para escolher uma nova palavra-passe.";
+      entradaPortalEstado.textContent = "Se já definiste uma palavra-passe, receberás o email de recuperação. Para o primeiro acesso, usa o convite enviado pelo teu treinador.";
     } catch (erro) {
       entradaPortalEstado.textContent = "Não foi possível pedir a recuperação agora. Tenta novamente dentro de momentos.";
     } finally { btnRecuperarPalavraPasse.disabled = false; }
@@ -2137,18 +2131,9 @@
     const palavraPasse = String(entradaPortalPassword.value || "");
     if (!email || palavraPasse.length < 8) { entradaPortalEstado.textContent = "Indica o email e uma palavra-passe com pelo menos 8 caracteres."; return; }
     btnEntradaPortal.disabled = true;
-    entradaPortalEstado.textContent = modoEntradaFirebase === "criar" ? "A criar o acesso…" : "A entrar…";
+    entradaPortalEstado.textContent = "A entrar…";
     try {
       await configurarEntradaFirebase();
-      if (modoEntradaFirebase === "criar") {
-        await window.AlMoveFirebaseAuth.criarConta(email, palavraPasse);
-        await window.AlMoveFirebaseAuth.sair();
-        entradaPortalPassword.value = "";
-        modoEntradaFirebase = "entrar";
-        atualizarModoEntradaFirebase();
-        entradaPortalEstado.textContent = "Confirma o email que te enviámos. Depois volta aqui e entra com a tua palavra-passe.";
-        return;
-      }
       const utilizador = await window.AlMoveFirebaseAuth.entrar(email, palavraPasse);
       if (!utilizador.emailVerified) {
         await window.AlMoveFirebaseAuth.reenviarConfirmacao(window.location.origin + window.location.pathname);
@@ -2163,22 +2148,12 @@
       window.location.replace(window.location.pathname);
     } catch (erro) {
       const codigo = String((erro && erro.code) || "");
-      if (modoEntradaFirebase === "criar" && codigo === "auth/email-already-in-use") {
-        entradaPortalEstado.textContent = "Este email já tem acesso. Entra com a palavra-passe que escolheste ou usa “Esqueci-me da palavra-passe”.";
-      } else if (modoEntradaFirebase === "criar" && codigo === "auth/operation-not-allowed") {
-        entradaPortalEstado.textContent = "A criação por email ainda não está ativa. Contacta o teu treinador.";
-      } else if (modoEntradaFirebase === "criar" && codigo === "auth/unauthorized-domain") {
-        entradaPortalEstado.textContent = "Este endereço ainda não está autorizado para criar contas. Contacta o teu treinador.";
-      } else if (modoEntradaFirebase === "criar" && codigo === "auth/weak-password") {
-        entradaPortalEstado.textContent = "Escolhe uma palavra-passe mais forte, com pelo menos 8 caracteres.";
-      } else if (codigo === "auth/network-request-failed") {
+      if (codigo === "auth/network-request-failed") {
         entradaPortalEstado.textContent = "Não foi possível contactar o Firebase. Confirma a ligação à internet e tenta novamente.";
       } else if (codigo === "auth/too-many-requests") {
         entradaPortalEstado.textContent = "O Firebase bloqueou temporariamente novas tentativas neste dispositivo. Aguarda alguns minutos antes de voltares a tentar.";
       } else {
-        entradaPortalEstado.textContent = modoEntradaFirebase === "criar"
-          ? "O Firebase recusou a criação deste acesso (" + (codigo || "erro sem código") + "). Envia esta mensagem ao André."
-          : "Email ou palavra-passe inválidos. Se necessário, recupera a palavra-passe.";
+        entradaPortalEstado.textContent = "Email ou palavra-passe inválidos. Se ainda não definiste a palavra-passe, pede ao teu treinador para reenviar o convite.";
       }
     } finally { btnEntradaPortal.disabled = false; }
   });
@@ -5645,7 +5620,7 @@
   // ---------- Service worker ----------
   // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
   // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
-  const VERSAO_CLIENTE_PORTAL = "59";
+  const VERSAO_CLIENTE_PORTAL = "60";
   const CHAVE_AVISO_SW = "ALMOVE_SW_AVISO_" + VERSAO_CLIENTE_PORTAL;
   let recarregarPorAtualizacao = false;
   let recarregamentoAgendado = false;

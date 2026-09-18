@@ -8313,8 +8313,9 @@ function regenerarLinkPortal(idCliente) {
 
 function enviarAcessoPortalClienteUI(idCliente) {
   if (!confirm('Enviar um convite para este cliente criar a própria palavra-passe?')) return;
-  google.script.run.withSuccessHandler(() => {
-    showAlert('Convite enviado. O cliente cria a própria palavra-passe.', 'success');
+  google.script.run.withSuccessHandler(resultado => {
+    const destino = resultado && resultado.email ? ' para ' + resultado.email : '';
+    showAlert('Convite enviado' + destino + '. O cliente escolhe a palavra-passe no email.', 'success');
   }).withFailureHandler(err => {
     showAlert('Não foi possível enviar o convite: ' + err.message, 'error');
   }).enviarConvitePortalCliente(idCliente);
