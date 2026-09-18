@@ -1069,7 +1069,6 @@
     .perfil-acesso-seta { width:9px; height:9px; border-top:2px solid var(--text-muted); border-right:2px solid var(--text-muted); transform:rotate(45deg); }
     .perfil-voltar { display:inline-flex; align-items:center; gap:8px; padding:0; margin-bottom:14px; border:0; background:transparent; color:var(--text-soft); font:inherit; font-size:12px; font-weight:850; cursor:pointer; }
     .perfil-voltar span { width:9px; height:9px; border-left:2px solid currentColor; border-bottom:2px solid currentColor; transform:rotate(45deg); }
-    body.perfil-detalhe-aberto #tabPlanos > :not(#perfilMetricas):not(#perfilAvaliacoes):not(#perfilPesoDiario):not(#perfilEvolucao):not(#perfilDadosPessoais):not(#perfilPlano) { display:none; }
     .dados-pessoais-form { display:grid; grid-template-columns:1fr 1fr; gap:11px; margin-top:16px; }
     .dados-pessoais-form label { display:grid; gap:6px; color:var(--text-soft); font-size:11px; font-weight:800; }
     .dados-pessoais-form label.largo { grid-column:1/-1; }
@@ -5620,7 +5619,7 @@
   // ---------- Service worker ----------
   // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
   // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
-  const VERSAO_CLIENTE_PORTAL = "60";
+  const VERSAO_CLIENTE_PORTAL = "61";
   const CHAVE_AVISO_SW = "ALMOVE_SW_AVISO_" + VERSAO_CLIENTE_PORTAL;
   let recarregarPorAtualizacao = false;
   let recarregamentoAgendado = false;
