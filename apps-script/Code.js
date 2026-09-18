@@ -2760,6 +2760,26 @@ function pedirLinkConviteFirebasePortal_(info) {
   return String(dados.link);
 }
 
+/** Confirma a ligação CRM → Vercel → Firebase sem enviar email nem alterar contas. */
+function diagnosticarConviteFirebasePortal_() {
+  const segredo = PropertiesService.getScriptProperties().getProperty('PORTAL_APPS_SCRIPT_HMAC_SECRET');
+  if (!segredo || String(segredo).length < 32) throw new Error('CONFIGURACAO_FIREBASE_EM_FALTA');
+  const email = 'diagnostico@almove.invalid';
+  const clientId = 'diagnostico';
+  const timestamp = Date.now();
+  const texto = clientId + '\n' + email + '\n' + timestamp;
+  const assinatura = Utilities.base64EncodeWebSafe(Utilities.computeHmacSha256Signature(texto, segredo)).replace(/=+$/g, '');
+  const resposta = UrlFetchApp.fetch('https://portal.almove.pt/api/invite', {
+    method: 'post',
+    contentType: 'application/json',
+    payload: JSON.stringify({ clientId: clientId, email: email, timestamp: timestamp, assinatura: assinatura, operacao: 'verificar' }),
+    muteHttpExceptions: true
+  });
+  const dados = JSON.parse(resposta.getContentText() || '{}');
+  if (resposta.getResponseCode() !== 200 || !dados.ok || !dados.firebase) throw new Error('LIGACAO_FIREBASE_INDISPONIVEL');
+  return { ok: true, firebase: true };
+}
+
 function enviarConvitePortalCliente(idCliente) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('CLIENTES');
   if (!sheet || sheet.getLastRow() < 4) throw new Error('Cliente não encontrado');

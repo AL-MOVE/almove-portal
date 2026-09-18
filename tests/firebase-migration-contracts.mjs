@@ -15,8 +15,10 @@ assert.match(firebase, /token\.email_verified/, 'O email Firebase tem de ser con
 assert.match(firebase, /PORTAL_APPS_SCRIPT_HMAC_SECRET/, 'A identidade enviada ao Apps Script tem de ser assinada.');
 assert.match(invite, /timingSafeEqual/, 'O convite CRM deve validar a assinatura em tempo constante.');
 assert.match(invite, /generatePasswordResetLink/, 'O convite deve gerar um link único para definir palavra-passe.');
+assert.match(invite, /auth\.listUsers\(1\)/, 'O diagnóstico assinado deve confirmar a credencial Firebase sem criar contas.');
 assert.match(appsScript, /obterClientePorAssertacaoFirebasePortal_/);
 assert.match(appsScript, /pedirLinkConviteFirebasePortal_/, 'O CRM deve pedir links de convite ao servidor Firebase.');
+assert.match(appsScript, /diagnosticarConviteFirebasePortal_/, 'O Apps Script deve conseguir diagnosticar a ligação de convite.');
 assert.match(appsScript, /obterClientePorEmailPortal_\(email\)/, 'O email Firebase deve corresponder a um único cliente CRM.');
 assert.match(appsScript, /firebase:/, 'A assertação não pode ser confundida com o token legado.');
 assert.match(browserAdapter, /browserLocalPersistence/, 'A sessão Firebase deve sobreviver ao fecho normal da PWA.');

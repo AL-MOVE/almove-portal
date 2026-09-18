@@ -27,6 +27,14 @@ export default async function handler(req, res) {
   if (!assinaturaValida(corpo)) return responder(res, 401, { ok: false });
 
   try {
+    // Diagnóstico assinado, usado apenas pelo Apps Script. Confirma que as
+    // credenciais de produção conseguem falar com o Firebase sem criar uma
+    // conta nem enviar um email.
+    if (corpo.operacao === 'verificar') {
+      const { auth } = obterAdminFirebase();
+      await auth.listUsers(1);
+      return responder(res, 200, { ok: true, firebase: true });
+    }
     const email = String(corpo.email).trim().toLowerCase();
     const { auth } = obterAdminFirebase();
     let utilizador;
