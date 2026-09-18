@@ -2,5 +2,5 @@ export default function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   // `versao` mantém compatibilidade com o portal; `version` é o contrato
   // usado pelos monitores externos.
-  res.status(200).json({ ok: true, servico: 'almove-portal', versao: 59, version: 59, data: new Date().toISOString() });
+  res.status(200).json({ ok: true, servico: 'almove-portal', versao: 60, version: 60, data: new Date().toISOString() });
 }
