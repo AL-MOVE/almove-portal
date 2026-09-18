@@ -2580,11 +2580,11 @@ function validarCodigoAcessoPortal_(sessao, codigo) {
 }
 
 function exigirAcessoSensivelPortal_(sessao) {
+  // A sessão autenticada pelo Firebase já identifica o cliente e substitui o
+  // antigo código por email no uso diário. Mantemos a validação da sessão e a
+  // autorização por cliente em todas as operações sensíveis.
   const info = obterClientePorTokenPortal_(sessao);
   if (!info || !info.eSessao) throw new Error('SESSAO_INVALIDA');
-  if (!lerTemporarioPortal_(chaveSeguraPortal_('acesso_sensivel_', sessao))) {
-    throw new Error('ACESSO_PROTEGIDO_POR_CODIGO');
-  }
   return info;
 }
 

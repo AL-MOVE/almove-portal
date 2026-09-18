@@ -2,7 +2,7 @@
 // A versão sobe com esta atualização visual para que instalações existentes
 // recebam o novo index.html em vez de manterem a versão anterior em cache.
 
-const VERSAO_CACHE = 'almove-portal-v61';
+const VERSAO_CACHE = 'almove-portal-v62';
 
 const FICHEIROS_ESSENCIAIS = [
   '/manifest.json',

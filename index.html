@@ -1211,6 +1211,15 @@
     body.perfil-detalhe-aberto #tabPlanos > :not(#perfilMetricas):not(#perfilAvaliacoes):not(#perfilPesoDiario):not(#perfilEvolucao):not(#perfilDadosPessoais):not(#perfilPlano):not(#perfilAvatar):not(#perfilMapa):not(#perfilPassaporte){display:none}
     @media (min-width:760px) and (max-width:1180px){.tab-conteudo{max-width:860px;padding-left:32px;padding-right:32px}.tabs-nav{width:min(760px,calc(100vw - 48px))}.execucao-lista{grid-template-columns:repeat(2,minmax(0,1fr))}.perfil-acessos{grid-template-columns:repeat(2,minmax(0,1fr))}.plano-visual{padding:22px}.mapa-grelha{grid-template-rows:repeat(7,29px);grid-auto-columns:29px}.mapa-dia{width:29px;height:29px}.avatar-presets{grid-template-columns:repeat(5,74px);justify-content:center}}
     @media (max-width:420px){.avatar-presets{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}.avatar-preset span{display:none}.plano-visual-topo{grid-template-columns:1fr 92px}.plano-anel{width:90px;height:90px}.plano-anel::before{width:68px;height:68px}.plano-anel-centro strong{font-size:20px}}
+  </style>
+  <style id="p0-experience-hardening">
+    /* P0: estado de rede discreto, navegação segura e ecrãs móveis focados. */
+    .estado-ligacao-portal { top:78px; width:min(360px,calc(100vw - 28px)); gap:8px; padding:7px 9px; border-radius:10px; box-shadow:0 10px 26px rgba(0,0,0,.28); }
+    .estado-ligacao-ponto { width:7px; height:7px; }.estado-ligacao-texto { font-size:11px; line-height:1.3; }.estado-ligacao-acao { min-height:34px; padding:0 9px; border-radius:8px; font-size:11px; }
+    #cardSessaoMinima { display:none !important; }
+    @media (max-width:540px) { .inicio-saudacao { padding-right:0; }.inicio-treino-ativo { position:static; width:auto; min-height:0; margin:16px 0 0; display:grid; grid-template-columns:30px 1fr; column-gap:10px; align-items:center; }.inicio-treino-ativo .inicio-cta-play { grid-row:span 2; margin:0; }.inicio-treino-ativo .inicio-cta-titulo { font-size:12px; }.inicio-treino-ativo .inicio-cta-sub { margin-top:2px; } }
+    body.treino-em-execucao .tabs-nav { display:none; } body.treino-em-execucao .tab-conteudo { padding-bottom:calc(28px + env(safe-area-inset-bottom)); } body.treino-em-execucao #cardExecucaoTreino { min-height:calc(100dvh - 94px); }
+    #tabPlanos [data-perfil-raiz] { padding:0; overflow:hidden; background:transparent; border:0; box-shadow:none; } #tabPlanos .perfil-topo { padding:8px 4px 14px; } #tabPlanos .perfil-avatar { width:42px; height:42px; font-size:15px; } #tabPlanos .perfil-nome { font-size:16px; } #tabPlanos .perfil-acessos { gap:0; border-top:1px solid var(--portal-line); } #tabPlanos .perfil-acesso { min-height:64px; padding:10px 4px; border:0; border-bottom:1px solid var(--portal-line); border-radius:0; background:transparent; box-shadow:none; } #tabPlanos .perfil-acesso:hover { transform:none; background:rgba(255,255,255,.025); } #tabPlanos .perfil-acesso strong { font-size:15px; } #tabPlanos .perfil-acesso small { display:none; } #tabPlanos .perfil-acesso-icone { width:38px; height:38px; border-radius:11px; } #tabPlanos .perfil-nivel-treino { margin:14px 4px 0; padding:12px 0 0; border:0; border-top:1px solid var(--portal-line); background:transparent; } #tabPlanos .perfil-nivel-treino small { display:none; } #tabPlanos .perfil-nivel-treino strong { font-size:11px; } #tabPlanos .perfil-nivel-opcoes button { min-height:36px; font-size:10px; }
   </style></head>
 <body>
 
@@ -1712,19 +1721,18 @@
         </div>
       </div>
       <div class="perfil-acessos">
-        <button type="button" class="perfil-acesso" data-abrir-perfil="dados"><span class="perfil-acesso-icone" data-perfil-icone="perfil"></span><span><strong>Os meus dados</strong><small>Consulta os teus dados e pede alterações</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
-        <button type="button" class="perfil-acesso" data-abrir-perfil="plano"><span class="perfil-acesso-icone" data-perfil-icone="treinos"></span><span><strong>O teu plano</strong><small>Serviço, validade e sessões presenciais</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
-        <button type="button" class="perfil-acesso" data-abrir-perfil="mapa"><span class="perfil-acesso-icone" data-perfil-icone="grafico"></span><span><strong>Mapa AL MOVE</strong><small>Consistência, carga e recuperação</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
-        <button type="button" class="perfil-acesso" data-abrir-perfil="passaporte"><span class="perfil-acesso-icone" data-perfil-icone="medalha"></span><span><strong>Passaporte técnico</strong><small>Competências validadas pelo teu PT</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
-        <button type="button" class="perfil-acesso" data-abrir-perfil="evolucao"><span class="perfil-acesso-icone" data-perfil-icone="grafico"></span><span><strong>A minha evolução</strong><small>Gráficos, filtros e calendário</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
-        <button type="button" class="perfil-acesso" data-abrir-perfil="peso"><span class="perfil-acesso-icone" data-perfil-icone="avaliacao"></span><span><strong>Registo de peso</strong><small>Regista o peso diário, se quiseres</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
-        <button type="button" class="perfil-acesso" id="btnAbrirAvaliacoes" data-abrir-perfil="avaliacoes"><span class="perfil-acesso-icone avaliacao" data-perfil-icone="avaliacao"></span><span><strong>Avaliações físicas</strong><small id="avaliacaoAcessoEstado">Pedir avaliação e ver evolução</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
-        <button type="button" class="perfil-acesso" data-abrir-perfil="caminhada"><span class="perfil-acesso-icone" data-perfil-icone="caminhar"></span><span><strong>Métricas de caminhada</strong><small>Passos, distância, duração e calorias</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
-        <button type="button" class="perfil-acesso" data-abrir-perfil="corrida"><span class="perfil-acesso-icone corrida" data-perfil-icone="foguetao"></span><span><strong>Calculadora de corrida</strong><small>Estimativa por distância e velocidade</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="dados"><span class="perfil-acesso-icone" data-perfil-icone="perfil"></span><span><strong>Os meus dados</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="plano"><span class="perfil-acesso-icone" data-perfil-icone="treinos"></span><span><strong>O teu plano</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="mapa"><span class="perfil-acesso-icone" data-perfil-icone="grafico"></span><span><strong>Mapa AL MOVE</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="passaporte"><span class="perfil-acesso-icone" data-perfil-icone="medalha"></span><span><strong>Passaporte técnico</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="evolucao"><span class="perfil-acesso-icone" data-perfil-icone="grafico"></span><span><strong>A minha evolução</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="peso"><span class="perfil-acesso-icone" data-perfil-icone="avaliacao"></span><span><strong>Registo de peso</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" id="btnAbrirAvaliacoes" data-abrir-perfil="avaliacoes"><span class="perfil-acesso-icone avaliacao" data-perfil-icone="avaliacao"></span><span><strong>Avaliações físicas</strong><small id="avaliacaoAcessoEstado" class="oculto">Pedir avaliação e ver evolução</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="caminhada"><span class="perfil-acesso-icone" data-perfil-icone="caminhar"></span><span><strong>Métricas de caminhada</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="corrida"><span class="perfil-acesso-icone corrida" data-perfil-icone="foguetao"></span><span><strong>Calculadora de corrida</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
       </div>
       <div class="perfil-nivel-treino" aria-labelledby="perfilNivelTitulo">
         <strong id="perfilNivelTitulo">Nível de treino</strong>
-        <small>Personaliza a forma de registar cada série.</small>
         <div class="perfil-nivel-opcoes" role="group" aria-label="Nível de treino">
           <button type="button" data-nivel-treino="iniciante">Iniciante</button>
           <button type="button" data-nivel-treino="intermedio">Intermédio</button>
@@ -2207,15 +2215,23 @@
   const estadoLigacaoPortalEl = document.getElementById("estadoLigacaoPortal");
   const estadoLigacaoTextoEl = document.getElementById("estadoLigacaoTexto");
   const btnRepetirLigacaoEl = document.getElementById("btnRepetirLigacao");
+  let estadoLigacaoTimer = null;
 
   function mostrarEstadoLigacao(tipo, texto) {
     if (!estadoLigacaoPortalEl) return;
-    estadoLigacaoPortalEl.classList.remove("oculto", "offline");
-    if (tipo === "offline") estadoLigacaoPortalEl.classList.add("offline");
-    if (estadoLigacaoTextoEl) estadoLigacaoTextoEl.textContent = texto;
+    clearTimeout(estadoLigacaoTimer);
+    const mostrar = function () {
+      estadoLigacaoPortalEl.classList.remove("oculto", "offline");
+      if (tipo === "offline") estadoLigacaoPortalEl.classList.add("offline");
+      if (estadoLigacaoTextoEl) estadoLigacaoTextoEl.textContent = texto;
+    };
+    // Uma sincronização rápida não merece ocupar o ecrã.
+    if (tipo === "a-ligar") estadoLigacaoTimer = setTimeout(mostrar, 700);
+    else mostrar();
   }
 
   function ocultarEstadoLigacao() {
+    clearTimeout(estadoLigacaoTimer);
     if (estadoLigacaoPortalEl) estadoLigacaoPortalEl.classList.add("oculto");
   }
 
@@ -2423,7 +2439,14 @@
 
   // ---------- Navegação por separadores (Início / Hoje / Conquistas / Planos) ----------
   const TABS = ["inicio", "hoje", "conquistas", "planos"];
+  function fecharTodosDetalhesPerfil() {
+    document.querySelectorAll("#perfilDadosPessoais,#perfilPlano,#perfilAvatar,#perfilMapa,#perfilPassaporte,#perfilAvaliacoes,#perfilPesoDiario,#perfilEvolucao,#perfilMetricas").forEach(function (painel) {
+      if (painel) painel.classList.add("oculto");
+    });
+    document.body.classList.remove("perfil-detalhe-aberto");
+  }
   function mudarTab(nome) {
+    fecharTodosDetalhesPerfil();
     TABS.forEach(function (t) {
       document.getElementById("tab" + t.charAt(0).toUpperCase() + t.slice(1)).classList.toggle("oculto", t !== nome);
       const botao = document.getElementById("tabBtn" + t.charAt(0).toUpperCase() + t.slice(1));
@@ -3059,6 +3082,7 @@
   }
 
   function abrirDetalhePerfilSimples(id) {
+    fecharTodosDetalhesPerfil();
     document.body.classList.add("perfil-detalhe-aberto");
     document.querySelectorAll("#perfilDadosPessoais,#perfilPlano,#perfilAvatar,#perfilMapa,#perfilPassaporte").forEach(function (painel) { painel.classList.add("oculto"); });
     const painel = document.getElementById(id);
@@ -3288,6 +3312,7 @@
   guardarNivelTreino(obterNivelTreino());
   const perfilMetricasEl = document.getElementById("perfilMetricas");
   function abrirPerfilMetricas(tipo) {
+    fecharTodosDetalhesPerfil();
     metricasAtividade.atividade = tipo === "corrida" ? "corrida" : "caminhada";
     guardarMetricasLocais();
     document.body.classList.add("perfil-detalhe-aberto");
@@ -3375,6 +3400,7 @@
     aplicarBloqueioAvaliacao(); atualizarEstadoPedidoAvaliacao(); renderHistoricoAvaliacoes();
   }
   function abrirPerfilAvaliacoes() {
+    fecharTodosDetalhesPerfil();
     document.body.classList.add("perfil-detalhe-aberto");
     perfilAvaliacoesEl.classList.remove("oculto");
     renderAvaliacaoFisica();
@@ -3428,7 +3454,7 @@
   }
   function renderPesoDiario() { renderGraficoSerie(document.getElementById('pesoDiarioGrafico'), serieAgrupadaPeso(), 'kg', 'Ainda não há pesos registados.'); document.querySelectorAll('[data-peso-periodo]').forEach(btn=>btn.classList.toggle('ativo',btn.dataset.pesoPeriodo===pesoPeriodo)); }
   function carregarPesosDiarios() { return obterProgressoPortal().then(function(dados){ if(Array.isArray(dados.pesosDiarios)){ pesosDiarios=dados.pesosDiarios; renderPesoDiario(); renderEvolucao(); } }).catch(function(){}); }
-  function abrirPerfilPesoDiario() { document.body.classList.add('perfil-detalhe-aberto'); document.getElementById('perfilPesoDiario').classList.remove('oculto'); document.getElementById('pesoDiarioData').value=dataLocalHoje(); renderPesoDiario(); obterProgressoPortal(false).then(aplicarProgressoPortal).catch(function(){}); window.scrollTo({top:0,behavior:'smooth'}); }
+  function abrirPerfilPesoDiario() { fecharTodosDetalhesPerfil(); document.body.classList.add('perfil-detalhe-aberto'); document.getElementById('perfilPesoDiario').classList.remove('oculto'); document.getElementById('pesoDiarioData').value=dataLocalHoje(); renderPesoDiario(); obterProgressoPortal(false).then(aplicarProgressoPortal).catch(function(){}); window.scrollTo({top:0,behavior:'smooth'}); }
   function fecharPerfilPesoDiario() { document.body.classList.remove('perfil-detalhe-aberto'); document.getElementById('perfilPesoDiario').classList.add('oculto'); }
   function guardarPesoDiario() { const data=document.getElementById('pesoDiarioData').value, peso=document.getElementById('pesoDiarioValor').value, sync=document.getElementById('pesoDiarioSync'); if(!data||!peso){sync.textContent='Indica a data e o peso.';return;} sync.textContent='A sincronizar…'; chamarApi('guardarPesoDiarioPortal',{data:data,pesoKg:peso}).then(function(resp){if(!resp||!resp.ok)throw new Error();pesosDiarios=resp.dados||[];document.getElementById('pesoDiarioValor').value='';sync.textContent='Peso guardado.';renderPesoDiario();renderEvolucao();}).catch(function(erro){if(pedirCodigoSeNecessario(erro,sync))return;sync.textContent='Não foi possível guardar. Tenta novamente com ligação.';}); }
   function atualizarOpcoesEvolucao() {
@@ -3454,7 +3480,7 @@
   }
   function dadosEvolucao(chave,inicio,fim) { const origem=chave==='pesoKg'&&pesosDiarios.length?pesosDiarios.map(item=>({atualizadoEm:item.data,pesoKg:item.pesoKg})):historicoAvaliacoesFisicas; return origem.filter(item=>!inicio||String(item.atualizadoEm).slice(0,10)>=inicio).filter(item=>!fim||String(item.atualizadoEm).slice(0,10)<=fim).map(item=>({data:dataValidaAvaliacao(item.atualizadoEm),valor:Number(String(item[chave]||'').replace(',','.'))})).filter(item=>item.data&&Number.isFinite(item.valor)); }
   function renderEvolucao() { const destino=document.getElementById('evolucaoGrafico'), resumo=document.getElementById('evolucaoResumo'); if(!destino||!resumo)return; const inicio=document.getElementById('evolucaoInicio').value, fim=document.getElementById('evolucaoFim').value, metricas=METRICAS_EVOLUCAO[evolucaoTipo]; if(evolucaoMetrica==="__todas"){const chaves=Object.keys(metricas); resumo.innerHTML=chaves.map(chave=>{const dados=dadosEvolucao(chave,inicio,fim),ultimo=dados[dados.length-1];return '<div><strong>'+ (ultimo?ultimo.valor.toLocaleString('pt-PT',{maximumFractionDigits:1})+' '+metricas[chave][1]:'—') +'</strong><span>'+metricas[chave][0]+'</span></div>';}).join(''); destino.innerHTML=chaves.map(chave=>'<section class="evolucao-grafico-item"><h3>'+metricas[chave][0]+'</h3><div class="avaliacao-grafico" id="evolucao-grafico-'+chave+'"></div></section>').join(''); chaves.forEach(chave=>renderGraficoSerie(document.getElementById('evolucao-grafico-'+chave),dadosEvolucao(chave,inicio,fim),metricas[chave][1],'Sem registos.')); return;} const dados=dadosEvolucao(evolucaoMetrica,inicio,fim), meta=metricas[evolucaoMetrica]; resumo.innerHTML='<div><strong>'+dados.length+'</strong><span>avaliações no período</span></div>'+(dados.length?'<div><strong>'+dados[dados.length-1].valor.toLocaleString('pt-PT',{maximumFractionDigits:1})+' '+meta[1]+'</strong><span>último valor</span></div>':''); renderGraficoSerie(destino,dados,meta[1],'Ainda não há registos desta métrica no período escolhido.'); }
-  function abrirPerfilEvolucao() { document.body.classList.add('perfil-detalhe-aberto'); document.getElementById('perfilEvolucao').classList.remove('oculto'); atualizarOpcoesEvolucao(); renderEvolucao(); obterProgressoPortal(false).then(aplicarProgressoPortal).catch(function(){}); window.scrollTo({top:0,behavior:'smooth'}); }
+  function abrirPerfilEvolucao() { fecharTodosDetalhesPerfil(); document.body.classList.add('perfil-detalhe-aberto'); document.getElementById('perfilEvolucao').classList.remove('oculto'); atualizarOpcoesEvolucao(); renderEvolucao(); obterProgressoPortal(false).then(aplicarProgressoPortal).catch(function(){}); window.scrollTo({top:0,behavior:'smooth'}); }
   function fecharPerfilEvolucao() { document.body.classList.remove('perfil-detalhe-aberto'); document.getElementById('perfilEvolucao').classList.add('oculto'); }
   const OPCOES_PERIODO_AVALIACAO = [
     { valor: "manhã", nome: "Manhã", detalhe: "07:00 – 12:30", inicio: "07:00", fim: "12:30" },
@@ -4338,6 +4364,14 @@
   const btnConfirmarPosTreino = document.getElementById("btnConfirmarPosTreino");
   const cardTreinoConcluido = document.getElementById("cardTreinoConcluido");
 
+  function atualizarModoTreinoFocado() {
+    const temPlayerAberto = cardExecucaoTreino && !cardExecucaoTreino.classList.contains("oculto") && !!cardExecucaoTreino.querySelector(".execucao-detalhe.player-ativo, .exec-info-pagina.player-ativo");
+    document.body.classList.toggle("treino-em-execucao", temPlayerAberto);
+  }
+  if (cardExecucaoTreino) {
+    new MutationObserver(atualizarModoTreinoFocado).observe(cardExecucaoTreino, { attributes:true, subtree:true, attributeFilter:["class"] });
+  }
+
   var PLANO_ATIVO = null;          // { nome, treinos: [...] }
   var PLANO_ATIVO_CARREGADO = false; // true assim que uma resposta (com ou sem plano) chega do servidor
   var TREINO_ATUAL_INDEX = null;
@@ -4794,6 +4828,7 @@
   }
 
   function mostrarListaExerciciosExecucao(scroll) {
+    document.body.classList.remove("treino-em-execucao");
     if (!TREINO_ATUAL_EXECUCAO) return;
     guardarTreinoAtual();
     const biblioteca = document.getElementById("execucaoBiblioteca");
@@ -4805,6 +4840,7 @@
   }
 
   function abrirDetalhesExercicio(indice) {
+    document.body.classList.add("treino-em-execucao");
     if (!TREINO_ATUAL_EXECUCAO) return;
     guardarTreinoAtual();
     execucaoExerciciosLista.querySelectorAll(".execucao-detalhe").forEach(function (detalhe) { detalhe.classList.remove("player-ativo"); });
@@ -4821,6 +4857,7 @@
   }
 
   function escolherExercicioExecucao(indice) {
+    document.body.classList.add("treino-em-execucao");
     const total = TREINO_ATUAL_EXECUCAO.exercicios.length;
     if (indice < 0 || indice >= total) return;
     guardarTreinoAtual();
@@ -5619,7 +5656,7 @@
   // ---------- Service worker ----------
   // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
   // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
-  const VERSAO_CLIENTE_PORTAL = "61";
+  const VERSAO_CLIENTE_PORTAL = "62";
   const CHAVE_AVISO_SW = "ALMOVE_SW_AVISO_" + VERSAO_CLIENTE_PORTAL;
   let recarregarPorAtualizacao = false;
   let recarregamentoAgendado = false;

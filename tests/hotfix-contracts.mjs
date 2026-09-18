@@ -33,7 +33,11 @@ assert.match(html, /id="perfilPassaporte"/, 'O Passaporte Técnico deve estar di
 assert.match(html, /<option value="rir" selected>RIR<\/option>/, 'RIR deve ser o método de intensidade predefinido');
 assert.match(html, /localStorage\.getItem\("ALMOVE_SESSAO_PORTAL"\)/, 'A sessão curta deve sobreviver ao fecho da PWA');
 assert.match(html, /bootstrapPortalPromise = SESSAO_PRONTA\.then/, 'O bootstrap deve aguardar pela autenticação antes de mostrar sincronização');
-assert.match(html, /VERSAO_CLIENTE_PORTAL = "61"/, 'O cliente deve identificar a versão da atualização');
+assert.match(html, /VERSAO_CLIENTE_PORTAL = "62"/, 'O cliente deve identificar a versão da atualização');
+assert.match(html, /id="p0-experience-hardening"/, 'A experiência móvel P0 deve ter estilos próprios');
+assert.match(html, /#cardSessaoMinima \{ display:none !important; \}/, 'O Plano B deve sair da interface');
+assert.match(html, /function fecharTodosDetalhesPerfil\(\)/, 'A navegação deve fechar os detalhes de Perfil antes de trocar de destino');
+assert.match(html, /body\.treino-em-execucao \.tabs-nav \{ display:none; \}/, 'A navegação inferior não pode cobrir o exercício ativo');
 assert.doesNotMatch(html, /Criar o primeiro acesso/, 'O portal não deve sugerir criação autónoma sem convite');
 assert.match(html, /Ainda não recebi convite/, 'O primeiro acesso deve encaminhar para o convite do CRM');
 assert.doesNotMatch(html, /\}, 350\);/, 'A atualização não deve forçar reload antes de o novo service worker ativar');
@@ -52,6 +56,7 @@ assert.match(backend, /FOTO_INVALIDA_OU_DEMASIADO_GRANDE/, 'Fotografias de perfi
 assert.match(backend, /const candidatosEmail = \[18, iEmail\]/, 'O email usado pelo login deve ter prioridade no perfil');
 assert.doesNotMatch(backend, /criarSessaoPortal:/, 'O backend não deve expor a criação de sessões por token permanente');
 assert.match(backend, /Um token permanente copiado de uma URL deixou de dar acesso/, 'Apenas sessões temporárias devem autenticar pedidos');
+assert.doesNotMatch(backend, /function exigirAcessoSensivelPortal_[\s\S]*?throw new Error\('ACESSO_PROTEGIDO_POR_CODIGO'\)/, 'O código por email não pode bloquear a sessão Firebase diária');
 assert.match(proxy, /json && json\.ok === false/, 'O proxy deve transformar erros da aplicação em erros HTTP');
 assert.doesNotMatch(proxy, /'criarSessaoPortal'/, 'O proxy não deve encaminhar a criação de sessões por token permanente');
 assert.match(html, /mostrarFalhaBootstrap/, 'A lentidão do serviço não deve ser apresentada como falta de internet');
@@ -59,7 +64,7 @@ assert.match(html, /icone = String\(proximo\.tipo/, 'O próximo compromisso deve
 assert.match(html, /botao\.disabled = true/, 'O envio de código deve impedir pedidos repetidos');
 assert.match(proxy, /controlador\.abort\(\), 27000/, 'O proxy deve tolerar a latência normal do Apps Script');
 assert.match(proxy, /guardarPedidoAtualizacaoDadosPortal/, 'O proxy deve permitir pedidos de alteração de dados');
-assert.match(sw, /almove-portal-v61/, 'A cache PWA deve avançar para v61');
+assert.match(sw, /almove-portal-v62/, 'A cache PWA deve avançar para v62');
 assert.equal((html.match(/body\.perfil-detalhe-aberto #tabPlanos/g) || []).length, 1, 'O Perfil só pode ter uma regra que escolhe a subpágina visível');
 assert.match(html, /:not\(#perfilMapa\):not\(#perfilPassaporte\)/, 'Mapa e Passaporte não podem ser escondidos ao abrir o detalhe');
 assert.doesNotMatch(sw, /\/js\/avatar-studio\.js/, 'O avatar removido não deve ocupar a cache offline');
@@ -71,4 +76,4 @@ const manifesto = JSON.parse(manifest);
 assert.equal(manifesto.display, 'standalone', 'O manifest deve abrir a PWA em modo app');
 assert.equal(manifesto.icons[0].src, '/al-move-mark.png', 'O manifest deve usar o ícone entregue');
 
-console.log('Contratos do portal v61 validados.');
+console.log('Contratos do portal v62 validados.');
