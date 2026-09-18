@@ -14,7 +14,7 @@ function base64UrlJson(valor) {
   return Buffer.from(JSON.stringify(valor)).toString('base64url');
 }
 
-function obterAdminFirebase() {
+export function obterAdminFirebase() {
   const projeto = String(process.env.FIREBASE_PROJECT_ID || '').trim();
   const bruto = String(process.env.FIREBASE_SERVICE_ACCOUNT_JSON || '').trim();
   if (!projeto || !bruto) throw erroFirebase('FIREBASE_NAO_CONFIGURADO');

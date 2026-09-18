@@ -2740,6 +2740,26 @@ function obterOuCriarTokenPortal_(idCliente) {
  */
 const URL_PORTAL_CLIENTE_PUBLICO_ = 'https://portal.almove.pt/?portal=';
 
+function pedirLinkConviteFirebasePortal_(info) {
+  const segredo = PropertiesService.getScriptProperties().getProperty('PORTAL_APPS_SCRIPT_HMAC_SECRET');
+  if (!segredo || String(segredo).length < 32) throw new Error('CONFIGURACAO_FIREBASE_EM_FALTA');
+  const email = String(info.email || '').trim().toLowerCase();
+  const clientId = String(info.idCliente || '').trim();
+  const timestamp = Date.now();
+  const texto = clientId + '\n' + email + '\n' + timestamp;
+  const assinatura = Utilities.base64EncodeWebSafe(Utilities.computeHmacSha256Signature(texto, segredo)).replace(/=+$/g, '');
+  const resposta = UrlFetchApp.fetch('https://portal.almove.pt/api/invite', {
+    method: 'post',
+    contentType: 'application/json',
+    payload: JSON.stringify({ clientId: clientId, email: email, timestamp: timestamp, assinatura: assinatura }),
+    muteHttpExceptions: true
+  });
+  if (resposta.getResponseCode() !== 200) throw new Error('NAO_FOI_POSSIVEL_GERAR_CONVITE');
+  const dados = JSON.parse(resposta.getContentText() || '{}');
+  if (!dados.ok || !/^https:\/\//.test(String(dados.link || ''))) throw new Error('NAO_FOI_POSSIVEL_GERAR_CONVITE');
+  return String(dados.link);
+}
+
 function enviarConvitePortalCliente(idCliente) {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('CLIENTES');
   if (!sheet || sheet.getLastRow() < 4) throw new Error('Cliente não encontrado');
@@ -2751,22 +2771,26 @@ function enviarConvitePortalCliente(idCliente) {
     if (!info) throw new Error('Este cliente não tem um email válido associado ao Portal.');
     if (info.duplicado) throw new Error('Este email está associado a mais do que um cliente ativo. Corrige o email antes de enviar o convite.');
     if (MailApp.getRemainingDailyQuota() < 1) throw new Error('LIMITE_DIARIO_EMAIL_ATINGIDO');
+    const cache = CacheService.getScriptCache();
+    const chaveLimite = chaveSeguraPortal_('convite_firebase_', info.email);
+    if (cache.get(chaveLimite)) throw new Error('AGUARDA_UM_MINUTO_PARA_REENVIAR');
+    const link = pedirLinkConviteFirebasePortal_(info);
+    cache.put(chaveLimite, '1', 60);
     const nome = escaparHtml_(String(info.nome || '').split(' ')[0]);
-    const link = 'https://portal.almove.pt/';
     MailApp.sendEmail({
       to: info.email,
       name: 'AL MOVE',
       subject: 'AL MOVE — cria o teu acesso ao portal',
-      body: 'Olá ' + String(info.nome || '').split(' ')[0] + ',\n\nO teu acesso ao Portal AL MOVE está pronto. Abre ' + link + ' e escolhe “Criar o primeiro acesso”. Usa este email e cria a tua palavra-passe.\n\nDepois confirma o email enviado pelo portal e entra.\n\nSe não esperavas este convite, ignora este email.',
+      body: 'Olá ' + String(info.nome || '').split(' ')[0] + ',\n\nO teu acesso ao Portal AL MOVE está pronto. Abre este link seguro para escolheres a tua palavra-passe:\n' + link + '\n\nDepois entra em https://portal.almove.pt/ com este email e a palavra-passe que escolheste.\n\nSe não esperavas este convite, ignora este email.',
       htmlBody: '<div style="font-family:Arial,sans-serif;color:#0b1b2e;line-height:1.6;max-width:520px">' +
         '<h2 style="margin:0 0 12px">O teu Portal AL MOVE está pronto</h2>' +
         '<p>Olá ' + nome + ',</p>' +
-        '<p>Cria o teu acesso pessoal para acompanhar treinos, agenda e progresso.</p>' +
-        '<p style="margin:24px 0"><a href="' + link + '" style="display:inline-block;padding:13px 20px;border-radius:10px;background:#079bbf;color:#fff;text-decoration:none;font-weight:700">Criar o meu acesso</a></p>' +
-        '<ol style="padding-left:20px"><li>Usa este email.</li><li>Escolhe <strong>Criar o primeiro acesso</strong>.</li><li>Cria uma palavra-passe e confirma o email recebido.</li></ol>' +
+        '<p>Escolhe a tua palavra-passe para acompanhar treinos, agenda e progresso.</p>' +
+        '<p style="margin:24px 0"><a href="' + link + '" style="display:inline-block;padding:13px 20px;border-radius:10px;background:#079bbf;color:#fff;text-decoration:none;font-weight:700">Definir palavra-passe</a></p>' +
+        '<p>Depois entra em <a href="https://portal.almove.pt/">portal.almove.pt</a> com este email e a palavra-passe que escolheste.</p>' +
         '<p style="font-size:12px;color:#718096">Se não esperavas este convite, ignora este email.</p></div>'
     });
-    registarAcessoPortal_(info, 'CONVITE_FIREBASE_ENVIADO', 'Convite para criar acesso com palavra-passe');
+    registarAcessoPortal_(info, 'CONVITE_FIREBASE_ENVIADO', 'Link seguro para definir palavra-passe enviado');
     return { enviado: true, email: info.email };
   }
   throw new Error('Cliente não encontrado');
