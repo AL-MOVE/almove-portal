@@ -6242,7 +6242,9 @@ function protegerContratosExistentes_() {
       Logger.log('Não foi possível proteger contrato ' + fileId + ': ' + erro.toString());
     }
   });
-  return { protegidos: protegidos, indisponiveis: indisponiveis };
+  const resultado = { protegidos: protegidos, indisponiveis: indisponiveis };
+  Logger.log('Proteção de contratos concluída: ' + JSON.stringify(resultado));
+  return resultado;
 }
 
 function getPrecosServicos() {
