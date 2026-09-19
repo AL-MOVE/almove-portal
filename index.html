@@ -2156,8 +2156,10 @@
   }
   const modoEntradaFirebase = "entrar";
   function configurarEntradaFirebase() {
-    if (!window.AlMoveFirebaseAuth || !window.ALMOVE_FIREBASE_CONFIG) return Promise.reject(new Error("FIREBASE_NAO_CONFIGURADO"));
-    return window.AlMoveFirebaseAuth.configurar(window.ALMOVE_FIREBASE_CONFIG);
+    if (!window.AlMoveFirebaseAuth || !window.ALMOVE_FIREBASE_CONFIG || !window.ALMOVE_FIREBASE_CONFIG.obter) return Promise.reject(new Error("FIREBASE_NAO_CONFIGURADO"));
+    return window.ALMOVE_FIREBASE_CONFIG.obter().then(function (configuracao) {
+      return window.AlMoveFirebaseAuth.configurar(configuracao);
+    });
   }
   function atualizarModoEntradaFirebase() {
     entradaPortalSub.textContent = "Entra com o email associado ao teu acompanhamento e a palavra-passe que escolheste no convite.";
