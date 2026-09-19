@@ -4,13 +4,14 @@
 
 O AL MOVE passa a usar PostgreSQL como registo principal de clientes, planos,
 treinos e auditoria. Firebase Auth continua responsável pela identidade. O
-browser comunica apenas com as funções Vercel; nunca recebe credenciais da base
-de dados, a `service_role` do Supabase, nem uma ligação PostgreSQL.
+browser comunica apenas com o backend AL MOVE; nunca recebe credenciais da base
+de dados nem uma ligação PostgreSQL. O destino de produção é Cloud Run + Cloud
+SQL, no mesmo projeto Google Cloud do Firebase.
 
 ```text
 Aluno: portal.almove.pt ─┐
-                           ├─ Firebase Auth ── Vercel ── PostgreSQL
-PT: coach.almove.pt ──────┘                         └── Storage privado
+                           ├─ Firebase Auth ── Cloud Run ── Cloud SQL PostgreSQL
+PT: coach.almove.pt ──────┘                              └── Storage privado
 ```
 
 O backend verifica cada ID token Firebase, encontra o utilizador por
@@ -27,8 +28,8 @@ uma operação. O email é um atributo de contacto; não é uma autorização.
 5. Contratos e fotografias ficam privados. A app recebe links temporários, não
    links Drive públicos.
 6. Toda a escrita relevante deixa rasto em `audit_log`.
-7. A Data API direta fica sem políticas de leitura/escrita. Só as funções
-   Vercel acedem ao PostgreSQL com credenciais privadas.
+7. A base não tem IP público para a app. Só o serviço Cloud Run acede ao
+   PostgreSQL através de credenciais privadas e identidade de serviço.
 
 ## Separação de papéis
 
@@ -43,11 +44,11 @@ email como distinção entre cliente e profissional.
 
 ## Ordem de migração
 
-1. Criar o projeto PostgreSQL na região `eu-central-1` (Frankfurt) e aplicar
-   `db/migrations/001_core.sql`.
-2. Ligar Vercel à base através do pooler de transações. Guardar a ligação só nas
-   variáveis `DATABASE_URL` de Development, Preview e Production.
-3. Implementar o módulo de dados Vercel com duas interfaces pequenas:
+1. Criar a instância Cloud SQL PostgreSQL em `europe-southwest1` (Madrid), no
+   mesmo projeto Google Cloud do Firebase, e aplicar `db/migrations/001_core.sql`.
+2. Criar a API privada Cloud Run. A instância Cloud SQL não recebe IP público;
+   só a conta de serviço do Cloud Run pode ligar-se à base.
+3. Implementar o módulo de dados no backend com duas interfaces pequenas:
    `getClientContext(firebaseUid)` e `recordWorkoutSet(context, input)`.
 4. Importar uma cópia de Sheets para tabelas de transição e produzir um relatório
    de diferenças. Nada no portal lê a nova base nesta fase.
