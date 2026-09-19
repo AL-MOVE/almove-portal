@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>AL MOVE — CRM Development</title>
+  <style>
+    :root { color-scheme:dark; font-family:system-ui,sans-serif; background:#07111f; color:#edf7ff; }
+    body { min-height:100vh; margin:0; display:grid; place-items:center; padding:24px; background:radial-gradient(circle at top left,#124a7a,#07111f 55%); }
+    main { width:min(100%,440px); padding:28px; border:1px solid #245575; border-radius:20px; background:#091827dd; box-shadow:0 24px 70px #0008; }
+    h1 { margin:0 0 6px; font-size:22px; } p { color:#a9bdcf; line-height:1.5; } label { display:grid; gap:6px; margin-top:15px; font-size:14px; font-weight:700; }
+    input,button { min-height:46px; border-radius:10px; font:inherit; } input { border:1px solid #35516a; background:#0e2233; color:#fff; padding:0 12px; }
+    button { width:100%; margin-top:22px; border:0; font-weight:800; background:#2dd4bf; color:#04211f; cursor:pointer; }
+    #estado { min-height:22px; margin-top:18px; font-size:14px; } .ok { color:#5eead4; } .erro { color:#fca5a5; }
+  </style>
+</head>
+<body><main>
+  <h1>AL MOVE · CRM Development</h1>
+  <p>Verificação privada da ligação Firebase → Vercel → Firestore.</p>
+  <form id="entrar">
+    <label>Email<input id="email" type="email" autocomplete="email" required></label>
+    <label>Palavra-passe<input id="password" type="password" autocomplete="current-password" required></label>
+    <button>Verificar acesso</button>
+  </form>
+  <div id="estado" role="status"></div>
+</main>
+<script src="/js/firebase-config.js"></script>
+<script src="/js/firebase-sdk.js"></script>
+<script src="/js/firebase-auth.js"></script>
+<script>
+  const form = document.querySelector('#entrar');
+  const estado = document.querySelector('#estado');
+  form.addEventListener('submit', async event => {
+    event.preventDefault(); estado.className = ''; estado.textContent = 'A verificar…';
+    try {
+      const config = await window.ALMOVE_FIREBASE_CONFIG.obter();
+      await window.AlMoveFirebaseAuth.configurar(config);
+      const user = await window.AlMoveFirebaseAuth.entrar(email.value, password.value);
+      if (!user.emailVerified) throw new Error('Confirma primeiro o email desta conta de desenvolvimento.');
+      const token = await window.AlMoveFirebaseAuth.token();
+      const resposta = await fetch('/api/dev-crm', { headers:{ Authorization:'Bearer ' + token }, cache:'no-store' });
+      const dados = await resposta.json();
+      if (!resposta.ok || !dados.ok) throw new Error(dados.erro || 'Acesso recusado.');
+      estado.className = 'ok'; estado.textContent = 'Ligação segura: Firestore Development · ' + dados.roles.join(', ');
+    } catch (erro) { estado.className = 'erro'; estado.textContent = erro.message || 'Não foi possível verificar.'; }
+  });
+</script>
+</body></html>

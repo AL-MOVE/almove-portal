@@ -33,6 +33,31 @@ export function obterAdminFirebase() {
   return { projeto, app, auth: getAuth(app) };
 }
 
+/** Verifica a identidade Firebase sem a converter numa sessão Apps Script. */
+export async function obterIdentidadeFirebase(req) {
+  const authorization = String(req.headers.authorization || '');
+  const correspondencia = authorization.match(/^Bearer\s+(.+)$/i);
+  if (!correspondencia) throw erroFirebase('FIREBASE_TOKEN_INVALIDO');
+
+  const { projeto, auth } = obterAdminFirebase();
+  let token;
+  try {
+    token = await auth.verifyIdToken(correspondencia[1], true);
+  } catch {
+    throw erroFirebase('FIREBASE_SESSAO_INVALIDA');
+  }
+
+  const email = String(token.email || '').trim().toLowerCase();
+  if (
+    token.aud !== projeto ||
+    !token.email_verified ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  ) {
+    throw erroFirebase('FIREBASE_CONTA_SEM_ACESSO');
+  }
+  return Object.freeze({ uid: String(token.uid), email, projeto });
+}
+
 function assinarAssertacao(assertacao, segredo) {
   const corpo = base64UrlJson(assertacao);
   const assinatura = createHmac('sha256', segredo).update(corpo).digest('base64url');
@@ -45,36 +70,16 @@ function assinarAssertacao(assertacao, segredo) {
  * o acesso ao portal mesmo antes de o token expirar.
  */
 export async function obterAssertacaoFirebasePortal(req) {
-  const authorization = String(req.headers.authorization || '');
-  if (!authorization) return '';
-  const correspondencia = authorization.match(/^Bearer\s+(.+)$/i);
-  if (!correspondencia) throw erroFirebase('FIREBASE_TOKEN_INVALIDO');
+  if (!String(req.headers.authorization || '')) return '';
 
   const segredo = String(process.env.PORTAL_APPS_SCRIPT_HMAC_SECRET || '');
   if (segredo.length < 32) throw erroFirebase('FIREBASE_NAO_CONFIGURADO');
-
-  const { projeto, auth } = obterAdminFirebase();
-  let token;
-  try {
-    token = await auth.verifyIdToken(correspondencia[1], true);
-  } catch {
-    throw erroFirebase('FIREBASE_SESSAO_INVALIDA');
-  }
-
+  const identidade = await obterIdentidadeFirebase(req);
   const agora = Math.floor(Date.now() / 1000);
-  const email = String(token.email || '').trim().toLowerCase();
-  if (
-    token.aud !== projeto ||
-    !token.email_verified ||
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-  ) {
-    throw erroFirebase('FIREBASE_CONTA_SEM_ACESSO');
-  }
-
   return assinarAssertacao({
     v: 1,
-    uid: String(token.uid),
-    email,
+    uid: identidade.uid,
+    email: identidade.email,
     iat: agora,
     exp: agora + DURACAO_ASSERTACAO_SEGUNDOS,
     nonce: globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2)
