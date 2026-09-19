@@ -37,7 +37,11 @@
       const config = await window.ALMOVE_FIREBASE_CONFIG.obter();
       await window.AlMoveFirebaseAuth.configurar(config);
       const user = await window.AlMoveFirebaseAuth.entrar(email.value, password.value);
-      if (!user.emailVerified) throw new Error('Confirma primeiro o email desta conta de desenvolvimento.');
+      if (!user.emailVerified) {
+        await window.AlMoveFirebaseAuth.reenviarConfirmacao(location.origin + location.pathname);
+        await window.AlMoveFirebaseAuth.sair();
+        throw new Error('Enviámos a confirmação para este email. Abre-a e volta a entrar.');
+      }
       const token = await window.AlMoveFirebaseAuth.token();
       const resposta = await fetch('/api/dev-crm', { headers:{ Authorization:'Bearer ' + token }, cache:'no-store' });
       const dados = await resposta.json();

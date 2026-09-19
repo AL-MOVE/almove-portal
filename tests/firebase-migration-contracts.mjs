@@ -24,6 +24,8 @@ assert.match(appsScript, /firebase:/, 'A assertação não pode ser confundida c
 assert.match(browserAdapter, /browserLocalPersistence/, 'A sessão Firebase deve sobreviver ao fecho normal da PWA.');
 assert.match(browserAdapter, /sendPasswordResetEmail/, 'A recuperação de palavra-passe tem de estar disponível.');
 assert.match(browserAdapter, /sendEmailVerification/, 'A confirmação do email tem de poder ser reenviada.');
+const devCrm = fs.readFileSync(new URL('../dev-crm.html', import.meta.url), 'utf8');
+assert.match(devCrm, /reenviarConfirmacao/, 'O verificador CRM deve permitir confirmar contas de desenvolvimento.');
 assert.match(browserSdk, /ALMOVE_FIREBASE_SDK/, 'O SDK Firebase deve ser servido localmente pelo portal.');
 assert.doesNotMatch(browserAdapter, /www\.gstatic\.com/, 'O adaptador não deve depender de imports externos no browser.');
 assert.match(browserConfig, /projectId: 'almove-portal'/, 'O portal real deve manter a configuração Firebase de produção.');
