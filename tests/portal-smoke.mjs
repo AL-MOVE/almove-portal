@@ -14,13 +14,14 @@ const saude = await fetch(`${base}/api/health`, { cache: 'no-store' });
 assert.equal(saude.status, 200, 'O endpoint de saúde deve responder');
 const estadoSaude = await saude.json();
 assert.equal(estadoSaude.ok, true, 'O endpoint de saúde deve indicar ok');
-assert.equal(estadoSaude.version ?? estadoSaude.versao, 63, 'O domínio deve estar na versão 63');
+assert.equal(estadoSaude.version ?? estadoSaude.versao, 64, 'O domínio deve estar na versão 64');
 
 // O Mapa são módulos separados. Sem estes ficheiros as respetivas
 // páginas parecem abrir, mas ficam vazias — uma falha fácil de não notar num
 // deploy manual pela interface do GitHub.
 const modulos = {
   '/js/activity-heatmap.js': /window\.ALMove/,
+  '/js/exercise-media.js': /ALMOVE_EXERCISE_MEDIA/,
   '/js/firebase-auth.js': /AlMoveFirebaseAuth/,
   '/js/firebase-config.js': /ALMOVE_FIREBASE_CONFIG/
 };
