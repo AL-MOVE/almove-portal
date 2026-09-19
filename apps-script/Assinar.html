@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Assinar Contrato — AL MOVE</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color:#050810; background-image:radial-gradient(ellipse 90% 70% at 15% 20%,rgba(11,92,194,.55),transparent 55%),radial-gradient(ellipse 90% 80% at 20% 75%,rgba(0,150,120,.5),transparent 60%),radial-gradient(ellipse 100% 90% at 90% 10%,rgba(0,20,45,.9),transparent 60%),linear-gradient(135deg,#0a2a5e 0%,#073d52 45%,#0a1220 100%); background-attachment:fixed; color:#e2e8f0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+    .card { background:rgba(255,255,255,.06); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,.12); border-radius:24px; padding:40px 32px; max-width:420px; width:100%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.4); }
+    img.logo { width:70px; margin-bottom:20px; } h1 { font-size:20px; font-weight:800; margin-bottom:8px; } p { color:#94a3b8; font-size:14px; line-height:1.6; margin-bottom:20px; }
+    a.botao-ver { display:inline-block; color:#00a99d; font-size:13px; font-weight:600; margin-bottom:24px; text-decoration:underline; }
+    button { width:100%; padding:14px; border:0; border-radius:10px; background:linear-gradient(135deg,#00a99d 0%,#003da0 100%); color:#fff; font-weight:700; font-size:15px; cursor:pointer; }
+    button:disabled { opacity:.6; cursor:default; }.sucesso { background:rgba(34,197,94,.1); border:1px solid rgba(34,197,94,.3); color:#22c55e; padding:16px; border-radius:10px; font-size:14px; font-weight:600; }.erro { color:#dc2626; font-size:13px; margin-top:12px; display:none; }
+  </style>
+</head>
+<body>
+  <div class="card" id="cardPrincipal">
+    <img class="logo" src="data:image/png;base64,<?= logoBase64 ?>" alt="AL MOVE">
+    <h1>Olá, <?= nomeCliente ?></h1>
+    <? if (jaAceite) { ?>
+      <div class="sucesso">✓ Já aceitaste este contrato em <?= aceiteEm ?>.</div>
+    <? } else { ?>
+      <p>Confirma que leste e aceitas o teu contrato de prestação de serviços de Personal Training com a AL MOVE.</p>
+      <? if (contratoUrl) { ?><a class="botao-ver" href="<?= contratoUrl ?>" target="_blank">Ver o contrato (PDF)</a><? } ?>
+      <button id="btnAutorizo" onclick="autorizar()">Autorizo</button>
+      <p class="erro" id="mensagemErro"></p>
+    <? } ?>
+  </div>
+  <script>
+    function autorizar() {
+      const btn = document.getElementById('btnAutorizo'); btn.disabled = true; btn.textContent = 'A registar...';
+      google.script.run.withSuccessHandler(function(resultado) {
+        document.getElementById('cardPrincipal').innerHTML = '<div class="sucesso">✓ Contrato aceite com sucesso em ' + resultado.aceiteEm + '. Obrigado!</div>';
+      }).withFailureHandler(function(err) {
+        btn.disabled = false; btn.textContent = 'Autorizo'; const msg = document.getElementById('mensagemErro'); msg.textContent = 'Erro: ' + err.message; msg.style.display = 'block';
+      }).registarAceiteDigital('<?= token ?>');
+    }
+  </script>
+</body>
+</html>
