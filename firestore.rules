@@ -1,0 +1,13 @@
+rules_version = '2';
+
+// O portal usa Firebase Auth apenas para identidade. Todos os dados passam
+// pela API Vercel, que confirma papel, cliente atribuído e valida valores.
+// Sem acesso direto do browser, uma alteração futura de interface não abre a
+// base de dados por engano.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

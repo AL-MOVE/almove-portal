@@ -30,7 +30,7 @@ export function obterAdminFirebase() {
   const app = getApps().length
     ? getApps()[0]
     : initializeApp({ credential: cert(conta), projectId: projeto });
-  return { projeto, auth: getAuth(app) };
+  return { projeto, app, auth: getAuth(app) };
 }
 
 function assinarAssertacao(assertacao, segredo) {

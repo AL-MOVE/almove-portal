@@ -1,6 +1,11 @@
-# Fundação CRM PostgreSQL
+# Fundação CRM PostgreSQL — fase futura paga
 
-## Decisão
+## Decisão futura
+
+Este documento não define a infraestrutura atual sem custo. A primeira fase
+usa Firestore conforme `docs/FIRESTORE-NO-COST-FOUNDATION.md`. PostgreSQL fica
+preparado para o momento em que backups geridos, relatórios relacionais e maior
+escala justifiquem uma conta de faturação.
 
 O AL MOVE passa a usar PostgreSQL como registo principal de clientes, planos,
 treinos e auditoria. Firebase Auth continua responsável pela identidade. O
