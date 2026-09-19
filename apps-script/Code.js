@@ -6247,6 +6247,11 @@ function protegerContratosExistentes_() {
   return resultado;
 }
 
+/** Execução manual no editor Apps Script para revogar links públicos antigos. */
+function protegerContratosExistentes() {
+  return protegerContratosExistentes_();
+}
+
 function getPrecosServicos() {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
