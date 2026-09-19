@@ -1208,7 +1208,7 @@
     .passaporte-resumo{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:14px 0}.passaporte-resumo div{padding:13px;border:1px solid var(--border-soft);border-radius:14px;background:rgba(255,255,255,.035)}.passaporte-resumo strong{display:block;color:#fff;font-size:22px}.passaporte-resumo span{color:var(--text-muted);font-size:9px}.passaporte-lista{display:grid;gap:9px}.passaporte-item{padding:13px;border:1px solid var(--border-soft);border-radius:15px;background:rgba(255,255,255,.03)}.passaporte-item-topo{display:flex;justify-content:space-between;gap:10px}.passaporte-item h3{margin:0;color:#fff;font-size:12px}.passaporte-item small{color:#7ff4e3;font-size:9px;font-weight:850}.passaporte-barra{height:5px;margin-top:10px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.08)}.passaporte-barra i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#0b82d8,#2dd4bf)}.passaporte-criterios{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:9px;color:var(--text-muted);font-size:8px;text-align:center}.passaporte-criterios b{display:block;color:#fff;font-size:10px}.passaporte-nota{margin:8px 0 0;color:var(--text-muted);font-size:9px;line-height:1.4}
     .sessao-minima-card{border-color:rgba(251,191,36,.24)!important;background:radial-gradient(circle at 90% 0,rgba(251,191,36,.14),transparent 34%),rgba(255,255,255,.025)!important}.sessao-minima-opcoes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.sessao-minima-opcao{min-height:62px;border:1px solid var(--border-soft);border-radius:14px;background:rgba(255,255,255,.035);color:#fff;font:inherit;text-align:left;padding:11px}.sessao-minima-opcao strong,.sessao-minima-opcao span{display:block}.sessao-minima-opcao strong{font-size:16px}.sessao-minima-opcao span{margin-top:3px;color:var(--text-muted);font-size:9px}.sessao-minima-opcao.ativo{border-color:#fbbf24;background:rgba(251,191,36,.10)}.sessao-minima-rpe{display:grid;grid-template-columns:1fr 88px;align-items:end;gap:9px;margin-top:11px}.sessao-minima-rpe label{display:grid;gap:5px;color:var(--text-soft);font-size:10px;font-weight:800}.sessao-minima-rpe input{min-height:43px;border:1px solid var(--border);border-radius:11px;background:#101c2e;color:#fff;padding:0 10px}.sessao-minima-estado{min-height:16px;margin:9px 0 0;color:#fcd34d;font-size:10px}
     .sessao-minima-plano{display:grid;gap:6px;margin-top:12px}.sessao-minima-exercicio{display:grid;grid-template-columns:25px 1fr;align-items:center;gap:9px;padding:9px 10px;border-left:2px solid #fbbf24;border-radius:0 10px 10px 0;background:rgba(251,191,36,.055)}.sessao-minima-exercicio b{display:grid;place-items:center;width:25px;height:25px;border-radius:8px;background:rgba(251,191,36,.14);color:#fcd34d;font-size:10px}.sessao-minima-exercicio strong{display:block;color:#fff;font-size:10px}.sessao-minima-exercicio span{display:block;margin-top:2px;color:var(--text-muted);font-size:8px}.sessao-minima-indisponivel{margin:11px 0 0;color:var(--text-muted);font-size:10px;line-height:1.45}
-    body.perfil-detalhe-aberto #tabPlanos > :not(#perfilMetricas):not(#perfilAvaliacoes):not(#perfilPesoDiario):not(#perfilEvolucao):not(#perfilDadosPessoais):not(#perfilPlano):not(#perfilAvatar):not(#perfilMapa):not(#perfilPassaporte){display:none}
+    body.perfil-detalhe-aberto #tabPlanos > :not(#perfilMetricas):not(#perfilAvaliacoes):not(#perfilPesoDiario):not(#perfilEvolucao):not(#perfilDadosPessoais):not(#perfilPlano):not(#perfilAvatar):not(#perfilMapa):not(#perfilPassaporte):not(#perfilProgresso):not(#painelPrivacidade){display:none}
     @media (min-width:760px) and (max-width:1180px){.tab-conteudo{max-width:860px;padding-left:32px;padding-right:32px}.tabs-nav{width:min(760px,calc(100vw - 48px))}.execucao-lista{grid-template-columns:repeat(2,minmax(0,1fr))}.perfil-acessos{grid-template-columns:repeat(2,minmax(0,1fr))}.plano-visual{padding:22px}.mapa-grelha{grid-template-rows:repeat(7,29px);grid-auto-columns:29px}.mapa-dia{width:29px;height:29px}.avatar-presets{grid-template-columns:repeat(5,74px);justify-content:center}}
     @media (max-width:420px){.avatar-presets{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}.avatar-preset span{display:none}.plano-visual-topo{grid-template-columns:1fr 92px}.plano-anel{width:90px;height:90px}.plano-anel::before{width:68px;height:68px}.plano-anel-centro strong{font-size:20px}}
   </style>
@@ -1220,6 +1220,29 @@
     @media (max-width:540px) { .inicio-saudacao { padding-right:0; }.inicio-treino-ativo { position:static; width:auto; min-height:0; margin:16px 0 0; display:grid; grid-template-columns:30px 1fr; column-gap:10px; align-items:center; }.inicio-treino-ativo .inicio-cta-play { grid-row:span 2; margin:0; }.inicio-treino-ativo .inicio-cta-titulo { font-size:12px; }.inicio-treino-ativo .inicio-cta-sub { margin-top:2px; } }
     body.treino-em-execucao .tabs-nav { display:none; } body.treino-em-execucao .tab-conteudo { padding-bottom:calc(28px + env(safe-area-inset-bottom)); } body.treino-em-execucao #cardExecucaoTreino { min-height:calc(100dvh - 94px); }
     #tabPlanos [data-perfil-raiz] { padding:0; overflow:hidden; background:transparent; border:0; box-shadow:none; } #tabPlanos .perfil-topo { padding:8px 4px 14px; } #tabPlanos .perfil-avatar { width:42px; height:42px; font-size:15px; } #tabPlanos .perfil-nome { font-size:16px; } #tabPlanos .perfil-acessos { gap:0; border-top:1px solid var(--portal-line); } #tabPlanos .perfil-acesso { min-height:64px; padding:10px 4px; border:0; border-bottom:1px solid var(--portal-line); border-radius:0; background:transparent; box-shadow:none; } #tabPlanos .perfil-acesso:hover { transform:none; background:rgba(255,255,255,.025); } #tabPlanos .perfil-acesso strong { font-size:15px; } #tabPlanos .perfil-acesso small { display:none; } #tabPlanos .perfil-acesso-icone { width:38px; height:38px; border-radius:11px; } #tabPlanos .perfil-nivel-treino { margin:14px 4px 0; padding:12px 0 0; border:0; border-top:1px solid var(--portal-line); background:transparent; } #tabPlanos .perfil-nivel-treino small { display:none; } #tabPlanos .perfil-nivel-treino strong { font-size:11px; } #tabPlanos .perfil-nivel-opcoes button { min-height:36px; font-size:10px; }
+  </style>
+  <style id="series-focadas-design">
+    /* Leitor de treino: uma série de cada vez, sem ruído visual. */
+    .exec-serie { display:none; padding:15px; margin:0; border:1px solid rgba(45,212,191,.28); border-radius:18px; background:linear-gradient(145deg,rgba(15,38,57,.86),rgba(7,18,30,.92)); box-shadow:0 16px 32px rgba(0,0,0,.18); animation:serie-entrar .24s cubic-bezier(.22,1,.36,1) both; }
+    .exec-serie.serie-ativa { display:block; }
+    .exec-serie-numero { width:34px; height:34px; display:grid; place-items:center; margin-bottom:12px; border-radius:11px; color:#03201d; background:var(--accent); font-size:12px; font-weight:900; }
+    .exec-serie .exec-serie-linha { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    .exec-registar-serie { width:100%; min-height:48px; margin-top:13px; border:0; border-radius:13px; background:linear-gradient(135deg,var(--blue),var(--accent-old),var(--accent)); color:#03201d; font:inherit; font-size:13px; font-weight:900; cursor:pointer; }
+    .exec-registar-serie:active,.exec-descanso-saltar:active,.exec-conclusao-seguir:active { transform:scale(.98); }
+    .exec-descanso-focado { display:none; padding:22px 16px; border:1px solid rgba(45,212,191,.35); border-radius:20px; background:radial-gradient(circle at 50% 0,rgba(45,212,191,.18),transparent 56%),rgba(7,21,35,.94); text-align:center; animation:serie-entrar .24s cubic-bezier(.22,1,.36,1) both; }
+    .exec-descanso-focado.ativo { display:block; }
+    .exec-descanso-eyebrow { color:var(--accent); font-size:10px; font-weight:900; letter-spacing:.12em; text-transform:uppercase; }
+    .exec-descanso-tempo-grande { margin:8px 0 14px; color:#fff; font-size:38px; font-weight:900; letter-spacing:-.05em; font-variant-numeric:tabular-nums; }
+    .exec-descanso-saltar,.exec-conclusao-seguir { min-height:42px; padding:0 14px; border:1px solid rgba(45,212,191,.42); border-radius:12px; background:rgba(45,212,191,.10); color:var(--accent); font:inherit; font-size:12px; font-weight:850; cursor:pointer; }
+    .exec-conclusao-titulo { margin:5px 0 12px; color:#fff; font-size:19px; font-weight:900; letter-spacing:-.035em; }
+    .exec-editar-anterior { display:none; width:100%; margin:11px 0 0; padding:8px; border:0; background:transparent; color:var(--text-muted); font:inherit; font-size:11px; font-weight:800; cursor:pointer; }
+    .exec-editar-anterior.visivel { display:block; }
+    .execucao-detalhe.player-ativo .exec-detalhe-nav { display:none; }
+    .execucao-detalhe.player-ativo .exec-descanso { display:none; }
+    .execucao-detalhe.player-ativo .exec-nota { display:none; }
+    .execucao-detalhe.exec-completo .exec-nota { display:block; margin-top:14px; }
+    @keyframes serie-entrar { from { opacity:0; transform:translateY(14px) scale(.985); } to { opacity:1; transform:translateY(0) scale(1); } }
+    @media (prefers-reduced-motion:reduce) { .exec-serie,.exec-descanso-focado { animation:none; } }
   </style></head>
 <body>
 
@@ -1723,13 +1746,9 @@
       <div class="perfil-acessos">
         <button type="button" class="perfil-acesso" data-abrir-perfil="dados"><span class="perfil-acesso-icone" data-perfil-icone="perfil"></span><span><strong>Os meus dados</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
         <button type="button" class="perfil-acesso" data-abrir-perfil="plano"><span class="perfil-acesso-icone" data-perfil-icone="treinos"></span><span><strong>O teu plano</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
-        <button type="button" class="perfil-acesso" data-abrir-perfil="mapa"><span class="perfil-acesso-icone" data-perfil-icone="grafico"></span><span><strong>Mapa AL MOVE</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
-        <button type="button" class="perfil-acesso" data-abrir-perfil="passaporte"><span class="perfil-acesso-icone" data-perfil-icone="medalha"></span><span><strong>Passaporte técnico</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
-        <button type="button" class="perfil-acesso" data-abrir-perfil="evolucao"><span class="perfil-acesso-icone" data-perfil-icone="grafico"></span><span><strong>A minha evolução</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
-        <button type="button" class="perfil-acesso" data-abrir-perfil="peso"><span class="perfil-acesso-icone" data-perfil-icone="avaliacao"></span><span><strong>Registo de peso</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="progresso"><span class="perfil-acesso-icone" data-perfil-icone="grafico"></span><span><strong>Progresso</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
         <button type="button" class="perfil-acesso" id="btnAbrirAvaliacoes" data-abrir-perfil="avaliacoes"><span class="perfil-acesso-icone avaliacao" data-perfil-icone="avaliacao"></span><span><strong>Avaliações físicas</strong><small id="avaliacaoAcessoEstado" class="oculto">Pedir avaliação e ver evolução</small></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
-        <button type="button" class="perfil-acesso" data-abrir-perfil="caminhada"><span class="perfil-acesso-icone" data-perfil-icone="caminhar"></span><span><strong>Métricas de caminhada</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
-        <button type="button" class="perfil-acesso" data-abrir-perfil="corrida"><span class="perfil-acesso-icone corrida" data-perfil-icone="foguetao"></span><span><strong>Calculadora de corrida</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="definicoes"><span class="perfil-acesso-icone" data-perfil-icone="configuracoes"></span><span><strong>Definições</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
       </div>
       <div class="perfil-nivel-treino" aria-labelledby="perfilNivelTitulo">
         <strong id="perfilNivelTitulo">Nível de treino</strong>
@@ -1791,6 +1810,19 @@
         <div class="plano-metricas"><div class="plano-metrica"><strong id="opcoesPlanoSessoesFeitas">—</strong><span>Sessões presenciais feitas este mês</span></div><div class="plano-metrica"><strong id="opcoesPlanoSessoesRestantes">—</strong><span>Sessões presenciais ainda disponíveis</span></div></div>
       </div>
       <p class="plano-origem" id="opcoesPlanoOrigem">A carregar informação do CRM…</p>
+    </section>
+
+    <section class="card oculto" id="perfilProgresso" aria-labelledby="perfilProgressoTitulo">
+      <button type="button" class="perfil-voltar" id="btnVoltarProgresso"><span aria-hidden="true"></span> Perfil</button>
+      <div class="metricas-cabecalho"><div><span class="metricas-eyebrow">Acompanhamento</span><div class="card-title" id="perfilProgressoTitulo">Progresso</div></div><span class="metricas-icone" data-perfil-detalhe-icone="grafico"></span></div>
+      <div class="perfil-acessos perfil-acessos-internos">
+        <button type="button" class="perfil-acesso" data-abrir-perfil="mapa"><span class="perfil-acesso-icone" data-perfil-icone="grafico"></span><span><strong>Mapa AL MOVE</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="passaporte"><span class="perfil-acesso-icone" data-perfil-icone="medalha"></span><span><strong>Passaporte técnico</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="evolucao"><span class="perfil-acesso-icone" data-perfil-icone="grafico"></span><span><strong>Evolução</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="peso"><span class="perfil-acesso-icone" data-perfil-icone="avaliacao"></span><span><strong>Registo de peso</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="caminhada"><span class="perfil-acesso-icone" data-perfil-icone="caminhar"></span><span><strong>Caminhada</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+        <button type="button" class="perfil-acesso" data-abrir-perfil="corrida"><span class="perfil-acesso-icone corrida" data-perfil-icone="foguetao"></span><span><strong>Corrida</strong></span><span class="perfil-acesso-seta" aria-hidden="true"></span></button>
+      </div>
     </section>
 
     <section class="card mapa-card oculto" id="perfilMapa" aria-labelledby="perfilMapaTitulo">
@@ -1918,6 +1950,7 @@
     </div>
 
     <section class="card oculto" id="painelPrivacidade" aria-labelledby="privacidadeTitulo">
+      <button type="button" class="perfil-voltar" id="btnVoltarPrivacidade"><span aria-hidden="true"></span> Perfil</button>
       <div class="card-title" id="privacidadeTitulo">Privacidade e dados</div>
       <p class="card-sub">A informação física fica protegida por código e só permanece neste browser durante a sessão. O resumo offline expira ao fim de 24 horas.</p>
       <div class="opcoes-lista">
@@ -2440,7 +2473,7 @@
   // ---------- Navegação por separadores (Início / Hoje / Conquistas / Planos) ----------
   const TABS = ["inicio", "hoje", "conquistas", "planos"];
   function fecharTodosDetalhesPerfil() {
-    document.querySelectorAll("#perfilDadosPessoais,#perfilPlano,#perfilAvatar,#perfilMapa,#perfilPassaporte,#perfilAvaliacoes,#perfilPesoDiario,#perfilEvolucao,#perfilMetricas").forEach(function (painel) {
+    document.querySelectorAll("#perfilDadosPessoais,#perfilPlano,#perfilAvatar,#perfilMapa,#perfilPassaporte,#perfilProgresso,#painelPrivacidade,#perfilAvaliacoes,#perfilPesoDiario,#perfilEvolucao,#perfilMetricas").forEach(function (painel) {
       if (painel) painel.classList.add("oculto");
     });
     document.body.classList.remove("perfil-detalhe-aberto");
@@ -2463,7 +2496,7 @@
   normalizarIconesFixos();
   const versaoPortalEl = document.createElement("div");
   versaoPortalEl.className = "versao-portal";
-  versaoPortalEl.textContent = "AL MOVE · versão 54";
+  versaoPortalEl.textContent = "AL MOVE · versão 63";
   document.getElementById("tabPlanos").appendChild(versaoPortalEl);
 
   const painelPrivacidadeEl = document.getElementById("painelPrivacidade");
@@ -3084,7 +3117,7 @@
   function abrirDetalhePerfilSimples(id) {
     fecharTodosDetalhesPerfil();
     document.body.classList.add("perfil-detalhe-aberto");
-    document.querySelectorAll("#perfilDadosPessoais,#perfilPlano,#perfilAvatar,#perfilMapa,#perfilPassaporte").forEach(function (painel) { painel.classList.add("oculto"); });
+    document.querySelectorAll("#perfilDadosPessoais,#perfilPlano,#perfilAvatar,#perfilMapa,#perfilPassaporte,#perfilProgresso,#painelPrivacidade").forEach(function (painel) { painel.classList.add("oculto"); });
     const painel = document.getElementById(id);
     if (painel) {
       painel.hidden = false;
@@ -3567,12 +3600,14 @@
   document.querySelectorAll("[data-peso-icone]").forEach(function (el) { trocarIconeDentro(el, el.getAttribute("data-peso-icone")); });
   document.querySelectorAll("[data-evolucao-icone]").forEach(function (el) { trocarIconeDentro(el, el.getAttribute("data-evolucao-icone")); });
   document.querySelectorAll("[data-perfil-detalhe-icone]").forEach(function (el) { trocarIconeDentro(el, el.getAttribute("data-perfil-detalhe-icone")); });
-  document.querySelectorAll("[data-abrir-perfil]").forEach(function (btn) { btn.addEventListener("click", function () { if (btn.dataset.abrirPerfil === "dados") abrirDetalhePerfilSimples("perfilDadosPessoais"); else if (btn.dataset.abrirPerfil === "avatar") abrirDetalhePerfilSimples("perfilAvatar"); else if (btn.dataset.abrirPerfil === "plano") abrirDetalhePerfilSimples("perfilPlano"); else if (btn.dataset.abrirPerfil === "mapa") abrirDetalhePerfilSimples("perfilMapa"); else if (btn.dataset.abrirPerfil === "passaporte") abrirDetalhePerfilSimples("perfilPassaporte"); else if (btn.dataset.abrirPerfil === "avaliacoes") abrirPerfilAvaliacoes(); else if (btn.dataset.abrirPerfil === "peso") abrirPerfilPesoDiario(); else if (btn.dataset.abrirPerfil === "evolucao") abrirPerfilEvolucao(); else abrirPerfilMetricas(btn.dataset.abrirPerfil); }); });
+  document.querySelectorAll("[data-abrir-perfil]").forEach(function (btn) { btn.addEventListener("click", function () { if (btn.dataset.abrirPerfil === "dados") abrirDetalhePerfilSimples("perfilDadosPessoais"); else if (btn.dataset.abrirPerfil === "avatar") abrirDetalhePerfilSimples("perfilAvatar"); else if (btn.dataset.abrirPerfil === "plano") abrirDetalhePerfilSimples("perfilPlano"); else if (btn.dataset.abrirPerfil === "progresso") abrirDetalhePerfilSimples("perfilProgresso"); else if (btn.dataset.abrirPerfil === "definicoes") abrirDetalhePerfilSimples("painelPrivacidade"); else if (btn.dataset.abrirPerfil === "mapa") abrirDetalhePerfilSimples("perfilMapa"); else if (btn.dataset.abrirPerfil === "passaporte") abrirDetalhePerfilSimples("perfilPassaporte"); else if (btn.dataset.abrirPerfil === "avaliacoes") abrirPerfilAvaliacoes(); else if (btn.dataset.abrirPerfil === "peso") abrirPerfilPesoDiario(); else if (btn.dataset.abrirPerfil === "evolucao") abrirPerfilEvolucao(); else abrirPerfilMetricas(btn.dataset.abrirPerfil); }); });
   document.getElementById("btnVoltarDadosPessoais").addEventListener("click", function () { fecharDetalhePerfilSimples("perfilDadosPessoais"); });
   document.getElementById("btnVoltarPlano").addEventListener("click", function () { fecharDetalhePerfilSimples("perfilPlano"); });
   document.getElementById("btnVoltarAvatar").addEventListener("click", function () { fecharDetalhePerfilSimples("perfilAvatar"); });
   document.getElementById("btnVoltarMapa").addEventListener("click", function () { fecharDetalhePerfilSimples("perfilMapa"); });
   document.getElementById("btnVoltarPassaporte").addEventListener("click", function () { fecharDetalhePerfilSimples("perfilPassaporte"); });
+  document.getElementById("btnVoltarProgresso").addEventListener("click", function () { fecharDetalhePerfilSimples("perfilProgresso"); });
+  document.getElementById("btnVoltarPrivacidade").addEventListener("click", function () { fecharDetalhePerfilSimples("painelPrivacidade"); });
   document.getElementById("btnPedirAtualizacaoDados").addEventListener("click", pedirAtualizacaoDadosPessoais);
   document.getElementById("dadosPessoaisForm").addEventListener("submit", function (evento) { evento.preventDefault(); pedirAtualizacaoDadosPessoais(); });
   document.getElementById("btnVoltarPesoDiario").addEventListener("click", fecharPerfilPesoDiario);
@@ -4762,13 +4797,13 @@
         '<div class="exec-historico-lista" id="exec-historico-' + exIdx + '"></div>';
 
       for (let s = 0; s < numSeries; s++) {
-        html += '<div class="exec-serie"><div class="exec-serie-linha">' +
+        html += '<div class="exec-serie" data-exec-serie="' + exIdx + '-' + s + '"><div class="exec-serie-linha">' +
           '<span class="exec-serie-numero">S' + (s + 1) + '</span>' +
           '<input type="text" inputmode="numeric" placeholder="' + (porTempo ? "tempo (seg)" : "reps") + '" id="exec-' + exIdx + '-' + s + '-reps" data-ex="' + exIdx + '" data-s="' + s + '">' +
           '<input type="text" inputmode="decimal" placeholder="kg" id="exec-' + exIdx + '-' + s + '-carga" data-ex="' + exIdx + '" data-s="' + s + '">' +
-          '</div><div class="velocidade-wrap">' + construirOpcoesSerie(exIdx, s) + '</div></div>';
+          '</div><div class="velocidade-wrap">' + construirOpcoesSerie(exIdx, s) + '</div><button type="button" class="exec-registar-serie" data-registar-serie="' + exIdx + '" data-serie="' + s + '">Registar série</button></div>';
       }
-      html += '<textarea class="exec-nota" id="exec-' + exIdx + '-notas" placeholder="Notas (opcional)" data-ex-notas="' + exIdx + '"></textarea>' +
+      html += '<div class="exec-descanso-focado" id="exec-descanso-focado-' + exIdx + '" aria-live="polite"></div><button type="button" class="exec-editar-anterior" id="exec-editar-anterior-' + exIdx + '" data-editar-exercicio="' + exIdx + '">Editar série anterior</button><textarea class="exec-nota" id="exec-' + exIdx + '-notas" placeholder="Notas (opcional)" data-ex-notas="' + exIdx + '"></textarea>' +
         '<div class="exec-detalhe-nav">' +
           '<button type="button" data-exec-nav="anterior" data-exec-index="' + exIdx + '">' + iconeNativoSvg("setaEsquerda") + ' Anterior</button>' +
           '<button type="button" data-exec-nav="seguinte" data-exec-index="' + exIdx + '">Seguinte ' + iconeNativoSvg("setaDireita") + '</button>' +
@@ -4822,14 +4857,23 @@
     execucaoExerciciosLista.querySelectorAll('[data-exec-nav]').forEach(function (btn) {
       btn.addEventListener("click", function () { navegarExercicioExecucao(btn.getAttribute("data-exec-nav") === "anterior" ? -1 : 1); });
     });
+    execucaoExerciciosLista.querySelectorAll('[data-registar-serie]').forEach(function (btn) {
+      btn.addEventListener("click", function () { registarSerieFocada(Number(btn.getAttribute("data-registar-serie")), Number(btn.getAttribute("data-serie"))); });
+    });
+    execucaoExerciciosLista.querySelectorAll('[data-editar-exercicio]').forEach(function (btn) {
+      btn.addEventListener("click", function () { editarSerieAnterior(Number(btn.getAttribute("data-editar-exercicio"))); });
+    });
 
     atualizarEstadoTodosExercicios();
+    configurarLeitorSeries(rascunho);
     mostrarListaExerciciosExecucao(false);
   }
 
   function mostrarListaExerciciosExecucao(scroll) {
     document.body.classList.remove("treino-em-execucao");
     if (!TREINO_ATUAL_EXECUCAO) return;
+    Object.keys(descansoIntervalos).forEach(function (key) { clearInterval(descansoIntervalos[key]); });
+    descansoIntervalos = {};
     guardarTreinoAtual();
     const biblioteca = document.getElementById("execucaoBiblioteca");
     if (biblioteca) biblioteca.classList.remove("oculto");
@@ -4870,6 +4914,9 @@
     execucaoExerciciosLista.querySelectorAll(".exec-info-pagina").forEach(function (pagina) { pagina.classList.remove("player-ativo"); });
     execucaoAcoesFinaisEl.classList.add("oculto");
     fluxoHojeEl.classList.add("oculto");
+    const descansoPendente = leitorSeriesFocado.descansos && leitorSeriesFocado.descansos[indice];
+    if (descansoPendente && Number(descansoPendente.fim) > Date.now()) mostrarDescansoSerie(indice, Number(descansoPendente.seguinte), Number(descansoPendente.fim));
+    else definirSerieAtiva(indice, Number(leitorSeriesFocado.ativas[indice]) || 0, true);
     atualizarNavegacaoExercicio();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -4891,6 +4938,117 @@
     atualizarNavegacaoExercicio();
   }
 
+  // ---------- Leitor focado: uma série de cada vez ----------
+  var leitorSeriesFocado = { ativas: {}, concluidas: {}, descansos: {} };
+  function guardarEstadoLeitorSeries() {
+    if (!TREINO_ATUAL_EXECUCAO || !PLANO_ATIVO) return;
+    const rascunho = lerRascunhoTreino(PLANO_ATIVO.nome, TREINO_ATUAL_EXECUCAO.nome) || novoRascunhoTreino(TREINO_ATUAL_EXECUCAO);
+    rascunho.leitorSeries = leitorSeriesFocado;
+    guardarRascunhoTreino(rascunho);
+  }
+  function numeroSeriesExercicio(exIdx) {
+    return parseInt(TREINO_ATUAL_EXECUCAO.exercicios[exIdx].series, 10) || 3;
+  }
+  function configurarLeitorSeries(rascunho) {
+    const guardado = rascunho && rascunho.leitorSeries;
+    leitorSeriesFocado = guardado && typeof guardado === "object" ? guardado : { ativas: {}, concluidas: {}, descansos: {} };
+    leitorSeriesFocado.ativas = leitorSeriesFocado.ativas || {};
+    leitorSeriesFocado.concluidas = leitorSeriesFocado.concluidas || {};
+    leitorSeriesFocado.descansos = leitorSeriesFocado.descansos || {};
+    TREINO_ATUAL_EXECUCAO.exercicios.forEach(function (_, exIdx) {
+      const total = numeroSeriesExercicio(exIdx);
+      const concluidas = Math.min(total, Number(leitorSeriesFocado.concluidas[exIdx]) || 0);
+      leitorSeriesFocado.concluidas[exIdx] = concluidas;
+      if (!Number.isInteger(leitorSeriesFocado.ativas[exIdx])) leitorSeriesFocado.ativas[exIdx] = Math.min(concluidas, total - 1);
+      const descanso = leitorSeriesFocado.descansos[exIdx];
+      if (descanso && Number(descanso.fim) > Date.now()) mostrarDescansoSerie(exIdx, Number(descanso.seguinte), Number(descanso.fim));
+      else { delete leitorSeriesFocado.descansos[exIdx]; definirSerieAtiva(exIdx, leitorSeriesFocado.ativas[exIdx], true); }
+    });
+    guardarEstadoLeitorSeries();
+  }
+  function definirSerieAtiva(exIdx, serieIdx, semScroll) {
+    const total = numeroSeriesExercicio(exIdx);
+    const concluido = (Number(leitorSeriesFocado.concluidas[exIdx]) || 0) >= total;
+    const ativa = Math.max(0, Math.min(total - 1, Number(serieIdx) || 0));
+    leitorSeriesFocado.ativas[exIdx] = ativa;
+    document.querySelectorAll('[data-exec-serie^="' + exIdx + '-"]').forEach(function (el) {
+      el.classList.toggle("serie-ativa", !concluido && Number(el.getAttribute("data-exec-serie").split("-")[1]) === ativa);
+    });
+    const descanso = document.getElementById("exec-descanso-focado-" + exIdx);
+    if (descanso) { descanso.classList.remove("ativo"); descanso.innerHTML = ""; }
+    const editar = document.getElementById("exec-editar-anterior-" + exIdx);
+    if (editar) editar.classList.toggle("visivel", !concluido && ativa > 0);
+    const progresso = document.getElementById("exec-progress-" + exIdx);
+    if (progresso) progresso.textContent = concluido ? "Exercício concluído" : "Série " + (ativa + 1) + " de " + total;
+    atualizarEstadoExercicio(exIdx, true);
+    guardarEstadoLeitorSeries();
+    if (!semScroll) window.scrollTo({ top:0, behavior:"smooth" });
+  }
+  function registarSerieFocada(exIdx, serieIdx) {
+    const reps = document.getElementById("exec-" + exIdx + "-" + serieIdx + "-reps");
+    if (!reps || !String(reps.value || "").trim()) {
+      execucaoErro.textContent = "Indica as repetições antes de avançar.";
+      execucaoErro.style.display = "block";
+      if (reps) reps.focus();
+      return;
+    }
+    execucaoErro.style.display = "none";
+    guardarTreinoAtual();
+    const total = numeroSeriesExercicio(exIdx);
+    const seguinte = serieIdx + 1;
+    leitorSeriesFocado.concluidas[exIdx] = Math.max(Number(leitorSeriesFocado.concluidas[exIdx]) || 0, seguinte);
+    if (seguinte >= total) { mostrarConclusaoExercicio(exIdx); return; }
+    const ex = TREINO_ATUAL_EXECUCAO.exercicios[exIdx];
+    const descanso = String(ex.grupoSuperserie || "").trim() ? 0 : Math.max(0, Number(ex.descansoSegundos || 60));
+    if (!descanso) { definirSerieAtiva(exIdx, seguinte); return; }
+    const fim = Date.now() + descanso * 1000;
+    leitorSeriesFocado.descansos[exIdx] = { fim: fim, seguinte: seguinte };
+    guardarEstadoLeitorSeries();
+    mostrarDescansoSerie(exIdx, seguinte, fim);
+  }
+  function mostrarDescansoSerie(exIdx, seguinte, fim) {
+    Object.keys(descansoIntervalos).forEach(function (key) { clearInterval(descansoIntervalos[key]); });
+    descansoIntervalos = {};
+    document.querySelectorAll('[data-exec-serie^="' + exIdx + '-"]').forEach(function (el) { el.classList.remove("serie-ativa"); });
+    const editar = document.getElementById("exec-editar-anterior-" + exIdx);
+    if (editar) editar.classList.remove("visivel");
+    const card = document.getElementById("exec-descanso-focado-" + exIdx);
+    if (!card) return;
+    card.classList.add("ativo");
+    card.innerHTML = '<div class="exec-descanso-eyebrow">Descanso</div><div class="exec-descanso-tempo-grande"></div><button type="button" class="exec-descanso-saltar">Saltar descanso</button>';
+    const tempo = card.querySelector(".exec-descanso-tempo-grande");
+    const saltar = card.querySelector(".exec-descanso-saltar");
+    const terminar = function () {
+      clearInterval(descansoIntervalos[exIdx]); delete descansoIntervalos[exIdx];
+      delete leitorSeriesFocado.descansos[exIdx];
+      definirSerieAtiva(exIdx, seguinte);
+    };
+    const atualizar = function () {
+      const restante = Math.max(0, Math.ceil((fim - Date.now()) / 1000));
+      tempo.textContent = formatarCronometroTreino(restante);
+      if (!restante) { if (navigator.vibrate) navigator.vibrate([80, 50, 80]); terminar(); }
+    };
+    saltar.addEventListener("click", terminar);
+    atualizar();
+    if (Date.now() < fim) descansoIntervalos[exIdx] = setInterval(atualizar, 500);
+  }
+  function editarSerieAnterior(exIdx) {
+    const atual = Number(leitorSeriesFocado.ativas[exIdx]) || 0;
+    if (atual < 1) return;
+    leitorSeriesFocado.concluidas[exIdx] = Math.min(Number(leitorSeriesFocado.concluidas[exIdx]) || 0, atual);
+    definirSerieAtiva(exIdx, atual - 1);
+  }
+  function mostrarConclusaoExercicio(exIdx) {
+    const card = document.getElementById("exec-descanso-focado-" + exIdx);
+    if (!card) return;
+    definirSerieAtiva(exIdx, numeroSeriesExercicio(exIdx) - 1, true);
+    card.classList.add("ativo");
+    const ultimo = exIdx >= TREINO_ATUAL_EXECUCAO.exercicios.length - 1;
+    card.innerHTML = '<div class="exec-descanso-eyebrow">Concluído</div><div class="exec-conclusao-titulo">Exercício registado</div><button type="button" class="exec-conclusao-seguir">' + (ultimo ? 'Voltar aos exercícios' : 'Seguinte exercício') + '</button>';
+    card.querySelector("button").addEventListener("click", function () { if (ultimo) mostrarListaExerciciosExecucao(); else escolherExercicioExecucao(exIdx + 1); });
+    atualizarEstadoExercicio(exIdx, true);
+  }
+
   // ---------- Registo de séries ----------
   var debounceWorkoutInput = null;
   function onWorkoutInput(exIdx) {
@@ -4904,10 +5062,13 @@
     const item = document.querySelector('[data-abrir-exercicio="' + exIdx + '"]');
     if (!card || !item) return;
     const numSeries = parseInt(TREINO_ATUAL_EXECUCAO.exercicios[exIdx].series, 10) || 3;
-    let completas = 0;
-    for (let s = 0; s < numSeries; s++) {
-      const repsInput = document.getElementById("exec-" + exIdx + "-" + s + "-reps");
-      if (repsInput && String(repsInput.value || "").trim() !== "") completas++;
+    let completas = leitorSeriesFocado && leitorSeriesFocado.concluidas && leitorSeriesFocado.concluidas[exIdx] !== undefined
+      ? Math.min(numSeries, Number(leitorSeriesFocado.concluidas[exIdx]) || 0) : 0;
+    if (!leitorSeriesFocado || !leitorSeriesFocado.concluidas || leitorSeriesFocado.concluidas[exIdx] === undefined) {
+      for (let s = 0; s < numSeries; s++) {
+        const repsInput = document.getElementById("exec-" + exIdx + "-" + s + "-reps");
+        if (repsInput && String(repsInput.value || "").trim() !== "") completas++;
+      }
     }
     const concluido = completas === numSeries && numSeries > 0;
     const parcial = completas > 0 && !concluido;
@@ -5656,7 +5817,7 @@
   // ---------- Service worker ----------
   // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
   // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
-  const VERSAO_CLIENTE_PORTAL = "62";
+  const VERSAO_CLIENTE_PORTAL = "63";
   const CHAVE_AVISO_SW = "ALMOVE_SW_AVISO_" + VERSAO_CLIENTE_PORTAL;
   let recarregarPorAtualizacao = false;
   let recarregamentoAgendado = false;
