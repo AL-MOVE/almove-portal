@@ -3084,7 +3084,7 @@ function servirPaginaAssinatura_(token) {
   template.token = token;
   template.jaAceite = !!info.aceiteEm;
   template.aceiteEm = info.aceiteEm || '';
-  template.contratoUrl = info.contratoUrl || '';
+  template.temContrato = !!info.temContrato;
   template.logoBase64 = LOGO_AL_MOVE_BASE64;
   
   return template.evaluate()
@@ -3106,7 +3106,9 @@ function obterInfoAssinaturaPorToken_(token) {
       return {
         idCliente: String(row[24]),
         nomeCliente: String(row[0]),
-        contratoUrl: contratoFileId ? ('https://drive.google.com/file/d/' + contratoFileId + '/view') : '',
+      // O ficheiro no Drive é privado. O PDF é entregue em anexo no email de
+      // assinatura, para que um link Drive copiado não exponha o contrato.
+      temContrato: !!contratoFileId,
         aceiteEm: row[20] ? formatarDataHoraPorExtenso_(row[20]) : ''
       };
     }
@@ -6097,7 +6099,7 @@ function gerarContratoPDF(data) {
 
     const pastaContratos = obterOuCriarPastaContratos_();
     const pdfFile = pastaContratos.createFile(pdfBlob);
-    pdfFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    pdfFile.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.VIEW);
 
     // Remove o documento intermédio, fica só o PDF final
     DriveApp.getFileById(doc.getId()).setTrashed(true);
@@ -6213,8 +6215,34 @@ function apagarContratoCliente(data) {
 
 function obterOuCriarPastaContratos_() {
   const pastas = DriveApp.getFoldersByName(NOME_PASTA_CONTRATOS);
-  if (pastas.hasNext()) return pastas.next();
-  return DriveApp.createFolder(NOME_PASTA_CONTRATOS);
+  const pasta = pastas.hasNext() ? pastas.next() : DriveApp.createFolder(NOME_PASTA_CONTRATOS);
+  pasta.setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.VIEW);
+  return pasta;
+}
+
+/**
+ * Revoga links públicos dos contratos já existentes. Executar manualmente
+ * pelo administrador depois de confirmar que os clientes receberam o PDF por
+ * email. Não gera ou envia contratos; apenas remove a partilha por link.
+ */
+function protegerContratosExistentes_() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('CLIENTES');
+  if (!sheet || sheet.getLastRow() < 4) return { protegidos: 0, indisponiveis: 0 };
+  const clientes = sheet.getRange('A4:Y' + sheet.getLastRow()).getValues();
+  let protegidos = 0;
+  let indisponiveis = 0;
+  clientes.forEach(row => {
+    const fileId = String(row[16] || '').trim();
+    if (!fileId) return;
+    try {
+      DriveApp.getFileById(fileId).setSharing(DriveApp.Access.PRIVATE, DriveApp.Permission.VIEW);
+      protegidos += 1;
+    } catch (erro) {
+      indisponiveis += 1;
+      Logger.log('Não foi possível proteger contrato ' + fileId + ': ' + erro.toString());
+    }
+  });
+  return { protegidos: protegidos, indisponiveis: indisponiveis };
 }
 
 function getPrecosServicos() {

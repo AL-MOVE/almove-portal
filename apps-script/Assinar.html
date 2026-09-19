@@ -22,7 +22,7 @@
       <div class="sucesso">✓ Já aceitaste este contrato em <?= aceiteEm ?>.</div>
     <? } else { ?>
       <p>Confirma que leste e aceitas o teu contrato de prestação de serviços de Personal Training com a AL MOVE.</p>
-      <? if (contratoUrl) { ?><a class="botao-ver" href="<?= contratoUrl ?>" target="_blank">Ver o contrato (PDF)</a><? } ?>
+      <? if (temContrato) { ?><p>O PDF do contrato foi enviado em anexo no email que contém este link.</p><? } ?>
       <button id="btnAutorizo" onclick="autorizar()">Autorizo</button>
       <p class="erro" id="mensagemErro"></p>
     <? } ?>
