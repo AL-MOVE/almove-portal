@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 
-const [html, backend, proxy, sw, manifest] = await Promise.all([
+const [html, backend, proxy, sw, manifest, exerciseMedia] = await Promise.all([
   readFile(new URL('../index.html', import.meta.url), 'utf8'),
   readFile(new URL('../apps-script/Code.js', import.meta.url), 'utf8'),
   readFile(new URL('../api/almove.js', import.meta.url), 'utf8'),
   readFile(new URL('../sw.js', import.meta.url), 'utf8'),
-  readFile(new URL('../manifest.json', import.meta.url), 'utf8')
+  readFile(new URL('../manifest.json', import.meta.url), 'utf8'),
+  readFile(new URL('../js/exercise-media.js', import.meta.url), 'utf8')
 ]);
 
 assert.match(html, /chamarApi\("getBootstrapPortal", \{\}\)/, 'O arranque deve usar o bootstrap único');
@@ -33,7 +34,7 @@ assert.match(html, /id="perfilPassaporte"/, 'O Passaporte Técnico deve estar di
 assert.match(html, /<option value="rir" selected>RIR<\/option>/, 'RIR deve ser o método de intensidade predefinido');
 assert.match(html, /localStorage\.getItem\("ALMOVE_SESSAO_PORTAL"\)/, 'A sessão curta deve sobreviver ao fecho da PWA');
 assert.match(html, /bootstrapPortalPromise = SESSAO_PRONTA\.then/, 'O bootstrap deve aguardar pela autenticação antes de mostrar sincronização');
-assert.match(html, /VERSAO_CLIENTE_PORTAL = "63"/, 'O cliente deve identificar a versão da atualização');
+assert.match(html, /VERSAO_CLIENTE_PORTAL = "64"/, 'O cliente deve identificar a versão da atualização');
 assert.match(html, /id="p0-experience-hardening"/, 'A experiência móvel P0 deve ter estilos próprios');
 assert.match(html, /#cardSessaoMinima \{ display:none !important; \}/, 'O Plano B deve sair da interface');
 assert.match(html, /function fecharTodosDetalhesPerfil\(\)/, 'A navegação deve fechar os detalhes de Perfil antes de trocar de destino');
@@ -44,6 +45,13 @@ assert.match(html, /function registarSerieFocada/, 'O treino deve avançar séri
 assert.match(html, /Saltar descanso/, 'O cliente deve conseguir saltar o descanso');
 assert.match(html, /String\(ex\.grupoSuperserie \|\| ""\)\.trim\(\) \? 0/, 'Superséries não devem impor descanso');
 assert.match(html, /rascunho\.leitorSeries/, 'O estado do leitor deve sobreviver localmente à app');
+assert.match(html, /<script src="\/js\/exercise-media\.js"><\/script>/, 'O catálogo visual deve carregar antes da app');
+assert.match(html, /function resolverImagemExercicio/, 'A app deve preferir uma imagem própria do exercício');
+assert.match(html, /execucao-exercicio-media/, 'A lista de exercícios deve mostrar miniaturas');
+assert.match(html, /exec-exercicio-visual/, 'O modo focado deve mostrar uma imagem grande');
+assert.match(exerciseMedia, /chest-press-na-maquina/, 'O catálogo deve reconhecer exercícios em PT-PT');
+assert.match(exerciseMedia, /nome: "RepDB"/, 'O catálogo deve declarar a origem da imagem');
+assert.match(html, /Exercícios por <a href="https:\/\/repdb\.co"/, 'A licença das imagens deve ter atribuição visível');
 assert.doesNotMatch(html, /Criar o primeiro acesso/, 'O portal não deve sugerir criação autónoma sem convite');
 assert.match(html, /Ainda não recebi convite/, 'O primeiro acesso deve encaminhar para o convite do CRM');
 assert.doesNotMatch(html, /\}, 350\);/, 'A atualização não deve forçar reload antes de o novo service worker ativar');
@@ -70,7 +78,8 @@ assert.match(html, /icone = String\(proximo\.tipo/, 'O próximo compromisso deve
 assert.match(html, /botao\.disabled = true/, 'O envio de código deve impedir pedidos repetidos');
 assert.match(proxy, /controlador\.abort\(\), 27000/, 'O proxy deve tolerar a latência normal do Apps Script');
 assert.match(proxy, /guardarPedidoAtualizacaoDadosPortal/, 'O proxy deve permitir pedidos de alteração de dados');
-assert.match(sw, /almove-portal-v63/, 'A cache PWA deve avançar para v63');
+assert.match(sw, /almove-portal-v64/, 'A cache PWA deve avançar para v64');
+assert.match(sw, /\/js\/exercise-media\.js/, 'O catálogo visual deve estar disponível offline');
 assert.equal((html.match(/body\.perfil-detalhe-aberto #tabPlanos/g) || []).length, 1, 'O Perfil só pode ter uma regra que escolhe a subpágina visível');
 assert.match(html, /:not\(#perfilMapa\):not\(#perfilPassaporte\)/, 'Mapa e Passaporte não podem ser escondidos ao abrir o detalhe');
 assert.doesNotMatch(sw, /\/js\/avatar-studio\.js/, 'O avatar removido não deve ocupar a cache offline');
@@ -82,4 +91,9 @@ const manifesto = JSON.parse(manifest);
 assert.equal(manifesto.display, 'standalone', 'O manifest deve abrir a PWA em modo app');
 assert.equal(manifesto.icons[0].src, '/al-move-mark.png', 'O manifest deve usar o ícone entregue');
 
-console.log('Contratos do portal v63 validados.');
+for (const ficheiro of ['chest-press-machine.webp', 'wide-grip-lat-pulldown.webp', 'triceps-pushdown-rope.webp']) {
+  const info = await stat(new URL('../images/exercises/' + ficheiro, import.meta.url));
+  assert.ok(info.size > 10000, 'A imagem ' + ficheiro + ' deve estar incluída no portal');
+}
+
+console.log('Contratos do portal v64 validados.');
