@@ -2,3 +2,36 @@
 <script>window.addEventListener('load',()=>{setTimeout(()=>window.entrarNaApp&&window.entrarNaApp(),0)});</script>
 
 <style>#landingScreen{display:none!important}#appLayout{display:flex!important}</style>
+<script>
+/* Ponte de leitura da ficha CRM para o Firebase Development. */
+(function () {
+  const legado = window.google && window.google.script && window.google.script.run;
+  const suportadas = new Set(['getClienteDetalhe', 'getHistoricoClienteCRM', 'getHistoricoAvaliacoesFisicasCRM', 'getHistoricoAtividadeCliente']);
+  async function detalhe(id) {
+    const config = await ALMOVE_FIREBASE_CONFIG.obter();
+    await AlMoveFirebaseAuth.configurar(config);
+    const token = await AlMoveFirebaseAuth.token();
+    if (!token) throw new Error('Entra primeiro em dev-crm.html.');
+    const resposta = await fetch('/api/dev-crm-client-detail?id=' + encodeURIComponent(id), { headers: { Authorization: 'Bearer ' + token }, cache: 'no-store' });
+    const dados = await resposta.json();
+    if (!resposta.ok || !dados.ok) throw new Error(dados.erro || 'Detalhe indisponível.');
+    return dados;
+  }
+  function corredor(sucesso, falha) {
+    return new Proxy({}, { get(_, nome) {
+      if (nome === 'withSuccessHandler') return fn => corredor(fn, falha);
+      if (nome === 'withFailureHandler') return fn => corredor(sucesso, fn);
+      return async function () {
+        const args = Array.from(arguments);
+        if (!suportadas.has(nome)) return legado.withSuccessHandler(sucesso).withFailureHandler(falha)[nome].apply(null, args);
+        try {
+          const dados = await detalhe(args[0]);
+          const resultado = nome === 'getClienteDetalhe' ? dados.detalhe : nome === 'getHistoricoClienteCRM' ? dados.notas : nome === 'getHistoricoAvaliacoesFisicasCRM' ? dados.avaliacoes : dados.atividade;
+          if (sucesso) sucesso(resultado);
+        } catch (erro) { if (falha) falha(erro); }
+      };
+    }});
+  }
+  window.google.script.run = corredor(null, null);
+})();
+</script>
