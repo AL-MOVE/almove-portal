@@ -8702,7 +8702,7 @@ window.addEventListener('load', init);
 </script>
 <script>
 /* A ficha usa um runner explícito para não ficar presa no estado de carregamento. */
-window.addEventListener('load',()=>{const runner=(ok,erro)=>({withSuccessHandler:f=>runner(f,erro),withFailureHandler:f=>runner(ok,f),getClienteDetalhe:async id=>{try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),r=await fetch('/api/dev-crm-dashboard',{headers:{Authorization:'Bearer '+t}}),d=await r.json(),crm=d.crm,cliente=(crm.clientes||[]).find(x=>String(x.id)===String(id));if(!cliente)throw Error('Cliente não encontrado.');const pack=(crm.packsResumo||[]).find(x=>String(x.idCliente)===String(id))||null;ok&&ok({cliente:{...cliente,ultimoCheckin:null,numPlanosTreino:0,modoEspecial:null,totalSessoesConfirmadas:0,marcoAtingido:0,streakSemanas:0,proximoMarco:null},packAtivo:pack,sessoes:[],historico:[]})}catch(e){erro&&erro(e)}},getPerfilPT:()=>ok&&ok({nome:'AL MOVE'})});window.google={script:{run:runner(null,null)}}});
+window.addEventListener('load',()=>{const runner=(ok,erro)=>({withSuccessHandler:f=>runner(f,erro),withFailureHandler:f=>runner(ok,f),getClienteDetalhe:async id=>{try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),r=await fetch('/api/dev-crm-client-detail?id='+encodeURIComponent(id),{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Cliente indisponível.');ok&&ok(d.detalhe)}catch(e){erro&&erro(e)}},getPerfilPT:()=>ok&&ok({nome:'AL MOVE'})});window.google={script:{run:runner(null,null)}}});
 </script>
 
 </body>
