@@ -8709,8 +8709,10 @@ window.addEventListener('load', init);
 <script>
 /* Adaptador temporário: mantém a interface CRM e alimenta somente as leituras já migradas. */
 (function(){
-  function chamada(nome, sucesso, falha){
-    if(nome === 'getCRMData') return (async()=>{try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();if(!t)throw Error('Entra em dev-crm.html primeiro.');const r=await fetch('/api/dev-crm-dashboard',{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Dados indisponíveis.');window.entrarNaApp&&window.entrarNaApp();sucesso&&sucesso(d.crm)}catch(e){falha&&falha(e)}})();
+  async function dadosDashboard(){const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();if(!t)throw Error('Entra em dev-crm.html primeiro.');const r=await fetch('/api/dev-crm-dashboard',{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Dados indisponíveis.');return d.crm}
+  function chamada(nome, sucesso, falha, args){
+    if(nome === 'getCRMData') return (async()=>{try{const crm=await dadosDashboard();window.entrarNaApp&&window.entrarNaApp();sucesso&&sucesso(crm)}catch(e){falha&&falha(e)}})();
+    if(nome === 'getClienteDetalhe') return (async()=>{try{const crm=await dadosDashboard(),id=String((args||[])[0]||''),cliente=(crm.clientes||[]).find(x=>String(x.id)===id);if(!cliente)throw Error('Cliente não encontrado.');const pack=(crm.packsResumo||[]).find(x=>String(x.idCliente)===id)||null;sucesso&&sucesso({cliente:{...cliente,ultimoCheckin:null,numPlanosTreino:0,modoEspecial:null,totalSessoesConfirmadas:0,marcoAtingido:0,streakSemanas:0,proximoMarco:null},packAtivo:pack,sessoes:[],historico:[]})}catch(e){falha&&falha(e)}})();
     if(nome === 'getPerfilPT') return sucesso&&sucesso({nome:'AL MOVE'});
     falha&&falha(new Error('Esta secção ainda está em leitura no espelho Firebase.'));
   }
