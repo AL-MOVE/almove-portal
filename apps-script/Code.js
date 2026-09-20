@@ -8115,7 +8115,7 @@ function exportarSnapshotMigracaoDevelopment_(token) {
     return { fonteLinha: indice + 2, idCliente: idCliente, mesAno: mesAno, numSessao: Number(l[2]) || 0, dataConfirmada: formatarDataISO_(l[3]), estado: String(l[4] || 'Pendente') };
   });
   const clientes = clientesBrutos.filter(l => l[0] && l[24]).map((l, indice) => ({
-    fonteLinha: indice + 4, id: String(l[24]), nome: String(l[0]), estado: String(l[1] || 'Ativo'), contacto: String(l[2] || ''), servicoAtual: String(l[3] || ''), notas: String(l[10] || ''), precoPersonalizado: l[11] === '' ? null : Number(l[11]), nif: String(l[15] || ''), morada: String(l[17] || ''), email: String(l[18] || ''), diaPagamento: l[21] === '' ? null : Number(l[21]), metodoPagamento: String(l[22] || '')
+    fonteLinha: indice + 4, id: String(l[24]), nome: String(l[0]), estado: String(l[1] || 'Ativo'), contacto: String(l[2] || ''), servicoAtual: String(l[3] || ''), notas: String(l[10] || ''), precoPersonalizado: l[11] === '' ? null : Number(l[11]), suspensoMes: l[13] ? normalizarMesAno(l[13]) : '', cancelarMes: l[14] ? normalizarMesAno(l[14]) : '', nif: String(l[15] || ''), contratoFileId: String(l[16] || ''), morada: String(l[17] || ''), email: String(l[18] || ''), assinaturaAceiteEm: l[20] ? formatarDataISO_(l[20]) : '', diaPagamento: l[21] === '' ? null : Number(l[21]), metodoPagamento: String(l[22] || '')
   }));
   const porCliente = {}; clientes.forEach(c => { porCliente[c.id] = c; });
   const packs = ler('DB_PACKS_ATIVOS', 2, 10).filter(l => l[0] && l[1]).map((l, indice) => {

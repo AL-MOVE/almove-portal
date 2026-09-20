@@ -2,7 +2,7 @@ import { obterAssertacaoFirebaseInterna, obterAdminFirebase } from './_firebase.
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from './_firestore.js';
 import { normalizarAvaliacaoFisicaLegada, normalizarCheckinLegado, normalizarClienteLegado, normalizarPackLegado, normalizarSessaoLegada } from './_crm-schema.js';
 
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwPwzaNSJx1owd6ohd9N3HagVHAwJ_mfOWQpbLfXSOR6e7EkaCSEc6DCoX5i5D_T4_B/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxf1aalZZPPVVdoqc58wQQdqPrmgXWm5wHFRvwAcIL8NdIMRrucuEqPHdACrxQ_Ta7i/exec';
 
 function responder(res, estado, corpo) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');

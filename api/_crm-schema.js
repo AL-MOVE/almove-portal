@@ -14,6 +14,10 @@ function mesAno(valor) {
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(resultado)) throw new Error('MIGRACAO_MES_INVALIDO');
   return resultado;
 }
+function mesAnoOpcional(valor) {
+  if (valor === '' || valor === null || valor === undefined) return '';
+  return mesAno(valor);
+}
 
 function dataISO(valor, campo) {
   const resultado = texto(valor, 32);
@@ -43,6 +47,10 @@ export function normalizarClienteLegado(entrada) {
     morada: texto(dados.morada, 500),
     servicoAtual: texto(dados.servicoAtual, 120),
     precoPersonalizado: numero(dados.precoPersonalizado),
+    suspensoMes: mesAnoOpcional(dados.suspensoMes),
+    cancelarMes: mesAnoOpcional(dados.cancelarMes),
+    contratoFileId: texto(dados.contratoFileId, 256),
+    assinaturaAceiteEm: texto(dados.assinaturaAceiteEm, 32),
     diaPagamento: numero(dados.diaPagamento),
     metodoPagamento: texto(dados.metodoPagamento, 80),
     notas: texto(dados.notas, 5000)
