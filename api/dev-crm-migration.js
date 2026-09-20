@@ -23,7 +23,17 @@ export default async function handler(req, res) {
     const resposta = await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8', Accept: 'application/json' }, body: JSON.stringify({ fn: funcao, token: assertacao }) });
     const dados = await resposta.json();
     if (!resposta.ok || !dados.ok) return responder(res, 502, { ok: false, erro: 'ORIGEM_CRM_INDISPONIVEL' });
-    if (req.method === 'GET') return responder(res, 200, { ok: true, resumo: dados.dados });
+    if (req.method === 'GET') {
+      if (String(req.query?.verify || '') !== '1') return responder(res, 200, { ok: true, resumo: dados.dados });
+      const origem = dados.dados || {};
+      const esperado = { clientes: Number(origem.clientes?.total || 0), packs: Number(origem.registos?.packsAtivos || 0), sessoes: Number(origem.registos?.sessoes || 0), checkins: Number(origem.registos?.checkins || 0), avaliacoes: Number(origem.registos?.avaliacoes || 0) };
+      const [clientes, packs, sessoes, checkins, avaliacoes] = await Promise.all([
+        db.collection('crmMigrationClients').count().get(), db.collection('crmMigrationPacks').count().get(), db.collection('crmMigrationSessions').count().get(), db.collection('crmMigrationCheckins').count().get(), db.collection('crmMigrationPhysicalAssessments').count().get()
+      ]);
+      const destino = { clientes: clientes.data().count, packs: packs.data().count, sessoes: sessoes.data().count, checkins: checkins.data().count, avaliacoes: avaliacoes.data().count };
+      const paridade = Object.keys(esperado).every(chave => esperado[chave] === destino[chave]);
+      return responder(res, 200, { ok: true, resumo: origem, destino, paridade });
+    }
     const origem = dados.dados || {};
     const registos = [
       ...(origem.clientes || []).map(item => ['crmMigrationClients', String(item.id), normalizarClienteLegado(item), item.fonteLinha]),
