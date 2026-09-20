@@ -15,6 +15,14 @@ function mesAno(valor) {
   return resultado;
 }
 
+function dataISO(valor, campo) {
+  const resultado = texto(valor, 32);
+  if (!/^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z)?$/.test(resultado)) {
+    throw new Error('MIGRACAO_' + campo + '_INVALIDA');
+  }
+  return resultado;
+}
+
 /**
  * Espelho do cliente atual. Não tenta interpretar ou apagar campos do CRM
  * existente; a importação guarda-os com o mesmo ID estável.
@@ -60,4 +68,58 @@ export function normalizarPackLegado(entrada) {
     estadoPagamento: ESTADOS_PAGAMENTO.has(estadoOriginal) ? estadoOriginal : 'Pendente',
     preco: numero(dados.preco, 0)
   });
+}
+
+/** Sessão do CRM preservada com o número e mês originais. */
+export function normalizarSessaoLegada(entrada) {
+  const dados = entrada && typeof entrada === 'object' ? entrada : {};
+  const clientId = texto(dados.idCliente, 128);
+  const numeroSessao = numero(dados.numSessao);
+  const estado = texto(dados.estado, 32) || 'Pendente';
+  if (!clientId || !Number.isInteger(numeroSessao) || numeroSessao < 1 || !['Pendente', 'Confirmada'].includes(estado)) {
+    throw new Error('MIGRACAO_SESSAO_INVALIDA');
+  }
+  const dataConfirmada = texto(dados.dataConfirmada, 32);
+  if (estado === 'Confirmada' && !dataConfirmada) throw new Error('MIGRACAO_SESSAO_SEM_DATA');
+  return Object.freeze({
+    clientId,
+    mesAno: mesAno(dados.mesAno),
+    numSessao: numeroSessao,
+    estado,
+    dataConfirmada: dataConfirmada ? dataISO(dataConfirmada, 'DATA_SESSAO') : ''
+  });
+}
+
+/** Check-in de bem-estar, sem inferir diagnóstico ou alterar pontuações. */
+export function normalizarCheckinLegado(entrada) {
+  const dados = entrada && typeof entrada === 'object' ? entrada : {};
+  const clientId = texto(dados.idCliente, 128);
+  if (!clientId) throw new Error('MIGRACAO_CHECKIN_SEM_CLIENTE');
+  const escala = campo => {
+    const valor = numero(dados[campo]);
+    const minimo = campo === 'doms' ? 0 : 1;
+    const maximo = campo === 'doms' ? 4 : 5;
+    if (!Number.isInteger(valor) || valor < minimo || valor > maximo) throw new Error('MIGRACAO_CHECKIN_INVALIDO');
+    return valor;
+  };
+  return Object.freeze({
+    clientId,
+    dataHora: dataISO(dados.dataHora, 'DATA_CHECKIN'),
+    sono: escala('sono'), stress: escala('stress'), cansaco: escala('cansaco'),
+    refeicoes: escala('refeicoes'), doms: escala('doms'), nota: texto(dados.nota, 2000)
+  });
+}
+
+/** Avaliação física: mantém os valores medidos sem os reinterpretar. */
+export function normalizarAvaliacaoFisicaLegada(entrada) {
+  const dados = entrada && typeof entrada === 'object' ? entrada : {};
+  const clientId = texto(dados.idCliente, 128);
+  if (!clientId) throw new Error('MIGRACAO_AVALIACAO_SEM_CLIENTE');
+  const medidas = {};
+  for (const campo of ['pesoKg', 'alturaCm', 'massaGordaPercent', 'cinturaCm', 'abdomenCm', 'bracoDireitoCm', 'bracoEsquerdoCm', 'pernaDireitaCm', 'pernaEsquerdaCm']) {
+    const valor = numero(dados[campo]);
+    if (valor !== null && valor < 0) throw new Error('MIGRACAO_AVALIACAO_INVALIDA');
+    medidas[campo] = valor;
+  }
+  return Object.freeze({ clientId, atualizadoEm: dataISO(dados.atualizadoEm, 'DATA_AVALIACAO'), ...medidas });
 }
