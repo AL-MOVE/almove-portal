@@ -8091,9 +8091,26 @@ function validarAssertacaoMigracaoDevelopment_(token) {
   } catch (erro) { return false; }
 }
 
+function lerRegistosTreinoMigracaoDevelopment_(nome, colunas) {
+  const id = PropertiesService.getScriptProperties().getProperty(PROP_SHEET_EXECUCOES_ID);
+  if (!id) return [];
+  try {
+    const folha = SpreadsheetApp.openById(id).getSheetByName(nome);
+    if (!folha || folha.getLastRow() < 2) return [];
+    return folha.getRange(2, 1, folha.getLastRow() - 1, colunas).getValues();
+  } catch (erro) {
+    Logger.log('Não foi possível ler ' + nome + ' para migração: ' + erro.toString());
+    return [];
+  }
+}
+
 function getResumoMigracaoDevelopment_(token) {
   if (!validarAssertacaoMigracaoDevelopment_(token)) throw new Error('ACESSO_MIGRACAO_RECUSADO');
-  return auditarProntidaoMigracaoCRM();
+  const resumo = auditarProntidaoMigracaoCRM();
+  resumo.registos.sessoesPt = lerRegistosTreinoMigracaoDevelopment_('SESSOES_PT', 12).filter(l => l[0] && l[1]).length;
+  resumo.registos.execucoesTreino = lerRegistosTreinoMigracaoDevelopment_('EXECUCOES', 15).filter(l => l[0] && l[3]).length;
+  resumo.registos.posTreino = lerRegistosTreinoMigracaoDevelopment_('POS_TREINO', 8).filter(l => l[0] && l[3]).length;
+  return resumo;
 }
 
 API_FUNCOES_PORTAL.getResumoMigracaoDevelopment = function (token) { return getResumoMigracaoDevelopment_(token); };
@@ -8133,9 +8150,12 @@ function exportarSnapshotMigracaoDevelopment_(token) {
   const avaliacoes = ler('DB_AVALIACOES_FISICAS', 2, 11).filter(l => l[0]).map((l, indice) => ({ fonteLinha: indice + 2, idCliente: String(l[0]), pesoKg: l[1], alturaCm: l[2], massaGordaPercent: l[3], cinturaCm: l[4], abdomenCm: l[5], bracoDireitoCm: l[6], bracoEsquerdoCm: l[7], pernaDireitaCm: l[8], pernaEsquerdaCm: l[9], atualizadoEm: formatarDataISO_(l[10]) }));
   const notas = ler('DB_NOTAS_CRM', 2, 4).filter(l => l[0] && l[1]).map((l, indice) => ({ fonteLinha: indice + 2, idCliente: String(l[0]), dataHora: formatarDataISO_(l[1]), tipo: String(l[2] || 'Nota'), nota: String(l[3] || '') }));
   const planos = ler('DB_PLANOS_TREINO', 2, 17).filter(l => l[0] && l[1]).map((l, indice) => ({ fonteLinha: indice + 2, idCliente: String(l[0]), nomePlano: String(l[1]), nomeTreino: String(l[2] || ''), ordem: Number(l[3]) || 0, exercicio: String(l[4] || ''), series: Number(l[5]) || 0, repsMin: Number(l[6]) || 0, repsMax: Number(l[7]) || 0, rir: l[8] === '' ? null : Number(l[8]), notas: String(l[9] || ''), atualizadoEm: formatarDataISO_(l[10]), validade: formatarDataISO_(l[11]), visibilidade: String(l[12] || ''), tipoPrescricao: String(l[13] || ''), descansoSegundos: Number(l[14]) || 0, aquecimento: String(l[15] || ''), grupoSuperserie: String(l[16] || '') }));
+  const sessoesPt = lerRegistosTreinoMigracaoDevelopment_('SESSOES_PT', 12).filter(l => l[0] && l[1]).map((l, indice) => ({ fonteLinha: indice + 2, idSessao: String(l[0]), idCliente: String(l[1]), nomePlano: String(l[2] || ''), nomeTreino: String(l[3] || ''), data: formatarDataISO_(l[4]), horaInicio: String(l[5] || ''), horaFim: String(l[6] || ''), duracaoMin: Number(l[7]) || 0, estado: String(l[8] || 'REALIZADA'), notaGeral: String(l[9] || ''), criadoEm: formatarDataISO_(l[10]), atualizadoEm: formatarDataISO_(l[11]) }));
+  const execucoesTreino = lerRegistosTreinoMigracaoDevelopment_('EXECUCOES', 15).filter(l => l[0] && l[3]).map((l, indice) => ({ fonteLinha: indice + 2, idCliente: String(l[0]), nomePlano: String(l[1] || ''), nomeTreino: String(l[2] || ''), data: formatarDataISO_(l[3]), exercicio: String(l[4] || ''), numeroSerie: Number(l[5]) || 0, reps: String(l[6] || ''), carga: String(l[7] || ''), notas: String(l[8] || ''), timestamp: formatarDataISO_(l[9]), velocidade: String(l[10] || ''), requestId: String(l[11] || ''), tipoSessao: String(l[12] || ''), registadoPor: String(l[13] || ''), idSessao: String(l[14] || '') }));
+  const posTreino = lerRegistosTreinoMigracaoDevelopment_('POS_TREINO', 8).filter(l => l[0] && l[3]).map((l, indice) => ({ fonteLinha: indice + 2, idCliente: String(l[0]), nomePlano: String(l[1] || ''), nomeTreino: String(l[2] || ''), data: formatarDataISO_(l[3]), energia: Number(l[4]) || 0, esforco: Number(l[5]) || 0, dificuldade: Number(l[6]) || 0, requestId: String(l[7] || '') }));
   const catalogoPacotesEspeciais = ler('CATALOGO_PACOTES_ESPECIAIS', 2, 5).filter(l => l[0]).map((l, indice) => ({ fonteLinha: indice + 2, chave: String(l[0]), nome: String(l[1] || l[0]), descricao: String(l[2] || ''), preco: Number(l[3]) || 0, ativo: String(l[4] || 'Sim').toLowerCase() !== 'não' }));
   const pacotesEspeciais = ler('PACOTES_ESPECIAIS', 2, 9).filter(l => l[0]).map((l, indice) => ({ fonteLinha: indice + 2, nome: String(l[0]), plano: String(l[1] || ''), preco: Number(l[2]) || 0, dataInicio: formatarDataISO_(l[3]), estado: String(l[4] || 'Ativo'), contacto: String(l[5] || ''), notas: String(l[6] || ''), nif: String(l[7] || ''), dataFim: formatarDataISO_(l[8]) }));
-  return { versao: 1, geradoEm: new Date().toISOString(), clientes: clientes, packs: packs, packsHistorico: packsHistorico, sessoes: sessoes, checkins: checkins, avaliacoes: avaliacoes, notas: notas, planos: planos, catalogoPacotesEspeciais: catalogoPacotesEspeciais, pacotesEspeciais: pacotesEspeciais };
+  return { versao: 1, geradoEm: new Date().toISOString(), clientes: clientes, packs: packs, packsHistorico: packsHistorico, sessoes: sessoes, checkins: checkins, avaliacoes: avaliacoes, notas: notas, planos: planos, sessoesPt: sessoesPt, execucoesTreino: execucoesTreino, posTreino: posTreino, catalogoPacotesEspeciais: catalogoPacotesEspeciais, pacotesEspeciais: pacotesEspeciais };
 }
 API_FUNCOES_PORTAL.exportarSnapshotMigracaoDevelopment = function (token) { return exportarSnapshotMigracaoDevelopment_(token); };
 FUNCOES_LEITURA_PORTAL_.add('exportarSnapshotMigracaoDevelopment');

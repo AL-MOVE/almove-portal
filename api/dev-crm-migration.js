@@ -2,7 +2,7 @@ import { obterAssertacaoFirebaseInterna, obterAdminFirebase } from './_firebase.
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from './_firestore.js';
 import { normalizarAvaliacaoFisicaLegada, normalizarCheckinLegado, normalizarClienteLegado, normalizarPackLegado, normalizarSessaoLegada } from './_crm-schema.js';
 
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwwNPUjCJhwmuwzDuQJt8mAcpyWVXKbx7M4SCO0xo775r4tC7i7ohH27FdfL8WxL-0Q/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgPYkfxZiDgi9-2l8wu0RBKmiG_g_p66VRh-Hp6QOvtMofgiJSdeV19Bxe_mSGuB1I/exec';
 
 function responder(res, estado, corpo) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -26,11 +26,11 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       if (String(req.query?.verify || '') !== '1') return responder(res, 200, { ok: true, resumo: dados.dados });
       const origem = dados.dados || {};
-      const esperado = { clientes: Number(origem.clientes?.total || 0), packs: Number(origem.registos?.packsAtivos || 0), packsHistorico: Number(origem.registos?.packsHistorico || 0), sessoes: Number(origem.registos?.sessoes || 0), checkins: Number(origem.registos?.checkins || 0), avaliacoes: Number(origem.registos?.avaliacoes || 0), notas: Number(origem.registos?.notas || 0), planos: Number(origem.registos?.planos || 0), catalogoPacotesEspeciais: Number(origem.registos?.catalogoPacotesEspeciais || 0), pacotesEspeciais: Number(origem.registos?.pacotesEspeciais || 0) };
-      const [clientes, packs, packsHistorico, sessoes, checkins, avaliacoes, notas, planos, catalogoPacotesEspeciais, pacotesEspeciais] = await Promise.all([
-        db.collection('crmMigrationClients').count().get(), db.collection('crmMigrationPacks').count().get(), db.collection('crmMigrationPackHistory').count().get(), db.collection('crmMigrationSessions').count().get(), db.collection('crmMigrationCheckins').count().get(), db.collection('crmMigrationPhysicalAssessments').count().get(), db.collection('crmMigrationNotes').count().get(), db.collection('crmMigrationTrainingPlans').count().get(), db.collection('crmMigrationSpecialPackageCatalog').count().get(), db.collection('crmMigrationSpecialPackages').count().get()
+      const esperado = { clientes: Number(origem.clientes?.total || 0), packs: Number(origem.registos?.packsAtivos || 0), packsHistorico: Number(origem.registos?.packsHistorico || 0), sessoes: Number(origem.registos?.sessoes || 0), checkins: Number(origem.registos?.checkins || 0), avaliacoes: Number(origem.registos?.avaliacoes || 0), notas: Number(origem.registos?.notas || 0), planos: Number(origem.registos?.planos || 0), sessoesPt: Number(origem.registos?.sessoesPt || 0), execucoesTreino: Number(origem.registos?.execucoesTreino || 0), posTreino: Number(origem.registos?.posTreino || 0), catalogoPacotesEspeciais: Number(origem.registos?.catalogoPacotesEspeciais || 0), pacotesEspeciais: Number(origem.registos?.pacotesEspeciais || 0) };
+      const [clientes, packs, packsHistorico, sessoes, checkins, avaliacoes, notas, planos, sessoesPt, execucoesTreino, posTreino, catalogoPacotesEspeciais, pacotesEspeciais] = await Promise.all([
+        db.collection('crmMigrationClients').count().get(), db.collection('crmMigrationPacks').count().get(), db.collection('crmMigrationPackHistory').count().get(), db.collection('crmMigrationSessions').count().get(), db.collection('crmMigrationCheckins').count().get(), db.collection('crmMigrationPhysicalAssessments').count().get(), db.collection('crmMigrationNotes').count().get(), db.collection('crmMigrationTrainingPlans').count().get(), db.collection('crmMigrationPersonalTrainingSessions').count().get(), db.collection('crmMigrationTrainingExecutions').count().get(), db.collection('crmMigrationPostTraining').count().get(), db.collection('crmMigrationSpecialPackageCatalog').count().get(), db.collection('crmMigrationSpecialPackages').count().get()
       ]);
-      const destino = { clientes: clientes.data().count, packs: packs.data().count, packsHistorico: packsHistorico.data().count, sessoes: sessoes.data().count, checkins: checkins.data().count, avaliacoes: avaliacoes.data().count, notas: notas.data().count, planos: planos.data().count, catalogoPacotesEspeciais: catalogoPacotesEspeciais.data().count, pacotesEspeciais: pacotesEspeciais.data().count };
+      const destino = { clientes: clientes.data().count, packs: packs.data().count, packsHistorico: packsHistorico.data().count, sessoes: sessoes.data().count, checkins: checkins.data().count, avaliacoes: avaliacoes.data().count, notas: notas.data().count, planos: planos.data().count, sessoesPt: sessoesPt.data().count, execucoesTreino: execucoesTreino.data().count, posTreino: posTreino.data().count, catalogoPacotesEspeciais: catalogoPacotesEspeciais.data().count, pacotesEspeciais: pacotesEspeciais.data().count };
       const paridade = Object.keys(esperado).every(chave => esperado[chave] === destino[chave]);
       return responder(res, 200, { ok: true, resumo: origem, destino, paridade });
     }
@@ -44,6 +44,9 @@ export default async function handler(req, res) {
       ...(origem.avaliacoes || []).map(item => ['crmMigrationPhysicalAssessments', String(item.fonteLinha), normalizarAvaliacaoFisicaLegada(item), item.fonteLinha]),
       ...(origem.notas || []).map(item => ['crmMigrationNotes', String(item.fonteLinha), item, item.fonteLinha]),
       ...(origem.planos || []).map(item => ['crmMigrationTrainingPlans', String(item.fonteLinha), item, item.fonteLinha]),
+      ...(origem.sessoesPt || []).map(item => ['crmMigrationPersonalTrainingSessions', String(item.fonteLinha), item, item.fonteLinha]),
+      ...(origem.execucoesTreino || []).map(item => ['crmMigrationTrainingExecutions', String(item.fonteLinha), item, item.fonteLinha]),
+      ...(origem.posTreino || []).map(item => ['crmMigrationPostTraining', String(item.fonteLinha), item, item.fonteLinha]),
       ...(origem.catalogoPacotesEspeciais || []).map(item => ['crmMigrationSpecialPackageCatalog', String(item.fonteLinha), item, item.fonteLinha]),
       ...(origem.pacotesEspeciais || []).map(item => ['crmMigrationSpecialPackages', String(item.fonteLinha), item, item.fonteLinha])
     ];
