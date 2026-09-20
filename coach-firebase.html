@@ -8724,3 +8724,6 @@ window.addEventListener('load',()=>{const runner=(ok,erro)=>({withSuccessHandler
   window.google={script:{run:cadeia(null,null)}};
 })();
 </script>
+<script>
+(function(){const runner=(ok,erro)=>({withSuccessHandler:f=>runner(f,erro),withFailureHandler:f=>runner(ok,f),getClienteDetalhe:async id=>{try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),r=await fetch('/api/dev-crm-client-detail?id='+encodeURIComponent(id),{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Cliente indisponível.');ok&&ok(d.detalhe)}catch(e){erro&&erro(e)}},getHistoricoClienteCRM:()=>ok&&ok([]),getPerfilPT:()=>ok&&ok({nome:'AL MOVE'})});window.google={script:{run:runner(null,null)}}})();
+</script>
