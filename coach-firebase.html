@@ -8710,7 +8710,7 @@ window.addEventListener('load', init);
 /* Adaptador temporário: mantém a interface CRM e alimenta somente as leituras já migradas. */
 (function(){
   function chamada(nome, sucesso, falha){
-    if(nome === 'getCRMData') return (async()=>{try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();if(!t)throw Error('Entra em dev-crm.html primeiro.');const r=await fetch('/api/dev-crm-dashboard',{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Dados indisponíveis.');sucesso&&sucesso(d.crm)}catch(e){falha&&falha(e)}})();
+    if(nome === 'getCRMData') return (async()=>{try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();if(!t)throw Error('Entra em dev-crm.html primeiro.');const r=await fetch('/api/dev-crm-dashboard',{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Dados indisponíveis.');window.entrarNaApp&&window.entrarNaApp();sucesso&&sucesso(d.crm)}catch(e){falha&&falha(e)}})();
     if(nome === 'getPerfilPT') return sucesso&&sucesso({nome:'AL MOVE'});
     falha&&falha(new Error('Esta secção ainda está em leitura no espelho Firebase.'));
   }
