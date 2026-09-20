@@ -6262,11 +6262,14 @@ function auditarProntidaoMigracaoCRM() {
     clientes: { total: clientes, semId: semId, idsDuplicados: duplicados },
     registos: {
       packsAtivos: contarLinhas('DB_PACKS_ATIVOS', 2),
+      packsHistorico: contarLinhas('DB_PACKS_HISTORICO', 2),
       sessoes: contarLinhas('DB_SESSOES', 2),
       checkins: contarLinhas('DB_CHECKINS', 2),
       avaliacoes: contarLinhas('DB_AVALIACOES_FISICAS', 2),
       notas: contarLinhasComCampos('DB_NOTAS_CRM', 2, [0, 1]),
-      planos: contarLinhasComCampos('DB_PLANOS_TREINO', 2, [0, 1])
+      planos: contarLinhasComCampos('DB_PLANOS_TREINO', 2, [0, 1]),
+      catalogoPacotesEspeciais: contarLinhas('CATALOGO_PACOTES_ESPECIAIS', 2),
+      pacotesEspeciais: contarLinhas('PACOTES_ESPECIAIS', 2)
     },
     prontoParaCopiaTeste: semId === 0 && duplicados === 0
   };
@@ -8122,11 +8125,17 @@ function exportarSnapshotMigracaoDevelopment_(token) {
     const idCliente = String(l[0]); const mesAno = normalizarMesAno(l[1]); const frequencia = String(l[2] || ''); const cliente = porCliente[idCliente] || {};
     return { fonteLinha: indice + 2, idCliente: idCliente, mesAno: mesAno, frequencia: frequencia, sessoesTotal: Number(l[3]) || calcularSessoesTotalPorFrequencia_(frequencia), sessoesConfirmadas: confirmadas[idCliente + '|' + mesAno] || 0, duracaoMinutos: extrairDuracaoMinutos_(frequencia), estadoPagamento: String(l[7] || 'Pendente'), preco: cliente.precoPersonalizado || Number(precos[frequencia]) || 0 };
   });
+  const packsHistorico = ler('DB_PACKS_HISTORICO', 2, 7).filter(l => l[0] && l[1]).map((l, indice) => {
+    const idCliente = String(l[0]); const mesAno = normalizarMesAno(l[1]); const frequencia = String(l[2] || ''); const cliente = porCliente[idCliente] || {};
+    return { fonteLinha: indice + 2, idCliente: idCliente, mesAno: mesAno, frequencia: frequencia, sessoesTotal: Number(l[3]) || calcularSessoesTotalPorFrequencia_(frequencia), sessoesConfirmadas: confirmadas[idCliente + '|' + mesAno] || 0, duracaoMinutos: extrairDuracaoMinutos_(frequencia), estadoPagamento: String(l[6] || 'Pendente'), preco: cliente.precoPersonalizado || Number(precos[frequencia]) || 0 };
+  });
   const checkins = ler('DB_CHECKINS', 2, 8).filter(l => l[0] && l[1]).map((l, indice) => ({ fonteLinha: indice + 2, idCliente: String(l[0]), dataHora: formatarDataISO_(l[1]), sono: Number(l[2]), stress: Number(l[3]), cansaco: Number(l[4]), refeicoes: Number(l[5]), doms: Number(l[6]), nota: String(l[7] || '') }));
   const avaliacoes = ler('DB_AVALIACOES_FISICAS', 2, 11).filter(l => l[0]).map((l, indice) => ({ fonteLinha: indice + 2, idCliente: String(l[0]), pesoKg: l[1], alturaCm: l[2], massaGordaPercent: l[3], cinturaCm: l[4], abdomenCm: l[5], bracoDireitoCm: l[6], bracoEsquerdoCm: l[7], pernaDireitaCm: l[8], pernaEsquerdaCm: l[9], atualizadoEm: formatarDataISO_(l[10]) }));
   const notas = ler('DB_NOTAS_CRM', 2, 4).filter(l => l[0] && l[1]).map((l, indice) => ({ fonteLinha: indice + 2, idCliente: String(l[0]), dataHora: formatarDataISO_(l[1]), tipo: String(l[2] || 'Nota'), nota: String(l[3] || '') }));
   const planos = ler('DB_PLANOS_TREINO', 2, 17).filter(l => l[0] && l[1]).map((l, indice) => ({ fonteLinha: indice + 2, idCliente: String(l[0]), nomePlano: String(l[1]), nomeTreino: String(l[2] || ''), ordem: Number(l[3]) || 0, exercicio: String(l[4] || ''), series: Number(l[5]) || 0, repsMin: Number(l[6]) || 0, repsMax: Number(l[7]) || 0, rir: l[8] === '' ? null : Number(l[8]), notas: String(l[9] || ''), atualizadoEm: formatarDataISO_(l[10]), validade: formatarDataISO_(l[11]), visibilidade: String(l[12] || ''), tipoPrescricao: String(l[13] || ''), descansoSegundos: Number(l[14]) || 0, aquecimento: String(l[15] || ''), grupoSuperserie: String(l[16] || '') }));
-  return { versao: 1, geradoEm: new Date().toISOString(), clientes: clientes, packs: packs, sessoes: sessoes, checkins: checkins, avaliacoes: avaliacoes, notas: notas, planos: planos };
+  const catalogoPacotesEspeciais = ler('CATALOGO_PACOTES_ESPECIAIS', 2, 5).filter(l => l[0]).map((l, indice) => ({ fonteLinha: indice + 2, chave: String(l[0]), nome: String(l[1] || l[0]), descricao: String(l[2] || ''), preco: Number(l[3]) || 0, ativo: String(l[4] || 'Sim').toLowerCase() !== 'não' }));
+  const pacotesEspeciais = ler('PACOTES_ESPECIAIS', 2, 9).filter(l => l[0]).map((l, indice) => ({ fonteLinha: indice + 2, nome: String(l[0]), plano: String(l[1] || ''), preco: Number(l[2]) || 0, dataInicio: formatarDataISO_(l[3]), estado: String(l[4] || 'Ativo'), contacto: String(l[5] || ''), notas: String(l[6] || ''), nif: String(l[7] || ''), dataFim: formatarDataISO_(l[8]) }));
+  return { versao: 1, geradoEm: new Date().toISOString(), clientes: clientes, packs: packs, packsHistorico: packsHistorico, sessoes: sessoes, checkins: checkins, avaliacoes: avaliacoes, notas: notas, planos: planos, catalogoPacotesEspeciais: catalogoPacotesEspeciais, pacotesEspeciais: pacotesEspeciais };
 }
 API_FUNCOES_PORTAL.exportarSnapshotMigracaoDevelopment = function (token) { return exportarSnapshotMigracaoDevelopment_(token); };
 FUNCOES_LEITURA_PORTAL_.add('exportarSnapshotMigracaoDevelopment');

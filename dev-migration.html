@@ -44,10 +44,10 @@
 
         const origem = dados.resumo;
         if (dados.paridade) {
-          estado.textContent = `Paridade confirmada: ${dados.destino.clientes} clientes, ${dados.destino.packs} packs, ${dados.destino.sessoes} sessões, ${dados.destino.checkins} check-ins, ${dados.destino.avaliacoes} avaliações, ${dados.destino.notas} notas e ${dados.destino.planos} planos de treino no Firebase Development.`;
+          estado.textContent = `Paridade confirmada: ${dados.destino.clientes} clientes, ${dados.destino.packs} packs ativos, ${dados.destino.packsHistorico} packs históricos, ${dados.destino.sessoes} sessões, ${dados.destino.checkins} check-ins, ${dados.destino.avaliacoes} avaliações, ${dados.destino.notas} notas, ${dados.destino.planos} planos de treino e ${dados.destino.pacotesEspeciais} pacotes especiais no Firebase Development.`;
           copiar.textContent = 'Atualizar cópia Development';
         } else {
-          estado.textContent = `Origem validada: ${origem.clientes.total} clientes, ${origem.registos.packsAtivos} packs, ${origem.registos.sessoes} sessões, ${origem.registos.checkins} check-ins, ${origem.registos.avaliacoes} avaliações, ${Number(origem.registos.notas || 0)} notas e ${Number(origem.registos.planos || 0)} planos de treino.`;
+          estado.textContent = `Origem validada: ${origem.clientes.total} clientes, ${origem.registos.packsAtivos} packs ativos, ${Number(origem.registos.packsHistorico || 0)} packs históricos, ${origem.registos.sessoes} sessões, ${origem.registos.checkins} check-ins, ${origem.registos.avaliacoes} avaliações, ${Number(origem.registos.notas || 0)} notas, ${Number(origem.registos.planos || 0)} planos de treino e ${Number(origem.registos.pacotesEspeciais || 0)} pacotes especiais.`;
           copiar.textContent = 'Copiar para Firebase Development';
         }
         copiar.hidden = false;

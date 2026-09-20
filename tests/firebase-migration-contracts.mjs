@@ -37,7 +37,10 @@ assert.match(browserConfig, /CONFIGURACAO_FIREBASE_EM_FALTA/, 'Sem configuraçã
 assert.doesNotMatch(browserConfig, /measurementId|getAnalytics/, 'O portal não deve carregar Analytics para autenticação.');
 assert.match(developmentMigration, /crmMigrationNotes/, 'A cópia Development deve incluir notas privadas do CRM.');
 assert.match(developmentMigration, /crmMigrationTrainingPlans/, 'A cópia Development deve incluir planos de treino.');
+assert.match(developmentMigration, /crmMigrationPackHistory/, 'A cópia Development deve incluir o histórico mensal de packs.');
+assert.match(developmentMigration, /crmMigrationSpecialPackages/, 'A cópia Development deve incluir pacotes especiais.');
 assert.match(appsScript, /notas: contarLinhasComCampos\('DB_NOTAS_CRM'/, 'A verificação deve contar notas na origem.');
 assert.match(appsScript, /planos: contarLinhasComCampos\('DB_PLANOS_TREINO'/, 'A verificação deve contar planos na origem.');
+assert.match(appsScript, /packsHistorico: contarLinhas\('DB_PACKS_HISTORICO'/, 'A verificação deve contar o histórico de packs na origem.');
 assert.match(developmentMigrationPage, /Atualizar cópia Development/, 'A página deve permitir atualizar uma cópia já em paridade.');
 console.log('Contratos de migração Firebase validados.');

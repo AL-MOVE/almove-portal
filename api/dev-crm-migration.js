@@ -2,7 +2,7 @@ import { obterAssertacaoFirebaseInterna, obterAdminFirebase } from './_firebase.
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from './_firestore.js';
 import { normalizarAvaliacaoFisicaLegada, normalizarCheckinLegado, normalizarClienteLegado, normalizarPackLegado, normalizarSessaoLegada } from './_crm-schema.js';
 
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxf1aalZZPPVVdoqc58wQQdqPrmgXWm5wHFRvwAcIL8NdIMRrucuEqPHdACrxQ_Ta7i/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwwNPUjCJhwmuwzDuQJt8mAcpyWVXKbx7M4SCO0xo775r4tC7i7ohH27FdfL8WxL-0Q/exec';
 
 function responder(res, estado, corpo) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -26,11 +26,11 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       if (String(req.query?.verify || '') !== '1') return responder(res, 200, { ok: true, resumo: dados.dados });
       const origem = dados.dados || {};
-      const esperado = { clientes: Number(origem.clientes?.total || 0), packs: Number(origem.registos?.packsAtivos || 0), sessoes: Number(origem.registos?.sessoes || 0), checkins: Number(origem.registos?.checkins || 0), avaliacoes: Number(origem.registos?.avaliacoes || 0), notas: Number(origem.registos?.notas || 0), planos: Number(origem.registos?.planos || 0) };
-      const [clientes, packs, sessoes, checkins, avaliacoes, notas, planos] = await Promise.all([
-        db.collection('crmMigrationClients').count().get(), db.collection('crmMigrationPacks').count().get(), db.collection('crmMigrationSessions').count().get(), db.collection('crmMigrationCheckins').count().get(), db.collection('crmMigrationPhysicalAssessments').count().get(), db.collection('crmMigrationNotes').count().get(), db.collection('crmMigrationTrainingPlans').count().get()
+      const esperado = { clientes: Number(origem.clientes?.total || 0), packs: Number(origem.registos?.packsAtivos || 0), packsHistorico: Number(origem.registos?.packsHistorico || 0), sessoes: Number(origem.registos?.sessoes || 0), checkins: Number(origem.registos?.checkins || 0), avaliacoes: Number(origem.registos?.avaliacoes || 0), notas: Number(origem.registos?.notas || 0), planos: Number(origem.registos?.planos || 0), catalogoPacotesEspeciais: Number(origem.registos?.catalogoPacotesEspeciais || 0), pacotesEspeciais: Number(origem.registos?.pacotesEspeciais || 0) };
+      const [clientes, packs, packsHistorico, sessoes, checkins, avaliacoes, notas, planos, catalogoPacotesEspeciais, pacotesEspeciais] = await Promise.all([
+        db.collection('crmMigrationClients').count().get(), db.collection('crmMigrationPacks').count().get(), db.collection('crmMigrationPackHistory').count().get(), db.collection('crmMigrationSessions').count().get(), db.collection('crmMigrationCheckins').count().get(), db.collection('crmMigrationPhysicalAssessments').count().get(), db.collection('crmMigrationNotes').count().get(), db.collection('crmMigrationTrainingPlans').count().get(), db.collection('crmMigrationSpecialPackageCatalog').count().get(), db.collection('crmMigrationSpecialPackages').count().get()
       ]);
-      const destino = { clientes: clientes.data().count, packs: packs.data().count, sessoes: sessoes.data().count, checkins: checkins.data().count, avaliacoes: avaliacoes.data().count, notas: notas.data().count, planos: planos.data().count };
+      const destino = { clientes: clientes.data().count, packs: packs.data().count, packsHistorico: packsHistorico.data().count, sessoes: sessoes.data().count, checkins: checkins.data().count, avaliacoes: avaliacoes.data().count, notas: notas.data().count, planos: planos.data().count, catalogoPacotesEspeciais: catalogoPacotesEspeciais.data().count, pacotesEspeciais: pacotesEspeciais.data().count };
       const paridade = Object.keys(esperado).every(chave => esperado[chave] === destino[chave]);
       return responder(res, 200, { ok: true, resumo: origem, destino, paridade });
     }
@@ -38,11 +38,14 @@ export default async function handler(req, res) {
     const registos = [
       ...(origem.clientes || []).map(item => ['crmMigrationClients', String(item.id), normalizarClienteLegado(item), item.fonteLinha]),
       ...(origem.packs || []).map(item => ['crmMigrationPacks', `${item.idCliente}-${item.mesAno}-${item.fonteLinha}`, normalizarPackLegado(item), item.fonteLinha]),
+      ...(origem.packsHistorico || []).map(item => ['crmMigrationPackHistory', `${item.idCliente}-${item.mesAno}-${item.fonteLinha}`, normalizarPackLegado(item), item.fonteLinha]),
       ...(origem.sessoes || []).map(item => ['crmMigrationSessions', `${item.idCliente}-${item.mesAno}-${item.numSessao}-${item.fonteLinha}`, normalizarSessaoLegada(item), item.fonteLinha]),
       ...(origem.checkins || []).map(item => ['crmMigrationCheckins', String(item.fonteLinha), normalizarCheckinLegado(item), item.fonteLinha]),
       ...(origem.avaliacoes || []).map(item => ['crmMigrationPhysicalAssessments', String(item.fonteLinha), normalizarAvaliacaoFisicaLegada(item), item.fonteLinha]),
       ...(origem.notas || []).map(item => ['crmMigrationNotes', String(item.fonteLinha), item, item.fonteLinha]),
-      ...(origem.planos || []).map(item => ['crmMigrationTrainingPlans', String(item.fonteLinha), item, item.fonteLinha])
+      ...(origem.planos || []).map(item => ['crmMigrationTrainingPlans', String(item.fonteLinha), item, item.fonteLinha]),
+      ...(origem.catalogoPacotesEspeciais || []).map(item => ['crmMigrationSpecialPackageCatalog', String(item.fonteLinha), item, item.fonteLinha]),
+      ...(origem.pacotesEspeciais || []).map(item => ['crmMigrationSpecialPackages', String(item.fonteLinha), item, item.fonteLinha])
     ];
     const agora = new Date();
     for (let inicio = 0; inicio < registos.length; inicio += 400) {
@@ -50,8 +53,8 @@ export default async function handler(req, res) {
       registos.slice(inicio, inicio + 400).forEach(([colecao, id, valor, linha]) => lote.set(db.collection(colecao).doc(id), { ...valor, migration: { source: 'apps-script', sourceRow: linha, copiedAt: agora, snapshotAt: origem.geradoEm } }));
       await lote.commit();
     }
-    await db.collection('crmMigrationRuns').doc('latest').set({ copiedAt: agora, snapshotAt: origem.geradoEm, actorUid: contexto.firebaseUid, counts: { clients: (origem.clientes || []).length, packs: (origem.packs || []).length, sessions: (origem.sessoes || []).length, checkins: (origem.checkins || []).length, assessments: (origem.avaliacoes || []).length, notes: (origem.notas || []).length, trainingPlans: (origem.planos || []).length } });
-    return responder(res, 200, { ok: true, copied: registos.length, resumo: { clientes: (origem.clientes || []).length, packs: (origem.packs || []).length, sessoes: (origem.sessoes || []).length, checkins: (origem.checkins || []).length, avaliacoes: (origem.avaliacoes || []).length, notas: (origem.notas || []).length, planos: (origem.planos || []).length } });
+    await db.collection('crmMigrationRuns').doc('latest').set({ copiedAt: agora, snapshotAt: origem.geradoEm, actorUid: contexto.firebaseUid, counts: { clients: (origem.clientes || []).length, packs: (origem.packs || []).length, packHistory: (origem.packsHistorico || []).length, sessions: (origem.sessoes || []).length, checkins: (origem.checkins || []).length, assessments: (origem.avaliacoes || []).length, notes: (origem.notas || []).length, trainingPlans: (origem.planos || []).length, specialPackageCatalog: (origem.catalogoPacotesEspeciais || []).length, specialPackages: (origem.pacotesEspeciais || []).length } });
+    return responder(res, 200, { ok: true, copied: registos.length, resumo: { clientes: (origem.clientes || []).length, packs: (origem.packs || []).length, packsHistorico: (origem.packsHistorico || []).length, sessoes: (origem.sessoes || []).length, checkins: (origem.checkins || []).length, avaliacoes: (origem.avaliacoes || []).length, notas: (origem.notas || []).length, planos: (origem.planos || []).length, catalogoPacotesEspeciais: (origem.catalogoPacotesEspeciais || []).length, pacotesEspeciais: (origem.pacotesEspeciais || []).length } });
   } catch (erro) {
     const codigo = String(erro?.code || erro?.message || 'FALHA');
     return responder(res, /^FIREBASE_/.test(codigo) ? 401 : 500, { ok: false, erro: codigo });
