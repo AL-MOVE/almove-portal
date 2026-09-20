@@ -6221,6 +6221,50 @@ function obterOuCriarPastaContratos_() {
 }
 
 /**
+ * Auditoria exclusivamente de leitura para preparar a migração para
+ * Firestore. Não expõe nomes, contactos, NIFs nem altera folhas: devolve
+ * apenas contagens e problemas de integridade que temos de resolver antes
+ * de importar uma cópia para Development.
+ */
+function auditarProntidaoMigracaoCRM() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const clientesSheet = ss.getSheetByName('CLIENTES');
+  if (!clientesSheet) throw new Error('Folha CLIENTES não encontrada.');
+  const ultimaLinha = clientesSheet.getLastRow();
+  const linhas = ultimaLinha >= 4 ? clientesSheet.getRange('A4:Y' + ultimaLinha).getValues() : [];
+  const ids = {};
+  let clientes = 0;
+  let semId = 0;
+  let duplicados = 0;
+  linhas.forEach(function(linha) {
+    if (!linha[0]) return;
+    clientes += 1;
+    const id = String(linha[24] || '').trim();
+    if (!id) { semId += 1; return; }
+    if (ids[id]) duplicados += 1;
+    ids[id] = true;
+  });
+  const contarLinhas = function(nome, primeiraLinha) {
+    const folha = ss.getSheetByName(nome);
+    return folha ? Math.max(0, folha.getLastRow() - primeiraLinha + 1) : null;
+  };
+  const resumo = {
+    versao: 1,
+    geradoEm: new Date().toISOString(),
+    clientes: { total: clientes, semId: semId, idsDuplicados: duplicados },
+    registos: {
+      packsAtivos: contarLinhas('DB_PACKS_ATIVOS', 2),
+      sessoes: contarLinhas('DB_SESSOES', 2),
+      checkins: contarLinhas('DB_CHECKINS', 2),
+      avaliacoes: contarLinhas('DB_AVALIACOES_FISICAS', 2)
+    },
+    prontoParaCopiaTeste: semId === 0 && duplicados === 0
+  };
+  Logger.log('Auditoria de migração CRM: ' + JSON.stringify(resumo));
+  return resumo;
+}
+
+/**
  * Revoga links públicos dos contratos já existentes. Executar manualmente
  * pelo administrador depois de confirmar que os clientes receberam o PDF por
  * email. Não gera ou envia contratos; apenas remove a partilha por link.
