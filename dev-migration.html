@@ -1,5 +1,81 @@
-<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>AL MOVE — migração Development</title>
-<script src="/js/firebase-config.js"></script><script src="/js/firebase-sdk.js"></script><script src="/js/firebase-auth.js"></script>
-<body><main><h1>Preparação da cópia de teste</h1><p id="estado">A autenticar…</p><button id="copiar" hidden>Copiar para Firebase Development</button></main><script>
-let token='';const e=document.querySelector('#estado'),b=document.querySelector('#copiar');(async()=>{try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);token=await AlMoveFirebaseAuth.token();if(!token)throw Error('Entra primeiro em dev-crm.html.');const r=await fetch('/api/dev-crm-migration?verify=1',{headers:{Authorization:'Bearer '+token}});const d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Não foi possível validar a origem.');const x=d.resumo;if(d.paridade){e.textContent=`Paridade confirmada: ${d.destino.clientes} clientes, ${d.destino.packs} packs, ${d.destino.sessoes} sessões, ${d.destino.checkins} check-ins e ${d.destino.avaliacoes} avaliações no Firebase Development.;b.textContent='Atualizar cópia Development';b.hidden=false;return}e.textContent=`Origem validada: ${x.clientes.total} clientes, ${x.registos.packsAtivos} packs, ${x.registos.sessoes} sessões, ${x.registos.checkins} check-ins e ${x.registos.avaliacoes} avaliações.`;b.hidden=false}catch(a){e.textContent=a.message||'Não foi possível validar.'}})();b.onclick=async()=>{b.disabled=true;e.textContent='A copiar para Firebase Development…';try{const r=await fetch('/api/dev-crm-migration',{method:'POST',headers:{Authorization:'Bearer '+token}}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Não foi possível copiar.');location.reload()}catch(a){e.textContent=a.message||'Não foi possível copiar.';b.disabled=false}};
-</script></body>
+<!doctype html>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<title>AL MOVE — migração Development</title>
+<script src="/js/firebase-config.js"></script>
+<script src="/js/firebase-sdk.js"></script>
+<script src="/js/firebase-auth.js"></script>
+<body>
+  <main>
+    <h1>Preparação da cópia de teste</h1>
+    <p id="estado" role="status">A autenticar…</p>
+    <button id="copiar" type="button" hidden>Copiar para Firebase Development</button>
+  </main>
+  <script>
+    const estado = document.querySelector('#estado');
+    const copiar = document.querySelector('#copiar');
+    let token = '';
+
+    function esperar(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function obterTokenDaSessao() {
+      for (let tentativa = 0; tentativa < 40; tentativa += 1) {
+        const atual = await AlMoveFirebaseAuth.token();
+        if (atual) return atual;
+        await esperar(250);
+      }
+      throw new Error('Entra primeiro em dev-crm.html.');
+    }
+
+    async function preparar() {
+      try {
+        const configuracao = await ALMOVE_FIREBASE_CONFIG.obter();
+        await AlMoveFirebaseAuth.configurar(configuracao);
+        token = await obterTokenDaSessao();
+
+        const resposta = await fetch('/api/dev-crm-migration?verify=1', {
+          headers: { Authorization: 'Bearer ' + token },
+          cache: 'no-store'
+        });
+        const dados = await resposta.json();
+        if (!resposta.ok || !dados.ok) throw new Error(dados.erro || 'Não foi possível validar a origem.');
+
+        const origem = dados.resumo;
+        if (dados.paridade) {
+          estado.textContent = `Paridade confirmada: ${dados.destino.clientes} clientes, ${dados.destino.packs} packs, ${dados.destino.sessoes} sessões, ${dados.destino.checkins} check-ins e ${dados.destino.avaliacoes} avaliações no Firebase Development.`;
+          copiar.textContent = 'Atualizar cópia Development';
+        } else {
+          estado.textContent = `Origem validada: ${origem.clientes.total} clientes, ${origem.registos.packsAtivos} packs, ${origem.registos.sessoes} sessões, ${origem.registos.checkins} check-ins e ${origem.registos.avaliacoes} avaliações.`;
+          copiar.textContent = 'Copiar para Firebase Development';
+        }
+        copiar.hidden = false;
+      } catch (erro) {
+        estado.textContent = erro.message || 'Não foi possível validar.';
+      }
+    }
+
+    copiar.addEventListener('click', async function () {
+      copiar.disabled = true;
+      estado.textContent = 'A copiar para Firebase Development…';
+      try {
+        if (!token) token = await obterTokenDaSessao();
+        const resposta = await fetch('/api/dev-crm-migration', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + token }
+        });
+        const dados = await resposta.json();
+        if (!resposta.ok || !dados.ok) throw new Error(dados.erro || 'Não foi possível copiar.');
+        estado.textContent = `Cópia concluída: ${dados.copied} registos no Firebase Development.`;
+        copiar.textContent = 'Atualizar cópia Development';
+        copiar.disabled = false;
+      } catch (erro) {
+        estado.textContent = erro.message || 'Não foi possível copiar.';
+        copiar.disabled = false;
+      }
+    });
+
+    preparar();
+  </script>
+</body>
