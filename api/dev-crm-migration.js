@@ -40,7 +40,9 @@ export default async function handler(req, res) {
       ...(origem.packs || []).map(item => ['crmMigrationPacks', `${item.idCliente}-${item.mesAno}-${item.fonteLinha}`, normalizarPackLegado(item), item.fonteLinha]),
       ...(origem.sessoes || []).map(item => ['crmMigrationSessions', `${item.idCliente}-${item.mesAno}-${item.numSessao}-${item.fonteLinha}`, normalizarSessaoLegada(item), item.fonteLinha]),
       ...(origem.checkins || []).map(item => ['crmMigrationCheckins', String(item.fonteLinha), normalizarCheckinLegado(item), item.fonteLinha]),
-      ...(origem.avaliacoes || []).map(item => ['crmMigrationPhysicalAssessments', String(item.fonteLinha), normalizarAvaliacaoFisicaLegada(item), item.fonteLinha])
+      ...(origem.avaliacoes || []).map(item => ['crmMigrationPhysicalAssessments', String(item.fonteLinha), normalizarAvaliacaoFisicaLegada(item), item.fonteLinha]),
+      ...(origem.notas || []).map(item => ['crmMigrationNotes', String(item.fonteLinha), item, item.fonteLinha]),
+      ...(origem.planos || []).map(item => ['crmMigrationTrainingPlans', String(item.fonteLinha), item, item.fonteLinha])
     ];
     const agora = new Date();
     for (let inicio = 0; inicio < registos.length; inicio += 400) {
@@ -49,7 +51,7 @@ export default async function handler(req, res) {
       await lote.commit();
     }
     await db.collection('crmMigrationRuns').doc('latest').set({ copiedAt: agora, snapshotAt: origem.geradoEm, actorUid: contexto.firebaseUid, counts: { clients: (origem.clientes || []).length, packs: (origem.packs || []).length, sessions: (origem.sessoes || []).length, checkins: (origem.checkins || []).length, assessments: (origem.avaliacoes || []).length } });
-    return responder(res, 200, { ok: true, copied: registos.length, resumo: { clientes: (origem.clientes || []).length, packs: (origem.packs || []).length, sessoes: (origem.sessoes || []).length, checkins: (origem.checkins || []).length, avaliacoes: (origem.avaliacoes || []).length } });
+    return responder(res, 200, { ok: true, copied: registos.length, resumo: { clientes: (origem.clientes || []).length, packs: (origem.packs || []).length, sessoes: (origem.sessoes || []).length, checkins: (origem.checkins || []).length, avaliacoes: (origem.avaliacoes || []).length, notas: (origem.notas || []).length, planos: (origem.planos || []).length } });
   } catch (erro) {
     const codigo = String(erro?.code || erro?.message || 'FALHA');
     return responder(res, /^FIREBASE_/.test(codigo) ? 401 : 500, { ok: false, erro: codigo });
