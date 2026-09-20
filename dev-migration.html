@@ -44,10 +44,10 @@
 
         const origem = dados.resumo;
         if (dados.paridade) {
-          estado.textContent = `Paridade confirmada: ${dados.destino.clientes} clientes, ${dados.destino.packs} packs, ${dados.destino.sessoes} sessões, ${dados.destino.checkins} check-ins e ${dados.destino.avaliacoes} avaliações no Firebase Development.`;
+          estado.textContent = `Paridade confirmada: ${dados.destino.clientes} clientes, ${dados.destino.packs} packs, ${dados.destino.sessoes} sessões, ${dados.destino.checkins} check-ins, ${dados.destino.avaliacoes} avaliações, ${dados.destino.notas} notas e ${dados.destino.planos} planos de treino no Firebase Development.`;
           copiar.textContent = 'Atualizar cópia Development';
         } else {
-          estado.textContent = `Origem validada: ${origem.clientes.total} clientes, ${origem.registos.packsAtivos} packs, ${origem.registos.sessoes} sessões, ${origem.registos.checkins} check-ins e ${origem.registos.avaliacoes} avaliações.`;
+          estado.textContent = `Origem validada: ${origem.clientes.total} clientes, ${origem.registos.packsAtivos} packs, ${origem.registos.sessoes} sessões, ${origem.registos.checkins} check-ins, ${origem.registos.avaliacoes} avaliações, ${origem.registos.notas} notas e ${origem.registos.planos} planos de treino.`;
           copiar.textContent = 'Copiar para Firebase Development';
         }
         copiar.hidden = false;

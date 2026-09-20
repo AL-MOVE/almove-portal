@@ -26,11 +26,11 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       if (String(req.query?.verify || '') !== '1') return responder(res, 200, { ok: true, resumo: dados.dados });
       const origem = dados.dados || {};
-      const esperado = { clientes: Number(origem.clientes?.total || 0), packs: Number(origem.registos?.packsAtivos || 0), sessoes: Number(origem.registos?.sessoes || 0), checkins: Number(origem.registos?.checkins || 0), avaliacoes: Number(origem.registos?.avaliacoes || 0) };
-      const [clientes, packs, sessoes, checkins, avaliacoes] = await Promise.all([
-        db.collection('crmMigrationClients').count().get(), db.collection('crmMigrationPacks').count().get(), db.collection('crmMigrationSessions').count().get(), db.collection('crmMigrationCheckins').count().get(), db.collection('crmMigrationPhysicalAssessments').count().get()
+      const esperado = { clientes: Number(origem.clientes?.total || 0), packs: Number(origem.registos?.packsAtivos || 0), sessoes: Number(origem.registos?.sessoes || 0), checkins: Number(origem.registos?.checkins || 0), avaliacoes: Number(origem.registos?.avaliacoes || 0), notas: Number(origem.registos?.notas || 0), planos: Number(origem.registos?.planos || 0) };
+      const [clientes, packs, sessoes, checkins, avaliacoes, notas, planos] = await Promise.all([
+        db.collection('crmMigrationClients').count().get(), db.collection('crmMigrationPacks').count().get(), db.collection('crmMigrationSessions').count().get(), db.collection('crmMigrationCheckins').count().get(), db.collection('crmMigrationPhysicalAssessments').count().get(), db.collection('crmMigrationNotes').count().get(), db.collection('crmMigrationTrainingPlans').count().get()
       ]);
-      const destino = { clientes: clientes.data().count, packs: packs.data().count, sessoes: sessoes.data().count, checkins: checkins.data().count, avaliacoes: avaliacoes.data().count };
+      const destino = { clientes: clientes.data().count, packs: packs.data().count, sessoes: sessoes.data().count, checkins: checkins.data().count, avaliacoes: avaliacoes.data().count, notas: notas.data().count, planos: planos.data().count };
       const paridade = Object.keys(esperado).every(chave => esperado[chave] === destino[chave]);
       return responder(res, 200, { ok: true, resumo: origem, destino, paridade });
     }
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
       registos.slice(inicio, inicio + 400).forEach(([colecao, id, valor, linha]) => lote.set(db.collection(colecao).doc(id), { ...valor, migration: { source: 'apps-script', sourceRow: linha, copiedAt: agora, snapshotAt: origem.geradoEm } }));
       await lote.commit();
     }
-    await db.collection('crmMigrationRuns').doc('latest').set({ copiedAt: agora, snapshotAt: origem.geradoEm, actorUid: contexto.firebaseUid, counts: { clients: (origem.clientes || []).length, packs: (origem.packs || []).length, sessions: (origem.sessoes || []).length, checkins: (origem.checkins || []).length, assessments: (origem.avaliacoes || []).length } });
+    await db.collection('crmMigrationRuns').doc('latest').set({ copiedAt: agora, snapshotAt: origem.geradoEm, actorUid: contexto.firebaseUid, counts: { clients: (origem.clientes || []).length, packs: (origem.packs || []).length, sessions: (origem.sessoes || []).length, checkins: (origem.checkins || []).length, assessments: (origem.avaliacoes || []).length, notes: (origem.notas || []).length, trainingPlans: (origem.planos || []).length } });
     return responder(res, 200, { ok: true, copied: registos.length, resumo: { clientes: (origem.clientes || []).length, packs: (origem.packs || []).length, sessoes: (origem.sessoes || []).length, checkins: (origem.checkins || []).length, avaliacoes: (origem.avaliacoes || []).length, notas: (origem.notas || []).length, planos: (origem.planos || []).length } });
   } catch (erro) {
     const codigo = String(erro?.code || erro?.message || 'FALHA');

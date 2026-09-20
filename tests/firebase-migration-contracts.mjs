@@ -8,6 +8,8 @@ const appsScript = fs.readFileSync(new URL('../apps-script/Code.js', import.meta
 const browserAdapter = fs.readFileSync(new URL('../js/firebase-auth.js', import.meta.url), 'utf8');
 const browserConfig = fs.readFileSync(new URL('../js/firebase-config.js', import.meta.url), 'utf8');
 const browserSdk = fs.readFileSync(new URL('../js/firebase-sdk.js', import.meta.url), 'utf8');
+const developmentMigration = fs.readFileSync(new URL('../api/dev-crm-migration.js', import.meta.url), 'utf8');
+const developmentMigrationPage = fs.readFileSync(new URL('../dev-migration.html', import.meta.url), 'utf8');
 
 assert.match(proxy, /obterAssertacaoFirebasePortal/);
 assert.match(firebase, /verifyIdToken\(correspondencia\[1\], true\)/, 'A Vercel tem de verificar tokens revogados.');
@@ -33,4 +35,9 @@ assert.match(browserConfig, /\/api\/firebase-config/, 'Uma pré-visualização t
 assert.match(browserConfig, /location\.hostname === 'portal\.almove\.pt'/, 'A pré-visualização não pode reutilizar a configuração Firebase de produção.');
 assert.match(browserConfig, /CONFIGURACAO_FIREBASE_EM_FALTA/, 'Sem configuração própria, a pré-visualização deve falhar fechada.');
 assert.doesNotMatch(browserConfig, /measurementId|getAnalytics/, 'O portal não deve carregar Analytics para autenticação.');
+assert.match(developmentMigration, /crmMigrationNotes/, 'A cópia Development deve incluir notas privadas do CRM.');
+assert.match(developmentMigration, /crmMigrationTrainingPlans/, 'A cópia Development deve incluir planos de treino.');
+assert.match(appsScript, /notas: contarLinhasComCampos\('DB_NOTAS_CRM'/, 'A verificação deve contar notas na origem.');
+assert.match(appsScript, /planos: contarLinhasComCampos\('DB_PLANOS_TREINO'/, 'A verificação deve contar planos na origem.');
+assert.match(developmentMigrationPage, /Atualizar cópia Development/, 'A página deve permitir atualizar uma cópia já em paridade.');
 console.log('Contratos de migração Firebase validados.');

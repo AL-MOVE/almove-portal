@@ -6248,6 +6248,14 @@ function auditarProntidaoMigracaoCRM() {
     const folha = ss.getSheetByName(nome);
     return folha ? Math.max(0, folha.getLastRow() - primeiraLinha + 1) : null;
   };
+  const contarLinhasComCampos = function(nome, primeiraLinha, campos) {
+    const folha = ss.getSheetByName(nome);
+    if (!folha || folha.getLastRow() < primeiraLinha) return 0;
+    const linhas = folha.getRange(primeiraLinha, 1, folha.getLastRow() - primeiraLinha + 1, Math.max.apply(null, campos) + 1).getValues();
+    return linhas.filter(function(linha) {
+      return campos.every(function(indice) { return Boolean(linha[indice]); });
+    }).length;
+  };
   const resumo = {
     versao: 1,
     geradoEm: new Date().toISOString(),
@@ -6256,7 +6264,9 @@ function auditarProntidaoMigracaoCRM() {
       packsAtivos: contarLinhas('DB_PACKS_ATIVOS', 2),
       sessoes: contarLinhas('DB_SESSOES', 2),
       checkins: contarLinhas('DB_CHECKINS', 2),
-      avaliacoes: contarLinhas('DB_AVALIACOES_FISICAS', 2)
+      avaliacoes: contarLinhas('DB_AVALIACOES_FISICAS', 2),
+      notas: contarLinhasComCampos('DB_NOTAS_CRM', 2, [0, 1]),
+      planos: contarLinhasComCampos('DB_PLANOS_TREINO', 2, [0, 1])
     },
     prontoParaCopiaTeste: semId === 0 && duplicados === 0
   };
