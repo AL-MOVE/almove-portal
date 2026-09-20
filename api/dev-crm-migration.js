@@ -19,20 +19,23 @@ export default async function handler(req, res) {
     const { db } = obterFirestoreAlmove();
     const contexto = await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid);
     if (!contexto.roles.includes('admin')) return responder(res, 403, { ok: false, erro: 'ACESSO_SEM_PERMISSAO_CRM' });
-    const funcao = req.method === 'POST' ? 'exportarSnapshotMigracaoDevelopment' : 'getResumoMigracaoDevelopment';
+    const funcao = 'exportarSnapshotMigracaoDevelopment';
     const resposta = await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8', Accept: 'application/json' }, body: JSON.stringify({ fn: funcao, token: assertacao }) });
-    const dados = await resposta.json();
+    const corpo = await resposta.text();
+    let dados;
+    try { dados = JSON.parse(corpo); } catch (erro) { return responder(res, 502, { ok: false, erro: 'ORIGEM_CRM_INDISPONIVEL' }); }
     if (!resposta.ok || !dados.ok) return responder(res, 502, { ok: false, erro: 'ORIGEM_CRM_INDISPONIVEL' });
     if (req.method === 'GET') {
       if (String(req.query?.verify || '') !== '1') return responder(res, 200, { ok: true, resumo: dados.dados });
-      const origem = dados.dados || {};
-      const esperado = { clientes: Number(origem.clientes?.total || 0), packs: Number(origem.registos?.packsAtivos || 0), packsHistorico: Number(origem.registos?.packsHistorico || 0), sessoes: Number(origem.registos?.sessoes || 0), checkins: Number(origem.registos?.checkins || 0), avaliacoes: Number(origem.registos?.avaliacoes || 0), notas: Number(origem.registos?.notas || 0), planos: Number(origem.registos?.planos || 0), sessoesPt: Number(origem.registos?.sessoesPt || 0), execucoesTreino: Number(origem.registos?.execucoesTreino || 0), posTreino: Number(origem.registos?.posTreino || 0), catalogoPacotesEspeciais: Number(origem.registos?.catalogoPacotesEspeciais || 0), pacotesEspeciais: Number(origem.registos?.pacotesEspeciais || 0) };
+      const snapshot = dados.dados || {};
+      const esperado = { clientes: (snapshot.clientes || []).length, packs: (snapshot.packs || []).length, packsHistorico: (snapshot.packsHistorico || []).length, sessoes: (snapshot.sessoes || []).length, checkins: (snapshot.checkins || []).length, avaliacoes: (snapshot.avaliacoes || []).length, notas: (snapshot.notas || []).length, planos: (snapshot.planos || []).length, sessoesPt: (snapshot.sessoesPt || []).length, execucoesTreino: (snapshot.execucoesTreino || []).length, posTreino: (snapshot.posTreino || []).length, catalogoPacotesEspeciais: (snapshot.catalogoPacotesEspeciais || []).length, pacotesEspeciais: (snapshot.pacotesEspeciais || []).length };
       const [clientes, packs, packsHistorico, sessoes, checkins, avaliacoes, notas, planos, sessoesPt, execucoesTreino, posTreino, catalogoPacotesEspeciais, pacotesEspeciais] = await Promise.all([
         db.collection('crmMigrationClients').count().get(), db.collection('crmMigrationPacks').count().get(), db.collection('crmMigrationPackHistory').count().get(), db.collection('crmMigrationSessions').count().get(), db.collection('crmMigrationCheckins').count().get(), db.collection('crmMigrationPhysicalAssessments').count().get(), db.collection('crmMigrationNotes').count().get(), db.collection('crmMigrationTrainingPlans').count().get(), db.collection('crmMigrationPersonalTrainingSessions').count().get(), db.collection('crmMigrationTrainingExecutions').count().get(), db.collection('crmMigrationPostTraining').count().get(), db.collection('crmMigrationSpecialPackageCatalog').count().get(), db.collection('crmMigrationSpecialPackages').count().get()
       ]);
       const destino = { clientes: clientes.data().count, packs: packs.data().count, packsHistorico: packsHistorico.data().count, sessoes: sessoes.data().count, checkins: checkins.data().count, avaliacoes: avaliacoes.data().count, notas: notas.data().count, planos: planos.data().count, sessoesPt: sessoesPt.data().count, execucoesTreino: execucoesTreino.data().count, posTreino: posTreino.data().count, catalogoPacotesEspeciais: catalogoPacotesEspeciais.data().count, pacotesEspeciais: pacotesEspeciais.data().count };
       const paridade = Object.keys(esperado).every(chave => esperado[chave] === destino[chave]);
-      return responder(res, 200, { ok: true, resumo: origem, destino, paridade });
+      const resumo = { clientes: { total: esperado.clientes }, registos: { packsAtivos: esperado.packs, packsHistorico: esperado.packsHistorico, sessoes: esperado.sessoes, checkins: esperado.checkins, avaliacoes: esperado.avaliacoes, notas: esperado.notas, planos: esperado.planos, sessoesPt: esperado.sessoesPt, execucoesTreino: esperado.execucoesTreino, posTreino: esperado.posTreino, catalogoPacotesEspeciais: esperado.catalogoPacotesEspeciais, pacotesEspeciais: esperado.pacotesEspeciais } };
+      return responder(res, 200, { ok: true, resumo, destino, paridade });
     }
     const origem = dados.dados || {};
     const registos = [
