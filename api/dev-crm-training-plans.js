@@ -78,6 +78,14 @@ export default async function handler(req, res) {
       }
       return responder(res, 200, { ok: true, planos: planos.sort((a, b) => (a.cliente + a.nomePlano).localeCompare(b.cliente + b.nomePlano, 'pt-PT')) });
     }
+    if (acao === 'pt-session-plans') {
+      const planos = listarPlanos(linhas, clienteId).map(plano => ({
+        nome: plano.nome,
+        visibilidade: plano.visibilidade,
+        treinos: listarTreinos(linhas, clienteId, plano.nome).map(treino => ({ nome: treino.nome, exercicios: detalheTreino(linhas, clienteId, plano.nome, treino.nome).exercicios }))
+      }));
+      return responder(res, 200, { ok: true, planos });
+    }
     return responder(res, 400, { ok: false, erro: 'ACAO_INVALIDA' });
   } catch (erro) {
     const codigo = String(erro?.code || erro?.message || 'FALHA'); return responder(res, /^FIREBASE_/.test(codigo) ? 401 : 500, { ok: false, erro: codigo });

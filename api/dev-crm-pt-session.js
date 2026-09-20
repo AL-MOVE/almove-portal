@@ -1,0 +1,33 @@
+import { obterAdminFirebase, obterIdentidadeFirebase } from './_firebase.js';
+import { criarAdaptadorFirestore, obterFirestoreAlmove } from './_firestore.js';
+import { exigirEquipa } from './_crm-development.js';
+
+function responder(res, estado, corpo) { res.setHeader('Cache-Control', 'no-store, max-age=0'); res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('X-Robots-Tag', 'noindex, nofollow'); return res.status(estado).json(corpo); }
+function texto(valor, maximo = 180) { return String(valor || '').trim().slice(0, maximo); }
+function estado(valor) { const resultado = texto(valor, 16).toUpperCase(); return ['PLANEADA', 'CANCELADA'].includes(resultado) ? resultado : 'REALIZADA'; }
+function duracao(inicio, fim) { const converter = valor => { const partes = texto(valor, 5).split(':'); if (partes.length !== 2) return null; const horas = Number(partes[0]); const minutos = Number(partes[1]); return Number.isFinite(horas) && Number.isFinite(minutos) ? horas * 60 + minutos : null; }; const a = converter(inicio); const b = converter(fim); if (a === null || b === null) return 0; return b >= a ? b - a : 1440 - a + b; }
+
+export default async function handler(req, res) {
+  if (!['GET', 'POST'].includes(req.method)) return responder(res, 405, { ok: false });
+  try {
+    if (obterAdminFirebase().projeto !== 'almove-portal-dev') return responder(res, 404, { ok: false });
+    const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove(); exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid));
+    const sessoesColecao = db.collection('crmMigrationPersonalTrainingSessions'); const execucoesColecao = db.collection('crmMigrationTrainingExecutions');
+    if (req.method === 'GET') {
+      const clienteId = texto(req.query?.clientId, 128); if (!clienteId) return responder(res, 400, { ok: false, erro: 'CLIENTE_INVALIDO' });
+      const [sessoesSnap, execucoesSnap] = await Promise.all([sessoesColecao.where('idCliente', '==', clienteId).get(), execucoesColecao.where('idCliente', '==', clienteId).get()]);
+      const ultima = sessoesSnap.docs.map(documento => documento.data()).filter(item => item.estado === 'REALIZADA').sort((a, b) => String(b.data || b.criadoEm || '').localeCompare(String(a.data || a.criadoEm || '')))[0];
+      if (!ultima) return responder(res, 200, { ok: true, sessao: null }); const porExercicio = new Map();
+      execucoesSnap.docs.map(documento => documento.data()).filter(item => item.idSessao === ultima.idSessao).sort((a, b) => Number(a.numeroSerie || 0) - Number(b.numeroSerie || 0)).forEach(item => { const atual = porExercicio.get(item.exercicio) || { nome: item.exercicio, nota: item.notas || '', series: [] }; atual.series.push({ reps: item.reps || '', carga: item.carga || '', velocidade: item.velocidade || '' }); porExercicio.set(item.exercicio, atual); });
+      return responder(res, 200, { ok: true, sessao: { idSessao: ultima.idSessao, data: ultima.data, plano: ultima.nomePlano, treino: ultima.nomeTreino, estado: ultima.estado, notaGeral: ultima.notaGeral || '', exercicios: [...porExercicio.values()] } });
+    }
+    const entrada = req.body && typeof req.body === 'object' ? req.body : {}; const clienteId = texto(entrada.idCliente, 128); const plano = texto(entrada.nomePlano); const treino = texto(entrada.nomeTreino); const idSessao = texto(entrada.idSessao, 180); const data = texto(entrada.data, 10); const exercicios = Array.isArray(entrada.exercicios) ? entrada.exercicios.slice(0, 60) : [];
+    if (!clienteId || !plano || !treino || !idSessao || !/^\d{4}-\d{2}-\d{2}$/.test(data)) return responder(res, 400, { ok: false, erro: 'SESSAO_PT_INVALIDA' });
+    const cliente = await db.collection('crmMigrationClients').doc(clienteId).get(); if (!cliente.exists) return responder(res, 404, { ok: false, erro: 'CLIENTE_NAO_ENCONTRADO' }); const sessaoRef = sessoesColecao.doc(encodeURIComponent(idSessao)); const existente = await sessaoRef.get();
+    if (existente.exists) { const registos = await execucoesColecao.where('idSessao', '==', idSessao).get(); return responder(res, 200, { ok: true, repetido: true, idSessao, seriesRegistadas: registos.size }); }
+    const planos = await db.collection('crmMigrationTrainingPlans').where('idCliente', '==', clienteId).get(); const prescritos = new Set(planos.docs.map(documento => documento.data()).filter(item => item.nomePlano === plano && item.nomeTreino === treino).map(item => item.exercicio)); if (!prescritos.size) return responder(res, 404, { ok: false, erro: 'TREINO_NAO_PRESCRITO' });
+    const agora = new Date(); const lote = db.batch(); const estadoSessao = estado(entrada.estado); const horaInicio = texto(entrada.horaInicio, 5); const horaFim = texto(entrada.horaFim, 5); lote.create(sessaoRef, { fonteLinha: null, idSessao, idCliente: clienteId, nomePlano: plano, nomeTreino: treino, data, horaInicio, horaFim, duracaoMin: duracao(horaInicio, horaFim), estado: estadoSessao, notaGeral: texto(entrada.notaGeral, 1000), criadoEm: agora.toISOString(), atualizadoEm: agora.toISOString(), origem: 'firebase-development' }); let seriesRegistadas = 0;
+    exercicios.forEach(exercicio => { const nome = texto(exercicio?.exercicio, 200); if (!prescritos.has(nome)) return; const series = Array.isArray(exercicio?.series) ? exercicio.series.slice(0, 20) : []; series.forEach((serie, indice) => { if (seriesRegistadas >= 400 || ![serie?.reps, serie?.carga, serie?.velocidade].some(valor => texto(valor, 100))) return; seriesRegistadas += 1; lote.create(execucoesColecao.doc(), { fonteLinha: null, idCliente: clienteId, nomePlano: plano, nomeTreino: treino, data, exercicio: nome, numeroSerie: indice + 1, reps: texto(serie.reps, 100), carga: texto(serie.carga, 100), notas: texto(exercicio.notas, 1000), timestamp: agora.toISOString(), velocidade: texto(serie.velocidade, 40), requestId: idSessao + '-' + seriesRegistadas, tipoSessao: 'PT', registadoPor: identidade.uid, idSessao, origem: 'firebase-development' }); }); });
+    if (estadoSessao === 'REALIZADA' && !seriesRegistadas) return responder(res, 400, { ok: false, erro: 'SESSAO_PT_SEM_SERIES' }); lote.create(db.collection('auditLogs').doc(), { action: 'development.pt-session.created', actorUid: identidade.uid, clientId: clienteId, sessionId: idSessao, createdAt: agora }); await lote.commit(); return responder(res, 201, { ok: true, idSessao, seriesRegistadas });
+  } catch (erro) { const codigo = String(erro?.code || erro?.message || 'FALHA'); return responder(res, /^FIREBASE_/.test(codigo) ? 401 : 500, { ok: false, erro: codigo }); }
+}
