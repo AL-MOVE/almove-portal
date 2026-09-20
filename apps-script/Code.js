@@ -8062,3 +8062,26 @@ function configurarNotificacoesPortal() {
   ScriptApp.newTrigger('enviarAlertasAcompanhamentoPortal').timeBased().everyDays(1).atHour(18).create();
   return { sucesso: true, mensagens: ['Lembrete de amanhã às 09h', 'Lembrete 15–45 minutos antes', 'Check-in diário e alerta semanal de treino'] };
 }
+
+/** Leitura de controlo exclusiva da cópia para Firebase Development. */
+function validarAssertacaoMigracaoDevelopment_(token) {
+  const partes = String(token || '').match(/^fb1\.([A-Za-z0-9_-]{20,1000})\.([A-Za-z0-9_-]{20,100})$/);
+  if (!partes) return false;
+  const segredo = PropertiesService.getScriptProperties().getProperty('PORTAL_APPS_SCRIPT_HMAC_SECRET');
+  if (!segredo || String(segredo).length < 32) return false;
+  const assinatura = Utilities.base64EncodeWebSafe(Utilities.computeHmacSha256Signature(partes[1], segredo)).replace(/=+$/g, '');
+  if (assinatura !== partes[2]) return false;
+  try {
+    const dados = JSON.parse(Utilities.newBlob(Utilities.base64DecodeWebSafe(partes[1])).getDataAsString('UTF-8'));
+    const agora = Math.floor(Date.now() / 1000);
+    return dados.v === 1 && dados.scope === 'crm-migration-development' && Number(dados.exp) >= agora && Number(dados.iat) <= agora + 60;
+  } catch (erro) { return false; }
+}
+
+function getResumoMigracaoDevelopment_(token) {
+  if (!validarAssertacaoMigracaoDevelopment_(token)) throw new Error('ACESSO_MIGRACAO_RECUSADO');
+  return auditarProntidaoMigracaoCRM();
+}
+
+API_FUNCOES_PORTAL.getResumoMigracaoDevelopment = function (token) { return getResumoMigracaoDevelopment_(token); };
+FUNCOES_LEITURA_PORTAL_.add('getResumoMigracaoDevelopment');

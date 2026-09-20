@@ -85,3 +85,19 @@ export async function obterAssertacaoFirebasePortal(req) {
     nonce: globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2)
   }, segredo);
 }
+
+/** Assertação curta para operações internas no ambiente Development. */
+export async function obterAssertacaoFirebaseInterna(req, scope) {
+  const segredo = String(process.env.PORTAL_APPS_SCRIPT_HMAC_SECRET || '');
+  if (segredo.length < 32) throw erroFirebase('FIREBASE_NAO_CONFIGURADO');
+  const identidade = await obterIdentidadeFirebase(req);
+  const agora = Math.floor(Date.now() / 1000);
+  return Object.freeze({
+    identidade,
+    assertacao: assinarAssertacao({
+      v: 1, uid: identidade.uid, email: identidade.email, scope: String(scope || ''),
+      iat: agora, exp: agora + DURACAO_ASSERTACAO_SEGUNDOS,
+      nonce: globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2)
+    }, segredo)
+  });
+}
