@@ -8085,3 +8085,36 @@ function getResumoMigracaoDevelopment_(token) {
 
 API_FUNCOES_PORTAL.getResumoMigracaoDevelopment = function (token) { return getResumoMigracaoDevelopment_(token); };
 FUNCOES_LEITURA_PORTAL_.add('getResumoMigracaoDevelopment');
+
+/** Snapshot integral, só de leitura, para a cópia isolada em Development. */
+function exportarSnapshotMigracaoDevelopment_(token) {
+  if (!validarAssertacaoMigracaoDevelopment_(token)) throw new Error('ACESSO_MIGRACAO_RECUSADO');
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const ler = function(nome, primeiraLinha, colunas) {
+    const sheet = ss.getSheetByName(nome);
+    if (!sheet || sheet.getLastRow() < primeiraLinha) return [];
+    return sheet.getRange(primeiraLinha, 1, sheet.getLastRow() - primeiraLinha + 1, colunas).getValues();
+  };
+  const clientesBrutos = ler('CLIENTES', 4, 25);
+  const sessoesBrutas = ler('DB_SESSOES', 2, 6);
+  const precos = getPrecosServicos();
+  const confirmadas = {};
+  const sessoes = sessoesBrutas.filter(l => l[0] && l[1] && l[2]).map((l, indice) => {
+    const idCliente = String(l[0]); const mesAno = normalizarMesAno(l[1]);
+    if (String(l[4] || 'Pendente') === 'Confirmada') confirmadas[idCliente + '|' + mesAno] = (confirmadas[idCliente + '|' + mesAno] || 0) + 1;
+    return { fonteLinha: indice + 2, idCliente: idCliente, mesAno: mesAno, numSessao: Number(l[2]) || 0, dataConfirmada: formatarDataISO_(l[3]), estado: String(l[4] || 'Pendente') };
+  });
+  const clientes = clientesBrutos.filter(l => l[0] && l[24]).map((l, indice) => ({
+    fonteLinha: indice + 4, id: String(l[24]), nome: String(l[0]), estado: String(l[1] || 'Ativo'), contacto: String(l[2] || ''), servicoAtual: String(l[3] || ''), notas: String(l[10] || ''), precoPersonalizado: l[11] === '' ? null : Number(l[11]), nif: String(l[15] || ''), morada: String(l[17] || ''), email: String(l[18] || ''), diaPagamento: l[21] === '' ? null : Number(l[21]), metodoPagamento: String(l[22] || '')
+  }));
+  const porCliente = {}; clientes.forEach(c => { porCliente[c.id] = c; });
+  const packs = ler('DB_PACKS_ATIVOS', 2, 10).filter(l => l[0] && l[1]).map((l, indice) => {
+    const idCliente = String(l[0]); const mesAno = normalizarMesAno(l[1]); const frequencia = String(l[2] || ''); const cliente = porCliente[idCliente] || {};
+    return { fonteLinha: indice + 2, idCliente: idCliente, mesAno: mesAno, frequencia: frequencia, sessoesTotal: Number(l[3]) || calcularSessoesTotalPorFrequencia_(frequencia), sessoesConfirmadas: confirmadas[idCliente + '|' + mesAno] || 0, duracaoMinutos: extrairDuracaoMinutos_(frequencia), estadoPagamento: String(l[7] || 'Pendente'), preco: cliente.precoPersonalizado || Number(precos[frequencia]) || 0 };
+  });
+  const checkins = ler('DB_CHECKINS', 2, 8).filter(l => l[0] && l[1]).map((l, indice) => ({ fonteLinha: indice + 2, idCliente: String(l[0]), dataHora: formatarDataISO_(l[1]), sono: Number(l[2]), stress: Number(l[3]), cansaco: Number(l[4]), refeicoes: Number(l[5]), doms: Number(l[6]), nota: String(l[7] || '') }));
+  const avaliacoes = ler('DB_AVALIACOES_FISICAS', 2, 11).filter(l => l[0]).map((l, indice) => ({ fonteLinha: indice + 2, idCliente: String(l[0]), pesoKg: l[1], alturaCm: l[2], massaGordaPercent: l[3], cinturaCm: l[4], abdomenCm: l[5], bracoDireitoCm: l[6], bracoEsquerdoCm: l[7], pernaDireitaCm: l[8], pernaEsquerdaCm: l[9], atualizadoEm: formatarDataISO_(l[10]) }));
+  return { versao: 1, geradoEm: new Date().toISOString(), clientes: clientes, packs: packs, sessoes: sessoes, checkins: checkins, avaliacoes: avaliacoes };
+}
+API_FUNCOES_PORTAL.exportarSnapshotMigracaoDevelopment = function (token) { return exportarSnapshotMigracaoDevelopment_(token); };
+FUNCOES_LEITURA_PORTAL_.add('exportarSnapshotMigracaoDevelopment');

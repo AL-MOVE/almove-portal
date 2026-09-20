@@ -1,5 +1,6 @@
 import { obterAssertacaoFirebaseInterna, obterAdminFirebase } from './_firebase.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from './_firestore.js';
+import { normalizarAvaliacaoFisicaLegada, normalizarCheckinLegado, normalizarClienteLegado, normalizarPackLegado, normalizarSessaoLegada } from './_crm-schema.js';
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyiOl7KkXMYSFv9lKKVb2sMspvwER2P5IMlpNQcr9csLyEDnzJqvVqisE-XVuAHgeUV/exec';
 
@@ -11,17 +12,34 @@ function responder(res, estado, corpo) {
 }
 
 export default async function handler(req, res) {
-  if (req.method !== 'GET') { res.setHeader('Allow', 'GET'); return responder(res, 405, { ok: false }); }
+  if (!['GET', 'POST'].includes(req.method)) { res.setHeader('Allow', 'GET, POST'); return responder(res, 405, { ok: false }); }
   try {
     if (obterAdminFirebase().projeto !== 'almove-portal-dev') return responder(res, 404, { ok: false });
     const { identidade, assertacao } = await obterAssertacaoFirebaseInterna(req, 'crm-migration-development');
     const { db } = obterFirestoreAlmove();
     const contexto = await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid);
     if (!contexto.roles.includes('admin')) return responder(res, 403, { ok: false, erro: 'ACESSO_SEM_PERMISSAO_CRM' });
-    const resposta = await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8', Accept: 'application/json' }, body: JSON.stringify({ fn: 'getResumoMigracaoDevelopment', token: assertacao }) });
+    const funcao = req.method === 'POST' ? 'exportarSnapshotMigracaoDevelopment' : 'getResumoMigracaoDevelopment';
+    const resposta = await fetch(APPS_SCRIPT_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8', Accept: 'application/json' }, body: JSON.stringify({ fn: funcao, token: assertacao }) });
     const dados = await resposta.json();
     if (!resposta.ok || !dados.ok) return responder(res, 502, { ok: false, erro: 'ORIGEM_CRM_INDISPONIVEL' });
-    return responder(res, 200, { ok: true, resumo: dados.dados });
+    if (req.method === 'GET') return responder(res, 200, { ok: true, resumo: dados.dados });
+    const origem = dados.dados || {};
+    const registos = [
+      ...(origem.clientes || []).map(item => ['crmMigrationClients', String(item.id), normalizarClienteLegado(item), item.fonteLinha]),
+      ...(origem.packs || []).map(item => ['crmMigrationPacks', `${item.idCliente}-${item.mesAno}-${item.fonteLinha}`, normalizarPackLegado(item), item.fonteLinha]),
+      ...(origem.sessoes || []).map(item => ['crmMigrationSessions', `${item.idCliente}-${item.mesAno}-${item.numSessao}-${item.fonteLinha}`, normalizarSessaoLegada(item), item.fonteLinha]),
+      ...(origem.checkins || []).map(item => ['crmMigrationCheckins', String(item.fonteLinha), normalizarCheckinLegado(item), item.fonteLinha]),
+      ...(origem.avaliacoes || []).map(item => ['crmMigrationPhysicalAssessments', String(item.fonteLinha), normalizarAvaliacaoFisicaLegada(item), item.fonteLinha])
+    ];
+    const agora = new Date();
+    for (let inicio = 0; inicio < registos.length; inicio += 400) {
+      const lote = db.batch();
+      registos.slice(inicio, inicio + 400).forEach(([colecao, id, valor, linha]) => lote.set(db.collection(colecao).doc(id), { ...valor, migration: { source: 'apps-script', sourceRow: linha, copiedAt: agora, snapshotAt: origem.geradoEm } }));
+      await lote.commit();
+    }
+    await db.collection('crmMigrationRuns').doc('latest').set({ copiedAt: agora, snapshotAt: origem.geradoEm, actorUid: contexto.firebaseUid, counts: { clients: (origem.clientes || []).length, packs: (origem.packs || []).length, sessions: (origem.sessoes || []).length, checkins: (origem.checkins || []).length, assessments: (origem.avaliacoes || []).length } });
+    return responder(res, 200, { ok: true, copied: registos.length, resumo: { clientes: (origem.clientes || []).length, packs: (origem.packs || []).length, sessoes: (origem.sessoes || []).length, checkins: (origem.checkins || []).length, avaliacoes: (origem.avaliacoes || []).length } });
   } catch (erro) {
     const codigo = String(erro?.code || erro?.message || 'FALHA');
     return responder(res, /^FIREBASE_/.test(codigo) ? 401 : 500, { ok: false, erro: codigo });
