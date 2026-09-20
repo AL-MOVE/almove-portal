@@ -35,3 +35,15 @@
   window.google.script.run = corredor(null, null);
 })();
 </script>
+<script>
+window.addEventListener('load', function () {
+  Array.from(document.querySelectorAll('button')).filter(function (botao) {
+    return String(botao.textContent || '').trim() === 'Abrir CRM';
+  }).forEach(function (botao) {
+    botao.onclick = function () {
+      if (typeof window.entrarNaApp === 'function') window.entrarNaApp();
+      else if (typeof window.init === 'function') window.init();
+    };
+  });
+});
+</script>
