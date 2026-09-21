@@ -1,0 +1,19 @@
+{
+  "name": "AL MOVE Coach",
+  "short_name": "AL MOVE Coach",
+  "id": "/coach-firebase.html",
+  "start_url": "/coach-firebase.html",
+  "scope": "/coach-firebase.html",
+  "display": "standalone",
+  "background_color": "#07121d",
+  "theme_color": "#07121d",
+  "description": "Aplicação de trabalho para coaches AL MOVE.",
+  "icons": [
+    {
+      "src": "/al-move-mark.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
