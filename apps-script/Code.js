@@ -8116,6 +8116,16 @@ function getResumoMigracaoDevelopment_(token) {
 API_FUNCOES_PORTAL.getResumoMigracaoDevelopment = function (token) { return getResumoMigracaoDevelopment_(token); };
 FUNCOES_LEITURA_PORTAL_.add('getResumoMigracaoDevelopment');
 
+function formatarDataHoraISOMigracao_(valor) {
+  try {
+    if (!valor) return '';
+    const data = valor instanceof Date ? valor : new Date(valor);
+    return isNaN(data.getTime()) ? '' : data.toISOString();
+  } catch (erro) {
+    return '';
+  }
+}
+
 /** Snapshot integral, só de leitura, para a cópia isolada em Development. */
 function exportarSnapshotMigracaoDevelopment_(token) {
   if (!validarAssertacaoMigracaoDevelopment_(token)) throw new Error('ACESSO_MIGRACAO_RECUSADO');
@@ -8155,7 +8165,9 @@ function exportarSnapshotMigracaoDevelopment_(token) {
   const posTreino = lerRegistosTreinoMigracaoDevelopment_('POS_TREINO', 8).filter(l => l[0] && l[3]).map((l, indice) => ({ fonteLinha: indice + 2, idCliente: String(l[0]), nomePlano: String(l[1] || ''), nomeTreino: String(l[2] || ''), data: formatarDataISO_(l[3]), energia: Number(l[4]) || 0, esforco: Number(l[5]) || 0, dificuldade: Number(l[6]) || 0, requestId: String(l[7] || '') }));
   const catalogoPacotesEspeciais = ler('CATALOGO_PACOTES_ESPECIAIS', 2, 5).filter(l => l[0]).map((l, indice) => ({ fonteLinha: indice + 2, chave: String(l[0]), nome: String(l[1] || l[0]), descricao: String(l[2] || ''), preco: Number(l[3]) || 0, ativo: String(l[4] || 'Sim').toLowerCase() !== 'não' }));
   const pacotesEspeciais = ler('PACOTES_ESPECIAIS', 2, 9).filter(l => l[0]).map((l, indice) => ({ fonteLinha: indice + 2, nome: String(l[0]), plano: String(l[1] || ''), preco: Number(l[2]) || 0, dataInicio: formatarDataISO_(l[3]), estado: String(l[4] || 'Ativo'), contacto: String(l[5] || ''), notas: String(l[6] || ''), nif: String(l[7] || ''), dataFim: formatarDataISO_(l[8]) }));
-  return { versao: 1, geradoEm: new Date().toISOString(), clientes: clientes, packs: packs, packsHistorico: packsHistorico, sessoes: sessoes, checkins: checkins, avaliacoes: avaliacoes, notas: notas, planos: planos, sessoesPt: sessoesPt, execucoesTreino: execucoesTreino, posTreino: posTreino, catalogoPacotesEspeciais: catalogoPacotesEspeciais, pacotesEspeciais: pacotesEspeciais };
+  const pedidosAvaliacao = ler('DB_PEDIDOS_AVALIACAO', 2, 12).filter(l => l[0]).map((l, indice) => ({ fonteLinha: indice + 2, idCliente: String(l[0]), periodo: String(l[1] || ''), diasDisponiveis: String(l[2] || ''), horaPreferida: String(l[3] || ''), horaAlternativa: String(l[4] || ''), objetivo: String(l[5] || ''), nota: String(l[6] || ''), estado: String(l[7] || 'Pendente'), criadoEm: formatarDataHoraISOMigracao_(l[8]), dataMarcada: formatarDataHoraISOMigracao_(l[9]), local: String(l[10] || ''), confirmadoEm: formatarDataHoraISOMigracao_(l[11]) }));
+  const agendaPortal = ler('DB_AGENDA_PORTAL', 2, 5).filter(l => l[0] && l[1]).map((l, indice) => ({ fonteLinha: indice + 2, idCliente: String(l[0]), dataHora: formatarDataHoraISOMigracao_(l[1]), titulo: String(l[2] || ''), local: String(l[3] || ''), estado: String(l[4] || 'Marcada') }));
+  return { versao: 1, geradoEm: new Date().toISOString(), clientes: clientes, packs: packs, packsHistorico: packsHistorico, sessoes: sessoes, checkins: checkins, avaliacoes: avaliacoes, notas: notas, planos: planos, sessoesPt: sessoesPt, execucoesTreino: execucoesTreino, posTreino: posTreino, catalogoPacotesEspeciais: catalogoPacotesEspeciais, pacotesEspeciais: pacotesEspeciais, pedidosAvaliacao: pedidosAvaliacao, agendaPortal: agendaPortal };
 }
 API_FUNCOES_PORTAL.exportarSnapshotMigracaoDevelopment = function (token) { return exportarSnapshotMigracaoDevelopment_(token); };
 FUNCOES_LEITURA_PORTAL_.add('exportarSnapshotMigracaoDevelopment');

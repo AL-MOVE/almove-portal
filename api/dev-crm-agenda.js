@@ -55,9 +55,9 @@ export default async function handler(req, res) {
     const semanaInicio = inicioSemana(offset);
     const semanaFim = adicionarDias(semanaInicio, 6);
     const mesReferencia = semanaInicio.slice(0, 7);
-    const [clientesSnap, packsSnap, sessoesSnap, avaliacoesSnap] = await Promise.all([
+    const [clientesSnap, packsSnap, sessoesSnap, agendaPortalSnap] = await Promise.all([
       db.collection('crmMigrationClients').get(), db.collection('crmMigrationPacks').get(),
-      db.collection('crmMigrationSessions').get(), db.collection('crmMigrationPhysicalAssessments').get()
+      db.collection('crmMigrationSessions').get(), db.collection('crmMigrationPortalAgenda').get()
     ]);
     const clientes = clientesSnap.docs.map(documento => ({ id: documento.id, ...documento.data() }))
       .filter(cliente => cliente.estado === 'Ativo').map(cliente => ({ id: cliente.id, nome: String(cliente.nome || '') }));
@@ -67,13 +67,18 @@ export default async function handler(req, res) {
       .filter(sessao => sessao.estado === 'Confirmada' && String(sessao.dataConfirmada || '').slice(0, 10) >= semanaInicio && String(sessao.dataConfirmada || '').slice(0, 10) <= semanaFim && nomes.has(sessao.clientId));
     const contagem = new Map();
     sessoes.forEach(sessao => contagem.set(sessao.clientId, (contagem.get(sessao.clientId) || 0) + 1));
-    const eventos = sessoes.map(sessao => ({
+    const eventosPt = sessoes.map(sessao => ({
       id: String(sessao.fonteLinha || ''), tipo: 'PT', titulo: nomes.get(sessao.clientId), clienteId: sessao.clientId,
       clienteNome: nomes.get(sessao.clientId), reconhecido: true, ignorado: false, motivoNaoReconhecido: '',
       dia: String(sessao.dataConfirmada || '').slice(0, 10), horaInicio: '—', horaFim: '', inicioMs: 0, diaSemana: ''
-    })).sort((a, b) => a.dia.localeCompare(b.dia) || a.clienteNome.localeCompare(b.clienteNome, 'pt-PT'));
-    const avaliacoes = avaliacoesSnap.docs.map(documento => documento.data())
-      .filter(item => String(item.atualizadoEm || '').slice(0, 10) >= semanaInicio && String(item.atualizadoEm || '').slice(0, 10) <= semanaFim).length;
+    }));
+    const eventosAvaliacao = agendaPortalSnap.docs.map(documento => ({ id: documento.id, ...documento.data() }))
+      .filter(item => String(item.estado || 'Marcada').toLowerCase() !== 'cancelada' && String(item.dataHora || '').slice(0, 10) >= semanaInicio && String(item.dataHora || '').slice(0, 10) <= semanaFim)
+      .map(item => ({ id: item.id, tipo: 'AVALIAÇÃO', titulo: textoTitulo(item.titulo, nomes.get(item.idCliente)), clienteId: item.idCliente,
+        clienteNome: nomes.get(item.idCliente) || 'Cliente', reconhecido: nomes.has(item.idCliente), ignorado: false, motivoNaoReconhecido: nomes.has(item.idCliente) ? '' : 'Cliente não encontrado',
+        dia: String(item.dataHora || '').slice(0, 10), horaInicio: String(item.dataHora || '').slice(11, 16) || '—', horaFim: '', inicioMs: Date.parse(item.dataHora) || 0, diaSemana: '', local: String(item.local || '') }));
+    const avaliacoes = eventosAvaliacao.length;
+    const eventos = [...eventosPt, ...eventosAvaliacao].sort((a, b) => a.dia.localeCompare(b.dia) || String(a.horaInicio).localeCompare(String(b.horaInicio)) || a.clienteNome.localeCompare(b.clienteNome, 'pt-PT'));
     const resumoClientes = clientes.map(cliente => {
       const pack = packs.get(cliente.id); const esperado = frequenciaEsperada(pack?.frequencia); const marcadas = contagem.get(cliente.id) || 0;
       return { id: cliente.id, nome: cliente.nome, frequencia: String(pack?.frequencia || ''), esperado, marcadas,
@@ -83,7 +88,7 @@ export default async function handler(req, res) {
     const comFrequencia = resumoClientes.filter(cliente => !cliente.semFrequencia);
     return responder(res, 200, { ok: true, semanaInicio, semanaFim, tituloSemana: tituloSemana(semanaInicio), mesReferencia,
       clientes: resumoClientes, eventos, porConfirmar: [], resumo: {
-        esperadas: comFrequencia.reduce((soma, cliente) => soma + cliente.esperado, 0), marcadas: eventos.length,
+        esperadas: comFrequencia.reduce((soma, cliente) => soma + cliente.esperado, 0), marcadas: eventosPt.length,
         emFalta: comFrequencia.reduce((soma, cliente) => soma + cliente.emFalta, 0), avaliacoes, porConfirmar: 0,
         semFrequencia: resumoClientes.filter(cliente => cliente.semFrequencia).length
       } });
@@ -91,4 +96,9 @@ export default async function handler(req, res) {
     const codigo = String(erro?.code || erro?.message || 'FALHA');
     return responder(res, /^FIREBASE_/.test(codigo) ? 401 : 500, { ok: false, erro: codigo });
   }
+}
+
+function textoTitulo(titulo, nomeCliente) {
+  const base = String(titulo || 'Avaliação física').trim() || 'Avaliação física';
+  return nomeCliente ? base + ' · ' + nomeCliente : base;
 }

@@ -10,6 +10,8 @@ const browserConfig = fs.readFileSync(new URL('../js/firebase-config.js', import
 const browserSdk = fs.readFileSync(new URL('../js/firebase-sdk.js', import.meta.url), 'utf8');
 const developmentMigration = fs.readFileSync(new URL('../api/dev-crm-migration.js', import.meta.url), 'utf8');
 const developmentMigrationPage = fs.readFileSync(new URL('../dev-migration.html', import.meta.url), 'utf8');
+const assessmentSchedule = fs.readFileSync(new URL('../api/dev-crm-assessment-schedule.js', import.meta.url), 'utf8');
+const coachFirebase = fs.readFileSync(new URL('../coach-firebase.html', import.meta.url), 'utf8');
 
 assert.match(proxy, /obterAssertacaoFirebasePortal/);
 assert.match(firebase, /verifyIdToken\(correspondencia\[1\], true\)/, 'A Vercel tem de verificar tokens revogados.');
@@ -39,6 +41,11 @@ assert.match(developmentMigration, /crmMigrationNotes/, 'A cópia Development de
 assert.match(developmentMigration, /crmMigrationTrainingPlans/, 'A cópia Development deve incluir planos de treino.');
 assert.match(developmentMigration, /crmMigrationPackHistory/, 'A cópia Development deve incluir o histórico mensal de packs.');
 assert.match(developmentMigration, /crmMigrationSpecialPackages/, 'A cópia Development deve incluir pacotes especiais.');
+assert.match(developmentMigration, /crmMigrationAssessmentRequests/, 'A cópia Development deve incluir pedidos de avaliação.');
+assert.match(developmentMigration, /crmMigrationPortalAgenda/, 'A cópia Development deve incluir a agenda do portal.');
+assert.match(assessmentSchedule, /development\.assessment\.request-scheduled/, 'Confirmar um pedido deve deixar auditoria no Firebase.');
+assert.match(assessmentSchedule, /PEDIDO_JA_TRATADO/, 'Um pedido de avaliação não pode ser tratado duas vezes.');
+assert.match(coachFirebase, /dev-crm-assessment-schedule/, 'O ecrã original deve encaminhar avaliações para o Firebase.');
 assert.match(appsScript, /notas: contarLinhasComCampos\('DB_NOTAS_CRM'/, 'A verificação deve contar notas na origem.');
 assert.match(appsScript, /planos: contarLinhasComCampos\('DB_PLANOS_TREINO'/, 'A verificação deve contar planos na origem.');
 assert.match(appsScript, /packsHistorico: contarLinhas\('DB_PACKS_HISTORICO'/, 'A verificação deve contar o histórico de packs na origem.');
