@@ -48,6 +48,7 @@ assert.match(coachFirebase, /AlMoveSessaoCRM\.exigirCoach/, 'A interface CRM nã
 assert.match(coachFirebase, /terminarSessaoCRM/, 'A equipa deve poder terminar a sessão do CRM neste dispositivo.');
 assert.match(coachFirebase, /sidebar-responsive-fix/, 'A navegação compacta deve vencer as regras antigas da sidebar.');
 assert.match(coachFirebase, /max-width: 1024px/, 'O menu lateral deve passar a gaveta antes de ficar comprimido.');
+assert.match(coachFirebase, /position: static !important/, 'Os contadores da navegação compacta não podem sair para fora do botão.');
 assert.match(browserSdk, /ALMOVE_FIREBASE_SDK/, 'O SDK Firebase deve ser servido localmente pelo portal.');
 assert.doesNotMatch(browserAdapter, /www\.gstatic\.com/, 'O adaptador não deve depender de imports externos no browser.');
 assert.match(browserConfig, /projectId: 'almove-portal'/, 'O portal real deve manter a configuração Firebase de produção.');
