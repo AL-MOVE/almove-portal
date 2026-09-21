@@ -16,6 +16,7 @@ function mesAtual() {
   const partes = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit' }).formatToParts(new Date());
   return partes.find(item => item.type === 'year').value + '-' + partes.find(item => item.type === 'month').value;
 }
+function proximoMes() { const [ano, mes] = mesAtual().split('-').map(Number); const data = new Date(Date.UTC(ano, mes, 1)); return data.getUTCFullYear() + '-' + String(data.getUTCMonth() + 1).padStart(2, '0'); }
 
 function hoje() {
   const partes = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
@@ -90,6 +91,9 @@ export default async function handler(req, res) {
     }
     if (acao === 'remove-special-mode') {
       await db.runTransaction(async transacao => { transacao.update(cliente, { modoEspecial: null, updatedAt: agora, updatedBy: identidade.uid }); transacao.create(db.collection('auditLogs').doc(), { ...auditoria, action: 'development.client.special-mode-removed' }); }); return responder(res, 200, { ok: true, idCliente: clienteId });
+    }
+    if (['schedule-suspension', 'clear-suspension', 'schedule-cancellation', 'clear-cancellation'].includes(acao)) {
+      const campo = acao.includes('suspension') ? 'suspensoMes' : 'cancelarMes'; const valor = acao.startsWith('schedule-') ? proximoMes() : ''; await db.runTransaction(async transacao => { transacao.update(cliente, { [campo]: valor, updatedAt: agora, updatedBy: identidade.uid }); transacao.create(db.collection('auditLogs').doc(), { ...auditoria, action: 'development.client.' + acao, month: valor }); }); return responder(res, 200, { ok: true, idCliente: clienteId });
     }
     return responder(res, 400, { ok: false, erro: 'ACAO_INVALIDA' });
   } catch (erro) {

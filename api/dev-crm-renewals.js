@@ -15,7 +15,7 @@ function ultimaFrequencia(packs, clienteId, mes) {
 async function candidatos(db) {
   const mes = mesAtual(); const [clientesSnap, packsAtivosSnap, packsHistoricoSnap] = await Promise.all([db.collection('crmMigrationClients').get(), db.collection('crmMigrationPacks').get(), db.collection('crmMigrationPackHistory').get()]);
   const packs = packsAtivosSnap.docs.concat(packsHistoricoSnap.docs).map(documento => documento.data());
-  const lista = clientesSnap.docs.map(documento => ({ id: documento.id, ...documento.data() })).filter(cliente => cliente.estado === 'Ativo').map(cliente => {
+  const lista = clientesSnap.docs.map(documento => ({ id: documento.id, ...documento.data() })).filter(cliente => cliente.estado === 'Ativo' && cliente.suspensoMes !== mes && cliente.cancelarMes !== mes).map(cliente => {
     const temAtual = packs.some(pack => pack.clientId === cliente.id && pack.mesAno === mes); const anterior = ultimaFrequencia(packs, cliente.id, mes);
     return !temAtual && anterior ? { idCliente: cliente.id, nome: cliente.nome, frequenciaAnterior: anterior.frequencia } : null;
   }).filter(Boolean).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-PT'));
