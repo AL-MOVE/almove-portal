@@ -9,6 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="/coach-manifest.json">
+  <link rel="apple-touch-icon" href="/al-move-mark.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;750;800&display=swap" rel="stylesheet">
@@ -2257,7 +2258,10 @@
     .coach-workbench-action.is-primary { border-color:rgba(45,212,191,.34); background:linear-gradient(145deg,rgba(9,67,72,.82),rgba(8,21,33,.98)); }
     .coach-dashboard-note { margin:0 0 12px; color:#91a3b8; font-size:12px; }
     .sidebar-sub { font-weight:800; }
+    #btnInstalarCoach.coach-install-disponivel { display:inline-flex !important; align-items:center; gap:6px; }
+    #btnInstalarCoach.coach-install-disponivel::before { content:'⇩'; font-size:14px; line-height:1; }
     @media (max-width: 920px) { .coach-workbench { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width: 720px) { #btnInstalarCoach.coach-install-disponivel { padding:7px 9px !important; border-radius:9px; font-size:11px !important; } }
     @media (max-width: 480px) { .coach-workbench { gap:8px; } .coach-workbench-action { min-height:108px; padding:14px; } .coach-workbench-action strong { font-size:13px; } .coach-mode-chip { display:none; } }
   </style>
 </head>
@@ -5479,17 +5483,49 @@ function entrarNaApp(tabInicial) {
 }
 
 let eventoInstalacaoCoach = null;
+function coachEstaInstalado() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function atualizarAcaoInstalacaoCoach() {
+  const botao = document.getElementById('btnInstalarCoach');
+  if (!botao) return;
+  const instalado = coachEstaInstalado();
+  botao.classList.toggle('coach-install-disponivel', !instalado);
+  botao.style.display = instalado ? 'none' : 'inline-flex';
+  botao.textContent = eventoInstalacaoCoach ? 'Instalar app' : 'Como instalar';
+  botao.setAttribute('aria-label', eventoInstalacaoCoach ? 'Instalar a aplicação AL MOVE Coach' : 'Ver como instalar a aplicação AL MOVE Coach');
+}
+function abrirAjudaInstalacaoCoach() {
+  const existente = document.getElementById('coachInstallOverlay');
+  if (existente) { existente.style.display = 'flex'; return; }
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const titulo = ios ? 'Adicionar ao ecrã principal' : 'Instalar AL MOVE Coach';
+  const passos = ios
+    ? '<ol><li>Abre esta página no <strong>Safari</strong>.</li><li>Toca em <strong>Partilhar</strong> (quadrado com seta).</li><li>Escolhe <strong>Adicionar ao ecrã principal</strong>.</li></ol>'
+    : '<ol><li>Abre o menu do browser (⋮).</li><li>Escolhe <strong>Instalar app</strong> ou <strong>Adicionar ao ecrã principal</strong>.</li><li>Confirma para criar o atalho seguro do Coach.</li></ol>';
+  const overlay = document.createElement('div');
+  overlay.id = 'coachInstallOverlay';
+  overlay.setAttribute('role', 'presentation');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:10020;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(1,7,14,.78);backdrop-filter:blur(6px);';
+  overlay.innerHTML = '<section role="dialog" aria-modal="true" aria-labelledby="coachInstallTitulo" style="width:min(440px,100%);border:1px solid rgba(45,212,191,.34);border-radius:18px;background:#0b1826;color:#edf7ff;box-shadow:0 24px 70px rgba(0,0,0,.45);padding:22px;">' +
+    '<div style="display:flex;align-items:flex-start;gap:14px;"><div style="display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#2dd4bf,#2584df);color:#062232;font-size:22px;font-weight:900;">⇩</div><div><div style="font-size:11px;font-weight:850;letter-spacing:.12em;color:#62f1dd;">AL MOVE COACH</div><h2 id="coachInstallTitulo" style="margin:3px 0 0;font-size:20px;line-height:1.2;">' + titulo + '</h2></div></div>' +
+    '<p style="margin:18px 0 12px;color:#bdd0df;line-height:1.55;">A aplicação instala-se no teu telemóvel e abre como uma app, sem guardar informação sensível no dispositivo.</p>' +
+    '<div style="padding:13px 14px;border:1px solid rgba(148,163,184,.18);border-radius:12px;background:rgba(15,30,46,.7);color:#e8f1f8;line-height:1.7;">' + passos + '</div>' +
+    '<button type="button" class="btn btn-primary" style="width:100%;margin-top:18px;" id="coachInstallFechar">Percebi</button></section>';
+  overlay.onclick = function(evento) { if (evento.target === overlay) overlay.remove(); };
+  document.body.appendChild(overlay);
+  overlay.querySelector('#coachInstallFechar').onclick = function() { overlay.remove(); };
+}
 function prepararCoachPWA() {
+  atualizarAcaoInstalacaoCoach();
   window.addEventListener('beforeinstallprompt', function(evento) {
     evento.preventDefault();
     eventoInstalacaoCoach = evento;
-    const botao = document.getElementById('btnInstalarCoach');
-    if (botao) botao.style.display = 'inline-flex';
+    atualizarAcaoInstalacaoCoach();
   });
   window.addEventListener('appinstalled', function() {
     eventoInstalacaoCoach = null;
-    const botao = document.getElementById('btnInstalarCoach');
-    if (botao) botao.style.display = 'none';
+    atualizarAcaoInstalacaoCoach();
   });
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/coach-sw.js', { scope: '/coach-firebase.html' }).catch(function(erro) {
@@ -5498,12 +5534,11 @@ function prepararCoachPWA() {
   }
 }
 async function instalarCoachPWA() {
-  if (!eventoInstalacaoCoach) return;
+  if (!eventoInstalacaoCoach) { abrirAjudaInstalacaoCoach(); return; }
   eventoInstalacaoCoach.prompt();
   await eventoInstalacaoCoach.userChoice.catch(function() { return null; });
   eventoInstalacaoCoach = null;
-  const botao = document.getElementById('btnInstalarCoach');
-  if (botao) botao.style.display = 'none';
+  atualizarAcaoInstalacaoCoach();
 }
 
 function switchTab(tab) {

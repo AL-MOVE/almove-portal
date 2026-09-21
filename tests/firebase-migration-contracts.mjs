@@ -47,6 +47,9 @@ assert.match(devCrm, /reenviarConfirmacao/, 'O verificador CRM deve permitir con
 assert.match(devCrm, /enviarRecuperacao/, 'O login CRM deve permitir recuperar a palavra-passe.');
 assert.match(coachFirebase, /AlMoveSessaoCRM\.exigirCoach/, 'A interface CRM não pode iniciar sem uma sessão de equipa.');
 assert.match(coachFirebase, /terminarSessaoCRM/, 'A equipa deve poder terminar a sessão do CRM neste dispositivo.');
+assert.match(coachFirebase, /beforeinstallprompt/, 'O Coach deve poder pedir a instalação PWA quando o browser a disponibiliza.');
+assert.match(coachFirebase, /abrirAjudaInstalacaoCoach/, 'O Coach móvel deve explicar a instalação quando o browser não abre o pedido automático.');
+assert.match(coachFirebase, /coach-install-disponivel/, 'A ação de instalação não pode ficar escondida pelas regras móveis.');
 assert.match(coachFirebase, /sidebar-responsive-fix/, 'A navegação compacta deve vencer as regras antigas da sidebar.');
 assert.match(coachFirebase, /max-width: 1024px/, 'O menu lateral deve passar a gaveta antes de ficar comprimido.');
 assert.match(coachFirebase, /position: static !important/, 'Os contadores da navegação compacta não podem sair para fora do botão.');
