@@ -2703,12 +2703,17 @@
     <div id="agendaConteudo" style="margin-top:8px;"><div class="agenda-vazio">A preparar agenda…</div></div>
   </section>
 
-  <!-- ========== PEDIDOS DE AVALIAÇÃO FÍSICA ========== -->
+  <!-- ========== CENTRO DE AVALIAÇÕES FÍSICAS ========== -->
   <section id="avaliacoes" class="view">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:16px;">
-      <div><div class="eyebrow">AL MOVE · ACOMPANHAMENTO</div><h1 class="section-title" style="margin-bottom:3px;">Avaliações físicas</h1><p style="color:#8ba0b8;font-size:13px;">Confirma pedidos e cria a marcação no portal do cliente.</p></div>
-      <button type="button" class="btn btn-primary" onclick="carregarPedidosAvaliacoes()">↻ Atualizar</button>
+      <div><div class="eyebrow">AL MOVE · ACOMPANHAMENTO</div><h1 class="section-title" style="margin-bottom:3px;">Centro de avaliações</h1><p style="color:#8ba0b8;font-size:13px;">Marca, regista, compara e acompanha a revisão de cada avaliação.</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;"><button type="button" class="btn btn-secondary" onclick="carregarCentroAvaliacoesCRM()">↻ Atualizar</button><button type="button" class="btn btn-primary" onclick="abrirNovaAvaliacaoCRM()">＋ Registar avaliação</button></div>
     </div>
+    <div id="avaliacoesResumo" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;"></div>
+    <article id="avaliacaoRegistoPainel" class="avaliacao-crm-card" hidden style="margin-bottom:14px;"></article>
+    <article id="avaliacaoComparacao" class="avaliacao-crm-card" style="margin-bottom:14px;"><div class="agenda-vazio">Escolhe um cliente para ver a comparação entre avaliações.</div></article>
+    <section class="card" style="margin-bottom:14px;"><div class="dashboard-section-row" style="margin:0 0 12px;"><div><h2 class="section-title" style="margin:0;">Histórico de avaliações</h2><p style="margin:4px 0 0;color:#8ba0b8;font-size:12px;">Abre um cliente para comparar resultados ou iniciar uma nova avaliação.</p></div></div><div id="avaliacoesHistoricoLista" style="display:grid;gap:10px;"><div class="agenda-vazio">A carregar avaliações…</div></div></section>
+    <section class="card" style="margin-bottom:14px;"><div class="dashboard-section-row" style="margin:0 0 12px;"><div><h2 class="section-title" style="margin:0;">Pedidos e marcações</h2><p style="margin:4px 0 0;color:#8ba0b8;font-size:12px;">Pedidos enviados pelo portal e marcações manuais.</p></div></div>
     <article class="avaliacao-crm-card" style="margin-bottom:14px;">
       <div class="avaliacao-crm-topo"><div><div class="avaliacao-crm-nome">Marcar avaliação física</div><div class="avaliacao-crm-meta">Podes marcar diretamente, mesmo sem pedido do cliente.</div></div></div>
       <div class="avaliacao-crm-acoes" style="border-top:0;padding-top:14px;">
@@ -2719,8 +2724,9 @@
       </div>
       <p class="avaliacao-crm-meta" id="avaliacao-manual-estado" style="margin-top:10px;"></p>
     </article>
-    <div id="avaliacoesResumo" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;"></div>
+    <div id="avaliacoesPedidosResumo" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;"></div>
     <div id="avaliacoesPedidosLista" style="display:grid;gap:12px;"><div class="agenda-vazio">A carregar pedidos…</div></div>
+    </section>
   </section>
   
   <!-- ========== CLIENTES ========== -->
@@ -5559,7 +5565,7 @@ function renderAbaAtiva(tab) {
   try {
     if (tab === 'dashboard') renderDashboard();
     if (tab === 'agenda') carregarAgendaSemanal(false);
-    if (tab === 'avaliacoes') carregarPedidosAvaliacoes();
+    if (tab === 'avaliacoes') carregarCentroAvaliacoesCRM();
     if (tab === 'clientes') renderClientes();
     if (tab === 'inativos') renderClientesInativos();
     if (tab === 'definicoes') renderDefinicoesCMR();
@@ -6302,6 +6308,14 @@ function formularioEditarDadosHtmlCRM(cliente, idCliente) {
   '</div>';
 }
 
+function graficoResumoAvaliacaoClienteHTML(avaliacoes) {
+  const serie = (avaliacoes || []).map(item => ({ data: item.realizadoEm || item.atualizadoEm, valor: Number(item.medidas?.pesoKg ?? item.pesoKg) })).filter(item => item.data && Number.isFinite(item.valor)).sort((a, b) => String(a.data).localeCompare(String(b.data)));
+  if (!serie.length) return '';
+  const valores = serie.map(item => item.valor); const minimoBase = Math.min(...valores); const maximoBase = Math.max(...valores); const margem = Math.max((maximoBase - minimoBase) * .18, 1); const minimo = minimoBase - margem; const maximo = maximoBase + margem;
+  const x = indice => serie.length === 1 ? 145 : 14 + indice * 252 / (serie.length - 1); const y = valor => 14 + (maximo - valor) / (maximo - minimo || 1) * 56;
+  return '<div style="margin:10px 0 12px;padding:10px;border:1px solid rgba(167,139,250,.22);border-radius:10px;background:rgba(167,139,250,.05)"><div style="display:flex;justify-content:space-between;gap:8px;color:#c4b5fd;font-size:11px;font-weight:800"><span>Evolução do peso</span><span>' + serie[serie.length - 1].valor.toLocaleString('pt-PT', { maximumFractionDigits: 1 }) + ' kg</span></div><svg viewBox="0 0 290 92" style="display:block;width:100%;height:88px;margin-top:4px" role="img" aria-label="Evolução do peso"><line x1="14" y1="70" x2="266" y2="70" stroke="rgba(255,255,255,.13)"/><polyline fill="none" stroke="#a78bfa" stroke-width="2.5" points="' + serie.map((item, indice) => x(indice) + ',' + y(item.valor)).join(' ') + '"/>' + serie.map((item, indice) => '<circle cx="' + x(indice) + '" cy="' + y(item.valor) + '" r="3.5" fill="#2dd4bf" stroke="#07101f" stroke-width="2"/>').join('') + '</svg></div>';
+}
+
 function renderizarDetalheCliente(detalhe) {
     const c = detalhe.cliente;
     CLIENTE_DETALHE_ATUAL = c;
@@ -6352,20 +6366,19 @@ function renderizarDetalheCliente(detalhe) {
     htmlDadosPortal += formularioEditarDadosHtmlCRM(c, c.id);
     html += grupoAcoes('grupo-dados-' + idEsc, '🔗 Dados e Portal', htmlDadosPortal);
 
-    let htmlAvaliacaoFisica = '<p style="margin:0 0 12px;color:#94a3b8;font-size:12px;line-height:1.45">Preenche estas medidas tu, durante a avaliação. O cliente vê apenas os resultados e o histórico no portal.</p>';
-    htmlAvaliacaoFisica += '<div id="avaliacaoFichaResumo" style="margin:0 0 12px;color:#7dd3fc;font-size:12px">A carregar histórico…</div>';
-    htmlAvaliacaoFisica += '<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">';
-    htmlAvaliacaoFisica += '<div class="form-group" style="margin:0"><label>Peso (kg)</label><input id="fichaAvaliacaoPeso" type="number" step="0.1" min="30" max="300"></div>';
-    htmlAvaliacaoFisica += '<div class="form-group" style="margin:0"><label>Altura (cm)</label><input id="fichaAvaliacaoAltura" type="number" min="120" max="230"></div>';
-    htmlAvaliacaoFisica += '<div class="form-group" style="margin:0"><label>Massa gorda (%)</label><input id="fichaAvaliacaoMassaGorda" type="number" step="0.1" min="1" max="80"></div>';
-    htmlAvaliacaoFisica += '<div class="form-group" style="margin:0"><label>Cintura (cm)</label><input id="fichaAvaliacaoCintura" type="number" step="0.1" min="30" max="250"></div>';
-    htmlAvaliacaoFisica += '<div class="form-group" style="margin:0"><label>Abdómen (cm)</label><input id="fichaAvaliacaoAbdomen" type="number" step="0.1" min="30" max="250"></div>';
-    htmlAvaliacaoFisica += '<div class="form-group" style="margin:0"><label>Braço direito (cm)</label><input id="fichaAvaliacaoBracoDireito" type="number" step="0.1" min="15" max="100"></div>';
-    htmlAvaliacaoFisica += '<div class="form-group" style="margin:0"><label>Braço esquerdo (cm)</label><input id="fichaAvaliacaoBracoEsquerdo" type="number" step="0.1" min="15" max="100"></div>';
-    htmlAvaliacaoFisica += '<div class="form-group" style="margin:0"><label>Perna direita (cm)</label><input id="fichaAvaliacaoPernaDireita" type="number" step="0.1" min="25" max="150"></div>';
-    htmlAvaliacaoFisica += '<div class="form-group" style="margin:0"><label>Perna esquerda (cm)</label><input id="fichaAvaliacaoPernaEsquerda" type="number" step="0.1" min="25" max="150"></div>';
-    htmlAvaliacaoFisica += '</div><button type="button" class="btn btn-primary" style="margin-top:14px" onclick="guardarAvaliacaoFisicaDaFicha(\'' + idEsc + '\')">Guardar avaliação</button>';
-    html += grupoAcoes('grupo-avaliacao-' + idEsc, '📏 Avaliação física', htmlAvaliacaoFisica);
+    const avaliacoesCliente = Array.isArray(detalhe.avaliacoes) ? detalhe.avaliacoes : [];
+    const ultimaAvaliacao = avaliacoesCliente.length ? avaliacoesCliente[avaliacoesCliente.length - 1] : null;
+    let htmlAvaliacaoFisica = '<p style="margin:0 0 12px;color:#94a3b8;font-size:12px;line-height:1.45">O registo é feito no Centro de avaliações. Aqui fica apenas o histórico e a comparação deste cliente.</p>';
+    if (ultimaAvaliacao) {
+      const data = formatarDataCurtaFrontend(ultimaAvaliacao.realizadoEm || ultimaAvaliacao.atualizadoEm || '');
+      const peso = ultimaAvaliacao.medidas?.pesoKg ?? ultimaAvaliacao.pesoKg;
+      const gordura = ultimaAvaliacao.medidas?.massaGordaPercent ?? ultimaAvaliacao.massaGordaPercent;
+      const cintura = ultimaAvaliacao.medidas?.cinturaCm ?? ultimaAvaliacao.cinturaCm;
+      htmlAvaliacaoFisica += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><span class="badge badge-active">Última: ' + data + '</span>' + (peso != null ? '<span class="badge">Peso ' + peso + ' kg</span>' : '') + (gordura != null ? '<span class="badge">Massa gorda ' + gordura + '%</span>' : '') + (cintura != null ? '<span class="badge">Cintura ' + cintura + ' cm</span>' : '') + '</div>';
+      htmlAvaliacaoFisica += graficoResumoAvaliacaoClienteHTML(avaliacoesCliente);
+    } else htmlAvaliacaoFisica += '<div style="margin:0 0 12px;color:#7dd3fc;font-size:12px">Ainda não há avaliações registadas.</div>';
+    htmlAvaliacaoFisica += '<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn btn-primary" style="width:auto" onclick="abrirAvaliacaoClienteCRM(\'' + idEsc + '\')">Ver histórico e comparar</button><button type="button" class="btn btn-secondary" style="width:auto" onclick="abrirNovaAvaliacaoDoClienteCRM(\'' + idEsc + '\')">Registar nova avaliação</button></div>';
+    html += grupoAcoes('grupo-avaliacao-' + idEsc, '📏 Avaliações físicas', htmlAvaliacaoFisica);
 
     let htmlEstado = '<div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;">';
     if (c.estado !== 'Ativo') htmlEstado += '<button type="button" class="btn btn-secondary" style="color: #00a99d;" onclick="alterarEstadoCliente(\'' + idEsc + '\', \'Ativo\')">Reativar</button>';
@@ -6591,7 +6604,6 @@ function renderizarDetalheCliente(detalhe) {
 
     document.getElementById('detalheConteudo').innerHTML = html;
     carregarHistoricoClienteCRM(c.id);
-    carregarAvaliacaoFisicaDaFicha(c.id);
     carregarHistoricoSessoesCMR(c.id);
     carregarResumoTrackerCMR(c.id);
 }
@@ -8639,7 +8651,7 @@ function carregarPedidosAvaliacoes() {
 }
 function renderPedidosAvaliacoes(pedidos) {
   atualizarBadgeAvaliacoes(pedidos);
-  const resumo = document.getElementById('avaliacoesResumo');
+  const resumo = document.getElementById('avaliacoesPedidosResumo');
   const lista = document.getElementById('avaliacoesPedidosLista');
   const pendentes = pedidos.filter(item => String(item.estado || '').toLowerCase() === 'pendente').length;
   const confirmados = pedidos.filter(item => String(item.estado || '').toLowerCase() === 'confirmado').length;
@@ -8666,6 +8678,99 @@ function recusarPedidoAvaliacao(linha) {
   google.script.run.withSuccessHandler(resultado => { renderPedidosAvaliacoes((resultado && resultado.pedidos) || []); showAlert('Pedido recusado.', 'success'); })
     .withFailureHandler(err => showAlert('Não foi possível recusar: ' + err.message, 'error'))
     .recusarPedidoAvaliacaoCRM({ linha: linha });
+}
+
+// ==================== CENTRO DE AVALIAÇÕES ====================
+// Este módulo concentra a captura e comparação de medidas; a ficha de cliente
+// mantém apenas um resumo, para a avaliação não acontecer no ecrã da ficha.
+const CAMPOS_AVALIACAO_AVANCADA = Object.freeze({
+  'Balança e composição': [
+    ['pesoKg', 'Peso', 'kg'], ['objetivoPesoKg', 'Objetivo de peso', 'kg'], ['alturaCm', 'Altura', 'cm'], ['massaGordaPercent', 'Massa gorda', '%'], ['massaGordaKg', 'Massa gorda', 'kg'], ['massaMagraPercent', 'Massa magra', '%'], ['massaMagraKg', 'Massa magra', 'kg'], ['massaMuscularKg', 'Massa muscular', 'kg'], ['massaOsseaKg', 'Massa óssea', 'kg'], ['aguaPercent', 'Água', '%'], ['gorduraVisceral', 'Gordura visceral', 'índice'], ['taxaMetabolicaBasal', 'Taxa metabólica basal', 'kcal'], ['idadeMetabolica', 'Idade metabólica', 'anos']
+  ],
+  'Perímetros': [
+    ['cinturaCm', 'Cintura', 'cm'], ['ancaCm', 'Anca', 'cm'], ['pescocoCm', 'Pescoço', 'cm'], ['ombroCm', 'Ombro', 'cm'], ['toraxCm', 'Tórax', 'cm'], ['abdomenCm', 'Abdómen', 'cm'], ['bracoDireitoRelaxadoCm', 'Braço direito relaxado', 'cm'], ['bracoEsquerdoRelaxadoCm', 'Braço esquerdo relaxado', 'cm'], ['bracoDireitoContraidoCm', 'Braço direito contraído', 'cm'], ['bracoEsquerdoContraidoCm', 'Braço esquerdo contraído', 'cm'], ['antebracoDireitoCm', 'Antebraço direito', 'cm'], ['antebracoEsquerdoCm', 'Antebraço esquerdo', 'cm'], ['coxaDireitaCm', 'Coxa direita', 'cm'], ['coxaEsquerdaCm', 'Coxa esquerda', 'cm'], ['pernaDireitaCm', 'Perna direita', 'cm'], ['pernaEsquerdaCm', 'Perna esquerda', 'cm'], ['diametroPulsoCm', 'Diâm. ósseo pulso', 'cm'], ['diametroFemurCm', 'Diâm. ósseo fémur', 'cm'], ['diametroUmeroCm', 'Diâm. ósseo úmero', 'cm']
+  ],
+  'Pregas cutâneas': [
+    ['pregaSubescapularMm', 'Subescapular', 'mm'], ['pregaTricipitalMm', 'Tricipital', 'mm'], ['pregaBicipitalMm', 'Bicipital', 'mm'], ['pregaAxilarMediaMm', 'Axilar média', 'mm'], ['pregaAbdominalMm', 'Abdominal', 'mm'], ['pregaSuprailiacaMm', 'Suprailíaca', 'mm'], ['pregaPeitoralMm', 'Peitoral', 'mm'], ['pregaQuadricipitalMm', 'Quadricipital', 'mm'], ['pregaGeminalMm', 'Geminal', 'mm']
+  ],
+  'Pressão arterial e testes': [
+    ['pressaoSistolicaMmhg', 'Pressão sistólica', 'mmHg'], ['pressaoDiastolicaMmhg', 'Pressão diastólica', 'mmHg'], ['frequenciaCardiacaRepousoBpm', 'Frequência cardíaca em repouso', 'bpm'], ['frequenciaCardiacaMaximaBpm', 'Frequência cardíaca máxima', 'bpm'], ['vo2Max', 'VO₂ máximo', 'ml/kg/min'], ['testeDistanciaM', 'Distância do teste', 'm'], ['testeDuracaoSeg', 'Duração do teste', 'seg'], ['testeVelocidadeKmh', 'Velocidade do teste', 'km/h']
+  ]
+});
+const METRICAS_COMPARACAO_AVALIACAO = Object.freeze([
+  ['pesoKg', 'Peso', 'kg'], ['massaGordaPercent', 'Massa gorda', '%'], ['cinturaCm', 'Cintura', 'cm'], ['ancaCm', 'Anca', 'cm'], ['abdomenCm', 'Abdómen', 'cm'], ['pressaoSistolicaMmhg', 'Pressão sistólica', 'mmHg']
+]);
+let AVALIACOES_CRM = [];
+let CLIENTE_AVALIACAO_SELECIONADO = '';
+let METRICA_COMPARACAO_ATUAL = 'pesoKg';
+let PEDIDO_REGISTO_AVALIACAO = '';
+
+function dataHojeAvaliacaoCRM() { const partes = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date()); return partes.find(parte => parte.type === 'year').value + '-' + partes.find(parte => parte.type === 'month').value + '-' + partes.find(parte => parte.type === 'day').value; }
+function dataCurtaAvaliacaoCRM(valor) { const data = new Date(String(valor || '') + 'T12:00:00'); return Number.isNaN(data.getTime()) ? '—' : data.toLocaleDateString('pt-PT'); }
+function clientesAvaliacaoCRM() { return (DATA?.clientes || []).filter(cliente => String(cliente.estado || '').toLowerCase() !== 'cancelado').slice().sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || ''), 'pt')); }
+async function pedidoAvaliacoesCRM(url, opcoes) {
+  const config = await ALMOVE_FIREBASE_CONFIG.obter(); await AlMoveFirebaseAuth.configurar(config);
+  const token = await AlMoveFirebaseAuth.token(); if (!token) throw new Error('Entra primeiro em dev-crm.html.');
+  const resposta = await fetch(url, { ...(opcoes || {}), headers: { Authorization: 'Bearer ' + token, ...((opcoes || {}).headers || {}) } });
+  const dados = await resposta.json().catch(() => ({})); if (!resposta.ok || !dados.ok) throw new Error(dados.erro || 'Avaliações indisponíveis.');
+  return dados;
+}
+function campoAvaliacaoHtml(campo) {
+  return '<div class="form-group" style="margin:0"><label>' + escaparTextoAvaliacoes(campo[1]) + ' (' + escaparTextoAvaliacoes(campo[2]) + ')</label><input id="avaliacaoAvancada-' + campo[0] + '" type="number" inputmode="decimal" step="0.1" min="0"></div>';
+}
+function montarPainelRegistoAvaliacao() {
+  const painel = document.getElementById('avaliacaoRegistoPainel'); if (!painel || painel.hidden) return;
+  const opcoes = clientesAvaliacaoCRM().map(cliente => '<option value="' + escaparTextoAvaliacoes(cliente.id) + '"' + (String(cliente.id) === String(CLIENTE_AVALIACAO_SELECIONADO) ? ' selected' : '') + '>' + escaparTextoAvaliacoes(cliente.nome) + '</option>').join('');
+  const secoes = Object.entries(CAMPOS_AVALIACAO_AVANCADA).map(([titulo, campos]) => '<section style="margin-top:16px"><h3 style="margin:0 0 9px;color:#e7edf5;font-size:13px">' + titulo + '</h3><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:9px">' + campos.map(campoAvaliacaoHtml).join('') + '</div></section>').join('');
+  painel.innerHTML = '<div class="avaliacao-crm-topo"><div><div class="avaliacao-crm-nome">Registar avaliação física</div><div class="avaliacao-crm-meta">As métricas ficam agrupadas. A pressão é guardada como leitura, sem classificação clínica automática.</div></div><button type="button" class="btn btn-secondary" style="width:auto" onclick="fecharNovaAvaliacaoCRM()">Fechar</button></div>' +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:15px"><div class="form-group" style="margin:0"><label>Cliente</label><select id="avaliacaoAvancadaCliente" onchange="selecionarClienteAvaliacaoCRM(this.value)"><option value="">Escolher cliente…</option>' + opcoes + '</select></div><div class="form-group" style="margin:0"><label>Data da avaliação</label><input id="avaliacaoAvancadaData" type="date" value="' + dataHojeAvaliacaoCRM() + '"></div><div class="form-group" style="margin:0"><label>Revisão recomendada</label><select id="avaliacaoAvancadaRevisao"><option value="28">28 dias</option><option value="42">42 dias</option><option value="56" selected>56 dias</option><option value="84">84 dias</option><option value="112">112 dias</option></select></div><div class="form-group" style="margin:0"><label>Protocolo / balança</label><input id="avaliacaoAvancadaProtocolo" maxlength="80" placeholder="Ex.: Bioimpedância"></div></div>' + secoes +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-top:16px"><div class="form-group" style="margin:0"><label>Notas privadas</label><textarea id="avaliacaoAvancadaNotasPrivadas" maxlength="3000" placeholder="Só para gestão"></textarea></div><div class="form-group" style="margin:0"><label>Nota visível no portal</label><textarea id="avaliacaoAvancadaNotasCliente" maxlength="1500" placeholder="Opcional"></textarea></div></div><button type="button" class="btn btn-primary" style="margin-top:16px" onclick="guardarNovaAvaliacaoCRM()">Guardar avaliação</button>';
+}
+function abrirNovaAvaliacaoCRM(idCliente) { if (idCliente) CLIENTE_AVALIACAO_SELECIONADO = String(idCliente); const painel = document.getElementById('avaliacaoRegistoPainel'); if (!painel) return; painel.hidden = false; montarPainelRegistoAvaliacao(); painel.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+function fecharNovaAvaliacaoCRM() { const painel = document.getElementById('avaliacaoRegistoPainel'); if (painel) { painel.hidden = true; painel.innerHTML = ''; } PEDIDO_REGISTO_AVALIACAO = ''; }
+function selecionarClienteAvaliacaoCRM(idCliente) { CLIENTE_AVALIACAO_SELECIONADO = String(idCliente || ''); const select = document.getElementById('avaliacaoAvancadaCliente'); if (select && select.value !== CLIENTE_AVALIACAO_SELECIONADO) select.value = CLIENTE_AVALIACAO_SELECIONADO; renderComparacaoAvaliacaoCRM(); renderHistoricoAvaliacoesCRM(); }
+function abrirAvaliacaoClienteCRM(idCliente) { CLIENTE_AVALIACAO_SELECIONADO = String(idCliente || ''); switchTab('avaliacoes'); carregarCentroAvaliacoesCRM(); }
+function abrirNovaAvaliacaoDoClienteCRM(idCliente) { CLIENTE_AVALIACAO_SELECIONADO = String(idCliente || ''); switchTab('avaliacoes'); carregarCentroAvaliacoesCRM().finally(() => abrirNovaAvaliacaoCRM(idCliente)); }
+function requestIdAvaliacaoCRM() { if (PEDIDO_REGISTO_AVALIACAO) return PEDIDO_REGISTO_AVALIACAO; const uuid = globalThis.crypto?.randomUUID?.(); PEDIDO_REGISTO_AVALIACAO = 'assessment-' + (uuid || Date.now() + '-' + Math.random().toString(16).slice(2)); return PEDIDO_REGISTO_AVALIACAO; }
+async function guardarNovaAvaliacaoCRM() {
+  const cliente = document.getElementById('avaliacaoAvancadaCliente'); if (!cliente?.value) { showAlert('Escolhe o cliente da avaliação.', 'error'); return; }
+  const medidas = {}; Object.values(CAMPOS_AVALIACAO_AVANCADA).flat().forEach(campo => { const input = document.getElementById('avaliacaoAvancada-' + campo[0]); medidas[campo[0]] = input ? input.value : ''; });
+  const botao = document.querySelector('#avaliacaoRegistoPainel .btn-primary'); if (botao) { botao.disabled = true; botao.textContent = 'A guardar…'; }
+  try {
+    await pedidoAvaliacoesCRM('/api/dev-crm-assessments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idCliente: cliente.value, requestId: requestIdAvaliacaoCRM(), realizadoEm: document.getElementById('avaliacaoAvancadaData').value, revisaoDias: document.getElementById('avaliacaoAvancadaRevisao').value, protocolo: document.getElementById('avaliacaoAvancadaProtocolo').value, notasPrivadas: document.getElementById('avaliacaoAvancadaNotasPrivadas').value, notasCliente: document.getElementById('avaliacaoAvancadaNotasCliente').value, medidas }) });
+    CLIENTE_AVALIACAO_SELECIONADO = cliente.value; fecharNovaAvaliacaoCRM(); await carregarCentroAvaliacoesCRM(); showAlert('Avaliação guardada no histórico.', 'success');
+  } catch (erro) { showAlert('Não foi possível guardar a avaliação: ' + erro.message, 'error'); if (botao) { botao.disabled = false; botao.textContent = 'Guardar avaliação'; } }
+}
+function renderResumoAvaliacoesCRM(resumo) {
+  const destino = document.getElementById('avaliacoesResumo'); if (!destino) return;
+  destino.innerHTML = '<span class="avaliacao-crm-pill">' + Number(resumo?.total || 0) + ' avaliação' + (Number(resumo?.total || 0) === 1 ? '' : 'ões') + '</span><span class="avaliacao-crm-pill">' + Number(resumo?.revisaoEmFalta || 0) + ' revisão em falta</span><span class="avaliacao-crm-pill">' + Number(resumo?.proximas || 0) + ' próximas de rever</span>';
+}
+function renderHistoricoAvaliacoesCRM() {
+  const destino = document.getElementById('avaliacoesHistoricoLista'); if (!destino) return;
+  const lista = CLIENTE_AVALIACAO_SELECIONADO ? AVALIACOES_CRM.filter(item => String(item.clientId) === String(CLIENTE_AVALIACAO_SELECIONADO)) : AVALIACOES_CRM;
+  if (!lista.length) { destino.innerHTML = '<div class="agenda-vazio">Ainda não há avaliações para mostrar.</div>'; return; }
+  destino.innerHTML = lista.map(item => '<article style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:rgba(255,255,255,.025);flex-wrap:wrap"><div><strong style="color:#fff">' + escaparTextoAvaliacoes(item.clienteNome) + '</strong><div style="margin-top:4px;color:#9fb0c3;font-size:12px">Avaliação em ' + dataCurtaAvaliacaoCRM(item.realizadoEm) + ' · ' + escaparTextoAvaliacoes(item.protocolo) + ' · ' + item.totalMedidas + ' medidas</div></div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="badge" style="color:' + (item.estadoRevisao === 'Revisão em falta' ? '#fca5a5' : '#7dd3fc') + '">' + escaparTextoAvaliacoes(item.estadoRevisao) + (item.proximaRevisaoEm ? ' · ' + dataCurtaAvaliacaoCRM(item.proximaRevisaoEm) : '') + '</span><button type="button" class="btn btn-secondary" style="width:auto;padding:6px 9px;font-size:11px" onclick="selecionarClienteAvaliacaoCRM(\'' + idParaOnclickCRM(item.clientId) + '\')">Comparar</button></div></article>').join('');
+}
+function graficoComparacaoAvaliacaoCRM(serie, unidade) {
+  if (!serie.length) return '<div class="agenda-vazio">Ainda não há valores desta métrica para comparar.</div>';
+  const valores = serie.map(item => item.valor); const minimoBase = Math.min(...valores); const maximoBase = Math.max(...valores); const margem = Math.max((maximoBase - minimoBase) * .18, 1); const minimo = minimoBase - margem; const maximo = maximoBase + margem;
+  const x = indice => serie.length === 1 ? 150 : 16 + indice * 268 / (serie.length - 1); const y = valor => 18 + (maximo - valor) / (maximo - minimo || 1) * 76;
+  const pontos = serie.map((item, indice) => x(indice) + ',' + y(item.valor)).join(' '); const ultimo = serie[serie.length - 1];
+  return '<div class="avaliacao-grafico-topo"><strong>' + ultimo.valor.toLocaleString('pt-PT', { maximumFractionDigits: 1 }) + ' ' + unidade + '</strong><span>' + serie.length + (serie.length === 1 ? ' avaliação' : ' avaliações') + '</span></div><svg viewBox="0 0 300 122" role="img" aria-label="Evolução da métrica selecionada"><line class="avaliacao-grafico-eixo" x1="16" y1="95" x2="284" y2="95"/><polyline class="avaliacao-grafico-linha" points="' + pontos + '"/>' + serie.map((item, indice) => '<circle class="avaliacao-grafico-ponto" cx="' + x(indice) + '" cy="' + y(item.valor) + '" r="4"/><text class="avaliacao-grafico-data" x="' + x(indice) + '" y="114" text-anchor="middle">' + dataCurtaAvaliacaoCRM(item.data).slice(0, 5) + '</text>').join('') + '</svg>';
+}
+function escolherMetricaComparacaoCRM(chave) { METRICA_COMPARACAO_ATUAL = chave; renderComparacaoAvaliacaoCRM(); }
+function renderComparacaoAvaliacaoCRM() {
+  const destino = document.getElementById('avaliacaoComparacao'); if (!destino) return;
+  const lista = AVALIACOES_CRM.filter(item => String(item.clientId) === String(CLIENTE_AVALIACAO_SELECIONADO)).slice().reverse();
+  if (!CLIENTE_AVALIACAO_SELECIONADO || !lista.length) { destino.innerHTML = '<div class="agenda-vazio">Escolhe um cliente com avaliações para comparar a evolução.</div>'; return; }
+  const metrica = METRICAS_COMPARACAO_AVALIACAO.find(item => item[0] === METRICA_COMPARACAO_ATUAL) || METRICAS_COMPARACAO_AVALIACAO[0]; const serie = lista.map(item => ({ data: item.realizadoEm, valor: Number(item.medidas?.[metrica[0]]) })).filter(item => Number.isFinite(item.valor)); const cliente = lista[0].clienteNome;
+  destino.innerHTML = '<div class="avaliacao-crm-topo"><div><div class="avaliacao-crm-nome">Comparação · ' + escaparTextoAvaliacoes(cliente) + '</div><div class="avaliacao-crm-meta">Histórico por avaliação; seleciona uma métrica para não misturar unidades.</div></div><button type="button" class="btn btn-secondary" style="width:auto" onclick="abrirNovaAvaliacaoCRM(\'' + idParaOnclickCRM(CLIENTE_AVALIACAO_SELECIONADO) + '\')">Nova avaliação</button></div><div class="avaliacao-grafico-opcoes">' + METRICAS_COMPARACAO_AVALIACAO.map(item => '<button type="button" class="' + (item[0] === metrica[0] ? 'ativo' : '') + '" onclick="escolherMetricaComparacaoCRM(\'' + item[0] + '\')">' + item[1] + '</button>').join('') + '</div><div class="avaliacao-grafico">' + graficoComparacaoAvaliacaoCRM(serie, metrica[2]) + '</div>';
+}
+async function carregarCentroAvaliacoesCRM() {
+  carregarPedidosAvaliacoes();
+  const historico = document.getElementById('avaliacoesHistoricoLista'); if (historico) historico.innerHTML = '<div class="agenda-vazio">A carregar avaliações…</div>';
+  try { const dados = await pedidoAvaliacoesCRM('/api/dev-crm-assessments'); AVALIACOES_CRM = Array.isArray(dados.avaliacoes) ? dados.avaliacoes : []; renderResumoAvaliacoesCRM(dados.resumo || {}); renderHistoricoAvaliacoesCRM(); renderComparacaoAvaliacaoCRM(); }
+  catch (erro) { if (historico) historico.innerHTML = '<div class="agenda-vazio">Não foi possível carregar as avaliações: ' + escaparTextoAvaliacoes(erro.message) + '</div>'; }
 }
 
 // ==================== FEEDBACK DE CARREGAMENTO ====================

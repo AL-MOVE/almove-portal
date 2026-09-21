@@ -12,6 +12,7 @@ const browserSdk = fs.readFileSync(new URL('../js/firebase-sdk.js', import.meta.
 const developmentMigration = fs.readFileSync(new URL('../server/dev-crm/dev-crm-migration.js', import.meta.url), 'utf8');
 const developmentMigrationPage = fs.readFileSync(new URL('../dev-migration.html', import.meta.url), 'utf8');
 const assessmentSchedule = fs.readFileSync(new URL('../server/dev-crm/dev-crm-assessment-schedule.js', import.meta.url), 'utf8');
+const assessments = fs.readFileSync(new URL('../server/dev-crm/dev-crm-assessments.js', import.meta.url), 'utf8');
 const coachFirebase = fs.readFileSync(new URL('../coach-firebase.html', import.meta.url), 'utf8');
 const developmentSettings = fs.readFileSync(new URL('../server/dev-crm/dev-crm-settings.js', import.meta.url), 'utf8');
 const developmentSession = fs.readFileSync(new URL('../server/dev-crm/dev-crm-session.js', import.meta.url), 'utf8');
@@ -66,6 +67,11 @@ assert.match(developmentMigration, /crmMigrationPortalAgenda/, 'A cópia Develop
 assert.match(assessmentSchedule, /development\.assessment\.request-scheduled/, 'Confirmar um pedido deve deixar auditoria no Firebase.');
 assert.match(assessmentSchedule, /PEDIDO_JA_TRATADO/, 'Um pedido de avaliação não pode ser tratado duas vezes.');
 assert.match(coachFirebase, /dev-crm-assessment-schedule/, 'O ecrã original deve encaminhar avaliações para o Firebase.');
+assert.match(assessments, /crmMigrationAssessmentWriteRequests/, 'Uma repetição de rede não pode duplicar uma avaliação.');
+assert.match(assessments, /proximaRevisaoEm/, 'Cada avaliação deve guardar a data recomendada de revisão.');
+assert.match(assessments, /notasPrivadas/, 'As notas privadas devem ficar separadas dos dados do portal.');
+assert.match(coachFirebase, /Centro de avaliações/, 'A gestão de avaliações deve ter uma área própria.');
+assert.match(coachFirebase, /abrirAvaliacaoClienteCRM/, 'A ficha do cliente deve remeter para o histórico de avaliações.');
 assert.match(coachFirebase, /atualizarDataSessaoConfirmada:'toggle-session'/, 'Editar uma sessão confirmada deve continuar a usar a ação Firebase autenticada.');
 assert.match(developmentSettings, /crmDevelopmentSettings/, 'O perfil do PT deve ser persistido no Firebase Development.');
 assert.ok(funcoesVercel.length <= 12, 'O projeto Hobby da Vercel não pode ultrapassar 12 funções serverless.');

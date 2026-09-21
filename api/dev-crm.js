@@ -2,6 +2,7 @@ import { obterAdminFirebase, obterIdentidadeFirebase } from './_firebase.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from './_firestore.js';
 import agenda from '../server/dev-crm/dev-crm-agenda.js';
 import avaliacoes from '../server/dev-crm/dev-crm-assessment-schedule.js';
+import avaliacoesAvancadas from '../server/dev-crm/dev-crm-assessments.js';
 import checkins from '../server/dev-crm/dev-crm-checkins.js';
 import acoesCliente from '../server/dev-crm/dev-crm-client-actions.js';
 import criarCliente from '../server/dev-crm/dev-crm-client-create.js';
@@ -22,7 +23,7 @@ import definicoes from '../server/dev-crm/dev-crm-settings.js';
 import sessao from '../server/dev-crm/dev-crm-session.js';
 
 const ROTAS = Object.freeze({
-  agenda, 'assessment-schedule': avaliacoes, checkins, 'client-actions': acoesCliente, 'client-create': criarCliente,
+  agenda, 'assessment-schedule': avaliacoes, assessments: avaliacoesAvancadas, checkins, 'client-actions': acoesCliente, 'client-create': criarCliente,
   'client-detail': detalheCliente, clients: clientes, command: comando, dashboard, migration: migracao, payments: pagamentos,
   'pt-session': sessaoPt, receipts: recibos, renewals: renovacoes, 'special-package-actions': acoesPacotesEspeciais,
   'special-packages': pacotesEspeciais, 'training-plan-actions': acoesPlanos, 'training-plans': planos, settings: definicoes, session: sessao
