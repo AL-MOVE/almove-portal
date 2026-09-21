@@ -23,9 +23,8 @@
     }
 
     const token = await global.AlMoveFirebaseAuth.token(true);
-    if (!token) return null;
     const resposta = await fetch('/api/dev-crm', {
-      headers: { Authorization: 'Bearer ' + token },
+      headers: token ? { Authorization: 'Bearer ' + token } : {},
       cache: 'no-store',
       credentials: 'same-origin'
     });
@@ -45,10 +44,28 @@
     return null;
   }
 
+  async function criarSessaoServidor() {
+    const token = await global.AlMoveFirebaseAuth.token(true);
+    if (!token) throw erro('FIREBASE_TOKEN_INVALIDO');
+    const resposta = await fetch('/api/dev-crm-session', {
+      method: 'POST', headers: { Authorization: 'Bearer ' + token }, credentials: 'same-origin', cache: 'no-store'
+    });
+    if (!resposta.ok) {
+      let dados = null; try { dados = await resposta.json(); } catch { /* resposta inválida */ }
+      throw erro((dados && dados.erro) || 'SESSAO_NAO_CRIADA');
+    }
+  }
+
+  async function sair() {
+    try { await fetch('/api/dev-crm-session', { method: 'DELETE', credentials: 'same-origin', cache: 'no-store' }); }
+    finally { return global.AlMoveFirebaseAuth.sair(); }
+  }
+
   global.AlMoveSessaoCRM = Object.freeze({
     destinoSeguro: destinoSeguro,
     obterContexto: obterContexto,
     exigirCoach: exigirCoach,
-    sair: function () { return global.AlMoveFirebaseAuth.sair(); }
+    criarSessaoServidor: criarSessaoServidor,
+    sair: sair
   });
 })(window);

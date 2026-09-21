@@ -3,6 +3,8 @@ import { cert, getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 
 const DURACAO_ASSERTACAO_SEGUNDOS = 5 * 60;
+const DURACAO_SESSAO_CRM_SEGUNDOS = 55 * 60;
+const NOME_COOKIE_SESSAO_CRM = 'almove_crm_dev_token';
 
 function erroFirebase(codigo) {
   const erro = new Error(codigo);
@@ -37,12 +39,13 @@ export function obterAdminFirebase() {
 export async function obterIdentidadeFirebase(req) {
   const authorization = String(req.headers.authorization || '');
   const correspondencia = authorization.match(/^Bearer\s+(.+)$/i);
-  if (!correspondencia) throw erroFirebase('FIREBASE_TOKEN_INVALIDO');
+  const credencial = correspondencia ? correspondencia[1] : obterCookie(req, NOME_COOKIE_SESSAO_CRM);
+  if (!credencial) throw erroFirebase('FIREBASE_TOKEN_INVALIDO');
 
   const { projeto, auth } = obterAdminFirebase();
   let token;
   try {
-    token = await auth.verifyIdToken(correspondencia[1], true);
+    token = await auth.verifyIdToken(credencial, true);
   } catch {
     throw erroFirebase('FIREBASE_SESSAO_INVALIDA');
   }
@@ -56,6 +59,25 @@ export async function obterIdentidadeFirebase(req) {
     throw erroFirebase('FIREBASE_CONTA_SEM_ACESSO');
   }
   return Object.freeze({ uid: String(token.uid), email, projeto });
+}
+
+function obterCookie(req, nome) {
+  const cabecalho = String(req.headers.cookie || '');
+  const par = cabecalho.split(';').map(valor => valor.trim()).find(valor => valor.startsWith(nome + '='));
+  return par ? decodeURIComponent(par.slice(nome.length + 1)) : '';
+}
+
+/** Sessão HTTP-only para o CRM Development, criada apenas após validar um ID token Firebase. */
+export async function criarSessaoCrmDevelopment(req) {
+  const authorization = String(req.headers.authorization || '');
+  const correspondencia = authorization.match(/^Bearer\s+(.+)$/i);
+  if (!correspondencia) throw erroFirebase('FIREBASE_TOKEN_INVALIDO');
+  await obterIdentidadeFirebase(req);
+  return correspondencia[1];
+}
+
+export function cookieSessaoCrmDevelopment(valor, maxAge = DURACAO_SESSAO_CRM_SEGUNDOS) {
+  return NOME_COOKIE_SESSAO_CRM + '=' + encodeURIComponent(valor || '') + '; Path=/; Max-Age=' + Math.max(0, Number(maxAge) || 0) + '; HttpOnly; Secure; SameSite=Lax';
 }
 
 function assinarAssertacao(assertacao, segredo) {

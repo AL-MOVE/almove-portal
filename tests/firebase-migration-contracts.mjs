@@ -14,13 +14,15 @@ const developmentMigrationPage = fs.readFileSync(new URL('../dev-migration.html'
 const assessmentSchedule = fs.readFileSync(new URL('../server/dev-crm/dev-crm-assessment-schedule.js', import.meta.url), 'utf8');
 const coachFirebase = fs.readFileSync(new URL('../coach-firebase.html', import.meta.url), 'utf8');
 const developmentSettings = fs.readFileSync(new URL('../server/dev-crm/dev-crm-settings.js', import.meta.url), 'utf8');
+const developmentSession = fs.readFileSync(new URL('../server/dev-crm/dev-crm-session.js', import.meta.url), 'utf8');
 const apiDir = new URL('../api/', import.meta.url);
 const funcoesVercel = fs.readdirSync(apiDir).filter(nome => nome.endsWith('.js'))
   .filter(nome => /export default/.test(fs.readFileSync(new URL(nome, apiDir), 'utf8')));
 const vercel = JSON.parse(fs.readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
 
 assert.match(proxy, /obterAssertacaoFirebasePortal/);
-assert.match(firebase, /verifyIdToken\(correspondencia\[1\], true\)/, 'A Vercel tem de verificar tokens revogados.');
+assert.match(firebase, /verifyIdToken\(credencial, true\)/, 'A Vercel tem de verificar tokens revogados.');
+assert.match(firebase, /HttpOnly; Secure; SameSite=Lax/, 'A sessão CRM deve usar um cookie HTTP-only seguro.');
 assert.match(firebase, /token\.email_verified/, 'O email Firebase tem de ser confirmado.');
 assert.match(firebase, /PORTAL_APPS_SCRIPT_HMAC_SECRET/, 'A identidade enviada ao Apps Script tem de ser assinada.');
 assert.match(invite, /timingSafeEqual/, 'O convite CRM deve validar a assinatura em tempo constante.');
@@ -37,6 +39,8 @@ assert.match(browserAdapter, /sendPasswordResetEmail/, 'A recuperação de palav
 assert.match(browserAdapter, /sendEmailVerification/, 'A confirmação do email tem de poder ser reenviada.');
 assert.match(crmSession, /ACESSO_SEM_PERMISSAO_CRM/, 'A página do CRM deve limitar a entrada à equipa.');
 assert.match(crmSession, /\/api\/dev-crm/, 'A sessão do CRM deve ser confirmada pela API antes de abrir a interface.');
+assert.match(crmSession, /\/api\/dev-crm-session/, 'O login CRM deve criar uma sessão HTTP-only para sobreviver ao redirecionamento.');
+assert.match(developmentSession, /almove-portal-dev/, 'A sessão HTTP-only só pode existir em Development.');
 const devCrm = fs.readFileSync(new URL('../dev-crm.html', import.meta.url), 'utf8');
 assert.match(devCrm, /reenviarConfirmacao/, 'O verificador CRM deve permitir confirmar contas de desenvolvimento.');
 assert.match(devCrm, /enviarRecuperacao/, 'O login CRM deve permitir recuperar a palavra-passe.');

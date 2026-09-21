@@ -68,6 +68,7 @@
         await AlMoveFirebaseAuth.sair();
         throw new Error('EMAIL_NAO_CONFIRMADO');
       }
+      await AlMoveSessaoCRM.criarSessaoServidor();
       await AlMoveSessaoCRM.obterContexto();
       apresentar('A abrir o CRM…', 'ok');
       location.replace(destino);

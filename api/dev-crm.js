@@ -19,12 +19,13 @@ import pacotesEspeciais from '../server/dev-crm/dev-crm-special-packages.js';
 import acoesPlanos from '../server/dev-crm/dev-crm-training-plan-actions.js';
 import planos from '../server/dev-crm/dev-crm-training-plans.js';
 import definicoes from '../server/dev-crm/dev-crm-settings.js';
+import sessao from '../server/dev-crm/dev-crm-session.js';
 
 const ROTAS = Object.freeze({
   agenda, 'assessment-schedule': avaliacoes, checkins, 'client-actions': acoesCliente, 'client-create': criarCliente,
   'client-detail': detalheCliente, clients: clientes, command: comando, dashboard, migration: migracao, payments: pagamentos,
   'pt-session': sessaoPt, receipts: recibos, renewals: renovacoes, 'special-package-actions': acoesPacotesEspeciais,
-  'special-packages': pacotesEspeciais, 'training-plan-actions': acoesPlanos, 'training-plans': planos, settings: definicoes
+  'special-packages': pacotesEspeciais, 'training-plan-actions': acoesPlanos, 'training-plans': planos, settings: definicoes, session: sessao
 });
 
 function responder(res, estado, corpo) {
