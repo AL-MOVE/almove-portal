@@ -12,6 +12,7 @@ const developmentMigration = fs.readFileSync(new URL('../server/dev-crm/dev-crm-
 const developmentMigrationPage = fs.readFileSync(new URL('../dev-migration.html', import.meta.url), 'utf8');
 const assessmentSchedule = fs.readFileSync(new URL('../server/dev-crm/dev-crm-assessment-schedule.js', import.meta.url), 'utf8');
 const coachFirebase = fs.readFileSync(new URL('../coach-firebase.html', import.meta.url), 'utf8');
+const developmentSettings = fs.readFileSync(new URL('../server/dev-crm/dev-crm-settings.js', import.meta.url), 'utf8');
 const apiDir = new URL('../api/', import.meta.url);
 const funcoesVercel = fs.readdirSync(apiDir).filter(nome => nome.endsWith('.js'))
   .filter(nome => /export default/.test(fs.readFileSync(new URL(nome, apiDir), 'utf8')));
@@ -50,6 +51,8 @@ assert.match(developmentMigration, /crmMigrationPortalAgenda/, 'A cópia Develop
 assert.match(assessmentSchedule, /development\.assessment\.request-scheduled/, 'Confirmar um pedido deve deixar auditoria no Firebase.');
 assert.match(assessmentSchedule, /PEDIDO_JA_TRATADO/, 'Um pedido de avaliação não pode ser tratado duas vezes.');
 assert.match(coachFirebase, /dev-crm-assessment-schedule/, 'O ecrã original deve encaminhar avaliações para o Firebase.');
+assert.match(coachFirebase, /atualizarDataSessaoConfirmada:'toggle-session'/, 'Editar uma sessão confirmada deve continuar a usar a ação Firebase autenticada.');
+assert.match(developmentSettings, /crmDevelopmentSettings/, 'O perfil do PT deve ser persistido no Firebase Development.');
 assert.ok(funcoesVercel.length <= 12, 'O projeto Hobby da Vercel não pode ultrapassar 12 funções serverless.');
 assert.ok(vercel.rewrites.some(item => item.source === '/api/dev-crm-:route' && /route=:route/.test(item.destination)), 'As rotas CRM consolidadas devem continuar acessíveis pelos URLs existentes.');
 assert.match(appsScript, /notas: contarLinhasComCampos\('DB_NOTAS_CRM'/, 'A verificação deve contar notas na origem.');
