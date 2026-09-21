@@ -8698,14 +8698,21 @@ instrumentarChamadasAppsScriptCMR();
 
 // ==================== START ====================
 
-window.addEventListener('load', init);
+window.addEventListener('load', function () {
+  AlMoveSessaoCRM.exigirCoach('/coach-firebase.html').then(function (contexto) {
+    if (contexto) init();
+  }).catch(function (erro) {
+    document.body.innerHTML = '<main style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#061321;color:#f7fbff;font-family:system-ui,sans-serif"><section style="max-width:420px;padding:28px;border:1px solid #34516a;border-radius:18px;background:#0b1c2d"><strong style="font-size:20px">Não foi possível validar a sessão</strong><p style="color:#b8c7d5;line-height:1.5">Volta a entrar para acederes ao CRM.</p><a href="/dev-crm.html?next=%2Fcoach-firebase.html" style="display:inline-block;padding:12px 16px;border-radius:10px;background:#19b9b0;color:#fff;font-weight:800;text-decoration:none">Ir para o login</a></section></main>';
+    console.error('Sessão CRM indisponível:', erro);
+  });
+});
 </script>
 
 </body>
 </html>
 
 
-<script src="/js/firebase-config.js"></script><script src="/js/firebase-sdk.js"></script><script src="/js/firebase-auth.js"></script><script>
+<script src="/js/firebase-config.js"></script><script src="/js/firebase-sdk.js"></script><script src="/js/firebase-auth.js"></script><script src="/js/firebase-crm-session.js"></script><script>
 (function(){function runner(ok,fail){return new Proxy({}, {get(_,name){if(name==='withSuccessHandler')return f=>runner(f,fail);if(name==='withFailureHandler')return f=>runner(ok,f);return async(...args)=>{try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();if(!t)throw Error('Entra primeiro em dev-crm.html.');let u='/api/dev-crm-dashboard',out;if(name==='getCRMData'){out=(await fetch(u,{headers:{Authorization:'Bearer '+t}}).then(r=>r.json())).crm}else if(name==='getPerfilPT'){out={nome:'AL MOVE'}}else if(['getClienteDetalhe','getHistoricoClienteCRM','getHistoricoAvaliacoesFisicasCRM','getHistoricoAtividadeCliente'].includes(name)){const d=await fetch('/api/dev-crm-client-detail?id='+encodeURIComponent(args[0]),{headers:{Authorization:'Bearer '+t}}).then(r=>r.json());if(!d.ok)throw Error(d.erro||'Erro');out=name==='getClienteDetalhe'?d.detalhe:name==='getHistoricoClienteCRM'?d.notas:name==='getHistoricoAvaliacoesFisicasCRM'?d.avaliacoes:d.atividade}else throw Error('Esta secção está a ser ligada ao Firebase.');ok&&ok(out)}catch(e){fail&&fail(e)}}}})}window.google={script:{run:runner(null,null)}}})();
 </script>
 <script>

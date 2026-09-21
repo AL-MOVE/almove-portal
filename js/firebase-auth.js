@@ -8,7 +8,7 @@
   let pronto = null;
 
   async function configurar(configuracao, aoMudar) {
-    if (pronto) return pronto;
+    if (pronto) return pronto.then(function () { return auth && auth.currentUser ? auth.currentUser : null; });
     if (!configuracao || !configuracao.apiKey || !configuracao.authDomain || !configuracao.projectId) {
       throw new Error('CONFIGURACAO_FIREBASE_EM_FALTA');
     }
@@ -18,8 +18,11 @@
       const app = sdk.getApps().length ? sdk.getApp() : sdk.initializeApp(configuracao);
       auth = sdk.getAuth(app);
       return sdk.setPersistence(auth, sdk.browserLocalPersistence).then(function () {
-        sdk.onAuthStateChanged(auth, function (utilizador) {
-          if (typeof aoMudar === 'function') aoMudar(utilizador || null);
+        return new Promise(function (resolver) {
+          sdk.onAuthStateChanged(auth, function (utilizador) {
+            if (typeof aoMudar === 'function') aoMudar(utilizador || null);
+            resolver(utilizador || null);
+          });
         });
       });
     });
@@ -30,10 +33,10 @@
     if (!auth || !sdk) throw new Error('FIREBASE_NAO_INICIALIZADO');
   }
 
-  async function token() {
+  async function token(atualizar) {
     exigirAuth();
     if (!auth.currentUser) return '';
-    return auth.currentUser.getIdToken();
+    return auth.currentUser.getIdToken(Boolean(atualizar));
   }
 
   async function entrar(email, palavraPasse) {

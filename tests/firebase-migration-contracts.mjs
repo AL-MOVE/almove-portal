@@ -6,6 +6,7 @@ const firebase = fs.readFileSync(new URL('../api/_firebase.js', import.meta.url)
 const invite = fs.readFileSync(new URL('../api/invite.js', import.meta.url), 'utf8');
 const appsScript = fs.readFileSync(new URL('../apps-script/Code.js', import.meta.url), 'utf8');
 const browserAdapter = fs.readFileSync(new URL('../js/firebase-auth.js', import.meta.url), 'utf8');
+const crmSession = fs.readFileSync(new URL('../js/firebase-crm-session.js', import.meta.url), 'utf8');
 const browserConfig = fs.readFileSync(new URL('../js/firebase-config.js', import.meta.url), 'utf8');
 const browserSdk = fs.readFileSync(new URL('../js/firebase-sdk.js', import.meta.url), 'utf8');
 const developmentMigration = fs.readFileSync(new URL('../server/dev-crm/dev-crm-migration.js', import.meta.url), 'utf8');
@@ -33,8 +34,12 @@ assert.match(appsScript, /firebase:/, 'A assertação não pode ser confundida c
 assert.match(browserAdapter, /browserLocalPersistence/, 'A sessão Firebase deve sobreviver ao fecho normal da PWA.');
 assert.match(browserAdapter, /sendPasswordResetEmail/, 'A recuperação de palavra-passe tem de estar disponível.');
 assert.match(browserAdapter, /sendEmailVerification/, 'A confirmação do email tem de poder ser reenviada.');
+assert.match(crmSession, /ACESSO_SEM_PERMISSAO_CRM/, 'A página do CRM deve limitar a entrada à equipa.');
+assert.match(crmSession, /\/api\/dev-crm/, 'A sessão do CRM deve ser confirmada pela API antes de abrir a interface.');
 const devCrm = fs.readFileSync(new URL('../dev-crm.html', import.meta.url), 'utf8');
 assert.match(devCrm, /reenviarConfirmacao/, 'O verificador CRM deve permitir confirmar contas de desenvolvimento.');
+assert.match(devCrm, /enviarRecuperacao/, 'O login CRM deve permitir recuperar a palavra-passe.');
+assert.match(coachFirebase, /AlMoveSessaoCRM\.exigirCoach/, 'A interface CRM não pode iniciar sem uma sessão de equipa.');
 assert.match(browserSdk, /ALMOVE_FIREBASE_SDK/, 'O SDK Firebase deve ser servido localmente pelo portal.');
 assert.doesNotMatch(browserAdapter, /www\.gstatic\.com/, 'O adaptador não deve depender de imports externos no browser.');
 assert.match(browserConfig, /projectId: 'almove-portal'/, 'O portal real deve manter a configuração Firebase de produção.');

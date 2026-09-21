@@ -4,50 +4,87 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>AL MOVE — CRM Development</title>
+  <title>Entrar · AL MOVE CRM</title>
   <style>
-    :root { color-scheme:dark; font-family:system-ui,sans-serif; background:#07111f; color:#edf7ff; }
-    body { min-height:100vh; margin:0; display:grid; place-items:center; padding:24px; background:radial-gradient(circle at top left,#124a7a,#07111f 55%); }
-    main { width:min(100%,440px); padding:28px; border:1px solid #245575; border-radius:20px; background:#091827dd; box-shadow:0 24px 70px #0008; }
-    h1 { margin:0 0 6px; font-size:22px; } p { color:#a9bdcf; line-height:1.5; } label { display:grid; gap:6px; margin-top:15px; font-size:14px; font-weight:700; }
-    input,button { min-height:46px; border-radius:10px; font:inherit; } input { border:1px solid #35516a; background:#0e2233; color:#fff; padding:0 12px; }
-    button { width:100%; margin-top:22px; border:0; font-weight:800; background:#2dd4bf; color:#04211f; cursor:pointer; }
-    #estado { min-height:22px; margin-top:18px; font-size:14px; } .ok { color:#5eead4; } .erro { color:#fca5a5; }
+    :root { color-scheme:dark; font-family:Inter,ui-sans-serif,system-ui,sans-serif; background:#061321; color:#f7fbff; }
+    * { box-sizing:border-box; } body { min-height:100vh; margin:0; display:grid; place-items:center; padding:24px; background:radial-gradient(circle at 12% 12%,#125278 0,transparent 30%),radial-gradient(circle at 88% 90%,#096e69 0,transparent 32%),#061321; }
+    main { width:min(100%,440px); padding:34px; border:1px solid #24506b; border-radius:24px; background:rgba(7,24,39,.94); box-shadow:0 28px 76px #000a; }
+    .marca { color:#36d8c5; font-size:12px; font-weight:900; letter-spacing:1.7px; } h1 { margin:12px 0 8px; font-size:28px; letter-spacing:-.8px; } p { margin:0; color:#9bb1c3; line-height:1.55; }
+    form { margin-top:27px; } label { display:grid; gap:7px; margin-top:16px; color:#d9e7f1; font-size:13px; font-weight:750; } input,button { min-height:48px; border-radius:11px; font:inherit; } input { width:100%; border:1px solid #335875; background:#0b2133; color:#fff; padding:0 13px; outline:none; } input:focus { border-color:#35d6c3; box-shadow:0 0 0 3px #35d6c328; }
+    button { width:100%; margin-top:24px; border:0; background:linear-gradient(120deg,#25cdbd,#1378df); color:#fff; font-weight:850; cursor:pointer; } button:disabled { cursor:wait; opacity:.72; } .acoes { display:flex; justify-content:flex-end; margin-top:14px; } a { color:#5fe3d4; font-size:13px; font-weight:700; text-decoration:none; } a:hover { text-decoration:underline; } #estado { min-height:22px; margin:20px 0 0; font-size:13px; line-height:1.45; } .erro { color:#fecaca; } .ok { color:#83f5dd; } .nota { margin-top:24px; padding-top:17px; border-top:1px solid #21415a; font-size:12px; }
   </style>
 </head>
 <body><main>
-  <h1>AL MOVE · CRM Development</h1>
-  <p>Verificação privada da ligação Firebase → Vercel → Firestore.</p>
+  <div class="marca">AL MOVE · CRM</div>
+  <h1>Entrar na área de gestão</h1>
+  <p>Usa a conta de equipa autorizada para este ambiente.</p>
   <form id="entrar">
     <label>Email<input id="email" type="email" autocomplete="email" required></label>
     <label>Palavra-passe<input id="password" type="password" autocomplete="current-password" required></label>
-    <button>Verificar acesso</button>
+    <button id="botaoEntrar" type="submit">Entrar em segurança</button>
   </form>
-  <div id="estado" role="status"></div>
+  <div class="acoes"><a id="recuperar" href="#recuperar">Esqueci-me da palavra-passe</a></div>
+  <div id="estado" role="status" aria-live="polite"></div>
+  <p class="nota">O acesso é validado pelo Firebase e pela API do CRM. Contas sem função de equipa não entram.</p>
 </main>
 <script src="/js/firebase-config.js"></script>
 <script src="/js/firebase-sdk.js"></script>
 <script src="/js/firebase-auth.js"></script>
+<script src="/js/firebase-crm-session.js"></script>
 <script>
   const form = document.querySelector('#entrar');
   const estado = document.querySelector('#estado');
-  form.addEventListener('submit', async event => {
-    event.preventDefault(); estado.className = ''; estado.textContent = 'A verificar…';
+  const botao = document.querySelector('#botaoEntrar');
+  const email = document.querySelector('#email');
+  const password = document.querySelector('#password');
+  const destino = AlMoveSessaoCRM.destinoSeguro(new URLSearchParams(location.search).get('next'));
+
+  function apresentar(mensagem, classe) { estado.className = classe || ''; estado.textContent = mensagem; }
+  function erroHumano(erro) {
+    const codigo = String(erro && (erro.code || erro.message) || '');
+    if (codigo.includes('EMAIL_NAO_CONFIRMADO')) return 'Confirma o email antes de entrares. Enviámos uma nova mensagem de confirmação.';
+    if (codigo.includes('ACESSO_SEM_PERMISSAO_CRM') || codigo.includes('ACESSO_NAO_ATRIBUIDO')) return 'Esta conta não tem acesso à área de gestão.';
+    if (codigo.includes('auth/invalid-credential') || codigo.includes('auth/wrong-password') || codigo.includes('auth/user-not-found')) return 'Email ou palavra-passe incorretos.';
+    return 'Não foi possível entrar. Tenta novamente.';
+  }
+
+  async function abrirSessaoExistente() {
     try {
-      const config = await window.ALMOVE_FIREBASE_CONFIG.obter();
-      await window.AlMoveFirebaseAuth.configurar(config);
-      const user = await window.AlMoveFirebaseAuth.entrar(email.value, password.value);
-      if (!user.emailVerified) {
-        await window.AlMoveFirebaseAuth.reenviarConfirmacao(location.origin + location.pathname);
-        await window.AlMoveFirebaseAuth.sair();
-        throw new Error('Enviámos a confirmação para este email. Abre-a e volta a entrar.');
+      const contexto = await AlMoveSessaoCRM.obterContexto();
+      if (contexto) location.replace(destino);
+    } catch (erro) {
+      if (String(erro.code || erro.message).includes('EMAIL_NAO_CONFIRMADO')) apresentar(erroHumano(erro), 'erro');
+    }
+  }
+
+  form.addEventListener('submit', async event => {
+    event.preventDefault(); botao.disabled = true; apresentar('A validar acesso…');
+    try {
+      const configuracao = await ALMOVE_FIREBASE_CONFIG.obter();
+      await AlMoveFirebaseAuth.configurar(configuracao);
+      const utilizador = await AlMoveFirebaseAuth.entrar(email.value, password.value);
+      if (!utilizador.emailVerified) {
+        await AlMoveFirebaseAuth.reenviarConfirmacao(location.origin + '/dev-crm.html');
+        await AlMoveFirebaseAuth.sair();
+        throw new Error('EMAIL_NAO_CONFIRMADO');
       }
-      const token = await window.AlMoveFirebaseAuth.token();
-      const resposta = await fetch('/api/dev-crm', { headers:{ Authorization:'Bearer ' + token }, cache:'no-store' });
-      const dados = await resposta.json();
-      if (!resposta.ok || !dados.ok) throw new Error(dados.erro || 'Acesso recusado.');
-      estado.className = 'ok'; estado.textContent = 'Ligação segura: Firestore Development · ' + dados.roles.join(', ');
-    } catch (erro) { estado.className = 'erro'; estado.textContent = erro.message || 'Não foi possível verificar.'; }
+      await AlMoveSessaoCRM.obterContexto();
+      apresentar('A abrir o CRM…', 'ok');
+      location.replace(destino);
+    } catch (erro) { apresentar(erroHumano(erro), 'erro'); botao.disabled = false; }
   });
+
+  document.querySelector('#recuperar').addEventListener('click', async event => {
+    event.preventDefault();
+    if (!email.value.trim()) { email.focus(); apresentar('Indica o email para receberes a ligação de recuperação.', 'erro'); return; }
+    try {
+      const configuracao = await ALMOVE_FIREBASE_CONFIG.obter();
+      await AlMoveFirebaseAuth.configurar(configuracao);
+      await AlMoveFirebaseAuth.enviarRecuperacao(email.value, location.origin + '/dev-crm.html');
+      apresentar('Enviámos a ligação para redefinir a palavra-passe.', 'ok');
+    } catch (erro) { apresentar('Não foi possível enviar a ligação. Confirma o email e tenta novamente.', 'erro'); }
+  });
+
+  abrirSessaoExistente();
 </script>
 </body></html>
