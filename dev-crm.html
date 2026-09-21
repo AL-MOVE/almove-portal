@@ -44,6 +44,7 @@
     const codigo = String(erro && (erro.code || erro.message) || '');
     if (codigo.includes('EMAIL_NAO_CONFIRMADO')) return 'Confirma o email antes de entrares. Enviámos uma nova mensagem de confirmação.';
     if (codigo.includes('ACESSO_SEM_PERMISSAO_CRM') || codigo.includes('ACESSO_NAO_ATRIBUIDO')) return 'Esta conta não tem acesso à área de gestão.';
+    if (codigo.includes('PREVIEW_VERCEL_PROTEGIDA')) return 'Esta pré-visualização está protegida pela Vercel. Entra na Vercel neste navegador e volta a tentar.';
     if (codigo.includes('auth/invalid-credential') || codigo.includes('auth/wrong-password') || codigo.includes('auth/user-not-found')) return 'Email ou palavra-passe incorretos.';
     return 'Não foi possível entrar. Tenta novamente.';
   }

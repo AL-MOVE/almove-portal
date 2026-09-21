@@ -31,8 +31,13 @@ async function obterConfiguracaoFirebase() {
   if (location.hostname === 'portal.almove.pt') return CONFIGURACAO_PRODUCAO;
   if (configuracaoPreVisualizacao) return configuracaoPreVisualizacao;
   const resposta = await fetch('/api/firebase-config', { cache: 'no-store', credentials: 'same-origin' });
-  if (!resposta.ok) throw new Error('CONFIGURACAO_FIREBASE_EM_FALTA');
-  const configuracao = validarConfiguracaoFirebase(await resposta.json());
+  const tipo = String(resposta.headers.get('content-type') || '');
+  if (!resposta.ok || resposta.url.includes('vercel.com/sso-api') || !tipo.includes('application/json')) {
+    throw new Error('PREVIEW_VERCEL_PROTEGIDA');
+  }
+  let dados;
+  try { dados = await resposta.json(); } catch { throw new Error('CONFIGURACAO_FIREBASE_EM_FALTA'); }
+  const configuracao = validarConfiguracaoFirebase(dados);
   if (!configuracao) throw new Error('CONFIGURACAO_FIREBASE_EM_FALTA');
   configuracaoPreVisualizacao = configuracao;
   return configuracao;

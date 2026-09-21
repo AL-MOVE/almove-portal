@@ -51,6 +51,7 @@ assert.match(browserConfig, /projectId: 'almove-portal'/, 'O portal real deve ma
 assert.match(browserConfig, /\/api\/firebase-config/, 'Uma pré-visualização tem de pedir a configuração Firebase própria à Vercel.');
 assert.match(browserConfig, /location\.hostname === 'portal\.almove\.pt'/, 'A pré-visualização não pode reutilizar a configuração Firebase de produção.');
 assert.match(browserConfig, /CONFIGURACAO_FIREBASE_EM_FALTA/, 'Sem configuração própria, a pré-visualização deve falhar fechada.');
+assert.match(browserConfig, /PREVIEW_VERCEL_PROTEGIDA/, 'A pré-visualização deve identificar quando a Vercel bloqueia a API com SSO.');
 assert.doesNotMatch(browserConfig, /measurementId|getAnalytics/, 'O portal não deve carregar Analytics para autenticação.');
 assert.match(developmentMigration, /crmMigrationNotes/, 'A cópia Development deve incluir notas privadas do CRM.');
 assert.match(developmentMigration, /crmMigrationTrainingPlans/, 'A cópia Development deve incluir planos de treino.');
