@@ -6,6 +6,18 @@
   let auth = null;
   let sdk = null;
   let pronto = null;
+  const CHAVE_TOKEN_SESSAO = 'almove.crm.id-token';
+
+  function lerTokenSessao() {
+    try { return global.sessionStorage.getItem(CHAVE_TOKEN_SESSAO) || ''; } catch { return ''; }
+  }
+
+  function guardarTokenSessao(valor) {
+    try {
+      if (valor) global.sessionStorage.setItem(CHAVE_TOKEN_SESSAO, valor);
+      else global.sessionStorage.removeItem(CHAVE_TOKEN_SESSAO);
+    } catch { /* O login normal continua quando o navegador não permite sessionStorage. */ }
+  }
 
   async function configurar(configuracao, aoMudar) {
     if (pronto) return pronto.then(function () { return auth && auth.currentUser ? auth.currentUser : null; });
@@ -35,8 +47,10 @@
 
   async function token(atualizar) {
     exigirAuth();
-    if (!auth.currentUser) return '';
-    return auth.currentUser.getIdToken(Boolean(atualizar));
+    if (!auth.currentUser) return lerTokenSessao();
+    const atual = await auth.currentUser.getIdToken(Boolean(atualizar));
+    guardarTokenSessao(atual);
+    return atual;
   }
 
   async function entrar(email, palavraPasse) {
@@ -67,6 +81,7 @@
 
   async function sair() {
     exigirAuth();
+    guardarTokenSessao('');
     return sdk.signOut(auth);
   }
 

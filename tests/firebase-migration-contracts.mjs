@@ -32,6 +32,7 @@ assert.match(appsScript, /diagnosticarConviteFirebasePortal_/, 'O Apps Script de
 assert.match(appsScript, /obterClientePorEmailPortal_\(email\)/, 'O email Firebase deve corresponder a um único cliente CRM.');
 assert.match(appsScript, /firebase:/, 'A assertação não pode ser confundida com o token legado.');
 assert.match(browserAdapter, /browserLocalPersistence/, 'A sessão Firebase deve sobreviver ao fecho normal da PWA.');
+assert.match(browserAdapter, /sessionStorage/, 'O redirecionamento login → CRM deve tolerar navegadores que atrasam a sessão Firebase persistente.');
 assert.match(browserAdapter, /sendPasswordResetEmail/, 'A recuperação de palavra-passe tem de estar disponível.');
 assert.match(browserAdapter, /sendEmailVerification/, 'A confirmação do email tem de poder ser reenviada.');
 assert.match(crmSession, /ACESSO_SEM_PERMISSAO_CRM/, 'A página do CRM deve limitar a entrada à equipa.');

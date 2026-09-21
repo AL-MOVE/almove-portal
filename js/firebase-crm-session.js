@@ -17,13 +17,13 @@
   async function obterContexto() {
     const configuracao = await global.ALMOVE_FIREBASE_CONFIG.obter();
     const utilizador = await global.AlMoveFirebaseAuth.configurar(configuracao);
-    if (!utilizador) return null;
-    if (!utilizador.emailVerified) {
+    if (utilizador && !utilizador.emailVerified) {
       await global.AlMoveFirebaseAuth.sair();
       throw erro('EMAIL_NAO_CONFIRMADO');
     }
 
     const token = await global.AlMoveFirebaseAuth.token(true);
+    if (!token) return null;
     const resposta = await fetch('/api/dev-crm', {
       headers: { Authorization: 'Bearer ' + token },
       cache: 'no-store',
