@@ -1,6 +1,6 @@
-import { obterAdminFirebase, obterIdentidadeFirebase } from './_firebase.js';
-import { criarAdaptadorFirestore, obterFirestoreAlmove } from './_firestore.js';
-import { exigirEquipa } from './_crm-development.js';
+import { obterAdminFirebase, obterIdentidadeFirebase } from '../../api/_firebase.js';
+import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
+import { exigirEquipa } from '../../api/_crm-development.js';
 
 function responder(res, estado, corpo) { res.setHeader('Cache-Control', 'no-store, max-age=0'); return res.status(estado).json(corpo); }
 function dataLisboa() { const partes = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date()); const parte = tipo => partes.find(item => item.type === tipo).value; return parte('year') + '-' + parte('month') + '-' + parte('day'); }

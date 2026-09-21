@@ -8,7 +8,7 @@ assert.deepEqual(validarNovoCliente({ nome: 'Cliente Teste', email: ' TESTE@EXEM
 assert.throws(() => validarNovoCliente({ nome: 'A', email: 'invalido' }), /CLIENTE_INVALIDO_EMAIL/);
 assert.throws(() => exigirEquipa({ roles: ['client'] }), /ACESSO_SEM_PERMISSAO_CRM/);
 assert.equal(exigirEquipa({ roles: ['coach'] }).roles[0], 'coach');
-const endpoint = fs.readFileSync(new URL('../api/dev-crm-clients.js', import.meta.url), 'utf8');
+const endpoint = fs.readFileSync(new URL('../server/dev-crm/dev-crm-clients.js', import.meta.url), 'utf8');
 const coach = fs.readFileSync(new URL('../coach.html', import.meta.url), 'utf8');
 assert.match(endpoint, /projeto !== 'almove-portal-dev'/);
 assert.match(endpoint, /FieldValue\.serverTimestamp/);

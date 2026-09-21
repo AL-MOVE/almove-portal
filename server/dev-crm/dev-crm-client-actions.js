@@ -1,6 +1,6 @@
-import { obterAdminFirebase, obterIdentidadeFirebase } from './_firebase.js';
-import { criarAdaptadorFirestore, obterFirestoreAlmove } from './_firestore.js';
-import { exigirEquipa } from './_crm-development.js';
+import { obterAdminFirebase, obterIdentidadeFirebase } from '../../api/_firebase.js';
+import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
+import { exigirEquipa } from '../../api/_crm-development.js';
 
 const MEDIDAS = ['pesoKg', 'alturaCm', 'massaGordaPercent', 'cinturaCm', 'abdomenCm', 'bracoDireitoCm', 'bracoEsquerdoCm', 'pernaDireitaCm', 'pernaEsquerdaCm'];
 const FREQUENCIAS = new Set(['1x30', '2x30', '3x30', '1x45', '2x45', '3x45', '1x60', '2x60', '3x60']);

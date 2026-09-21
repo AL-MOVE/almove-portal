@@ -1,6 +1,6 @@
-import { obterAdminFirebase, obterIdentidadeFirebase } from './_firebase.js';
-import { criarAdaptadorFirestore, obterFirestoreAlmove } from './_firestore.js';
-import { exigirEquipa } from './_crm-development.js';
+import { obterAdminFirebase, obterIdentidadeFirebase } from '../../api/_firebase.js';
+import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
+import { exigirEquipa } from '../../api/_crm-development.js';
 
 function responder(res, estado, corpo) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');

@@ -1,6 +1,6 @@
-import { obterAssertacaoFirebaseInterna, obterAdminFirebase } from './_firebase.js';
-import { criarAdaptadorFirestore, obterFirestoreAlmove } from './_firestore.js';
-import { normalizarAvaliacaoFisicaLegada, normalizarCheckinLegado, normalizarClienteLegado, normalizarPackLegado, normalizarSessaoLegada } from './_crm-schema.js';
+import { obterAssertacaoFirebaseInterna, obterAdminFirebase } from '../../api/_firebase.js';
+import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
+import { normalizarAvaliacaoFisicaLegada, normalizarCheckinLegado, normalizarClienteLegado, normalizarPackLegado, normalizarSessaoLegada } from '../../api/_crm-schema.js';
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgPYkfxZiDgi9-2l8wu0RBKmiG_g_p66VRh-Hp6QOvtMofgiJSdeV19Bxe_mSGuB1I/exec';
 

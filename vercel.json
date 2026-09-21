@@ -1,4 +1,7 @@
 {
+  "rewrites": [
+    { "source": "/api/dev-crm-:route", "destination": "/api/dev-crm?route=:route" }
+  ],
   "functions": {
     "api/*.js": { "maxDuration": 30 }
   },
