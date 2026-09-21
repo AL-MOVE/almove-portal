@@ -2471,6 +2471,7 @@
       <div class="topbar-right">
         <div class="topbar-date" id="dataAtual"></div>
         <button type="button" class="btn btn-primary topbar-quick-action" onclick="switchTab('criar')">+ Novo cliente</button>
+        <button type="button" class="btn btn-secondary topbar-quick-action" id="btnSairSessaoCRM" onclick="terminarSessaoCRM()" style="padding:9px 12px;font-size:12px" title="Terminar sessão">Sair</button>
         <div class="notificacoes-wrap">
           <button type="button" class="btn-notificacoes" id="btnNotificacoes" onclick="alternarNotificacoesCMR()" aria-label="Abrir notificações" aria-expanded="false" title="Alertas operacionais">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -8694,13 +8695,28 @@ function instrumentarChamadasAppsScriptCMR() {
   }
 }
 
+function apresentarSessaoCRM(contexto) {
+  const avatar = document.getElementById('avatarBtn');
+  const email = String(contexto && contexto.email || '');
+  if (avatar && email) avatar.title = 'Meu perfil · sessão: ' + email;
+}
+
+async function terminarSessaoCRM() {
+  if (!confirm('Terminar sessão neste dispositivo?')) return;
+  const botao = document.getElementById('btnSairSessaoCRM');
+  if (botao) { botao.disabled = true; botao.textContent = 'A sair…'; }
+  try { await AlMoveSessaoCRM.sair(); }
+  catch (erro) { console.warn('Não foi possível terminar a sessão no servidor:', erro); }
+  location.replace('/dev-crm.html');
+}
+
 instrumentarChamadasAppsScriptCMR();
 
 // ==================== START ====================
 
 window.addEventListener('load', function () {
   AlMoveSessaoCRM.exigirCoach('/coach-firebase.html').then(function (contexto) {
-    if (contexto) init();
+    if (contexto) { apresentarSessaoCRM(contexto); init(); }
   }).catch(function (erro) {
     document.body.innerHTML = '<main style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#061321;color:#f7fbff;font-family:system-ui,sans-serif"><section style="max-width:420px;padding:28px;border:1px solid #34516a;border-radius:18px;background:#0b1c2d"><strong style="font-size:20px">Não foi possível validar a sessão</strong><p style="color:#b8c7d5;line-height:1.5">Volta a entrar para acederes ao CRM.</p><a href="/dev-crm.html?next=%2Fcoach-firebase.html" style="display:inline-block;padding:12px 16px;border-radius:10px;background:#19b9b0;color:#fff;font-weight:800;text-decoration:none">Ir para o login</a></section></main>';
     console.error('Sessão CRM indisponível:', erro);
