@@ -2260,8 +2260,17 @@
     .sidebar-sub { font-weight:800; }
     #btnInstalarCoach.coach-install-disponivel { display:inline-flex !important; align-items:center; gap:6px; }
     #btnInstalarCoach.coach-install-disponivel::before { content:'⇩'; font-size:14px; line-height:1; }
+    .coach-bottom-nav { display:none; }
     @media (max-width: 920px) { .coach-workbench { grid-template-columns:repeat(2,minmax(0,1fr)); } }
     @media (max-width: 720px) { #btnInstalarCoach.coach-install-disponivel { padding:7px 9px !important; border-radius:9px; font-size:11px !important; } }
+    @media (max-width: 700px) {
+      #appLayout .main-area { padding-bottom:calc(76px + env(safe-area-inset-bottom)); }
+      #appLayout .coach-bottom-nav { position:fixed; z-index:280; right:0; bottom:0; left:0; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:2px; padding:8px 8px calc(8px + env(safe-area-inset-bottom)); border-top:1px solid rgba(148,163,184,.14); background:rgba(7,18,29,.96); box-shadow:0 -10px 30px rgba(0,0,0,.22); backdrop-filter:blur(16px); }
+      .coach-bottom-nav button { display:grid; justify-items:center; gap:3px; min-width:0; padding:5px 2px; border:0; border-radius:10px; background:transparent; color:#8ea1b7; font:750 10px/1.15 inherit; cursor:pointer; }
+      .coach-bottom-nav button svg { width:19px; height:19px; stroke-width:2; }
+      .coach-bottom-nav button.active { color:#73f2df; background:rgba(45,212,191,.10); }
+      .coach-bottom-nav button.active svg { stroke:#5eead4; }
+    }
     @media (max-width: 480px) { .coach-workbench { gap:8px; } .coach-workbench-action { min-height:108px; padding:14px; } .coach-workbench-action strong { font-size:13px; } .coach-mode-chip { display:none; } }
   </style>
 </head>
@@ -2540,6 +2549,13 @@
     </button>
   </aside>
   <button type="button" id="sidebarOverlay" onclick="fecharSidebarMobile()" aria-label="Fechar menu"></button>
+  <nav class="coach-bottom-nav" aria-label="Navegação principal do Coach">
+    <button type="button" data-coach-bottom-tab="dashboard" onclick="switchTab('dashboard')" aria-label="Início"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Início</span></button>
+    <button type="button" data-coach-bottom-tab="agenda" onclick="switchTab('agenda')" aria-label="Agenda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg><span>Agenda</span></button>
+    <button type="button" data-coach-bottom-tab="clientes" onclick="switchTab('clientes')" aria-label="Alunos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Alunos</span></button>
+    <button type="button" data-coach-bottom-tab="avaliacoes" onclick="switchTab('avaliacoes')" aria-label="Avaliações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/><path d="M9 3v4h6V3"/></svg><span>Avaliações</span></button>
+    <button type="button" data-coach-bottom-more onclick="abrirMenuInferiorCoach()" aria-label="Mais opções"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg><span>Mais</span></button>
+  </nav>
 
   <div class="main-area">
     <div class="topbar">
@@ -5432,6 +5448,25 @@ function initSidebarState() {
   } catch(e) {}
 }
 
+function atualizarNavegacaoInferiorCoach(tab) {
+  document.querySelectorAll('[data-coach-bottom-tab], [data-coach-bottom-more]').forEach(function(botao) {
+    const ativo = botao.dataset.coachBottomTab === tab;
+    botao.classList.toggle('active', ativo);
+    if (ativo) botao.setAttribute('aria-current', 'page');
+    else botao.removeAttribute('aria-current');
+  });
+}
+
+function abrirMenuInferiorCoach() {
+  document.querySelectorAll('[data-coach-bottom-tab], [data-coach-bottom-more]').forEach(function(botao) {
+    const ativo = botao.hasAttribute('data-coach-bottom-more');
+    botao.classList.toggle('active', ativo);
+    if (ativo) botao.setAttribute('aria-current', 'page');
+    else botao.removeAttribute('aria-current');
+  });
+  abrirSidebarMobile();
+}
+
 // ==================== INIT ====================
 
 let pesquisaTimer = null;
@@ -5450,6 +5485,7 @@ function init() {
   });
   
   initSidebarState();
+  atualizarNavegacaoInferiorCoach('dashboard');
   document.querySelectorAll('#sidebar .nav-item').forEach(item => {
     item.addEventListener('click', () => {
       if (sidebarEmTelemovel()) window.setTimeout(fecharSidebarMobile, 0);
@@ -5546,6 +5582,7 @@ function switchTab(tab) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const tabBtn = document.querySelector('[data-tab="' + tab + '"]');
   if (tabBtn) tabBtn.classList.add('active');
+  atualizarNavegacaoInferiorCoach(tab);
   const viewEl = document.getElementById(tab);
   if (viewEl) viewEl.classList.add('active');
   if (sidebarEmTelemovel()) fecharSidebarMobile();

@@ -52,6 +52,8 @@ assert.match(coachFirebase, /terminarSessaoCRM/, 'A equipa deve poder terminar a
 assert.match(coachFirebase, /beforeinstallprompt/, 'O Coach deve poder pedir a instalação PWA quando o browser a disponibiliza.');
 assert.match(coachFirebase, /abrirAjudaInstalacaoCoach/, 'O Coach móvel deve explicar a instalação quando o browser não abre o pedido automático.');
 assert.match(coachFirebase, /coach-install-disponivel/, 'A ação de instalação não pode ficar escondida pelas regras móveis.');
+assert.match(coachFirebase, /coach-bottom-nav/, 'O Coach móvel deve ter uma navegação diária acessível sem abrir a gaveta.');
+assert.match(coachFirebase, /abrirMenuInferiorCoach/, 'As restantes áreas do Coach devem continuar acessíveis através de Mais.');
 assert.equal(coachManifest.display, 'standalone', 'O Coach instalado deve abrir sem a interface do browser.');
 assert.ok(coachManifest.icons.some(icone => icone.sizes === '192x192') && coachManifest.icons.some(icone => icone.sizes === '512x512'), 'O Coach precisa de ícones PWA Android de 192px e 512px.');
 assert.match(coachWorker, /almove-coach-shell-v2/, 'O Coach deve ter um shell PWA independente do Portal do Cliente.');
