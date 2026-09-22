@@ -18,6 +18,7 @@ const coachManifest = JSON.parse(fs.readFileSync(new URL('../coach-manifest.json
 const coachWorker = fs.readFileSync(new URL('../coach-sw.js', import.meta.url), 'utf8');
 const developmentSettings = fs.readFileSync(new URL('../server/dev-crm/dev-crm-settings.js', import.meta.url), 'utf8');
 const developmentSession = fs.readFileSync(new URL('../server/dev-crm/dev-crm-session.js', import.meta.url), 'utf8');
+const developmentPayments = fs.readFileSync(new URL('../server/dev-crm/dev-crm-payments.js', import.meta.url), 'utf8');
 const apiDir = new URL('../api/', import.meta.url);
 const funcoesVercel = fs.readdirSync(apiDir).filter(nome => nome.endsWith('.js'))
   .filter(nome => /export default/.test(fs.readFileSync(new URL(nome, apiDir), 'utf8')));
@@ -85,6 +86,8 @@ assert.match(coachFirebase, /Centro de avaliações/, 'A gestão de avaliações
 assert.match(coachFirebase, /abrirAvaliacaoClienteCRM/, 'A ficha do cliente deve remeter para o histórico de avaliações.');
 assert.match(coachFirebase, /atualizarDataSessaoConfirmada:'toggle-session'/, 'Editar uma sessão confirmada deve continuar a usar a ação Firebase autenticada.');
 assert.match(developmentSettings, /crmDevelopmentSettings/, 'O perfil do PT deve ser persistido no Firebase Development.');
+assert.match(developmentPayments, /req\.method !== 'GET'/, 'A leitura de pagamentos deve recusar métodos HTTP inesperados.');
+assert.match(developmentPayments, /PAGAMENTOS_INDISPONIVEIS/, 'O endpoint de pagamentos não deve devolver detalhes internos em falhas.');
 assert.ok(funcoesVercel.length <= 12, 'O projeto Hobby da Vercel não pode ultrapassar 12 funções serverless.');
 assert.ok(vercel.rewrites.some(item => item.source === '/api/dev-crm-:route' && /route=:route/.test(item.destination)), 'As rotas CRM consolidadas devem continuar acessíveis pelos URLs existentes.');
 assert.match(appsScript, /notas: contarLinhasComCampos\('DB_NOTAS_CRM'/, 'A verificação deve contar notas na origem.');
