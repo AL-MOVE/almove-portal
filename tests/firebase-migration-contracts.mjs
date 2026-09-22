@@ -14,6 +14,8 @@ const developmentMigrationPage = fs.readFileSync(new URL('../dev-migration.html'
 const assessmentSchedule = fs.readFileSync(new URL('../server/dev-crm/dev-crm-assessment-schedule.js', import.meta.url), 'utf8');
 const assessments = fs.readFileSync(new URL('../server/dev-crm/dev-crm-assessments.js', import.meta.url), 'utf8');
 const coachFirebase = fs.readFileSync(new URL('../coach-firebase.html', import.meta.url), 'utf8');
+const coachManifest = JSON.parse(fs.readFileSync(new URL('../coach-manifest.json', import.meta.url), 'utf8'));
+const coachWorker = fs.readFileSync(new URL('../coach-sw.js', import.meta.url), 'utf8');
 const developmentSettings = fs.readFileSync(new URL('../server/dev-crm/dev-crm-settings.js', import.meta.url), 'utf8');
 const developmentSession = fs.readFileSync(new URL('../server/dev-crm/dev-crm-session.js', import.meta.url), 'utf8');
 const apiDir = new URL('../api/', import.meta.url);
@@ -50,6 +52,10 @@ assert.match(coachFirebase, /terminarSessaoCRM/, 'A equipa deve poder terminar a
 assert.match(coachFirebase, /beforeinstallprompt/, 'O Coach deve poder pedir a instalação PWA quando o browser a disponibiliza.');
 assert.match(coachFirebase, /abrirAjudaInstalacaoCoach/, 'O Coach móvel deve explicar a instalação quando o browser não abre o pedido automático.');
 assert.match(coachFirebase, /coach-install-disponivel/, 'A ação de instalação não pode ficar escondida pelas regras móveis.');
+assert.equal(coachManifest.display, 'standalone', 'O Coach instalado deve abrir sem a interface do browser.');
+assert.ok(coachManifest.icons.some(icone => icone.sizes === '192x192') && coachManifest.icons.some(icone => icone.sizes === '512x512'), 'O Coach precisa de ícones PWA Android de 192px e 512px.');
+assert.match(coachWorker, /almove-coach-shell-v2/, 'O Coach deve ter um shell PWA independente do Portal do Cliente.');
+assert.match(coachWorker, /respostaSemLigacao/, 'O Coach instalado deve responder de forma controlada sem rede.');
 assert.match(coachFirebase, /sidebar-responsive-fix/, 'A navegação compacta deve vencer as regras antigas da sidebar.');
 assert.match(coachFirebase, /max-width: 1024px/, 'O menu lateral deve passar a gaveta antes de ficar comprimido.');
 assert.match(coachFirebase, /position: static !important/, 'Os contadores da navegação compacta não podem sair para fora do botão.');

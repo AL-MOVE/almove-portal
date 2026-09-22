@@ -5,10 +5,25 @@
   "start_url": "/coach-firebase.html?source=pwa",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "prefer_related_applications": false,
   "background_color": "#07121d",
   "theme_color": "#07121d",
   "description": "Aplicação de trabalho para coaches AL MOVE.",
+  "categories": ["health", "fitness", "productivity"],
   "icons": [
+    {
+      "src": "/icons/coach-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/coach-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
     {
       "src": "/al-move-mark.png",
       "sizes": "1254x1254",
