@@ -99,7 +99,10 @@
         });
         const dados = await resposta.json();
         if (!resposta.ok || !dados.ok) throw new Error(dados.erro || 'Não foi possível copiar.');
-        estado.textContent = `Cópia concluída: ${dados.copied} registos no Firebase Development.`;
+        const removidos = Number(dados.removed || 0);
+        estado.textContent = removidos
+          ? `Cópia concluída: ${dados.copied} registos atualizados e ${removidos} registos obsoletos removidos no Firebase Development.`
+          : `Cópia concluída: ${dados.copied} registos no Firebase Development.`;
         copiar.textContent = 'Atualizar cópia Development';
         copiar.disabled = false;
       } catch (erro) {

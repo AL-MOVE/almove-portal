@@ -78,6 +78,8 @@ assert.match(developmentMigration, /crmMigrationPackHistory/, 'A cópia Developm
 assert.match(developmentMigration, /crmMigrationSpecialPackages/, 'A cópia Development deve incluir pacotes especiais.');
 assert.match(developmentMigration, /crmMigrationAssessmentRequests/, 'A cópia Development deve incluir pedidos de avaliação.');
 assert.match(developmentMigration, /crmMigrationPortalAgenda/, 'A cópia Development deve incluir a agenda do portal.');
+assert.match(developmentMigration, /migration\.source', '==', 'apps-script'/, 'Atualizar a cópia Development deve identificar registos legados obsoletos.');
+assert.match(developmentMigration, /lote\.delete\(documento\.ref\)/, 'Atualizar a cópia Development deve remover apenas os registos legados fora da origem atual.');
 assert.match(assessmentSchedule, /development\.assessment\.request-scheduled/, 'Confirmar um pedido deve deixar auditoria no Firebase.');
 assert.match(assessmentSchedule, /PEDIDO_JA_TRATADO/, 'Um pedido de avaliação não pode ser tratado duas vezes.');
 assert.match(coachFirebase, /dev-crm-assessment-schedule/, 'O ecrã original deve encaminhar avaliações para o Firebase.');
@@ -97,4 +99,5 @@ assert.match(appsScript, /planos: contarLinhasComCampos\('DB_PLANOS_TREINO'/, 'A
 assert.match(appsScript, /packsHistorico: contarLinhas\('DB_PACKS_HISTORICO'/, 'A verificação deve contar o histórico de packs na origem.');
 assert.match(developmentMigrationPage, /Atualizar cópia Development/, 'A página deve permitir atualizar uma cópia já em paridade.');
 assert.match(developmentMigrationPage, /mostrarParidade\(origem, dados\.destino \|\| \{\}\)/, 'A migração deve expor as contagens de origem e destino antes de validar a paridade.');
+assert.match(developmentMigrationPage, /registos obsoletos removidos/, 'A migração deve informar quando reconciliou cópias antigas.');
 console.log('Contratos de migração Firebase validados.');

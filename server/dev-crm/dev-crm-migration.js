@@ -55,14 +55,31 @@ export default async function handler(req, res) {
       ...(origem.pedidosAvaliacao || []).map(item => ['crmMigrationAssessmentRequests', String(item.fonteLinha), item, item.fonteLinha]),
       ...(origem.agendaPortal || []).map(item => ['crmMigrationPortalAgenda', String(item.fonteLinha), item, item.fonteLinha])
     ];
+    const documentosEsperados = new Map();
+    registos.forEach(([colecao, id]) => {
+      if (!documentosEsperados.has(colecao)) documentosEsperados.set(colecao, new Set());
+      documentosEsperados.get(colecao).add(id);
+    });
+    const colecoesMigradas = [...documentosEsperados.keys()];
+    const colecoesComRegistosObsoletos = await Promise.all(colecoesMigradas.map(async colecao => {
+      const documentos = await db.collection(colecao).where('migration.source', '==', 'apps-script').get();
+      const esperados = documentosEsperados.get(colecao);
+      return documentos.docs.filter(documento => !esperados.has(documento.id));
+    }));
+    const registosObsoletos = colecoesComRegistosObsoletos.flat();
+    for (let inicio = 0; inicio < registosObsoletos.length; inicio += 400) {
+      const lote = db.batch();
+      registosObsoletos.slice(inicio, inicio + 400).forEach(documento => lote.delete(documento.ref));
+      await lote.commit();
+    }
     const agora = new Date();
     for (let inicio = 0; inicio < registos.length; inicio += 400) {
       const lote = db.batch();
       registos.slice(inicio, inicio + 400).forEach(([colecao, id, valor, linha]) => lote.set(db.collection(colecao).doc(id), { ...valor, migration: { source: 'apps-script', sourceRow: linha, copiedAt: agora, snapshotAt: origem.geradoEm } }));
       await lote.commit();
     }
-    await db.collection('crmMigrationRuns').doc('latest').set({ copiedAt: agora, snapshotAt: origem.geradoEm, actorUid: contexto.firebaseUid, counts: { clients: (origem.clientes || []).length, packs: (origem.packs || []).length, packHistory: (origem.packsHistorico || []).length, sessions: (origem.sessoes || []).length, checkins: (origem.checkins || []).length, assessments: (origem.avaliacoes || []).length, notes: (origem.notas || []).length, trainingPlans: (origem.planos || []).length, specialPackageCatalog: (origem.catalogoPacotesEspeciais || []).length, specialPackages: (origem.pacotesEspeciais || []).length, assessmentRequests: (origem.pedidosAvaliacao || []).length, portalAgenda: (origem.agendaPortal || []).length } });
-    return responder(res, 200, { ok: true, copied: registos.length, resumo: { clientes: (origem.clientes || []).length, packs: (origem.packs || []).length, packsHistorico: (origem.packsHistorico || []).length, sessoes: (origem.sessoes || []).length, checkins: (origem.checkins || []).length, avaliacoes: (origem.avaliacoes || []).length, notas: (origem.notas || []).length, planos: (origem.planos || []).length, catalogoPacotesEspeciais: (origem.catalogoPacotesEspeciais || []).length, pacotesEspeciais: (origem.pacotesEspeciais || []).length, pedidosAvaliacao: (origem.pedidosAvaliacao || []).length, agendaPortal: (origem.agendaPortal || []).length } });
+    await db.collection('crmMigrationRuns').doc('latest').set({ copiedAt: agora, snapshotAt: origem.geradoEm, actorUid: contexto.firebaseUid, removed: registosObsoletos.length, counts: { clients: (origem.clientes || []).length, packs: (origem.packs || []).length, packHistory: (origem.packsHistorico || []).length, sessions: (origem.sessoes || []).length, checkins: (origem.checkins || []).length, assessments: (origem.avaliacoes || []).length, notes: (origem.notas || []).length, trainingPlans: (origem.planos || []).length, specialPackageCatalog: (origem.catalogoPacotesEspeciais || []).length, specialPackages: (origem.pacotesEspeciais || []).length, assessmentRequests: (origem.pedidosAvaliacao || []).length, portalAgenda: (origem.agendaPortal || []).length } });
+    return responder(res, 200, { ok: true, copied: registos.length, removed: registosObsoletos.length, resumo: { clientes: (origem.clientes || []).length, packs: (origem.packs || []).length, packsHistorico: (origem.packsHistorico || []).length, sessoes: (origem.sessoes || []).length, checkins: (origem.checkins || []).length, avaliacoes: (origem.avaliacoes || []).length, notas: (origem.notas || []).length, planos: (origem.planos || []).length, catalogoPacotesEspeciais: (origem.catalogoPacotesEspeciais || []).length, pacotesEspeciais: (origem.pacotesEspeciais || []).length, pedidosAvaliacao: (origem.pedidosAvaliacao || []).length, agendaPortal: (origem.agendaPortal || []).length } });
   } catch (erro) {
     const codigo = String(erro?.code || erro?.message || 'FALHA');
     return responder(res, /^FIREBASE_/.test(codigo) ? 401 : 500, { ok: false, erro: codigo });
