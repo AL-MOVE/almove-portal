@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
+const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const proxy = fs.readFileSync(new URL('../api/almove.js', import.meta.url), 'utf8');
 const firebase = fs.readFileSync(new URL('../api/_firebase.js', import.meta.url), 'utf8');
 const invite = fs.readFileSync(new URL('../api/invite.js', import.meta.url), 'utf8');
@@ -24,6 +25,7 @@ const funcoesVercel = fs.readdirSync(apiDir).filter(nome => nome.endsWith('.js')
   .filter(nome => /export default/.test(fs.readFileSync(new URL(nome, apiDir), 'utf8')));
 const vercel = JSON.parse(fs.readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
 
+assert.equal(packageJson.overrides?.['jwks-rsa'], '3.2.2', 'A Vercel precisa de jwks-rsa compatível com o bundle Firebase Admin.');
 assert.match(proxy, /obterAssertacaoFirebasePortal/);
 assert.match(firebase, /verifyIdToken\(credencial, true\)/, 'A Vercel tem de verificar tokens revogados.');
 assert.match(firebase, /HttpOnly; Secure; SameSite=Lax/, 'A sessão CRM deve usar um cookie HTTP-only seguro.');

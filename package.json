@@ -12,5 +12,8 @@
     "esbuild": "^0.28.2",
     "firebase": "^12.19.0",
     "firebase-admin": "^14.4.0"
+  },
+  "overrides": {
+    "jwks-rsa": "3.2.2"
   }
 }
