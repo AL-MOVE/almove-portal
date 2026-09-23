@@ -96,4 +96,5 @@ assert.match(appsScript, /notas: contarLinhasComCampos\('DB_NOTAS_CRM'/, 'A veri
 assert.match(appsScript, /planos: contarLinhasComCampos\('DB_PLANOS_TREINO'/, 'A verificação deve contar planos na origem.');
 assert.match(appsScript, /packsHistorico: contarLinhas\('DB_PACKS_HISTORICO'/, 'A verificação deve contar o histórico de packs na origem.');
 assert.match(developmentMigrationPage, /Atualizar cópia Development/, 'A página deve permitir atualizar uma cópia já em paridade.');
+assert.match(developmentMigrationPage, /mostrarParidade\(origem, dados\.destino \|\| \{\}\)/, 'A migração deve expor as contagens de origem e destino antes de validar a paridade.');
 console.log('Contratos de migração Firebase validados.');
