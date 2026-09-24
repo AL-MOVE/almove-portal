@@ -100,4 +100,5 @@ assert.match(appsScript, /packsHistorico: contarLinhas\('DB_PACKS_HISTORICO'/, '
 assert.match(developmentMigrationPage, /Atualizar cópia Development/, 'A página deve permitir atualizar uma cópia já em paridade.');
 assert.match(developmentMigrationPage, /mostrarParidade\(origem, dados\.destino \|\| \{\}\)/, 'A migração deve expor as contagens de origem e destino antes de validar a paridade.');
 assert.match(developmentMigrationPage, /registos obsoletos removidos/, 'A migração deve informar quando reconciliou cópias antigas.');
+assert.match(developmentMigrationPage, /token = await obterTokenDaSessao\(true\)/, 'A cópia Development deve renovar a sessão Firebase imediatamente antes de escrever.');
 console.log('Contratos de migração Firebase validados.');

@@ -51,9 +51,9 @@
       return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async function obterTokenDaSessao() {
+    async function obterTokenDaSessao(atualizar) {
       for (let tentativa = 0; tentativa < 40; tentativa += 1) {
-        const atual = await AlMoveFirebaseAuth.token();
+        const atual = await AlMoveFirebaseAuth.token(Boolean(atualizar));
         if (atual) return atual;
         await esperar(250);
       }
@@ -92,7 +92,7 @@
       copiar.disabled = true;
       estado.textContent = 'A copiar para Firebase Development…';
       try {
-        if (!token) token = await obterTokenDaSessao();
+        token = await obterTokenDaSessao(true);
         const resposta = await fetch('/api/dev-crm-migration', {
           method: 'POST',
           headers: { Authorization: 'Bearer ' + token }
