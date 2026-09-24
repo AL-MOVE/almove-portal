@@ -34,7 +34,7 @@ assert.match(html, /id="perfilPassaporte"/, 'O Passaporte Técnico deve estar di
 assert.match(html, /<option value="rir" selected>RIR<\/option>/, 'RIR deve ser o método de intensidade predefinido');
 assert.match(html, /localStorage\.getItem\("ALMOVE_SESSAO_PORTAL"\)/, 'A sessão curta deve sobreviver ao fecho da PWA');
 assert.match(html, /bootstrapPortalPromise = SESSAO_PRONTA\.then/, 'O bootstrap deve aguardar pela autenticação antes de mostrar sincronização');
-assert.match(html, /VERSAO_CLIENTE_PORTAL = "64"/, 'O cliente deve identificar a versão da atualização');
+assert.match(html, /VERSAO_CLIENTE_PORTAL = "65"/, 'O cliente deve identificar a versão da atualização');
 assert.match(html, /id="p0-experience-hardening"/, 'A experiência móvel P0 deve ter estilos próprios');
 assert.match(html, /#cardSessaoMinima \{ display:none !important; \}/, 'O Plano B deve sair da interface');
 assert.match(html, /function fecharTodosDetalhesPerfil\(\)/, 'A navegação deve fechar os detalhes de Perfil antes de trocar de destino');
@@ -78,7 +78,7 @@ assert.match(html, /icone = String\(proximo\.tipo/, 'O próximo compromisso deve
 assert.match(html, /botao\.disabled = true/, 'O envio de código deve impedir pedidos repetidos');
 assert.match(proxy, /controlador\.abort\(\), 27000/, 'O proxy deve tolerar a latência normal do Apps Script');
 assert.match(proxy, /guardarPedidoAtualizacaoDadosPortal/, 'O proxy deve permitir pedidos de alteração de dados');
-assert.match(sw, /almove-portal-v64/, 'A cache PWA deve avançar para v64');
+assert.match(sw, /almove-portal-v65/, 'A cache PWA deve avançar para v65');
 assert.match(sw, /\/js\/exercise-media\.js/, 'O catálogo visual deve estar disponível offline');
 assert.equal((html.match(/body\.perfil-detalhe-aberto #tabPlanos/g) || []).length, 1, 'O Perfil só pode ter uma regra que escolhe a subpágina visível');
 assert.match(html, /:not\(#perfilMapa\):not\(#perfilPassaporte\)/, 'Mapa e Passaporte não podem ser escondidos ao abrir o detalhe');
@@ -86,14 +86,18 @@ assert.doesNotMatch(sw, /\/js\/avatar-studio\.js/, 'O avatar removido não deve 
 assert.match(sw, /\/js\/activity-heatmap\.js/, 'O Mapa AL MOVE deve estar disponível offline');
 const etapaInstalacao = sw.split("self.addEventListener('activate'")[0];
 assert.doesNotMatch(etapaInstalacao, /skipWaiting/, 'A atualização não deve ativar automaticamente durante a instalação');
-assert.match(sw, /\/al-move-mark\.png/, 'O service worker deve usar o ícone realmente entregue');
+assert.match(sw, /\/icons\/icon-192\.png/, 'O service worker deve preparar o ícone pequeno para instalação');
+assert.match(sw, /\/icons\/icon-any-512\.png/, 'O service worker deve preparar o ícone Android padrão');
+assert.match(sw, /\/icons\/icon-maskable-512\.png/, 'O service worker deve preparar o ícone maskable Android');
 const manifesto = JSON.parse(manifest);
 assert.equal(manifesto.display, 'standalone', 'O manifest deve abrir a PWA em modo app');
-assert.equal(manifesto.icons[0].src, '/al-move-mark.png', 'O manifest deve usar o ícone entregue');
+assert.ok(manifesto.icons.some((icone) => icone.src === '/icons/icon-192.png' && icone.sizes === '192x192' && icone.purpose === 'any'), 'O manifest deve declarar o ícone de 192px');
+assert.ok(manifesto.icons.some((icone) => icone.src === '/icons/icon-any-512.png' && icone.sizes === '512x512' && icone.purpose === 'any'), 'O manifest deve declarar o ícone padrão de 512px');
+assert.ok(manifesto.icons.some((icone) => icone.src === '/icons/icon-maskable-512.png' && icone.sizes === '512x512' && icone.purpose === 'maskable'), 'O manifest deve declarar o ícone maskable de 512px');
 
 for (const ficheiro of ['chest-press-machine.webp', 'wide-grip-lat-pulldown.webp', 'triceps-pushdown-rope.webp']) {
   const info = await stat(new URL('../images/exercises/' + ficheiro, import.meta.url));
   assert.ok(info.size > 10000, 'A imagem ' + ficheiro + ' deve estar incluída no portal');
 }
 
-console.log('Contratos do portal v64 validados.');
+console.log('Contratos do portal v65 validados.');
