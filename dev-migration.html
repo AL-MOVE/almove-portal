@@ -36,14 +36,16 @@
       ['agendaPortal', 'Agenda do portal', resumo => resumo.registos.agendaPortal || 0]
     ];
 
-    function mostrarParidade(origem, destino) {
+    function mostrarParidade(origem, importado, development, destino) {
       const linhas = camposParidade.map(([chave, nome, obterOrigem]) => {
         const esperado = Number(obterOrigem(origem) || 0);
-        const copiado = Number(destino[chave] || 0);
-        const estadoLinha = esperado === copiado ? 'Confirmado' : 'Por reconciliar';
-        return `<tr><th scope="row">${nome}</th><td>${esperado}</td><td>${copiado}</td><td>${estadoLinha}</td></tr>`;
+        const copiado = Number(importado[chave] || 0);
+        const criadoNoDevelopment = Number(development[chave] || 0);
+        const total = Number(destino[chave] || 0);
+        const estadoLinha = esperado !== copiado ? 'Por reconciliar' : criadoNoDevelopment ? 'Origem confirmada + Development' : 'Confirmado';
+        return `<tr><th scope="row">${nome}</th><td>${esperado}</td><td>${copiado}</td><td>${criadoNoDevelopment}</td><td>${total}</td><td>${estadoLinha}</td></tr>`;
       }).join('');
-      detalhe.innerHTML = `<h2>Verificação de paridade</h2><table><thead><tr><th>Dados</th><th>Origem</th><th>Firebase Development</th><th>Estado</th></tr></thead><tbody>${linhas}</tbody></table>`;
+      detalhe.innerHTML = `<h2>Verificação de paridade</h2><p>A coluna “Cópia da origem” é a referência para a paridade. Registos criados no Development são mantidos separadamente.</p><table><thead><tr><th>Dados</th><th>Origem</th><th>Cópia da origem</th><th>Criado no Development</th><th>Total no Development</th><th>Estado</th></tr></thead><tbody>${linhas}</tbody></table>`;
       detalhe.hidden = false;
     }
 
@@ -74,7 +76,7 @@
         if (!resposta.ok || !dados.ok) throw new Error(dados.erro || 'Não foi possível validar a origem.');
 
         const origem = dados.resumo;
-        mostrarParidade(origem, dados.destino || {});
+        mostrarParidade(origem, dados.importado || {}, dados.development || {}, dados.destino || {});
         if (dados.paridade) {
           estado.textContent = `Paridade confirmada: ${dados.destino.clientes} clientes, ${dados.destino.packs} packs ativos, ${dados.destino.packsHistorico} packs históricos, ${dados.destino.sessoes} sessões, ${dados.destino.checkins} check-ins, ${dados.destino.avaliacoes} avaliações, ${dados.destino.notas} notas, ${dados.destino.planos} planos de treino e ${dados.destino.pacotesEspeciais} pacotes especiais no Firebase Development.`;
           copiar.textContent = 'Atualizar cópia Development';

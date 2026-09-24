@@ -3,6 +3,13 @@ import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firest
 import { normalizarAvaliacaoFisicaLegada, normalizarCheckinLegado, normalizarClienteLegado, normalizarPackLegado, normalizarSessaoLegada } from '../../api/_crm-schema.js';
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgPYkfxZiDgi9-2l8wu0RBKmiG_g_p66VRh-Hp6QOvtMofgiJSdeV19Bxe_mSGuB1I/exec';
+const COLECOES_MIGRACAO = Object.freeze({
+  clientes: 'crmMigrationClients', packs: 'crmMigrationPacks', packsHistorico: 'crmMigrationPackHistory', sessoes: 'crmMigrationSessions',
+  checkins: 'crmMigrationCheckins', avaliacoes: 'crmMigrationPhysicalAssessments', notas: 'crmMigrationNotes', planos: 'crmMigrationTrainingPlans',
+  sessoesPt: 'crmMigrationPersonalTrainingSessions', execucoesTreino: 'crmMigrationTrainingExecutions', posTreino: 'crmMigrationPostTraining',
+  catalogoPacotesEspeciais: 'crmMigrationSpecialPackageCatalog', pacotesEspeciais: 'crmMigrationSpecialPackages',
+  pedidosAvaliacao: 'crmMigrationAssessmentRequests', agendaPortal: 'crmMigrationPortalAgenda'
+});
 
 function responder(res, estado, corpo) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -29,13 +36,21 @@ export default async function handler(req, res) {
       if (String(req.query?.verify || '') !== '1') return responder(res, 200, { ok: true, resumo: dados.dados });
       const snapshot = dados.dados || {};
       const esperado = { clientes: (snapshot.clientes || []).length, packs: (snapshot.packs || []).length, packsHistorico: (snapshot.packsHistorico || []).length, sessoes: (snapshot.sessoes || []).length, checkins: (snapshot.checkins || []).length, avaliacoes: (snapshot.avaliacoes || []).length, notas: (snapshot.notas || []).length, planos: (snapshot.planos || []).length, sessoesPt: (snapshot.sessoesPt || []).length, execucoesTreino: (snapshot.execucoesTreino || []).length, posTreino: (snapshot.posTreino || []).length, catalogoPacotesEspeciais: (snapshot.catalogoPacotesEspeciais || []).length, pacotesEspeciais: (snapshot.pacotesEspeciais || []).length, pedidosAvaliacao: (snapshot.pedidosAvaliacao || []).length, agendaPortal: (snapshot.agendaPortal || []).length };
-      const [clientes, packs, packsHistorico, sessoes, checkins, avaliacoes, notas, planos, sessoesPt, execucoesTreino, posTreino, catalogoPacotesEspeciais, pacotesEspeciais, pedidosAvaliacao, agendaPortal] = await Promise.all([
-        db.collection('crmMigrationClients').count().get(), db.collection('crmMigrationPacks').count().get(), db.collection('crmMigrationPackHistory').count().get(), db.collection('crmMigrationSessions').count().get(), db.collection('crmMigrationCheckins').count().get(), db.collection('crmMigrationPhysicalAssessments').count().get(), db.collection('crmMigrationNotes').count().get(), db.collection('crmMigrationTrainingPlans').count().get(), db.collection('crmMigrationPersonalTrainingSessions').count().get(), db.collection('crmMigrationTrainingExecutions').count().get(), db.collection('crmMigrationPostTraining').count().get(), db.collection('crmMigrationSpecialPackageCatalog').count().get(), db.collection('crmMigrationSpecialPackages').count().get(), db.collection('crmMigrationAssessmentRequests').count().get(), db.collection('crmMigrationPortalAgenda').count().get()
-      ]);
-      const destino = { clientes: clientes.data().count, packs: packs.data().count, packsHistorico: packsHistorico.data().count, sessoes: sessoes.data().count, checkins: checkins.data().count, avaliacoes: avaliacoes.data().count, notas: notas.data().count, planos: planos.data().count, sessoesPt: sessoesPt.data().count, execucoesTreino: execucoesTreino.data().count, posTreino: posTreino.data().count, catalogoPacotesEspeciais: catalogoPacotesEspeciais.data().count, pacotesEspeciais: pacotesEspeciais.data().count, pedidosAvaliacao: pedidosAvaliacao.data().count, agendaPortal: agendaPortal.data().count };
-      const paridade = Object.keys(esperado).every(chave => esperado[chave] === destino[chave]);
+      const contagens = await Promise.all(Object.entries(COLECOES_MIGRACAO).map(async ([chave, colecao]) => {
+        const referencia = db.collection(colecao);
+        const [total, importado, development] = await Promise.all([
+          referencia.count().get(),
+          referencia.where('migration.source', '==', 'apps-script').count().get(),
+          referencia.where('origem', '==', 'firebase-development').count().get()
+        ]);
+        return [chave, { total: total.data().count, importado: importado.data().count, development: development.data().count }];
+      }));
+      const destino = Object.fromEntries(contagens.map(([chave, contagem]) => [chave, contagem.total]));
+      const importado = Object.fromEntries(contagens.map(([chave, contagem]) => [chave, contagem.importado]));
+      const development = Object.fromEntries(contagens.map(([chave, contagem]) => [chave, contagem.development]));
+      const paridade = Object.keys(esperado).every(chave => esperado[chave] === importado[chave]);
       const resumo = { clientes: { total: esperado.clientes }, registos: { packsAtivos: esperado.packs, packsHistorico: esperado.packsHistorico, sessoes: esperado.sessoes, checkins: esperado.checkins, avaliacoes: esperado.avaliacoes, notas: esperado.notas, planos: esperado.planos, sessoesPt: esperado.sessoesPt, execucoesTreino: esperado.execucoesTreino, posTreino: esperado.posTreino, catalogoPacotesEspeciais: esperado.catalogoPacotesEspeciais, pacotesEspeciais: esperado.pacotesEspeciais, pedidosAvaliacao: esperado.pedidosAvaliacao, agendaPortal: esperado.agendaPortal } };
-      return responder(res, 200, { ok: true, resumo, destino, paridade });
+      return responder(res, 200, { ok: true, resumo, destino, importado, development, paridade });
     }
     const origem = dados.dados || {};
     const registos = [
