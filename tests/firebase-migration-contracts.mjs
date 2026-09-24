@@ -51,6 +51,8 @@ const devCrm = fs.readFileSync(new URL('../dev-crm.html', import.meta.url), 'utf
 assert.match(devCrm, /reenviarConfirmacao/, 'O verificador CRM deve permitir confirmar contas de desenvolvimento.');
 assert.match(devCrm, /enviarRecuperacao/, 'O login CRM deve permitir recuperar a palavra-passe.');
 assert.match(coachFirebase, /AlMoveSessaoCRM\.exigirCoach/, 'A interface CRM não pode iniciar sem uma sessão de equipa.');
+assert.match(coachFirebase, /function obterAtalhoPwaCoach\(\)/, 'O Coach deve abrir os atalhos nativos na área certa.');
+assert.ok(coachManifest.shortcuts.some((atalho) => atalho.url === '/coach-firebase.html?abrir=agenda&source=pwa'), 'O Coach deve expor o atalho nativo para a agenda.');
 assert.match(coachFirebase, /terminarSessaoCRM/, 'A equipa deve poder terminar a sessão do CRM neste dispositivo.');
 assert.match(coachFirebase, /beforeinstallprompt/, 'O Coach deve poder pedir a instalação PWA quando o browser a disponibiliza.');
 assert.match(coachFirebase, /abrirAjudaInstalacaoCoach/, 'O Coach móvel deve explicar a instalação quando o browser não abre o pedido automático.');
@@ -59,7 +61,7 @@ assert.match(coachFirebase, /coach-bottom-nav/, 'O Coach móvel deve ter uma nav
 assert.match(coachFirebase, /abrirMenuInferiorCoach/, 'As restantes áreas do Coach devem continuar acessíveis através de Mais.');
 assert.equal(coachManifest.display, 'standalone', 'O Coach instalado deve abrir sem a interface do browser.');
 assert.ok(coachManifest.icons.some(icone => icone.sizes === '192x192') && coachManifest.icons.some(icone => icone.sizes === '512x512'), 'O Coach precisa de ícones PWA Android de 192px e 512px.');
-assert.match(coachWorker, /almove-coach-shell-v2/, 'O Coach deve ter um shell PWA independente do Portal do Cliente.');
+assert.match(coachWorker, /almove-coach-shell-v3/, 'O Coach deve ter um shell PWA independente do Portal do Cliente.');
 assert.match(coachWorker, /respostaSemLigacao/, 'O Coach instalado deve responder de forma controlada sem rede.');
 assert.match(coachFirebase, /sidebar-responsive-fix/, 'A navegação compacta deve vencer as regras antigas da sidebar.');
 assert.match(coachFirebase, /max-width: 1024px/, 'O menu lateral deve passar a gaveta antes de ficar comprimido.');

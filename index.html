@@ -2527,10 +2527,20 @@
   document.querySelectorAll(".tab-btn").forEach(function (btn) {
     btn.addEventListener("click", function () { mudarTab(btn.getAttribute("data-tab")); });
   });
+  function aplicarAtalhoPwaPortal() {
+    const url = new URL(window.location.href);
+    const destino = String(url.searchParams.get("abrir") || "").toLowerCase();
+    if (!TABS.includes(destino)) return;
+    mudarTab(destino);
+    url.searchParams.delete("abrir");
+    url.searchParams.delete("source");
+    window.history.replaceState({}, "", url.pathname + (url.search || "") + url.hash);
+  }
+  aplicarAtalhoPwaPortal();
   normalizarIconesFixos();
   const versaoPortalEl = document.createElement("div");
   versaoPortalEl.className = "versao-portal";
-  versaoPortalEl.textContent = "AL MOVE · versão 64";
+  versaoPortalEl.textContent = "AL MOVE · versão 67";
   document.getElementById("tabPlanos").appendChild(versaoPortalEl);
 
   const painelPrivacidadeEl = document.getElementById("painelPrivacidade");
@@ -5887,7 +5897,7 @@
   // ---------- Service worker ----------
   // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
   // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
-  const VERSAO_CLIENTE_PORTAL = "66";
+  const VERSAO_CLIENTE_PORTAL = "67";
   let eventoInstalacaoPortal = null;
   function portalEstaInstalado() {
     return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;

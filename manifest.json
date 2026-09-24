@@ -1,11 +1,16 @@
 {
   "name": "AL MOVE — Portal do Cliente",
   "short_name": "AL MOVE",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#06111e",
   "theme_color": "#06111e",
+  "lang": "pt-PT",
+  "dir": "ltr",
+  "categories": ["health", "fitness", "lifestyle"],
   "description": "Acompanhamento, treino e evolução AL MOVE.",
   "icons": [
     {
@@ -25,6 +30,22 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Treinos",
+      "short_name": "Treinos",
+      "description": "Abrir os teus treinos",
+      "url": "/?abrir=hoje&source=pwa",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Perfil",
+      "short_name": "Perfil",
+      "description": "Abrir o teu perfil AL MOVE",
+      "url": "/?abrir=planos&source=pwa",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }

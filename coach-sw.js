@@ -1,6 +1,6 @@
 /* O Coach guarda apenas o shell público da aplicação. Dados clínicos, alunos,
    credenciais e chamadas API continuam sempre a ser pedidas à rede. */
-const VERSAO_CACHE_COACH = 'almove-coach-shell-v2';
+const VERSAO_CACHE_COACH = 'almove-coach-shell-v3';
 const SHELL_COACH = [
   '/coach-firebase.html',
   '/coach-manifest.json',

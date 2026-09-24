@@ -9,6 +9,8 @@
   "prefer_related_applications": false,
   "background_color": "#07121d",
   "theme_color": "#07121d",
+  "lang": "pt-PT",
+  "dir": "ltr",
   "description": "Aplicação de trabalho para coaches AL MOVE.",
   "categories": ["health", "fitness", "productivity"],
   "icons": [
@@ -29,6 +31,29 @@
       "sizes": "1254x1254",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Agenda",
+      "short_name": "Agenda",
+      "description": "Abrir a agenda semanal",
+      "url": "/coach-firebase.html?abrir=agenda&source=pwa",
+      "icons": [{ "src": "/icons/coach-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Alunos",
+      "short_name": "Alunos",
+      "description": "Abrir a carteira de alunos",
+      "url": "/coach-firebase.html?abrir=clientes&source=pwa",
+      "icons": [{ "src": "/icons/coach-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Avaliações",
+      "short_name": "Avaliações",
+      "description": "Abrir avaliações físicas",
+      "url": "/coach-firebase.html?abrir=avaliacoes&source=pwa",
+      "icons": [{ "src": "/icons/coach-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }

@@ -2,7 +2,7 @@
 // A versão sobe com esta atualização visual para que instalações existentes
 // recebam o novo index.html em vez de manterem a versão anterior em cache.
 
-const VERSAO_CACHE = 'almove-portal-v66';
+const VERSAO_CACHE = 'almove-portal-v67';
 const PREFIXO_CACHE_PORTAL = 'almove-portal-';
 
 // O domínio também aloja ferramentas internas. O service worker do cliente
@@ -17,6 +17,8 @@ const ROTAS_FORA_DO_PORTAL = new Set([
 ]);
 
 const FICHEIROS_ESSENCIAIS = [
+  '/',
+  '/index.html',
   '/manifest.json',
   '/al-move-mark.png',
   '/icons/icon-192.png',
@@ -71,11 +73,14 @@ self.addEventListener('fetch', (evento) => {
     evento.respondWith(
       fetch(new Request(evento.request, { cache: 'no-store' }))
         .then((respostaRede) => {
+          if (!respostaRede || !respostaRede.ok || respostaRede.type !== 'basic') return respostaRede;
           const clone = respostaRede.clone();
           caches.open(VERSAO_CACHE).then((cache) => cache.put(evento.request, clone));
           return respostaRede;
         })
-        .catch(() => caches.match(evento.request))
+        .catch(() => caches.match(evento.request).then((respostaCache) => (
+          respostaCache || caches.match('/').then((paginaPrincipal) => paginaPrincipal || caches.match('/index.html'))
+        )))
     );
     return;
   }
@@ -84,14 +89,14 @@ self.addEventListener('fetch', (evento) => {
     caches.match(evento.request).then((respostaCache) => (
       respostaCache ||
       fetch(evento.request).then((respostaRede) => {
-        const clone = respostaRede.clone();
-        caches.open(VERSAO_CACHE).then((cache) => {
-          if (respostaRede && respostaRede.status === 200 && respostaRede.type === 'basic') {
+        if (respostaRede && respostaRede.status === 200 && respostaRede.type === 'basic') {
+          const clone = respostaRede.clone();
+          caches.open(VERSAO_CACHE).then((cache) => {
             cache.put(evento.request, clone);
-          }
-        });
+          });
+        }
         return respostaRede;
-      })
+      }).catch(() => caches.match(evento.request).then((respostaCache) => respostaCache || Response.error()))
     ))
   );
 });
