@@ -59,6 +59,10 @@ assert.match(html, /id="btnInstalarPortal"/, 'O Portal deve expor uma ação de 
 assert.match(html, /beforeinstallprompt/, 'O Portal deve usar o pedido de instalação nativo quando o browser o disponibiliza');
 assert.match(html, /abrirAjudaInstalacaoPortal/, 'O Portal deve explicar a instalação quando o browser não abre o pedido automático');
 assert.match(html, /portalEstaInstalado/, 'O botão de instalação deve desaparecer numa PWA já instalada');
+assert.match(html, /token\(fn === "getBootstrapPortal"\)/, 'O arranque deve renovar o token Firebase antes de pedir dados');
+assert.match(html, /erro\.status = resposta\.status/, 'O frontend deve distinguir recusas de autenticação de indisponibilidade');
+assert.match(html, /reporAcessoPortalAposFalhaAutenticacao/, 'Uma sessão Firebase recusada deve regressar ao ecrã de entrada');
+assert.match(html, /acessoPortalReposto/, 'O Portal não deve renderizar um dashboard vazio depois de repor o acesso');
 
 assert.match(backend, /doms < 0 \|\| doms > 4/, 'O backend deve aceitar DOMS de 0 a 4');
 assert.match(backend, /diasSemana\.push\(/, 'O backend deve devolver os sete dias dos passos');

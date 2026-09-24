@@ -2155,6 +2155,16 @@
     definirCamadaExclusiva(ecraEntradaPortal, true);
     if (mensagem) entradaPortalEstado.textContent = mensagem;
   }
+  function reporAcessoPortalAposFalhaAutenticacao() {
+    try {
+      localStorage.removeItem("ALMOVE_FIREBASE_SESSAO");
+      localStorage.removeItem("ALMOVE_FIREBASE_EMAIL");
+    } catch (erro) {}
+    if (window.AlMoveFirebaseAuth && window.AlMoveFirebaseAuth.sair) {
+      window.AlMoveFirebaseAuth.sair().catch(function () {});
+    }
+    mostrarEntradaPortal("Não foi possível validar o acesso desta conta. Entra com a conta associada ao convite do teu treinador.");
+  }
   const modoEntradaFirebase = "entrar";
   function configurarEntradaFirebase() {
     if (!window.AlMoveFirebaseAuth || !window.ALMOVE_FIREBASE_CONFIG || !window.ALMOVE_FIREBASE_CONFIG.obter) return Promise.reject(new Error("FIREBASE_NAO_CONFIGURADO"));
@@ -2342,6 +2352,11 @@
       .catch(function (erro) {
         if (avisoDemora) window.clearTimeout(avisoDemora);
         bootstrapPortalPromise = null;
+        if (FIREBASE_ATIVA && Number(erro && erro.status) === 401) {
+          reporAcessoPortalAposFalhaAutenticacao();
+          erro.acessoPortalReposto = true;
+          throw erro;
+        }
         const local = lerBootstrapLocal();
         if (local) {
           mostrarFalhaBootstrap(true);
@@ -3772,7 +3787,9 @@
       const corpo = Object.assign({ fn: fn, token: TOKEN }, dados || {});
       const headersAutenticacao = {};
       if (FIREBASE_ATIVA && endpoint === "/api/almove") {
-        const idToken = await window.AlMoveFirebaseAuth.token();
+        // A primeira leitura confirma também que uma sessão deixada aberta
+        // recebeu um ID token recente antes de a Vercel a validar.
+        const idToken = await window.AlMoveFirebaseAuth.token(fn === "getBootstrapPortal");
         if (!idToken) throw new Error("A tua sessão terminou. Entra novamente.");
         headersAutenticacao.Authorization = "Bearer " + idToken;
       }
@@ -3791,7 +3808,11 @@
       });
     }).then(function (resposta) {
       return resposta.json().catch(function () { throw new Error("O servidor devolveu uma resposta inválida."); }).then(function (corpo) {
-        if (!resposta.ok || !corpo || corpo.ok === false) throw new Error((corpo && corpo.erro) || ("O servidor respondeu com erro " + resposta.status + "."));
+        if (!resposta.ok || !corpo || corpo.ok === false) {
+          const erro = new Error((corpo && corpo.erro) || ("O servidor respondeu com erro " + resposta.status + "."));
+          erro.status = resposta.status;
+          throw erro;
+        }
         return corpo;
       });
     });
@@ -5855,7 +5876,8 @@
           // Sem plano carregado — o cliente continua a ver check-in/prontidão normalmente.
         });
     })
-    .catch(function () {
+    .catch(function (erro) {
+      if (erro && erro.acessoPortalReposto) return;
       ecraCarregando.classList.add("oculto");
       cardCheckin.classList.remove("oculto");
       checkinErro.textContent = navigator.onLine === false ? "Sem ligação. Tenta novamente quando tiveres rede." : "Não foi possível carregar agora. Tenta novamente.";
