@@ -34,7 +34,7 @@ assert.match(html, /id="perfilPassaporte"/, 'O Passaporte Técnico deve estar di
 assert.match(html, /<option value="rir" selected>RIR<\/option>/, 'RIR deve ser o método de intensidade predefinido');
 assert.match(html, /localStorage\.getItem\("ALMOVE_SESSAO_PORTAL"\)/, 'A sessão curta deve sobreviver ao fecho da PWA');
 assert.match(html, /bootstrapPortalPromise = SESSAO_PRONTA\.then/, 'O bootstrap deve aguardar pela autenticação antes de mostrar sincronização');
-assert.match(html, /VERSAO_CLIENTE_PORTAL = "65"/, 'O cliente deve identificar a versão da atualização');
+assert.match(html, /VERSAO_CLIENTE_PORTAL = "66"/, 'O cliente deve identificar a versão da atualização');
 assert.match(html, /id="p0-experience-hardening"/, 'A experiência móvel P0 deve ter estilos próprios');
 assert.match(html, /#cardSessaoMinima \{ display:none !important; \}/, 'O Plano B deve sair da interface');
 assert.match(html, /function fecharTodosDetalhesPerfil\(\)/, 'A navegação deve fechar os detalhes de Perfil antes de trocar de destino');
@@ -86,7 +86,7 @@ assert.match(html, /icone = String\(proximo\.tipo/, 'O próximo compromisso deve
 assert.match(html, /botao\.disabled = true/, 'O envio de código deve impedir pedidos repetidos');
 assert.match(proxy, /controlador\.abort\(\), 27000/, 'O proxy deve tolerar a latência normal do Apps Script');
 assert.match(proxy, /guardarPedidoAtualizacaoDadosPortal/, 'O proxy deve permitir pedidos de alteração de dados');
-assert.match(sw, /almove-portal-v65/, 'A cache PWA deve avançar para v65');
+assert.match(sw, /almove-portal-v66/, 'A cache PWA deve avançar para v66');
 assert.match(sw, /\/js\/exercise-media\.js/, 'O catálogo visual deve estar disponível offline');
 assert.equal((html.match(/body\.perfil-detalhe-aberto #tabPlanos/g) || []).length, 1, 'O Perfil só pode ter uma regra que escolhe a subpágina visível');
 assert.match(html, /:not\(#perfilMapa\):not\(#perfilPassaporte\)/, 'Mapa e Passaporte não podem ser escondidos ao abrir o detalhe');
@@ -97,6 +97,10 @@ assert.doesNotMatch(etapaInstalacao, /skipWaiting/, 'A atualização não deve a
 assert.match(sw, /\/icons\/icon-192\.png/, 'O service worker deve preparar o ícone pequeno para instalação');
 assert.match(sw, /\/icons\/icon-any-512\.png/, 'O service worker deve preparar o ícone Android padrão');
 assert.match(sw, /\/icons\/icon-maskable-512\.png/, 'O service worker deve preparar o ícone maskable Android');
+assert.match(sw, /nome\.startsWith\(PREFIXO_CACHE_PORTAL\)/, 'A PWA do cliente só pode remover as suas próprias caches');
+assert.match(sw, /ROTAS_FORA_DO_PORTAL/, 'A PWA do cliente deve reconhecer as áreas internas separadas');
+assert.match(sw, /\/coach-firebase\.html/, 'A página do Coach não pode ser tratada como uma página do cliente');
+assert.match(sw, /\/dev-crm\.html/, 'A página do CRM não pode ser tratada como uma página do cliente');
 const manifesto = JSON.parse(manifest);
 assert.equal(manifesto.display, 'standalone', 'O manifest deve abrir a PWA em modo app');
 assert.ok(manifesto.icons.some((icone) => icone.src === '/icons/icon-192.png' && icone.sizes === '192x192' && icone.purpose === 'any'), 'O manifest deve declarar o ícone de 192px');
@@ -108,4 +112,4 @@ for (const ficheiro of ['chest-press-machine.webp', 'wide-grip-lat-pulldown.webp
   assert.ok(info.size > 10000, 'A imagem ' + ficheiro + ' deve estar incluída no portal');
 }
 
-console.log('Contratos do portal v65 validados.');
+console.log('Contratos do portal v66 validados.');

@@ -2,7 +2,19 @@
 // A versão sobe com esta atualização visual para que instalações existentes
 // recebam o novo index.html em vez de manterem a versão anterior em cache.
 
-const VERSAO_CACHE = 'almove-portal-v65';
+const VERSAO_CACHE = 'almove-portal-v66';
+const PREFIXO_CACHE_PORTAL = 'almove-portal-';
+
+// O domínio também aloja ferramentas internas. O service worker do cliente
+// não lhes deve responder nem guardá-las na cache da PWA do Portal.
+const ROTAS_FORA_DO_PORTAL = new Set([
+  '/coach-firebase.html',
+  '/coach.html',
+  '/coach-manifest.json',
+  '/coach-sw.js',
+  '/dev-crm.html',
+  '/dev-migration.html'
+]);
 
 const FICHEIROS_ESSENCIAIS = [
   '/manifest.json',
@@ -30,7 +42,7 @@ self.addEventListener('activate', (evento) => {
     caches.keys().then((nomes) =>
       Promise.all(
         nomes
-          .filter((nome) => nome !== VERSAO_CACHE)
+          .filter((nome) => nome.startsWith(PREFIXO_CACHE_PORTAL) && nome !== VERSAO_CACHE)
           .map((nome) => caches.delete(nome))
       )
     )
@@ -45,6 +57,10 @@ self.addEventListener('fetch', (evento) => {
   if (evento.request.url.includes('/api/')) return;
 
   const url = new URL(evento.request.url);
+  if (url.origin === self.location.origin && (
+    ROTAS_FORA_DO_PORTAL.has(url.pathname) ||
+    url.pathname.startsWith('/icons/coach-')
+  )) return;
   const pedePaginaNova = evento.request.mode === 'navigate' ||
     url.pathname === '/' ||
     url.pathname.endsWith('/index.html');
