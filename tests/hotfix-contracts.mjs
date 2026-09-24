@@ -55,6 +55,10 @@ assert.match(html, /Exercícios por <a href="https:\/\/repdb\.co"/, 'A licença 
 assert.doesNotMatch(html, /Criar o primeiro acesso/, 'O portal não deve sugerir criação autónoma sem convite');
 assert.match(html, /Ainda não recebi convite/, 'O primeiro acesso deve encaminhar para o convite do CRM');
 assert.doesNotMatch(html, /\}, 350\);/, 'A atualização não deve forçar reload antes de o novo service worker ativar');
+assert.match(html, /id="btnInstalarPortal"/, 'O Portal deve expor uma ação de instalação PWA no próprio ecrã');
+assert.match(html, /beforeinstallprompt/, 'O Portal deve usar o pedido de instalação nativo quando o browser o disponibiliza');
+assert.match(html, /abrirAjudaInstalacaoPortal/, 'O Portal deve explicar a instalação quando o browser não abre o pedido automático');
+assert.match(html, /portalEstaInstalado/, 'O botão de instalação deve desaparecer numa PWA já instalada');
 
 assert.match(backend, /doms < 0 \|\| doms > 4/, 'O backend deve aceitar DOMS de 0 a 4');
 assert.match(backend, /diasSemana\.push\(/, 'O backend deve devolver os sete dias dos passos');

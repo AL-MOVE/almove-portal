@@ -1262,7 +1262,7 @@
 
   <style id="entrada-portal-estilo">
     .entrada-portal{position:fixed;z-index:360;inset:0;display:grid;place-items:center;min-height:100dvh;padding:24px;background:radial-gradient(circle at 88% 4%,rgba(45,212,191,.15),transparent 30%),radial-gradient(circle at 6% 92%,rgba(11,92,194,.32),transparent 34%),#06111e;color:#f7fbff}.entrada-portal::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(45,212,191,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(45,212,191,.025) 1px,transparent 1px);background-size:46px 46px;pointer-events:none}.entrada-portal-conteudo{position:relative;width:min(100%,480px)}.entrada-portal-marca{display:flex;align-items:center;gap:10px;margin-bottom:34px;color:#fff;font-size:15px;font-weight:900;letter-spacing:.03em}.entrada-portal-marca i{width:10px;height:10px;border-radius:50%;background:#2dd4bf;box-shadow:0 0 18px rgba(45,212,191,.86)}.entrada-portal-titulo{max-width:12ch;margin:0;color:#fff;font-size:clamp(38px,10vw,56px);line-height:.96;letter-spacing:-.065em}.entrada-portal-titulo span{color:#2dd4bf}.entrada-portal-sub{max-width:38ch;margin:18px 0 28px;color:#aab9ca;font-size:15px;line-height:1.55}.entrada-portal-form{padding:20px;border:1px solid rgba(45,212,191,.26);border-radius:18px;background:rgba(8,24,40,.82);box-shadow:0 20px 55px rgba(0,0,0,.26)}.entrada-portal-form label{display:block;margin-bottom:8px;color:#dbe7f4;font-size:12px;font-weight:850}.entrada-portal-form input{box-sizing:border-box;width:100%;min-height:52px;padding:0 14px;border:1px solid rgba(166,190,211,.28);border-radius:12px;outline:0;background:#0c1b2d;color:#fff;font:inherit;font-size:16px}.entrada-portal-form input:focus{border-color:#2dd4bf;box-shadow:0 0 0 3px rgba(45,212,191,.14)}.entrada-portal-form button{width:100%;min-height:52px;margin-top:11px;border:0;border-radius:12px;background:#2dd4bf;color:#03201d;font:inherit;font-size:14px;font-weight:900;cursor:pointer}.entrada-portal-form button:active{transform:scale(.985)}.entrada-portal-estado{min-height:22px;margin:12px 0 0;color:#aab9ca;font-size:12px;line-height:1.45}.entrada-portal-nota{margin:20px 0 0;color:#8294a9;font-size:11px;line-height:1.5}.entrada-portal-nota strong{color:#c8d6e5}@media(min-width:700px){.entrada-portal-conteudo{transform:translateX(-8vw)}}
-    .entrada-portal-form label{margin-top:14px}.entrada-portal-form label:first-child{margin-top:0}.entrada-portal-form button{margin-top:14px}.entrada-portal-acoes{display:flex;justify-content:space-between;gap:12px;margin-top:13px}.entrada-portal-acoes button{width:auto;min-height:44px;margin:0;padding:0;background:none;color:#9cdbd4;font-size:12px;text-align:left}.entrada-portal-acoes button:last-child{text-align:right}
+    .entrada-portal-form label{margin-top:14px}.entrada-portal-form label:first-child{margin-top:0}.entrada-portal-form button{margin-top:14px}.entrada-portal-acoes{display:flex;justify-content:space-between;gap:12px;margin-top:13px}.entrada-portal-acoes button{width:auto;min-height:44px;margin:0;padding:0;background:none;color:#9cdbd4;font-size:12px;text-align:left}.entrada-portal-acoes button:last-child{text-align:right}.entrada-portal-instalar{display:none;align-items:center;justify-content:center;gap:8px;width:100%;min-height:46px;margin-top:16px;border:1px solid rgba(45,212,191,.42);border-radius:12px;background:rgba(45,212,191,.08);color:#a8fff2;font:inherit;font-size:12px;font-weight:850;cursor:pointer}.entrada-portal-instalar.visivel{display:flex}.entrada-portal-instalar::before{content:'⇩';font-size:16px;line-height:1}.entrada-portal-instalar:active{transform:scale(.985)}
   </style>
   <section class="entrada-portal oculto" id="ecraEntradaPortal" aria-labelledby="entradaPortalTitulo">
     <div class="entrada-portal-conteudo">
@@ -1284,6 +1284,7 @@
         <p class="entrada-portal-estado" id="entradaPortalEstado" aria-live="polite"></p>
       </form>
       <p class="entrada-portal-nota"><strong>Primeiro acesso:</strong> abre o convite enviado pelo teu treinador e escolhe aí a tua palavra-passe. Depois regressa a este ecrã para entrar.</p>
+      <button type="button" class="entrada-portal-instalar" id="btnInstalarPortal" onclick="instalarPortalPWA()">Instalar app</button>
     </div>
   </section>
 
@@ -5865,6 +5866,59 @@
   // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
   // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
   const VERSAO_CLIENTE_PORTAL = "65";
+  let eventoInstalacaoPortal = null;
+  function portalEstaInstalado() {
+    return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  }
+  function atualizarAcaoInstalacaoPortal() {
+    const botao = document.getElementById("btnInstalarPortal");
+    if (!botao) return;
+    const instalado = portalEstaInstalado();
+    botao.classList.toggle("visivel", !instalado);
+    botao.textContent = eventoInstalacaoPortal ? "Instalar app" : "Como instalar";
+    botao.setAttribute("aria-label", eventoInstalacaoPortal ? "Instalar a aplicação AL MOVE" : "Ver como instalar a aplicação AL MOVE");
+  }
+  function abrirAjudaInstalacaoPortal() {
+    const existente = document.getElementById("portalInstallOverlay");
+    if (existente) { existente.style.display = "flex"; return; }
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const titulo = ios ? "Adicionar ao ecrã principal" : "Instalar AL MOVE";
+    const passos = ios
+      ? "<ol><li>Abre esta página no <strong>Safari</strong>.</li><li>Toca em <strong>Partilhar</strong> (quadrado com seta).</li><li>Escolhe <strong>Adicionar ao ecrã principal</strong>.</li></ol>"
+      : "<ol><li>Abre o menu do browser (⋮).</li><li>Escolhe <strong>Instalar app</strong>.</li><li>Confirma a instalação da AL MOVE.</li></ol>";
+    const overlay = document.createElement("div");
+    overlay.id = "portalInstallOverlay";
+    overlay.setAttribute("role", "presentation");
+    overlay.style.cssText = "position:fixed;inset:0;z-index:10020;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(1,7,14,.78);backdrop-filter:blur(6px);";
+    overlay.innerHTML = '<section role="dialog" aria-modal="true" aria-labelledby="portalInstallTitulo" style="width:min(440px,100%);border:1px solid rgba(45,212,191,.34);border-radius:18px;background:#0b1826;color:#edf7ff;box-shadow:0 24px 70px rgba(0,0,0,.45);padding:22px;">' +
+      '<div style="display:flex;align-items:flex-start;gap:14px;"><div style="display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#2dd4bf,#2584df);color:#062232;font-size:22px;font-weight:900;">⇩</div><div><div style="font-size:11px;font-weight:850;letter-spacing:.12em;color:#62f1dd;">AL MOVE</div><h2 id="portalInstallTitulo" style="margin:3px 0 0;font-size:20px;line-height:1.2;">' + titulo + "</h2></div></div>" +
+      '<p style="margin:18px 0 12px;color:#bdd0df;line-height:1.55;">A aplicação abre como uma app no teu telemóvel. Os teus dados continuam protegidos pela sessão segura.</p>' +
+      '<div style="padding:13px 14px;border:1px solid rgba(148,163,184,.18);border-radius:12px;background:rgba(15,30,46,.7);color:#e8f1f8;line-height:1.7;">' + passos + "</div>" +
+      '<button type="button" style="width:100%;min-height:48px;margin-top:18px;border:0;border-radius:12px;background:linear-gradient(100deg,#2dd4bf,#0b82d8);color:#04211f;font:inherit;font-size:12px;font-weight:900;cursor:pointer;" id="portalInstallFechar">Percebi</button></section>';
+    overlay.onclick = function(evento) { if (evento.target === overlay) overlay.remove(); };
+    document.body.appendChild(overlay);
+    overlay.querySelector("#portalInstallFechar").onclick = function() { overlay.remove(); };
+  }
+  function prepararInstalacaoPortal() {
+    atualizarAcaoInstalacaoPortal();
+    window.addEventListener("beforeinstallprompt", function(evento) {
+      evento.preventDefault();
+      eventoInstalacaoPortal = evento;
+      atualizarAcaoInstalacaoPortal();
+    });
+    window.addEventListener("appinstalled", function() {
+      eventoInstalacaoPortal = null;
+      atualizarAcaoInstalacaoPortal();
+    });
+  }
+  async function instalarPortalPWA() {
+    if (!eventoInstalacaoPortal) { abrirAjudaInstalacaoPortal(); return; }
+    eventoInstalacaoPortal.prompt();
+    await eventoInstalacaoPortal.userChoice.catch(function() { return null; });
+    eventoInstalacaoPortal = null;
+    atualizarAcaoInstalacaoPortal();
+  }
+  prepararInstalacaoPortal();
   const CHAVE_AVISO_SW = "ALMOVE_SW_AVISO_" + VERSAO_CLIENTE_PORTAL;
   let recarregarPorAtualizacao = false;
   let recarregamentoAgendado = false;
