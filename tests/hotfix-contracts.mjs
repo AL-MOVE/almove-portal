@@ -34,7 +34,7 @@ assert.match(html, /id="perfilPassaporte"/, 'O Passaporte Técnico deve estar di
 assert.match(html, /<option value="rir" selected>RIR<\/option>/, 'RIR deve ser o método de intensidade predefinido');
 assert.match(html, /localStorage\.getItem\("ALMOVE_SESSAO_PORTAL"\)/, 'A sessão curta deve sobreviver ao fecho da PWA');
 assert.match(html, /bootstrapPortalPromise = SESSAO_PRONTA\.then/, 'O bootstrap deve aguardar pela autenticação antes de mostrar sincronização');
-assert.match(html, /VERSAO_CLIENTE_PORTAL = "67"/, 'O cliente deve identificar a versão da atualização');
+assert.match(html, /VERSAO_CLIENTE_PORTAL = "68"/, 'O cliente deve identificar a versão da atualização');
 assert.match(html, /id="p0-experience-hardening"/, 'A experiência móvel P0 deve ter estilos próprios');
 assert.match(html, /#cardSessaoMinima \{ display:none !important; \}/, 'O Plano B deve sair da interface');
 assert.match(html, /function fecharTodosDetalhesPerfil\(\)/, 'A navegação deve fechar os detalhes de Perfil antes de trocar de destino');
@@ -86,7 +86,7 @@ assert.match(html, /icone = String\(proximo\.tipo/, 'O próximo compromisso deve
 assert.match(html, /botao\.disabled = true/, 'O envio de código deve impedir pedidos repetidos');
 assert.match(proxy, /controlador\.abort\(\), 27000/, 'O proxy deve tolerar a latência normal do Apps Script');
 assert.match(proxy, /guardarPedidoAtualizacaoDadosPortal/, 'O proxy deve permitir pedidos de alteração de dados');
-assert.match(sw, /almove-portal-v67/, 'A cache PWA deve avançar para v67');
+assert.match(sw, /almove-portal-v68/, 'A cache PWA deve avançar para v67');
 assert.match(sw, /\/js\/exercise-media\.js/, 'O catálogo visual deve estar disponível offline');
 assert.equal((html.match(/body\.perfil-detalhe-aberto #tabPlanos/g) || []).length, 1, 'O Perfil só pode ter uma regra que escolhe a subpágina visível');
 assert.match(html, /:not\(#perfilMapa\):not\(#perfilPassaporte\)/, 'Mapa e Passaporte não podem ser escondidos ao abrir o detalhe');

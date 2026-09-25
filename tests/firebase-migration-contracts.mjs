@@ -61,7 +61,7 @@ assert.match(coachFirebase, /coach-bottom-nav/, 'O Coach móvel deve ter uma nav
 assert.match(coachFirebase, /abrirMenuInferiorCoach/, 'As restantes áreas do Coach devem continuar acessíveis através de Mais.');
 assert.equal(coachManifest.display, 'standalone', 'O Coach instalado deve abrir sem a interface do browser.');
 assert.ok(coachManifest.icons.some(icone => icone.sizes === '192x192') && coachManifest.icons.some(icone => icone.sizes === '512x512'), 'O Coach precisa de ícones PWA Android de 192px e 512px.');
-assert.match(coachWorker, /almove-coach-shell-v3/, 'O Coach deve ter um shell PWA independente do Portal do Cliente.');
+assert.match(coachWorker, /almove-coach-shell-v4/, 'O Coach deve ter um shell PWA independente do Portal do Cliente.');
 assert.match(coachWorker, /respostaSemLigacao/, 'O Coach instalado deve responder de forma controlada sem rede.');
 assert.match(coachFirebase, /sidebar-responsive-fix/, 'A navegação compacta deve vencer as regras antigas da sidebar.');
 assert.match(coachFirebase, /max-width: 1024px/, 'O menu lateral deve passar a gaveta antes de ficar comprimido.');

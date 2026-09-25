@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Assinar Contrato — AL MOVE</title>
+  <title>Assinar Contrato — André Martins - Personal Trainer</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background-color:#050810; background-image:radial-gradient(ellipse 90% 70% at 15% 20%,rgba(11,92,194,.55),transparent 55%),radial-gradient(ellipse 90% 80% at 20% 75%,rgba(0,150,120,.5),transparent 60%),radial-gradient(ellipse 100% 90% at 90% 10%,rgba(0,20,45,.9),transparent 60%),linear-gradient(135deg,#0a2a5e 0%,#073d52 45%,#0a1220 100%); background-attachment:fixed; color:#e2e8f0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
@@ -16,12 +16,12 @@
 </head>
 <body>
   <div class="card" id="cardPrincipal">
-    <img class="logo" src="data:image/png;base64,<?= logoBase64 ?>" alt="AL MOVE">
+    <img class="logo" src="data:image/png;base64,<?= logoBase64 ?>" alt="André Martins - Personal Trainer">
     <h1>Olá, <?= nomeCliente ?></h1>
     <? if (jaAceite) { ?>
       <div class="sucesso">✓ Já aceitaste este contrato em <?= aceiteEm ?>.</div>
     <? } else { ?>
-      <p>Confirma que leste e aceitas o teu contrato de prestação de serviços de Personal Training com a AL MOVE.</p>
+      <p>Confirma que leste e aceitas o teu contrato de prestação de serviços de Personal Training com André Martins - Personal Trainer.</p>
       <? if (temContrato) { ?><p>O PDF do contrato foi enviado em anexo no email que contém este link.</p><? } ?>
       <button id="btnAutorizo" onclick="autorizar()">Autorizo</button>
       <p class="erro" id="mensagemErro"></p>

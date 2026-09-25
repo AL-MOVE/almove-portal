@@ -7,7 +7,7 @@ const pagina = await fetch(`${base}/`, { redirect: 'follow' });
 assert.equal(pagina.status, 200, 'A página principal deve responder com 200');
 assert.match(pagina.headers.get('content-security-policy') || '', /frame-ancestors 'none'/, 'CSP deve impedir incorporação');
 const html = await pagina.text();
-assert.match(html, /AL MOVE/, 'A página deve conter a marca AL MOVE');
+assert.match(html, /AL MOVE|André Martins/, 'A página deve expor uma marca durante a transição de identidade');
 assert.match(html, /id="inicioSaudacao"/, 'O ecrã inicial deve existir');
 
 const saude = await fetch(`${base}/api/health`, { cache: 'no-store' });

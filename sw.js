@@ -1,8 +1,8 @@
-// Service worker do Portal AL MOVE.
+// Service worker do Portal de André Martins.
 // A versão sobe com esta atualização visual para que instalações existentes
 // recebam o novo index.html em vez de manterem a versão anterior em cache.
 
-const VERSAO_CACHE = 'almove-portal-v67';
+const VERSAO_CACHE = 'almove-portal-v68';
 const PREFIXO_CACHE_PORTAL = 'almove-portal-';
 
 // O domínio também aloja ferramentas internas. O service worker do cliente
@@ -110,7 +110,7 @@ self.addEventListener('message', (evento) => {
 self.addEventListener('push', (evento) => {
   let dados = {};
   try { dados = evento.data ? evento.data.json() : {}; } catch (erro) { dados = { body: evento.data ? evento.data.text() : '' }; }
-  evento.waitUntil(self.registration.showNotification(dados.title || 'AL MOVE', {
+  evento.waitUntil(self.registration.showNotification(dados.title || 'André Martins - Personal Trainer', {
     body: dados.body || 'Tens uma atualização no teu acompanhamento.',
     icon: '/al-move-mark.png',
     badge: '/al-move-mark.png',

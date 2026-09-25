@@ -1,6 +1,6 @@
 {
-  "name": "AL MOVE Coach",
-  "short_name": "AL MOVE Coach",
+  "name": "André Martins - Personal Trainer",
+  "short_name": "André Martins - Personal Trainer",
   "id": "/coach-firebase.html",
   "start_url": "/coach-firebase.html?source=pwa",
   "scope": "/",
@@ -11,7 +11,7 @@
   "theme_color": "#07121d",
   "lang": "pt-PT",
   "dir": "ltr",
-  "description": "Aplicação de trabalho para coaches AL MOVE.",
+  "description": "Aplicação de trabalho de André Martins - Personal Trainer.",
   "categories": ["health", "fitness", "productivity"],
   "icons": [
     {

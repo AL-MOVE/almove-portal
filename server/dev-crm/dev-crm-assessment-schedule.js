@@ -47,7 +47,7 @@ export default async function handler(req, res) {
     if (req.method === 'GET') return responder(res, 200, { ok: true, pedidos: await listarPedidos(db) });
 
     const entrada = req.body && typeof req.body === 'object' ? req.body : {};
-    const acao = texto(entrada.action, 40); const quando = dataHora(entrada.dataMarcada); const local = texto(entrada.local, 180) || 'AL MOVE'; const agora = new Date();
+    const acao = texto(entrada.action, 40); const quando = dataHora(entrada.dataMarcada); const local = texto(entrada.local, 180) || 'André Martins - Personal Trainer'; const agora = new Date();
     const agenda = db.collection('crmMigrationPortalAgenda');
 
     if (acao === 'schedule-manual') {
