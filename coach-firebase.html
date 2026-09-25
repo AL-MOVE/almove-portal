@@ -2763,6 +2763,11 @@
     </div>
 
     <div class="dashboard-actions">
+      <button type="button" class="action-card" onclick="abrirPagamentos()">
+        <span class="action-card-label">Pagamentos pendentes</span>
+        <strong class="action-card-value" id="pagamentosPendentesCount">0</strong>
+        <span class="action-card-meta">Rever packs deste mês →</span>
+      </button>
       <button type="button" class="action-card alerta" onclick="abrirPagamentos()">
         <span class="action-card-label">Pagamentos em atraso</span>
         <strong class="action-card-value" id="clientesEmAtrasoCount">0</strong>
@@ -2956,15 +2961,24 @@
 
   <!-- ========== PAGAMENTOS ========== -->
   <section id="pagamentos" class="view">
-    <h2 class="section-title">Pagamentos em atraso</h2>
+    <h2 class="section-title">Pagamentos</h2>
     <p style="color: #94a3b8; font-size: 13px; margin-bottom: 20px;">
-      Clientes ativos com dia de pagamento definido, cujo pack do mês (ou do mês anterior) ainda está como "Pendente" depois de já ter passado o dia combinado. Nunca bloqueia nada — é só para veres de relance quem está em falta.
+      Consulta os packs pendentes deste mês. Os pagamentos em atraso aparecem separados quando o dia de pagamento do cliente já passou.
     </p>
     <div style="margin-bottom: 20px; padding: 16px; background: #0a0e14; border-radius: 8px; max-width: 320px;">
-      <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">Total em dívida</div>
-      <div style="font-size: 28px; font-weight: 700;" id="pagamentosTotalAtraso">€0.00</div>
+      <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">Por receber este mês</div>
+      <div style="font-size: 28px; font-weight: 700;" id="pagamentosTotalPendente">€0.00</div>
     </div>
-    <div id="pagamentosLista" style="display: flex; flex-direction: column; gap: 10px;"></div>
+    <div id="pagamentosPendentesLista" style="display: flex; flex-direction: column; gap: 10px;"></div>
+    <div style="margin-top: 30px; padding-top: 24px; border-top: 1px solid #1e293b;">
+      <h3 class="section-title" style="font-size:18px; margin-bottom:6px;">Pagamentos em atraso</h3>
+      <p style="color: #94a3b8; font-size: 13px; margin-bottom: 16px;">Clientes ativos com dia de pagamento definido, cujo pack deste mês ou do mês anterior continua pendente depois do dia combinado.</p>
+      <div style="margin-bottom: 20px; padding: 16px; background: #0a0e14; border-radius: 8px; max-width: 320px;">
+      <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;">Total em atraso</div>
+      <div style="font-size: 28px; font-weight: 700;" id="pagamentosTotalAtraso">€0.00</div>
+      </div>
+      <div id="pagamentosLista" style="display: flex; flex-direction: column; gap: 10px;"></div>
+    </div>
   </section>
 
   <!-- ========== FINANÇAS ========== -->
@@ -5851,11 +5865,12 @@ function renderDashboard() {
   setText('lucroEstimado', '€' + (d.lucroEstimado || '0.00'));
   setText('receitaPotencial', '€' + (d.receitaPotencial || '0.00'));
   setText('clientesEmAtrasoCount', d.clientesEmAtraso || 0);
+  setText('pagamentosPendentesCount', packsPendentes);
   const badgePagamentos = document.getElementById('navBadgePagamentos');
   const emAtraso = Number(d.clientesEmAtraso) || 0;
   if (badgePagamentos) {
-    badgePagamentos.textContent = emAtraso > 9 ? '9+' : emAtraso;
-    badgePagamentos.style.display = emAtraso > 0 ? 'inline-block' : 'none';
+    badgePagamentos.textContent = packsPendentes > 9 ? '9+' : packsPendentes;
+    badgePagamentos.style.display = packsPendentes > 0 ? 'inline-block' : 'none';
   }
 
   const contadorNotificacoes = document.getElementById('notificacoesContador');
@@ -5948,8 +5963,8 @@ function renderCentroComandoCRM(centro) {
 
 function abrirPagamentos() {
   switchTab('pagamentos');
-  const lista = (DATA.clientesEmAtraso || []);
-  renderPagamentosLista(lista);
+  renderPagamentosPendentesLista(DATA.pagamentosPendentes || []);
+  renderPagamentosLista(DATA.clientesEmAtraso || []);
 }
 
 // ==================== FINANÇAS ====================
@@ -6060,6 +6075,35 @@ function apagarDespesaCRM(id) {
     showAlert('Despesa apagada.', 'success');
   }).withFailureHandler(err => showAlert('Erro ao apagar despesa: ' + err.message, 'error'))
     .apagarDespesaCRM({ id, mesAno });
+}
+
+function renderPagamentosPendentesLista(lista) {
+  const container = document.getElementById('pagamentosPendentesLista');
+  const totalEl = document.getElementById('pagamentosTotalPendente');
+  const total = lista.reduce((soma, item) => soma + (Number(item.valorPendente) || 0), 0);
+  if (totalEl) totalEl.textContent = '€' + total.toFixed(2);
+  if (!container) return;
+  if (lista.length === 0) {
+    container.innerHTML = '<p style="color: #64748b; text-align: center; padding: 20px 0;">Todos os packs deste mês estão pagos.</p>';
+    return;
+  }
+  const metodoLabel = { 'Stripe': 'Stripe', 'Transferência': 'Transferência', 'Mão': 'Em mão', '': 'Por definir' };
+  container.innerHTML = lista.map(item => {
+    const idEsc = idParaOnclickCRM(item.idCliente);
+    const diaPagamento = Number(item.diaPagamento);
+    const etiquetaDia = diaPagamento ? 'Dia ' + diaPagamento : 'Dia por definir';
+    const metodo = metodoLabel[item.metodoPagamento] || item.metodoPagamento || 'Por definir';
+    return '<div class="cliente-item" onclick="verDetalheCliente(\'' + idEsc + '\')">' +
+      '<div class="cliente-info">' +
+      '<div class="cliente-nome">' + escaparHtmlCRM(item.nome) + '</div>' +
+      '<div class="cliente-meta">' +
+      '<span class="badge badge-pending">Pendente</span>' +
+      '<span class="badge">' + etiquetaDia + '</span>' +
+      '<span class="badge">' + escaparHtmlCRM(metodo) + '</span>' +
+      '</div></div>' +
+      '<div style="font-weight: 700; font-size: 15px;">€' + (Number(item.valorPendente) || 0).toFixed(2) + '</div>' +
+      '</div>';
+  }).join('');
 }
 
 function renderPagamentosLista(lista) {

@@ -26,9 +26,22 @@ export default async function handler(req, res) {
     }, { sessoes: 0, confirmadas: 0, recebido: 0, pendente: 0, minutos: 0, minutosConfirmados: 0, packsPendentes: 0 });
     const despesas = await obterResumoDespesas(db, mes);
     const clientesEmAtraso = calcularPagamentosEmAtraso({ clientes, packs: todosPacks, mesAno: mes });
+    const pagamentosPendentes = packs
+      .filter(pack => !pagamentoEstaConfirmado(pack.estadoPagamento))
+      .map(pack => {
+        const cliente = clientesPorId.get(pack.clientId) || {};
+        return {
+          idCliente: pack.clientId,
+          nome: cliente.nome || 'Cliente sem nome',
+          valorPendente: numero(pack.preco),
+          mesReferencia: mes,
+          diaPagamento: Number(cliente.diaPagamento) || null,
+          metodoPagamento: pack.metodoPagamento || cliente.metodoPagamento || ''
+        };
+      });
     const receitaPotencial = total.recebido + total.pendente;
     const horasContratadas = total.minutos / 60; const horasRealizadas = total.minutosConfirmados / 60;
     const mesFormatado = new Intl.DateTimeFormat('pt-PT', { month: 'long', year: 'numeric', timeZone: 'Europe/Lisbon' }).format(new Date(mes + '-01T12:00:00'));
-    return responder(res, 200, { ok: true, crm: { clientes, packsResumo, mesAtual: mes, mesVisualizado: mes, mesAtualFormatado: mesFormatado, somenteLeitura: mes !== mesReal, previsao: false, avisoRenovacao: null, clientesEmAtraso, dashboard: { clientesAtivos: clientes.filter(c => c.estado === 'Ativo').length, totalClientes: clientes.filter(c => c.estado !== 'Cancelado').length, sessoesConfirmadas: total.confirmadas, sessoesTotal: total.sessoes, horasContratadas: horasContratadas.toFixed(1), horasConfirmadas: horasRealizadas.toFixed(1), taxaConclusao: total.sessoes ? Math.round(total.confirmadas / total.sessoes * 100) : 0, packsAtivos: packsResumo.length, packsPendentes: total.packsPendentes, recebido: total.recebido.toFixed(2), pendente: total.pendente.toFixed(2), receitaPotencial: receitaPotencial.toFixed(2), ticketMedioPack: (packsResumo.length ? receitaPotencial / packsResumo.length : 0).toFixed(2), valorHoraContratada: (horasContratadas ? receitaPotencial / horasContratadas : 0).toFixed(2), valorHoraRealizada: (horasRealizadas ? total.recebido / horasRealizadas : 0).toFixed(2), despesas: despesas.total.toFixed(2), despesasRecorrentes: despesas.recorrentes.toFixed(2), resultadoRecebido: (total.recebido - despesas.total).toFixed(2), lucroEstimado: (receitaPotencial - despesas.total).toFixed(2), receitaPacotesEspeciais: '0.00', clientesEmAtraso: clientesEmAtraso.length } } });
+    return responder(res, 200, { ok: true, crm: { clientes, packsResumo, pagamentosPendentes, mesAtual: mes, mesVisualizado: mes, mesAtualFormatado: mesFormatado, somenteLeitura: mes !== mesReal, previsao: false, avisoRenovacao: null, clientesEmAtraso, dashboard: { clientesAtivos: clientes.filter(c => c.estado === 'Ativo').length, totalClientes: clientes.filter(c => c.estado !== 'Cancelado').length, sessoesConfirmadas: total.confirmadas, sessoesTotal: total.sessoes, horasContratadas: horasContratadas.toFixed(1), horasConfirmadas: horasRealizadas.toFixed(1), taxaConclusao: total.sessoes ? Math.round(total.confirmadas / total.sessoes * 100) : 0, packsAtivos: packsResumo.length, packsPendentes: total.packsPendentes, recebido: total.recebido.toFixed(2), pendente: total.pendente.toFixed(2), receitaPotencial: receitaPotencial.toFixed(2), ticketMedioPack: (packsResumo.length ? receitaPotencial / packsResumo.length : 0).toFixed(2), valorHoraContratada: (horasContratadas ? receitaPotencial / horasContratadas : 0).toFixed(2), valorHoraRealizada: (horasRealizadas ? total.recebido / horasRealizadas : 0).toFixed(2), despesas: despesas.total.toFixed(2), despesasRecorrentes: despesas.recorrentes.toFixed(2), resultadoRecebido: (total.recebido - despesas.total).toFixed(2), lucroEstimado: (receitaPotencial - despesas.total).toFixed(2), receitaPacotesEspeciais: '0.00', clientesEmAtraso: clientesEmAtraso.length } } });
   } catch (erro) { const codigo = String(erro?.code || erro?.message || 'FALHA'); return responder(res, /^FIREBASE_/.test(codigo) ? 401 : 500, { ok: false, erro: codigo }); }
 }

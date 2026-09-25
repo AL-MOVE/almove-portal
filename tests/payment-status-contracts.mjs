@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { calcularPagamentosEmAtraso, pagamentoEstaConfirmado } from '../server/dev-crm/payment-status.js';
 
 assert.equal(pagamentoEstaConfirmado(' Pago '), true);
@@ -29,4 +30,13 @@ const atrasoAnterior = calcularPagamentosEmAtraso({
   mesAno: '2026-09', hoje: new Date('2026-09-01T12:00:00Z')
 });
 assert.equal(atrasoAnterior[0].mesReferencia, '2026-08');
+
+const [dashboardApi, coach] = await Promise.all([
+  readFile(new URL('../server/dev-crm/dev-crm-dashboard.js', import.meta.url), 'utf8'),
+  readFile(new URL('../coach-firebase.html', import.meta.url), 'utf8')
+]);
+assert.match(dashboardApi, /pagamentosPendentes/);
+for (const elemento of ['pagamentosPendentesLista', 'pagamentosTotalPendente', 'renderPagamentosPendentesLista', 'pagamentosPendentesCount']) {
+  assert.match(coach, new RegExp(elemento));
+}
 console.log('Contratos de pagamentos Development validados.');
