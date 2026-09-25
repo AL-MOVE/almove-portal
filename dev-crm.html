@@ -6,12 +6,19 @@
   <meta name="robots" content="noindex,nofollow">
   <title>Entrar · AL MOVE CRM</title>
   <style>
-    :root { color-scheme:dark; font-family:Inter,ui-sans-serif,system-ui,sans-serif; background:#061321; color:#f7fbff; }
-    * { box-sizing:border-box; } body { min-height:100vh; margin:0; display:grid; place-items:center; padding:24px; background:radial-gradient(circle at 12% 12%,#125278 0,transparent 30%),radial-gradient(circle at 88% 90%,#096e69 0,transparent 32%),#061321; }
-    main { width:min(100%,440px); padding:34px; border:1px solid #24506b; border-radius:24px; background:rgba(7,24,39,.94); box-shadow:0 28px 76px #000a; }
-    .marca { color:#36d8c5; font-size:12px; font-weight:900; letter-spacing:1.7px; } h1 { margin:12px 0 8px; font-size:28px; letter-spacing:-.8px; } p { margin:0; color:#9bb1c3; line-height:1.55; }
-    form { margin-top:27px; } label { display:grid; gap:7px; margin-top:16px; color:#d9e7f1; font-size:13px; font-weight:750; } input,button { min-height:48px; border-radius:11px; font:inherit; } input { width:100%; border:1px solid #335875; background:#0b2133; color:#fff; padding:0 13px; outline:none; } input:focus { border-color:#35d6c3; box-shadow:0 0 0 3px #35d6c328; }
-    button { width:100%; margin-top:24px; border:0; background:linear-gradient(120deg,#25cdbd,#1378df); color:#fff; font-weight:850; cursor:pointer; } button:disabled { cursor:wait; opacity:.72; } .acoes { display:flex; justify-content:flex-end; margin-top:14px; } a { color:#5fe3d4; font-size:13px; font-weight:700; text-decoration:none; } a:hover { text-decoration:underline; } #estado { min-height:22px; margin:20px 0 0; font-size:13px; line-height:1.45; } .erro { color:#fecaca; } .ok { color:#83f5dd; } .nota { margin-top:24px; padding-top:17px; border-top:1px solid #21415a; font-size:12px; }
+    :root { color-scheme:dark; font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:#061321; color:#f7fbff; --ink:#061321; --surface:#071827; --surface-raised:#0b2133; --line:#24506b; --line-strong:#335875; --text-muted:#9bb1c3; --accent:#35d6c3; --accent-blue:#1378df; --danger:#fecaca; --success:#83f5dd; --ease-out:cubic-bezier(.23,1,.32,1); }
+    * { box-sizing:border-box; }
+    body { min-height:100dvh; margin:0; display:grid; place-items:center; padding:clamp(20px,5vw,40px) 24px; background:radial-gradient(circle at 12% 12%,#125278 0,transparent 30%),radial-gradient(circle at 88% 90%,#096e69 0,transparent 32%),var(--ink); }
+    main { width:min(100%,440px); padding:clamp(28px,6vw,38px); border:1px solid var(--line); border-radius:24px; background:linear-gradient(145deg,rgba(11,33,51,.98),rgba(6,19,33,.98)); box-shadow:0 28px 76px rgba(0,0,0,.58),inset 0 1px 0 rgba(255,255,255,.035); animation:entrada-crm .32s var(--ease-out) both; }
+    .marca { display:flex; align-items:center; gap:9px; color:var(--accent); font-size:12px; font-weight:900; letter-spacing:1.7px; }
+    .marca::before { content:""; width:8px; height:8px; border-radius:50%; background:currentColor; box-shadow:0 0 16px rgba(53,214,195,.72); }
+    h1 { margin:15px 0 9px; font-size:clamp(27px,5vw,32px); line-height:1.08; letter-spacing:-1px; } p { margin:0; color:var(--text-muted); line-height:1.55; }
+    form { margin-top:29px; } label { display:grid; gap:8px; margin-top:17px; color:#d9e7f1; font-size:13px; font-weight:750; } input,button { min-height:50px; border-radius:12px; font:inherit; } input { width:100%; border:1px solid var(--line-strong); background:rgba(11,33,51,.94); color:#fff; padding:0 14px; outline:none; transition:border-color .16s ease,box-shadow .16s ease,background .16s ease; } input::placeholder { color:#7891a6; } input:focus-visible { border-color:var(--accent); background:#0d263b; box-shadow:0 0 0 3px rgba(53,214,195,.16); } input:user-invalid { border-color:#fb7185; }
+    button { width:100%; margin-top:26px; border:0; background:linear-gradient(120deg,#25cdbd,#1378df); color:#fff; font-weight:850; cursor:pointer; box-shadow:0 10px 25px rgba(19,120,223,.25); transition:transform .16s var(--ease-out),filter .16s ease,box-shadow .16s ease; } button:active { transform:scale(.98); filter:brightness(.97); } button:disabled { cursor:wait; opacity:.72; box-shadow:none; } button[aria-busy="true"] { letter-spacing:.01em; } button:focus-visible,a:focus-visible { outline:3px solid rgba(53,214,195,.58); outline-offset:3px; }
+    .acoes { display:flex; justify-content:flex-end; margin-top:15px; } a { color:#5fe3d4; font-size:13px; font-weight:700; text-decoration:none; transition:color .16s ease; } #estado { min-height:22px; margin:21px 0 0; font-size:13px; line-height:1.45; } #estado:not(:empty) { padding:11px 12px; border:1px solid rgba(155,177,195,.2); border-radius:11px; background:rgba(255,255,255,.035); } .erro { color:var(--danger); border-color:rgba(254,202,202,.28)!important; background:rgba(127,29,29,.18)!important; } .ok { color:var(--success); border-color:rgba(131,245,221,.24)!important; background:rgba(6,78,59,.2)!important; } .nota { margin-top:25px; padding-top:18px; border-top:1px solid rgba(36,80,107,.82); font-size:12px; }
+    @media (hover:hover) and (pointer:fine) { button:not(:disabled):hover { filter:brightness(1.07); box-shadow:0 14px 30px rgba(19,120,223,.34); } a:hover { color:#a8fff2; text-decoration:underline; } }
+    @keyframes entrada-crm { from { opacity:0; transform:translateY(14px) scale(.985); } to { opacity:1; transform:translateY(0) scale(1); } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms!important; animation-iteration-count:1!important; scroll-behavior:auto!important; transition-duration:.01ms!important; } }
   </style>
 </head>
 <body><main>
@@ -37,6 +44,7 @@
   const botao = document.querySelector('#botaoEntrar');
   const email = document.querySelector('#email');
   const password = document.querySelector('#password');
+  const textoBotaoEntrar = botao.textContent;
   const destino = AlMoveSessaoCRM.destinoSeguro(new URLSearchParams(location.search).get('next'));
 
   function apresentar(mensagem, classe) { estado.className = classe || ''; estado.textContent = mensagem; }
@@ -59,7 +67,7 @@
   }
 
   form.addEventListener('submit', async event => {
-    event.preventDefault(); botao.disabled = true; apresentar('A validar acesso…');
+    event.preventDefault(); botao.disabled = true; botao.setAttribute('aria-busy', 'true'); botao.textContent = 'A validar acesso…'; apresentar('A validar acesso…');
     try {
       const configuracao = await ALMOVE_FIREBASE_CONFIG.obter();
       await AlMoveFirebaseAuth.configurar(configuracao);
@@ -73,7 +81,7 @@
       await AlMoveSessaoCRM.obterContexto();
       apresentar('A abrir o CRM…', 'ok');
       location.replace(destino);
-    } catch (erro) { apresentar(erroHumano(erro), 'erro'); botao.disabled = false; }
+    } catch (erro) { apresentar(erroHumano(erro), 'erro'); botao.disabled = false; botao.removeAttribute('aria-busy'); botao.textContent = textoBotaoEntrar; }
   });
 
   document.querySelector('#recuperar').addEventListener('click', async event => {
