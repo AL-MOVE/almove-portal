@@ -58,6 +58,18 @@ export default async function handler(req, res) {
       await db.runTransaction(async transacao => { transacao.update(sessao.ref, { estado: confirmar ? 'Confirmada' : 'Pendente', dataConfirmada: confirmar ? data : '', updatedAt: agora }); transacao.create(db.collection('auditLogs').doc(), { ...auditoria, action: confirmar ? 'development.session.confirmed' : 'development.session.unconfirmed', sessionId: sessao.id }); });
       return responder(res, 200, { ok: true, idCliente: clienteId });
     }
+    if (acao === 'set-all-sessions-state') {
+      const mes = texto(dados.mesAno, 7); const estado = texto(dados.estado, 16);
+      if (mes !== mesAtual() || !['Confirmada', 'Pendente'].includes(estado)) return responder(res, 400, { ok: false, erro: 'SESSOES_EM_LOTE_INVALIDAS' });
+      const sessoes = await db.collection('crmMigrationSessions').where('clientId', '==', clienteId).get();
+      const sessoesDoMes = sessoes.docs.filter(documento => documento.data().mesAno === mes);
+      if (!sessoesDoMes.length) return responder(res, 404, { ok: false, erro: 'SESSOES_NAO_ENCONTRADAS' });
+      const lote = db.batch(); const dataConfirmada = estado === 'Confirmada' ? hoje() : '';
+      sessoesDoMes.forEach(documento => lote.update(documento.ref, { estado, dataConfirmada, updatedAt: agora }));
+      lote.create(db.collection('auditLogs').doc(), { ...auditoria, action: estado === 'Confirmada' ? 'development.sessions.confirmed-all' : 'development.sessions.unconfirmed-all', mesAno: mes, total: sessoesDoMes.length });
+      await lote.commit();
+      return responder(res, 200, { ok: true, idCliente: clienteId, total: sessoesDoMes.length });
+    }
     if (acao === 'add-note') {
       const nota = texto(dados.nota, 1500); const tipo = ['Nota', 'Contacto', 'Saúde', 'Decisão'].includes(texto(dados.tipo, 16)) ? texto(dados.tipo, 16) : 'Nota'; if (!nota) return responder(res, 400, { ok: false, erro: 'NOTA_INVALIDA' });
       const referencia = db.collection('crmMigrationNotes').doc(); await db.runTransaction(async transacao => { transacao.create(referencia, { idCliente: clienteId, dataHora: agora.toISOString(), tipo, nota, origem: 'firebase-development' }); transacao.create(db.collection('auditLogs').doc(), { ...auditoria, action: 'development.client.note-created', noteId: referencia.id }); });

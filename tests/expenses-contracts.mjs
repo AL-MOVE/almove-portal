@@ -18,8 +18,10 @@ const [api, dashboard, coach] = await Promise.all([
 assert.match(api, /expenses: despesas/);
 assert.match(dashboard, /obterResumoDespesas/);
 assert.match(dashboard, /lucroEstimado/);
+assert.match(dashboard, /ticketMedioPack/);
+assert.match(dashboard, /valorHoraRealizada/);
 assert.match(await readFile(new URL('../server/dev-crm/dev-crm-expenses.js', import.meta.url), 'utf8'), /DESPESA_NAO_APAGAVEL/);
-for (const trecho of ['getDespesasCRM', 'guardarDespesaCRM', 'terminarDespesaRecorrenteCRM', 'apagarDespesaCRM', '/api/dev-crm-expenses']) {
+for (const trecho of ['getDespesasCRM', 'guardarDespesaCRM', 'terminarDespesaRecorrenteCRM', 'apagarDespesaCRM', '/api/dev-crm-expenses', 'financasTicketMedio', 'financasValorHoraContratada', 'financasValorHoraRealizada']) {
   assert.ok(coach.includes(trecho), 'Falta a integração financeira: ' + trecho);
 }
 console.log('Contratos de despesas CRM validados.');

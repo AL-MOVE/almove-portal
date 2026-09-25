@@ -9,10 +9,13 @@ assert.throws(() => validarNovoCliente({ nome: 'A', email: 'invalido' }), /CLIEN
 assert.throws(() => exigirEquipa({ roles: ['client'] }), /ACESSO_SEM_PERMISSAO_CRM/);
 assert.equal(exigirEquipa({ roles: ['coach'] }).roles[0], 'coach');
 const endpoint = fs.readFileSync(new URL('../server/dev-crm/dev-crm-clients.js', import.meta.url), 'utf8');
+const actions = fs.readFileSync(new URL('../server/dev-crm/dev-crm-client-actions.js', import.meta.url), 'utf8');
 const coach = fs.readFileSync(new URL('../coach.html', import.meta.url), 'utf8');
 assert.match(endpoint, /projeto !== 'almove-portal-dev'/);
 assert.match(endpoint, /FieldValue\.serverTimestamp/);
 assert.match(endpoint, /criarRepositorioClientes/);
+assert.match(actions, /set-all-sessions-state/);
+assert.match(actions, /development\.sessions\.confirmed-all/);
 assert.match(coach, /\/api\/dev-crm-clients/);
 assert.match(coach, /ALMOVE_FIREBASE_CONFIG\.obter/);
 assert.match(coach, /Área do professor/);
