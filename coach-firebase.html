@@ -5861,16 +5861,16 @@ function renderPagamentosLista(lista) {
   }
   const metodoLabel = { 'Stripe': 'Stripe', 'Transferência': 'Transferência', 'Mão': 'Em mão', '': 'Por definir' };
   container.innerHTML = lista.map(item => {
-    const idEsc = item.idCliente.replace(/'/g, "\\'");
+    const idEsc = idParaOnclickCRM(item.idCliente);
     const estiloUrgente = item.mesesEmAtraso >= 2 ? ' style="background:#7f1d1d;color:#fecaca;"' : '';
     const textoMeses = item.mesesEmAtraso >= 2 ? (item.mesesEmAtraso + ' meses em atraso') : '1 mês em atraso';
     return '<div class="cliente-item" onclick="verDetalheCliente(\'' + idEsc + '\')">' +
       '<div class="cliente-info">' +
-      '<div class="cliente-nome">' + item.nome + '</div>' +
+      '<div class="cliente-nome">' + escaparHtmlCRM(item.nome) + '</div>' +
       '<div class="cliente-meta">' +
       '<span class="badge badge-pending"' + estiloUrgente + '>' + textoMeses + '</span>' +
       '<span class="badge">Dia ' + item.diaPagamento + '</span>' +
-      '<span class="badge">' + (metodoLabel[item.metodoPagamento] || item.metodoPagamento) + '</span>' +
+      '<span class="badge">' + escaparHtmlCRM(metodoLabel[item.metodoPagamento] || item.metodoPagamento) + '</span>' +
       '</div></div>' +
       '<div style="font-weight: 700; font-size: 15px;">€' + item.valorEmAtraso.toFixed(2) + '</div>' +
       '</div>';
@@ -5949,10 +5949,10 @@ function renderNotificacoesCMR(resultado) {
     return;
   }
   lista.innerHTML = itens.map(item =>
-    '<button type="button" class="notificacao-linha ' + item.tipo + '" onclick="abrirNotificacaoCMR(\'' + item.acao + '\')">' +
+    '<button type="button" class="notificacao-linha ' + (item.tipo === 'pendente' ? 'pendente' : item.tipo === 'alerta' ? 'alerta' : 'info') + '" onclick="abrirNotificacaoCMR(\'' + idParaOnclickCRM(item.acao) + '\')">' +
       '<span class="notificacao-tipo">' + (item.tipo === 'pendente' ? 'Pendente' : item.tipo === 'alerta' ? 'Atenção' : 'Acompanhamento') + '</span>' +
-      '<span class="notificacao-titulo">' + item.titulo + '</span>' +
-      (item.detalhe ? '<span class="notificacao-detalhe">' + item.detalhe + '</span>' : '') +
+      '<span class="notificacao-titulo">' + escaparHtmlCRM(item.titulo) + '</span>' +
+      (item.detalhe ? '<span class="notificacao-detalhe">' + escaparHtmlCRM(item.detalhe) + '</span>' : '') +
     '</button>'
   ).join('');
 }
@@ -6108,7 +6108,7 @@ function renderPacotesEspeciaisLista() {
       '</div></div>' +
       '<div style="display: flex; align-items: center; gap: 12px;">' +
       '<div style="font-weight: 700; font-size: 15px;">€' + item.preco.toFixed(2) + '</div>' +
-      '<button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="alternarEstadoPacoteEspecialUI(' + item.linha + ', \'' + item.estado + '\')">' + (item.estado === 'Ativo' ? 'Cancelar' : 'Reativar') + '</button>' +
+      '<button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="alternarEstadoPacoteEspecialUI(' + Number(item.linha) + ', \'' + idParaOnclickCRM(item.estado) + '\')">' + (item.estado === 'Ativo' ? 'Cancelar' : 'Reativar') + '</button>' +
       '</div></div>';
   };
   const ativos = lista.filter(item => !item.historico);
@@ -6140,7 +6140,7 @@ function preencherSelectClientesCheckin() {
   const select = document.getElementById('selectClienteHistoricoCheckin');
   if (!select || !DATA.clientes) return;
   const ativos = DATA.clientes.filter(c => c.estado !== 'Cancelado').slice().sort((a, b) => a.nome.localeCompare(b.nome));
-  select.innerHTML = ativos.map(c => '<option value="' + c.id.replace(/"/g, '&quot;') + '">' + c.nome + '</option>').join('');
+  select.innerHTML = ativos.map(c => '<option value="' + escaparHtmlCRM(c.id) + '">' + escaparHtmlCRM(c.nome) + '</option>').join('');
 }
 
 const CHECKIN_ICONES = { sono: '😴', stress: '😰', cansaco: '⚡', refeicoes: '🍽️', doms: '🦵' };
@@ -6164,11 +6164,11 @@ function renderCheckinsResumoHoje(resultado) {
     listaHoje.innerHTML = resultado.comCheckin.map(item => {
       return '<div class="cliente-item" style="cursor: default; flex-direction: column; align-items: flex-start; gap: 8px;">' +
         '<div style="display: flex; justify-content: space-between; width: 100%;">' +
-        '<div class="cliente-nome">' + item.nome + '</div>' +
-        '<div style="color: #64748b; font-size: 12px;">' + item.dataHora + '</div>' +
+        '<div class="cliente-nome">' + escaparHtmlCRM(item.nome) + '</div>' +
+        '<div style="color: #64748b; font-size: 12px;">' + escaparHtmlCRM(item.dataHora) + '</div>' +
         '</div>' +
         '<div style="display: flex; gap: 6px; flex-wrap: wrap;">' + badgesCheckin(item) + '</div>' +
-        (item.nota ? '<div style="font-size: 13px; color: #cbd5e1; font-style: italic;">"' + item.nota + '"</div>' : '') +
+        (item.nota ? '<div style="font-size: 13px; color: #cbd5e1; font-style: italic;">"' + escaparHtmlCRM(item.nota) + '"</div>' : '') +
         '</div>';
     }).join('');
   }
@@ -6177,7 +6177,7 @@ function renderCheckinsResumoHoje(resultado) {
   if (resultado.semCheckin.length === 0) {
     listaFaltam.innerHTML = '<p style="color: #64748b; font-size: 13px;">Todos os clientes ativos já preencheram hoje.</p>';
   } else {
-    listaFaltam.innerHTML = resultado.semCheckin.map(nome => '<span class="badge">' + nome + '</span>').join('');
+    listaFaltam.innerHTML = resultado.semCheckin.map(nome => '<span class="badge">' + escaparHtmlCRM(nome) + '</span>').join('');
   }
 }
 
@@ -6194,9 +6194,9 @@ function verHistoricoCheckinCliente() {
     }
     container.innerHTML = lista.map(item => {
       return '<div class="cliente-item" style="cursor: default; flex-direction: column; align-items: flex-start; gap: 8px;">' +
-        '<div style="color: #64748b; font-size: 12px;">' + item.dataHora + '</div>' +
+        '<div style="color: #64748b; font-size: 12px;">' + escaparHtmlCRM(item.dataHora) + '</div>' +
         '<div style="display: flex; gap: 6px; flex-wrap: wrap;">' + badgesCheckin(item) + '</div>' +
-        (item.nota ? '<div style="font-size: 13px; color: #cbd5e1; font-style: italic;">"' + item.nota + '"</div>' : '') +
+        (item.nota ? '<div style="font-size: 13px; color: #cbd5e1; font-style: italic;">"' + escaparHtmlCRM(item.nota) + '"</div>' : '') +
         '</div>';
     }).join('');
   }).withFailureHandler(err => {
@@ -6264,7 +6264,7 @@ function renderResumoCheckinsMensal(resumo) {
       '<div style="display:flex;flex-direction:column;gap:7px;margin-top:10px;">' + dias.slice().reverse().map(item =>
         '<div style="padding:9px 10px;border-left:2px solid rgba(24,255,200,.55);background:rgba(255,255,255,.035);border-radius:0 10px 10px 0;font-size:11px;">' +
           '<strong style="color:#e7eff8;">' + item.rotulo + '</strong><span style="color:#91a3b8;"> · Sono ' + item.sono + '/5 · Stress ' + item.stress + '/5 · Energia ' + item.cansaco + '/5 · Refeições ' + item.refeicoes + '/5 · DOMS ' + item.doms + '/4</span>' +
-          (item.nota ? '<div style="margin-top:4px;color:#cbd5e1;font-style:italic;">“' + item.nota + '”</div>' : '') +
+          (item.nota ? '<div style="margin-top:4px;color:#cbd5e1;font-style:italic;">“' + escaparHtmlCRM(item.nota) + '”</div>' : '') +
         '</div>'
       ).join('') + '</div></details>';
 }
@@ -6274,16 +6274,16 @@ function montarCardCliente(c) {
   const confirmadas = pack ? pack.sessoesConfirmadas : 0;
   const totalSessoesPack = pack ? pack.sessoesTotal : 0;
   const percentual = totalSessoesPack > 0 ? Math.round((confirmadas / totalSessoesPack) * 100) : 0;
-  const idEscapado = c.id.replace(/'/g, "\\'");
+  const idEscapado = idParaOnclickCRM(c.id);
   const badgeEstadoClasse = c.estado === 'Ativo' ? 'badge-active' : (c.estado === 'Pausado' ? 'badge-pending' : 'badge');
   let html = '<div class="cliente-item" onclick="verDetalheCliente(\'' + idEscapado + '\')">';
   html += '<div class="cliente-info">';
-  html += '<div class="cliente-nome">' + c.nome + '</div>';
+  html += '<div class="cliente-nome">' + escaparHtmlCRM(c.nome) + '</div>';
   html += '<div class="cliente-meta">';
-  html += '<span class="badge ' + badgeEstadoClasse + '">' + c.estado + '</span>';
+  html += '<span class="badge ' + badgeEstadoClasse + '">' + escaparHtmlCRM(c.estado) + '</span>';
   if (c.precoPersonalizado) html += '<span class="desconto-patch">↓ Preço especial</span>';
-  if (pack) html += '<span class="badge">' + pack.frequencia + '</span>';
-  if (pack) html += '<span class="badge badge-' + (pack.estadoPagamento === 'Pago' ? 'pago' : 'pending') + '">' + pack.estadoPagamento + '</span>';
+  if (pack) html += '<span class="badge">' + escaparHtmlCRM(pack.frequencia) + '</span>';
+  if (pack) html += '<span class="badge badge-' + (pack.estadoPagamento === 'Pago' ? 'pago' : 'pending') + '">' + escaparHtmlCRM(pack.estadoPagamento) + '</span>';
   html += '</div></div>';
   html += '<div class="cliente-right"><div class="sessoes-progress">';
   html += '<div>' + confirmadas + '/' + totalSessoesPack + '</div>';
@@ -6320,11 +6320,11 @@ function renderSearchResults(termo) {
     box.innerHTML = '<div class="cliente-item" style="cursor: default; justify-content: center; color: #64748b;">Sem clientes encontrados</div>';
   } else {
     box.innerHTML = encontrados.map(c => {
-      const idEsc = c.id.replace(/'/g, "\\'");
+      const idEsc = idParaOnclickCRM(c.id);
       const badgeEstadoClasse = c.estado === 'Ativo' ? 'badge-active' : (c.estado === 'Pausado' ? 'badge-pending' : 'badge');
       return '<div class="cliente-item" onclick="selecionarResultadoPesquisa(\'' + idEsc + '\')">' +
-        '<div class="cliente-info"><div class="cliente-nome">' + c.nome + '</div>' +
-        '<div class="cliente-meta"><span class="badge ' + badgeEstadoClasse + '">' + c.estado + '</span>' + (c.precoPersonalizado ? '<span class="desconto-patch">↓ Preço especial</span>' : '') + '</div></div>' +
+        '<div class="cliente-info"><div class="cliente-nome">' + escaparHtmlCRM(c.nome) + '</div>' +
+        '<div class="cliente-meta"><span class="badge ' + badgeEstadoClasse + '">' + escaparHtmlCRM(c.estado) + '</span>' + (c.precoPersonalizado ? '<span class="desconto-patch">↓ Preço especial</span>' : '') + '</div></div>' +
         '</div>';
     }).join('');
   }
@@ -6465,30 +6465,30 @@ function graficoResumoAvaliacaoClienteHTML(avaliacoes) {
 function renderizarDetalheCliente(detalhe) {
     const c = detalhe.cliente;
     CLIENTE_DETALHE_ATUAL = c;
-    const idEsc = c.id.replace(/'/g, "\\'");
+    const idEsc = idParaOnclickCRM(c.id);
     let html = '';
 
     html += '<div class="detail-header" style="justify-content: space-between;">';
     html += '<div style="display: flex; align-items: center; gap: 16px;">';
-    html += '<div class="detail-avatar">' + c.nome.charAt(0).toUpperCase() + '</div>';
+    html += '<div class="detail-avatar">' + escaparHtmlCRM(c.nome.charAt(0).toUpperCase()) + '</div>';
     html += '<div class="detail-info">';
-    html += '<h1>' + c.nome + '</h1>';
+    html += '<h1>' + escaparHtmlCRM(c.nome) + '</h1>';
     if (c.precoPersonalizado) html += '<div style="margin-top:6px;"><span class="desconto-patch">↓ Preço especial · €' + c.precoPersonalizado.toFixed(2) + '</span></div>';
-    html += '<p>' + (c.servicoAtual || '—') + ' · ' + (c.contacto || '—') + '</p>';
-    html += '<p style="margin-top: 8px; color: #94a3b8; font-size: 12px;">' + (c.notas || 'Sem notas') + '</p>';
+    html += '<p>' + escaparHtmlCRM(c.servicoAtual || '—') + ' · ' + escaparHtmlCRM(c.contacto || '—') + '</p>';
+    html += '<p style="margin-top: 8px; color: #94a3b8; font-size: 12px;">' + escaparHtmlCRM(c.notas || 'Sem notas') + '</p>';
     html += '</div></div>';
     html += '</div>';
 
     const ultimoCheckinResumo = c.ultimoCheckin && c.ultimoCheckin.dataHora ? c.ultimoCheckin.dataHora : 'Sem registo recente';
     const modoResumo = c.modoEspecial ? c.modoEspecial.modo : 'Normal';
     html += '<div class="cliente-quick-grid">';
-    html += '<div class="cliente-quick-item"><span>Estado</span><strong>' + (c.estado || '—') + '</strong></div>';
-    html += '<div class="cliente-quick-item"><span>Último check-in</span><strong>' + ultimoCheckinResumo + '</strong></div>';
+    html += '<div class="cliente-quick-item"><span>Estado</span><strong>' + escaparHtmlCRM(c.estado || '—') + '</strong></div>';
+    html += '<div class="cliente-quick-item"><span>Último check-in</span><strong>' + escaparHtmlCRM(ultimoCheckinResumo) + '</strong></div>';
     html += '<div class="cliente-quick-item"><span>Planos ativos</span><strong>' + (c.numPlanosTreino || 0) + '</strong></div>';
-    html += '<div class="cliente-quick-item"><span>Modo atual</span><strong>' + modoResumo + '</strong></div>';
+    html += '<div class="cliente-quick-item"><span>Modo atual</span><strong>' + escaparHtmlCRM(modoResumo) + '</strong></div>';
     html += '</div>';
 
-    html += '<button type="button" class="btn btn-primary planos-cta-principal" onclick="abrirPlanosTreinoCliente(\'' + idEsc + '\', \'' + c.nome.replace(/'/g, "\\'") + '\')">';
+    html += '<button type="button" class="btn btn-primary planos-cta-principal" onclick="abrirPlanosTreinoCliente(\'' + idEsc + '\', \'' + idParaOnclickCRM(c.nome) + '\')">';
     html += '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
     html += 'Planos de treino' + (c.numPlanosTreino > 0 ? ' (' + c.numPlanosTreino + ')' : '');
     html += '</button>';
@@ -6530,7 +6530,7 @@ function renderizarDetalheCliente(detalhe) {
     if (c.estado !== 'Ativo') htmlEstado += '<button type="button" class="btn btn-secondary" style="color: #00a99d;" onclick="alterarEstadoCliente(\'' + idEsc + '\', \'Ativo\')">Reativar</button>';
     if (c.estado !== 'Pausado') htmlEstado += '<button type="button" class="btn btn-secondary" style="color: #eab308;" onclick="alterarEstadoCliente(\'' + idEsc + '\', \'Pausado\')">Pausar</button>';
     if (c.estado !== 'Cancelado') htmlEstado += '<button type="button" class="btn btn-secondary" style="color: #dc2626;" onclick="alterarEstadoCliente(\'' + idEsc + '\', \'Cancelado\')">Cancelar</button>';
-    if (c.estado === 'Cancelado') htmlEstado += '<button type="button" class="btn btn-secondary" style="color: #dc2626; border: 1px solid #dc2626;" onclick="arquivarClientePermanente(\'' + idEsc + '\', \'' + c.nome.replace(/'/g, "\\'") + '\')">Arquivar cliente</button>';
+    if (c.estado === 'Cancelado') htmlEstado += '<button type="button" class="btn btn-secondary" style="color: #dc2626; border: 1px solid #dc2626;" onclick="arquivarClientePermanente(\'' + idEsc + '\', \'' + idParaOnclickCRM(c.nome) + '\')">Arquivar cliente</button>';
     htmlEstado += '</div>';
     if (c.estado === 'Ativo') {
       if (!c.suspensoMes) htmlEstado += '<button type="button" class="btn btn-secondary" style="color: #eab308; padding: 6px 12px; font-size: 12px; margin-right: 8px;" onclick="suspenderProximoMesCliente(\'' + idEsc + '\')">Suspender o próximo mês</button>';
@@ -6540,7 +6540,7 @@ function renderizarDetalheCliente(detalhe) {
 
     let htmlModoEspecial = '';
     if (c.modoEspecial) {
-      htmlModoEspecial += '<p style="margin:0 0 10px;color:#2dd4bf;font-size:13px;font-weight:700;">' + c.modoEspecial.modo + ' · ' + c.modoEspecial.dataInicio + ' até ' + c.modoEspecial.dataFim + '</p>';
+      htmlModoEspecial += '<p style="margin:0 0 10px;color:#2dd4bf;font-size:13px;font-weight:700;">' + escaparHtmlCRM(c.modoEspecial.modo) + ' · ' + escaparHtmlCRM(c.modoEspecial.dataInicio) + ' até ' + escaparHtmlCRM(c.modoEspecial.dataFim) + '</p>';
       htmlModoEspecial += '<p style="margin:0 0 12px;color:#94a3b8;font-size:12px;">' + (c.modoEspecial.ativoAgora ? 'Ativo agora.' : 'Agendado.') + '</p>';
       htmlModoEspecial += '<button type="button" class="btn btn-secondary" style="color:#f87171" onclick="removerModoEspecialClienteUI(\'' + idEsc + '\')">Terminar modo</button>';
     } else {
@@ -6555,7 +6555,7 @@ function renderizarDetalheCliente(detalhe) {
       let htmlContrato = '<div style="display: flex; gap: 8px; flex-wrap: wrap;">';
       htmlContrato += '<button type="button" class="btn btn-secondary" style="color: #00a99d; display: inline-flex; align-items: center; gap: 6px;" onclick="abrirModalContrato(\'' + idEsc + '\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>' + (c.contratoUrl ? 'Gerar novo contrato' : 'Gerar contrato') + '</button>';
       if (c.contratoUrl) {
-        htmlContrato += '<button type="button" class="btn btn-secondary" style="color: #00a99d; display: inline-flex; align-items: center; gap: 6px;" onclick="window.open(\'' + c.contratoUrl + '\', \'_blank\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Ver contrato</button>';
+        htmlContrato += '<button type="button" class="btn btn-secondary" style="color: #00a99d; display: inline-flex; align-items: center; gap: 6px;" onclick="window.open(\'' + idParaOnclickCRM(c.contratoUrl) + '\', \'_blank\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Ver contrato</button>';
         htmlContrato += '<button type="button" class="btn btn-secondary" style="color: #dc2626; display: inline-flex; align-items: center; gap: 6px;" onclick="apagarContratoClienteUI(\'' + idEsc + '\')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Apagar contrato</button>';
       }
       htmlContrato += '</div>';
@@ -6604,7 +6604,7 @@ function renderizarDetalheCliente(detalhe) {
       }
       html += '<span style="font-size: 12px; color: #64748b;">' + c.totalSessoesConfirmadas + ' sessões confirmadas ao todo' + (c.proximoMarco ? ' · faltam ' + (c.proximoMarco - c.totalSessoesConfirmadas) + ' para as ' + c.proximoMarco : '') + '</span>';
       if (c.marcoAtingido > 0 || c.streakSemanas >= 2) {
-        html += '<button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px; margin-left: auto;" onclick="copiarMensagemMarco(\'' + idEsc + '\', \'' + c.nome.replace(/'/g, "\\'") + '\', ' + c.marcoAtingido + ', ' + c.streakSemanas + ')">Copiar mensagem de parabéns</button>';
+        html += '<button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px; margin-left: auto;" onclick="copiarMensagemMarco(\'' + idEsc + '\', \'' + idParaOnclickCRM(c.nome) + '\', ' + Number(c.marcoAtingido || 0) + ', ' + Number(c.streakSemanas || 0) + ')">Copiar mensagem de parabéns</button>';
       }
       html += '</div>';
     }
@@ -6629,13 +6629,13 @@ function renderizarDetalheCliente(detalhe) {
       const feitos = pg.treinos.filter(t => t.feitoAntes);
       const porFazer = pg.treinos.filter(t => !t.feitoAntes);
       html += '<div style="margin-bottom: 16px; padding: 12px 16px; background: #0a0e14; border-radius: 8px;">';
-      html += '<div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">Progresso do plano atual — ' + pg.nomePlano + '</div>';
+      html += '<div style="font-size: 12px; color: #64748b; margin-bottom: 8px;">Progresso do plano atual — ' + escaparHtmlCRM(pg.nomePlano) + '</div>';
       html += '<div style="display: flex; gap: 8px; flex-wrap: wrap;">';
       feitos.forEach(t => {
-        html += '<span class="badge badge-pago">✓ ' + t.nome + (t.diasDesde === 0 ? ' (hoje)' : ' (há ' + t.diasDesde + 'd)') + '</span>';
+        html += '<span class="badge badge-pago">✓ ' + escaparHtmlCRM(t.nome) + (t.diasDesde === 0 ? ' (hoje)' : ' (há ' + Number(t.diasDesde || 0) + 'd)') + '</span>';
       });
       porFazer.forEach(t => {
-        html += '<span class="badge">' + t.nome + ' — por fazer</span>';
+        html += '<span class="badge">' + escaparHtmlCRM(t.nome) + ' — por fazer</span>';
       });
       html += '</div></div>';
     }
@@ -6661,8 +6661,8 @@ function renderizarDetalheCliente(detalhe) {
       html += '<div class="pack-card">';
       html += '<div class="pack-header"><div class="pack-title">Pack ativo (este mês)</div>';
       html += '<div class="pack-status">';
-      html += '<span class="badge">' + p.frequencia + '</span>';
-      html += '<span class="badge badge-' + (p.estadoPagamento === 'Pago' ? 'pago' : 'pending') + '">' + p.estadoPagamento + '</span>';
+      html += '<span class="badge">' + escaparHtmlCRM(p.frequencia) + '</span>';
+      html += '<span class="badge badge-' + (p.estadoPagamento === 'Pago' ? 'pago' : 'pending') + '">' + escaparHtmlCRM(p.estadoPagamento) + '</span>';
       html += '<button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="toggleEditarPack()">Editar</button>';
       html += '</div></div>';
 
@@ -6733,7 +6733,7 @@ function renderizarDetalheCliente(detalhe) {
     }
 
     html += '<section class="card" style="margin-bottom:16px;border:1px solid rgba(0,169,157,.35);background:linear-gradient(135deg,rgba(0,169,157,.12),rgba(10,25,42,.96))">';
-    html += '<div class="dashboard-section-row" style="margin:0 0 12px;align-items:center"><div><h2 class="section-title" style="margin:0">Sessões e progresso</h2><div style="font-size:12px;color:#91a3b8;margin-top:4px">PT presencial e treino autónomo no mesmo histórico</div></div><button type="button" class="btn btn-primary" style="width:auto;padding:12px 18px;font-size:14px;font-weight:800;box-shadow:0 8px 20px rgba(0,169,157,.22)" onclick="abrirSessaoPTUI(\'' + idEsc + '\', \'' + c.nome.replace(/'/g, "\\'") + '\')">▶ Iniciar sessão PT</button></div>';
+    html += '<div class="dashboard-section-row" style="margin:0 0 12px;align-items:center"><div><h2 class="section-title" style="margin:0">Sessões e progresso</h2><div style="font-size:12px;color:#91a3b8;margin-top:4px">PT presencial e treino autónomo no mesmo histórico</div></div><button type="button" class="btn btn-primary" style="width:auto;padding:12px 18px;font-size:14px;font-weight:800;box-shadow:0 8px 20px rgba(0,169,157,.22)" onclick="abrirSessaoPTUI(\'' + idEsc + '\', \'' + idParaOnclickCRM(c.nome) + '\')">▶ Iniciar sessão PT</button></div>';
     html += '<div id="historicoSessoesCMR"><span style="color:#94a3b8;font-size:12px">A carregar histórico…</span></div>';
     html += '<details style="margin-top:14px"><summary style="cursor:pointer;color:#91a3b8;font-size:12px">Ver histórico legado do Tracker</summary><div id="resumoTrackerCMR" style="margin-top:9px"><span style="color:#94a3b8;font-size:12px">A carregar…</span></div></details>';
     html += '</section>';
@@ -7327,7 +7327,7 @@ function renderListaPlanos(planos) {
     return;
   }
   container.innerHTML = planos.map(p => {
-    const nomeEsc = p.nome.replace(/'/g, "\\'");
+    const nomeEsc = idParaOnclickCRM(p.nome);
     let badgeValidade = '';
     if (p.validoAte) {
       let cor = '#64748b';
@@ -7339,15 +7339,15 @@ function renderListaPlanos(planos) {
     }
     return '<div class="cliente-item" style="cursor: default;">' +
       '<div class="cliente-info" style="cursor: pointer;" onclick="abrirTreinosDoPlano(\'' + nomeEsc + '\')">' +
-      '<div class="cliente-nome">' + p.nome + '</div>' +
+      '<div class="cliente-nome">' + escaparHtmlCRM(p.nome) + '</div>' +
       '<div class="cliente-meta">' +
       '<span class="badge">' + p.numTreinos + ' treino(s)</span>' +
       '<span class="badge" style="color:' + (p.visibilidade === 'PT' ? '#fbbf24' : '#2dd4bf') + '">' + (p.visibilidade === 'PT' ? 'PT privado' : 'Portal') + '</span>' +
       badgeValidade +
-      (p.atualizadoEm ? '<span style="color: #64748b; font-size: 12px;">atualizado em ' + p.atualizadoEm + '</span>' : '') +
+      (p.atualizadoEm ? '<span style="color: #64748b; font-size: 12px;">atualizado em ' + escaparHtmlCRM(p.atualizadoEm) + '</span>' : '') +
       '</div></div>' +
       '<div style="display:flex;gap:6px;">' +
-      '<button type="button" class="btn btn-secondary" style="padding:4px 10px;font-size:11px;" onclick="alterarVisibilidadePlanoUI(\'' + nomeEsc + '\', \'' + p.visibilidade + '\')">' + (p.visibilidade === 'PT' ? 'Tornar visível' : 'Ocultar no Portal') + '</button>' +
+      '<button type="button" class="btn btn-secondary" style="padding:4px 10px;font-size:11px;" onclick="alterarVisibilidadePlanoUI(\'' + nomeEsc + '\', \'' + idParaOnclickCRM(p.visibilidade) + '\')">' + (p.visibilidade === 'PT' ? 'Tornar visível' : 'Ocultar no Portal') + '</button>' +
       '<button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="renovarValidadeUI(\'' + nomeEsc + '\')">Renovar validade</button>' +
       '<button type="button" class="btn btn-secondary" style="color: #dc2626; padding: 4px 10px; font-size: 11px;" onclick="apagarPlanoUI(\'' + nomeEsc + '\')">Apagar</button>' +
       '</div></div>';
@@ -7421,13 +7421,13 @@ function renderListaTreinos(treinos) {
     return;
   }
   container.innerHTML = treinos.map(t => {
-    const nomeEsc = t.nome.replace(/'/g, "\\'");
+    const nomeEsc = idParaOnclickCRM(t.nome);
     return '<div class="cliente-item" style="cursor: default;">' +
       '<div class="cliente-info" style="cursor: pointer;" onclick="abrirEditorTreino(\'' + nomeEsc + '\')">' +
-      '<div class="cliente-nome">' + t.nome + '</div>' +
+      '<div class="cliente-nome">' + escaparHtmlCRM(t.nome) + '</div>' +
       '<div class="cliente-meta">' +
       '<span class="badge">' + t.numExercicios + ' exercício(s)</span>' +
-      (t.atualizadoEm ? '<span style="color: #64748b; font-size: 12px;">atualizado em ' + t.atualizadoEm + '</span>' : '') +
+      (t.atualizadoEm ? '<span style="color: #64748b; font-size: 12px;">atualizado em ' + escaparHtmlCRM(t.atualizadoEm) + '</span>' : '') +
       '</div></div>' +
       '<button type="button" class="btn btn-secondary" style="color: #dc2626; padding: 4px 10px; font-size: 11px;" onclick="apagarTreinoUI(\'' + nomeEsc + '\')">Apagar</button>' +
       '</div>';
@@ -7570,7 +7570,7 @@ function pesquisarExerciciosUI() {
 function renderResultadosPesquisaExercicio(resultados, aviso) {
   const container = document.getElementById('resultadosPesquisaExercicio');
   if (aviso) {
-    container.innerHTML = '<p style="color: #eab308; font-size: 13px; padding: 8px;">' + aviso + '</p>';
+    container.innerHTML = '<p style="color: #eab308; font-size: 13px; padding: 8px;">' + escaparHtmlCRM(aviso) + '</p>';
     return;
   }
   if (resultados.length === 0) {
@@ -7578,10 +7578,10 @@ function renderResultadosPesquisaExercicio(resultados, aviso) {
     return;
   }
   container.innerHTML = '<div style="font-size:11px;color:#91a3b8;padding:6px 8px;">' + resultados.length + (resultados.length === 50 ? '+ resultados — afina a pesquisa ou os filtros.' : ' resultado(s)') + '</div>' + resultados.map(ex => {
-    const nomeEsc = ex.nome.replace(/'/g, "\\'");
+    const nomeEsc = idParaOnclickCRM(ex.nome);
     return '<div class="cliente-item" style="cursor: pointer; padding: 8px 12px;" onclick="adicionarExercicioAoTreino(\'' + nomeEsc + '\')">' +
       '<div class="cliente-info">' +
-      '<div class="cliente-nome" style="font-size: 13px;">' + ex.nome + '</div>' +
+      '<div class="cliente-nome" style="font-size: 13px;">' + escaparHtmlCRM(ex.nome) + '</div>' +
       '<div class="cliente-meta"><span style="color: #64748b; font-size: 11px;">' + [ex.grupoMuscular, ex.equipamento, ex.padraoMovimento].filter(Boolean).map(escaparHtmlCRM).join(' · ') + '</span></div>' +
       '</div><span style="color: #00a99d; font-size: 18px;">+</span></div>';
   }).join('');
@@ -7631,7 +7631,7 @@ function renderExerciciosEscolhidos() {
     const porTempo = ex.tipoPrescricao === 'TEMPO';
     return '<div style="background:#0a0e14;border-radius:8px;padding:12px;margin-bottom:8px;">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
-      '<span style="font-weight:700;font-size:13px;">' + (idx + 1) + '. ' + ex.exercicio + '</span>' +
+      '<span style="font-weight:700;font-size:13px;">' + (idx + 1) + '. ' + escaparHtmlCRM(ex.exercicio) + '</span>' +
       '<div style="display:flex;gap:4px;">' +
       '<button type="button" class="btn btn-secondary" style="padding:2px 8px;font-size:11px;" onclick="moverExercicioNoTreino(' + idx + ', -1)">▲</button>' +
       '<button type="button" class="btn btn-secondary" style="padding:2px 8px;font-size:11px;" onclick="moverExercicioNoTreino(' + idx + ', 1)">▼</button>' +
@@ -7647,7 +7647,7 @@ function renderExerciciosEscolhidos() {
       campoSelectExercicio(idx, 'aquecimento', 'Fase', String(ex.aquecimento) === 'true' || ex.aquecimento === true ? 'true' : 'false', [['false', 'Séries de trabalho'], ['true', 'Aquecimento']]) +
       campoSelectExercicio(idx, 'grupoSuperserie', 'Supersérie', ex.grupoSuperserie || '', [['', 'Sem grupo'], ['A', 'Grupo A'], ['B', 'Grupo B'], ['C', 'Grupo C'], ['D', 'Grupo D']]) +
       '</div>' +
-      '<input type="text" placeholder="Notas (link de vídeo, dica de posição, etc.)" value="' + (ex.notas || '').toString().replace(/"/g, '&quot;') + '" style="width:100%;" onchange="atualizarCampoExercicio(' + idx + ', \'notas\', this.value)">' +
+      '<input type="text" placeholder="Notas (link de vídeo, dica de posição, etc.)" value="' + escaparHtmlCRM(ex.notas || '') + '" style="width:100%;" onchange="atualizarCampoExercicio(' + idx + ', \'notas\', this.value)">' +
       '</div>';
   }).join('');
 }
@@ -7655,7 +7655,7 @@ function renderExerciciosEscolhidos() {
 function campoMiniExercicio(idx, campo, label, valor) {
   return '<div style="flex:1;min-width:70px;">' +
     '<label style="font-size:10px;color:#64748b;display:block;margin-bottom:2px;">' + label + '</label>' +
-    '<input type="text" value="' + (valor || '').toString().replace(/"/g, '&quot;') + '" style="width:100%;" onchange="atualizarCampoExercicio(' + idx + ', \'' + campo + '\', this.value)">' +
+    '<input type="text" value="' + escaparHtmlCRM(valor || '') + '" style="width:100%;" onchange="atualizarCampoExercicio(' + idx + ', \'' + campo + '\', this.value)">' +
     '</div>';
 }
 
@@ -8596,7 +8596,7 @@ function renderRenovarLista() {
         opts += '<option value="' + f + '"' + (f === item.frequencia ? ' selected' : '') + '>' + f + '</option>';
       });
       return '<div class="cliente-item" style="cursor: default;">' +
-        '<div class="cliente-info"><div class="cliente-nome">' + item.nome + '</div></div>' +
+        '<div class="cliente-info"><div class="cliente-nome">' + escaparHtmlCRM(item.nome) + '</div></div>' +
         '<div style="display: flex; align-items: center; gap: 10px;">' +
         '<select onchange="alterarFrequenciaRenovacao(' + idx + ', this.value)" style="width: auto; padding: 8px 10px;">' + opts + '</select>' +
         '<button type="button" class="btn btn-secondary" style="color: #dc2626; padding: 6px 10px;" onclick="retirarDaRenovacao(' + idx + ')">&times;</button>' +
@@ -8654,14 +8654,14 @@ function renderRecibosLista(lista) {
     return;
   }
   container.innerHTML = lista.map(item => {
-    const idEsc = item.idCliente.replace(/'/g, "\\'");
+    const idEsc = idParaOnclickCRM(item.idCliente);
     return '<div class="cliente-item" style="cursor: default;">' +
       '<div class="cliente-info">' +
-      '<div class="cliente-nome">' + item.nome + '</div>' +
+      '<div class="cliente-nome">' + escaparHtmlCRM(item.nome) + '</div>' +
       '<div class="cliente-meta">' +
-      '<span class="badge">' + item.frequencia + '</span>' +
+      '<span class="badge">' + escaparHtmlCRM(item.frequencia) + '</span>' +
       '<span class="badge badge-pago">€' + item.preco.toFixed(2) + '</span>' +
-      (item.dataPagamento ? '<span style="color: #64748b;">Pago em ' + item.dataPagamento + '</span>' : '') +
+      (item.dataPagamento ? '<span style="color: #64748b;">Pago em ' + escaparHtmlCRM(item.dataPagamento) + '</span>' : '') +
       '</div></div>' +
       '<button type="button" class="btn btn-primary" style="width: auto; padding: 8px 16px;" onclick="marcarReciboEmitido(\'' + idEsc + '\')">Marcar emitido</button>' +
       '</div>';
