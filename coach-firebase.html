@@ -2528,6 +2528,10 @@
       <span class="nav-item-label">Pagamentos</span>
       <span class="nav-alert" id="navBadgePagamentos"></span>
     </button>
+    <button class="nav-item" data-tab="financas" data-label="Finanças" onclick="abrirFinancasCRM()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V5.8a2 2 0 0 1 1.5-1.94l11-2.75A2 2 0 0 1 19 3.05V17"/><path d="M4 7h15"/><path d="M15 15.5h5a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1h-5a3 3 0 0 1 0-6Z"/><circle cx="16.5" cy="18.25" r=".5" fill="currentColor"/></svg>
+      <span class="nav-item-label">Finanças</span>
+    </button>
     <button class="nav-item" data-tab="pacotesEspeciais" data-label="Pacotes Especiais" onclick="abrirPacotesEspeciais()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
       <span class="nav-item-label">Pacotes Especiais</span>
@@ -2658,6 +2662,14 @@
         <div class="painel-resumo-item">
           <span>Receita pendente</span>
           <strong id="pendente">€0</strong>
+        </div>
+        <div class="painel-resumo-item">
+          <span>Custos do mês</span>
+          <strong id="despesasMes">€0</strong>
+        </div>
+        <div class="painel-resumo-item">
+          <span>Lucro estimado</span>
+          <strong id="lucroEstimado">€0</strong>
         </div>
         <div class="painel-resumo-item">
           <span>Sessões este mês</span>
@@ -2895,6 +2907,34 @@
       <div style="font-size: 28px; font-weight: 700;" id="pagamentosTotalAtraso">€0.00</div>
     </div>
     <div id="pagamentosLista" style="display: flex; flex-direction: column; gap: 10px;"></div>
+  </section>
+
+  <!-- ========== FINANÇAS ========== -->
+  <section id="financas" class="view">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:16px;">
+      <div><div class="eyebrow">AL MOVE · NEGÓCIO</div><h2 class="section-title" style="margin-bottom:3px;">Finanças</h2><p style="color:#8ba0b8;font-size:13px;max-width:680px;">Regista custos como renda do ginásio, software ou equipamento. O lucro estimado desconta estes valores à receita potencial do mês.</p></div>
+      <button type="button" class="btn btn-primary" style="width:auto;padding:9px 14px" onclick="alternarFormDespesaCRM()">+ Adicionar despesa</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:18px;">
+      <article class="card" style="margin:0;padding:15px;"><div class="card-label">Receita potencial</div><div class="card-value" id="financasReceitaPotencial">€0.00</div><div class="card-subtext">Recebido + pendente</div></article>
+      <article class="card" style="margin:0;padding:15px;"><div class="card-label">Despesas do mês</div><div class="card-value" id="financasDespesasTotal">€0.00</div><div class="card-subtext" id="financasRecorrentes">€0.00 recorrentes</div></article>
+      <article class="card" style="margin:0;padding:15px;"><div class="card-label">Lucro estimado</div><div class="card-value" id="financasLucroEstimado">€0.00</div><div class="card-subtext">Antes de impostos</div></article>
+    </div>
+    <section id="formDespesaCRM" class="card" hidden style="margin-bottom:16px;max-width:760px;">
+      <div class="dashboard-section-row" style="margin:0 0 13px;"><h3 class="section-title" style="margin:0;font-size:16px;">Nova despesa</h3><button type="button" class="btn btn-secondary" style="width:auto;padding:6px 10px;font-size:11px" onclick="alternarFormDespesaCRM()">Fechar</button></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:11px;">
+        <div class="form-group" style="margin:0"><label for="despesaCategoria">Categoria</label><select id="despesaCategoria"><option>Renda do ginásio</option><option>Software e subscrições</option><option>Equipamento</option><option>Marketing</option><option>Transporte</option><option>Serviços profissionais</option><option>Outros</option></select></div>
+        <div class="form-group" style="margin:0"><label for="despesaTipo">Frequência</label><select id="despesaTipo"><option value="recorrente">Mensal recorrente</option><option value="avulsa">Apenas neste mês</option></select></div>
+        <div class="form-group" style="margin:0"><label for="despesaMes">Mês</label><input id="despesaMes" type="month"></div>
+        <div class="form-group" style="margin:0"><label for="despesaValor">Valor (€)</label><input id="despesaValor" type="number" min="0.01" max="100000" step="0.01" inputmode="decimal" placeholder="0,00"></div>
+      </div>
+      <div class="form-group" style="margin:11px 0 0"><label for="despesaDescricao">Descrição</label><input id="despesaDescricao" type="text" maxlength="160" placeholder="Ex.: renda mensal do espaço"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap;"><button type="button" class="btn btn-secondary" style="width:auto;padding:9px 13px" onclick="alternarFormDespesaCRM()">Cancelar</button><button type="button" class="btn btn-primary" style="width:auto;padding:9px 13px" onclick="guardarDespesaCRM()">Guardar despesa</button></div>
+    </section>
+    <section class="card" style="margin:0;">
+      <div class="dashboard-section-row" style="margin:0 0 12px;"><div><h3 class="section-title" style="margin:0;font-size:16px;">Despesas em <span id="financasMesTitulo">este mês</span></h3><p style="margin:4px 0 0;color:#8ba0b8;font-size:12px;">As despesas recorrentes mantêm-se nos meses seguintes até serem terminadas.</p></div></div>
+      <div id="financasLista" style="display:flex;flex-direction:column;gap:10px;"><div class="agenda-vazio">A carregar despesas…</div></div>
+    </section>
   </section>
 
   <!-- ========== PACOTES ESPECIAIS ========== -->
@@ -5714,6 +5754,7 @@ function renderAbaAtiva(tab) {
     if (tab === 'avaliacoes') carregarCentroAvaliacoesCRM();
     if (tab === 'clientes') renderClientes();
     if (tab === 'inativos') renderClientesInativos();
+    if (tab === 'financas') abrirFinancasCRM(false);
     if (tab === 'definicoes') renderDefinicoesCMR();
   } catch (e) {
     console.error('Erro ao renderizar a aba ' + tab + ':', e);
@@ -5745,6 +5786,8 @@ function renderDashboard() {
   setText('recebido', '€' + (d.recebido || '0.00'));
   setText('receitaPacotesEspeciais', 'Pacotes especiais: €' + (d.receitaPacotesEspeciais || '0.00'));
   setText('pendente', '€' + (d.pendente || '0.00'));
+  setText('despesasMes', '€' + (d.despesas || '0.00'));
+  setText('lucroEstimado', '€' + (d.lucroEstimado || '0.00'));
   setText('receitaPotencial', '€' + (d.receitaPotencial || '0.00'));
   setText('clientesEmAtrasoCount', d.clientesEmAtraso || 0);
   const badgePagamentos = document.getElementById('navBadgePagamentos');
@@ -5846,6 +5889,113 @@ function abrirPagamentos() {
   switchTab('pagamentos');
   const lista = (DATA.clientesEmAtraso || []);
   renderPagamentosLista(lista);
+}
+
+// ==================== FINANÇAS ====================
+
+let DESPESAS_CRM = { despesas: [], total: '0.00', recorrentes: '0.00' };
+
+function valorEuroCRM(valor) {
+  return '€' + (Number(valor) || 0).toFixed(2);
+}
+
+function atualizarResumoFinancasCRM() {
+  const dashboard = DATA && DATA.dashboard ? DATA.dashboard : {};
+  setText('financasReceitaPotencial', valorEuroCRM(dashboard.receitaPotencial));
+  setText('financasDespesasTotal', valorEuroCRM(DESPESAS_CRM.total));
+  setText('financasRecorrentes', valorEuroCRM(DESPESAS_CRM.recorrentes) + ' recorrentes');
+  setText('financasLucroEstimado', valorEuroCRM(dashboard.lucroEstimado));
+  setText('financasMesTitulo', DATA && (DATA.mesAtualFormatado || DATA.mesVisualizado) ? (DATA.mesAtualFormatado || DATA.mesVisualizado) : 'este mês');
+}
+
+function abrirFinancasCRM(mudarAba = true) {
+  if (mudarAba) { switchTab('financas'); return; }
+  const mes = DATA && (DATA.mesVisualizado || DATA.mesAtual) ? (DATA.mesVisualizado || DATA.mesAtual) : '';
+  const campoMes = document.getElementById('despesaMes');
+  if (campoMes) campoMes.value = mes;
+  atualizarResumoFinancasCRM();
+  const lista = document.getElementById('financasLista');
+  if (lista) lista.innerHTML = '<div class="agenda-vazio">A carregar despesas…</div>';
+  google.script.run.withSuccessHandler(resultado => {
+    DESPESAS_CRM = resultado || { despesas: [], total: '0.00', recorrentes: '0.00' };
+    atualizarResumoFinancasCRM();
+    renderDespesasCRM();
+  }).withFailureHandler(err => {
+    if (lista) lista.innerHTML = '<div class="agenda-vazio">Não foi possível carregar as despesas.</div>';
+    showAlert('Erro ao carregar despesas: ' + err.message, 'error');
+  }).getDespesasCRM(mes);
+}
+
+function alternarFormDespesaCRM() {
+  const form = document.getElementById('formDespesaCRM');
+  if (!form) return;
+  const vaiAbrir = form.hidden;
+  form.hidden = !vaiAbrir;
+  if (vaiAbrir) {
+    const campoMes = document.getElementById('despesaMes');
+    if (campoMes && !campoMes.value && DATA) campoMes.value = DATA.mesVisualizado || DATA.mesAtual || '';
+    const descricao = document.getElementById('despesaDescricao');
+    if (descricao) descricao.focus();
+  }
+}
+
+function renderDespesasCRM() {
+  const lista = document.getElementById('financasLista');
+  if (!lista) return;
+  const despesas = Array.isArray(DESPESAS_CRM.despesas) ? DESPESAS_CRM.despesas : [];
+  if (!despesas.length) {
+    lista.innerHTML = '<div class="agenda-vazio">Ainda não registaste despesas neste mês. Adiciona a renda do ginásio ou outro custo para veres o lucro estimado.</div>';
+    return;
+  }
+  lista.innerHTML = despesas.map(item => {
+    const id = idParaOnclickCRM(item.id);
+    const recorrente = item.tipo === 'recorrente';
+    return '<article class="cliente-item" style="cursor:default;align-items:center;">' +
+      '<div class="cliente-info"><div class="cliente-nome">' + escaparHtmlCRM(item.descricao) + '</div>' +
+      '<div class="cliente-meta"><span class="badge">' + escaparHtmlCRM(item.categoria) + '</span><span class="badge">' + (recorrente ? 'Mensal recorrente' : 'Pontual') + '</span></div></div>' +
+      '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;"><strong style="font-size:15px;color:#fecaca">' + valorEuroCRM(item.valor) + '</strong>' +
+      (recorrente
+        ? '<button type="button" class="btn btn-secondary" style="width:auto;padding:6px 9px;font-size:11px" onclick="terminarDespesaRecorrenteCRM(\'' + id + '\')">Terminar após este mês</button>'
+        : '<button type="button" class="btn btn-secondary" style="width:auto;padding:6px 9px;font-size:11px;color:#fecaca" onclick="apagarDespesaCRM(\'' + id + '\')">Apagar</button>') +
+      '</div></article>';
+  }).join('');
+}
+
+function guardarDespesaCRM() {
+  const categoria = document.getElementById('despesaCategoria').value;
+  const tipo = document.getElementById('despesaTipo').value;
+  const mesAno = document.getElementById('despesaMes').value;
+  const valor = document.getElementById('despesaValor').value;
+  const descricao = document.getElementById('despesaDescricao').value.trim();
+  if (!descricao || !mesAno || !(Number(valor) > 0)) { showAlert('Indica descrição, mês e um valor superior a zero.', 'error'); return; }
+  google.script.run.withSuccessHandler(() => {
+    document.getElementById('despesaValor').value = '';
+    document.getElementById('despesaDescricao').value = '';
+    const form = document.getElementById('formDespesaCRM'); if (form) form.hidden = true;
+    carregarMes(mesAno);
+    showAlert('Despesa guardada. O lucro estimado foi atualizado.', 'success');
+  }).withFailureHandler(err => showAlert('Erro ao guardar despesa: ' + err.message, 'error'))
+    .guardarDespesaCRM({ categoria, tipo, mesAno, valor, descricao });
+}
+
+function terminarDespesaRecorrenteCRM(id) {
+  if (!window.confirm('Terminar esta despesa após o mês que estás a consultar?')) return;
+  const mesAno = DATA && (DATA.mesVisualizado || DATA.mesAtual);
+  google.script.run.withSuccessHandler(() => {
+    carregarMes(mesAno);
+    showAlert('Despesa recorrente terminada após este mês.', 'success');
+  }).withFailureHandler(err => showAlert('Erro ao terminar despesa: ' + err.message, 'error'))
+    .terminarDespesaRecorrenteCRM({ id, mesAno });
+}
+
+function apagarDespesaCRM(id) {
+  if (!window.confirm('Apagar este lançamento pontual? Esta ação altera o total deste mês.')) return;
+  const mesAno = DATA && (DATA.mesVisualizado || DATA.mesAtual);
+  google.script.run.withSuccessHandler(() => {
+    carregarMes(mesAno);
+    showAlert('Despesa apagada.', 'success');
+  }).withFailureHandler(err => showAlert('Erro ao apagar despesa: ' + err.message, 'error'))
+    .apagarDespesaCRM({ id, mesAno });
 }
 
 function renderPagamentosLista(lista) {
@@ -9115,4 +9265,41 @@ window.addEventListener('load', function () {
 </script>
 <script>
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(!['getTreinosParaSessaoPT','getUltimaSessaoPTCliente','registarSessaoPT'].includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();if(nome==='getTreinosParaSessaoPT'){const r=await fetch('/api/dev-crm-training-plans?action=pt-session-plans&clientId='+encodeURIComponent(args[0]),{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok)throw Error(d.erro||'Modo PT indisponível.');return ok&&ok(d)}if(nome==='getUltimaSessaoPTCliente'){const r=await fetch('/api/dev-crm-pt-session?clientId='+encodeURIComponent(args[0]),{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok)throw Error(d.erro||'Sessão anterior indisponível.');return ok&&ok(d)}const r=await fetch('/api/dev-crm-pt-session',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify(args[0]||{})}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Não foi possível guardar a sessão PT.');ok&&ok(d)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
+</script>
+<script>
+(function () {
+  const anterior = google.script.run;
+  function cadeia(ok, fail) {
+    return new Proxy({}, { get(_, nome) {
+      if (nome === 'withSuccessHandler') return f => cadeia(f, fail);
+      if (nome === 'withFailureHandler') return f => cadeia(ok, f);
+      return async (...args) => {
+        const acoes = { guardarDespesaCRM: 'create', terminarDespesaRecorrenteCRM: 'finish', apagarDespesaCRM: 'delete' };
+        if (nome !== 'getDespesasCRM' && !acoes[nome]) return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);
+        try {
+          const configuracao = await ALMOVE_FIREBASE_CONFIG.obter();
+          await AlMoveFirebaseAuth.configurar(configuracao);
+          const token = await AlMoveFirebaseAuth.token();
+          if (!token) throw Error('Entra primeiro na área de gestão.');
+          let url = '/api/dev-crm-expenses';
+          const opcoes = { headers: { Authorization: 'Bearer ' + token } };
+          if (nome === 'getDespesasCRM') {
+            url += '?mes=' + encodeURIComponent(args[0] || '');
+          } else {
+            opcoes.method = 'POST';
+            opcoes.headers['Content-Type'] = 'application/json';
+            opcoes.body = JSON.stringify({ ...(args[0] || {}), action: acoes[nome] });
+          }
+          const resposta = await fetch(url, opcoes);
+          const dados = await resposta.json();
+          if (!resposta.ok || !dados.ok) throw Error(dados.erro || 'Finanças indisponíveis.');
+          ok && ok(dados);
+        } catch (erro) {
+          fail && fail(erro);
+        }
+      };
+    }});
+  }
+  google.script.run = cadeia(null, null);
+})();
 </script>

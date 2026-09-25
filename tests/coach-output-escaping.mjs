@@ -14,12 +14,14 @@ for (const trecho of [
   "escaparHtmlCRM(c.servicoAtual || '—')", "escaparHtmlCRM(c.contacto || '—')",
   "escaparHtmlCRM(c.notas || 'Sem notas')", "escaparHtmlCRM(p.nome)",
   "escaparHtmlCRM(p.frequencia)", "escaparHtmlCRM(t.nome)",
-  "escaparHtmlCRM(ex.nome)", "escaparHtmlCRM(ex.exercicio)"
+  "escaparHtmlCRM(ex.nome)", "escaparHtmlCRM(ex.exercicio)",
+  "escaparHtmlCRM(item.descricao)", "escaparHtmlCRM(item.categoria)"
 ]) {
   assert.ok(html.includes(trecho), 'Falta encoding HTML na superfície: ' + trecho);
 }
 
 assert.match(html, /value="' \+ escaparHtmlCRM\(ex\.notas \|\| ''\) \+ '"/);
 assert.match(html, /value="' \+ escaparHtmlCRM\(valor \|\| ''\) \+ '"/);
+assert.match(html, /const id = idParaOnclickCRM\(item\.id\);/);
 
 console.log('Saídas dinâmicas do Coach usam encoding HTML e argumentos inline seguros.');
