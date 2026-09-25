@@ -1,9 +1,15 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { calcularPagamentosEmAtraso, pagamentoEstaConfirmado } from '../server/dev-crm/payment-status.js';
+import { calcularPagamentosEmAtraso, consolidarPacksMensais, pagamentoEstaConfirmado } from '../server/dev-crm/payment-status.js';
 
 assert.equal(pagamentoEstaConfirmado(' Pago '), true);
 assert.equal(pagamentoEstaConfirmado('Pendente'), false);
+
+const packsDuplicados = consolidarPacksMensais([
+  { id: 'legado-pendente', clientId: 'a', mesAno: '2026-09', estadoPagamento: 'Pendente', preco: 225, migration: { sourceRow: 10 } },
+  { id: 'development-pago', clientId: 'a', mesAno: '2026-09', estadoPagamento: 'Pago', preco: 79, origem: 'firebase-development' }
+]);
+assert.deepEqual(packsDuplicados.map(pack => [pack.id, pack.preco]), [['development-pago', 79]]);
 
 const clientes = [
   { id: 'a', nome: 'Ana', estado: 'Ativo', diaPagamento: 10 },

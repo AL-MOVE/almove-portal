@@ -27,6 +27,42 @@ export function pagamentoEstaConfirmado(valor) {
   return String(valor || '').trim().toLocaleLowerCase('pt-PT') === 'pago';
 }
 
+function prioridadePack(pack) {
+  const criadoNoDevelopment = String(pack?.origem || '') === 'firebase-development' ? 4 : 0;
+  const pago = pagamentoEstaConfirmado(pack?.estadoPagamento) ? 2 : 0;
+  const atualizado = pack?.updatedAt || pack?.createdAt || null;
+  const instante = atualizado && typeof atualizado.toMillis === 'function' ? atualizado.toMillis() : Number(new Date(atualizado || 0)) || 0;
+  const linhaOrigem = Number(pack?.migration?.sourceRow ?? pack?.fonteLinha ?? 0) || 0;
+  return [criadoNoDevelopment, pago, instante, linhaOrigem, String(pack?.id || '')];
+}
+
+function packTemPrioridade(pack, referencia) {
+  const [origemPack, pagoPack, dataPack, linhaPack, idPack] = prioridadePack(pack);
+  const [origemReferencia, pagoReferencia, dataReferencia, linhaReferencia, idReferencia] = prioridadePack(referencia);
+  if (origemPack !== origemReferencia) return origemPack > origemReferencia;
+  if (pagoPack !== pagoReferencia) return pagoPack > pagoReferencia;
+  if (dataPack !== dataReferencia) return dataPack > dataReferencia;
+  if (linhaPack !== linhaReferencia) return linhaPack > linhaReferencia;
+  return idPack > idReferencia;
+}
+
+/**
+ * A aplicação trabalha com um pack ativo por cliente e por mês. Uma cópia
+ * legada pode trazer linhas repetidas; neste caso a alteração feita no
+ * Development prevalece e, entre espelhos do mesmo tipo, um pagamento já
+ * confirmado prevalece sobre um pendente.
+ */
+export function consolidarPacksMensais(packs = []) {
+  const porClienteMes = new Map();
+  packs.forEach(pack => {
+    if (!pack?.clientId || !pack?.mesAno) return;
+    const chave = String(pack.clientId) + '|' + String(pack.mesAno);
+    const existente = porClienteMes.get(chave);
+    if (!existente || packTemPrioridade(pack, existente)) porClienteMes.set(chave, pack);
+  });
+  return Array.from(porClienteMes.values());
+}
+
 /**
  * Um atraso só existe quando há um dia de cobrança definido e esse dia já
  * passou. Um pack apenas marcado como Pendente continua visível na receita
@@ -40,7 +76,7 @@ export function calcularPagamentosEmAtraso({ clientes = [], packs = [], mesAno, 
   const mesAnteriorReferencia = mesAnterior(mesReferenciaAtual);
   const packsPorClienteMes = new Map();
 
-  packs.forEach(pack => {
+  consolidarPacksMensais(packs).forEach(pack => {
     const chave = String(pack.clientId || '') + '|' + String(pack.mesAno || '');
     if (!pack.clientId || (pack.mesAno !== mesReferenciaAtual && pack.mesAno !== mesAnteriorReferencia)) return;
     packsPorClienteMes.set(chave, pack);

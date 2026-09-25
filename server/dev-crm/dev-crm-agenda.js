@@ -1,6 +1,7 @@
 import { obterAdminFirebase, obterIdentidadeFirebase } from '../../api/_firebase.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
+import { consolidarPacksMensais } from './payment-status.js';
 
 function responder(res, estado, corpo) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -62,7 +63,7 @@ export default async function handler(req, res) {
     const clientes = clientesSnap.docs.map(documento => ({ id: documento.id, ...documento.data() }))
       .filter(cliente => cliente.estado === 'Ativo').map(cliente => ({ id: cliente.id, nome: String(cliente.nome || '') }));
     const nomes = new Map(clientes.map(cliente => [cliente.id, cliente.nome]));
-    const packs = new Map(packsSnap.docs.map(documento => documento.data()).filter(pack => pack.mesAno === mesReferencia).map(pack => [pack.clientId, pack]));
+    const packs = new Map(consolidarPacksMensais(packsSnap.docs.map(documento => ({ id: documento.id, ...documento.data() }))).filter(pack => pack.mesAno === mesReferencia).map(pack => [pack.clientId, pack]));
     const sessoes = sessoesSnap.docs.map(documento => documento.data())
       .filter(sessao => sessao.estado === 'Confirmada' && String(sessao.dataConfirmada || '').slice(0, 10) >= semanaInicio && String(sessao.dataConfirmada || '').slice(0, 10) <= semanaFim && nomes.has(sessao.clientId));
     const contagem = new Map();

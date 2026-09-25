@@ -2,7 +2,7 @@ import { obterAdminFirebase, obterIdentidadeFirebase } from '../../api/_firebase
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
 import { obterResumoDespesas } from './dev-crm-expenses.js';
-import { calcularPagamentosEmAtraso, pagamentoEstaConfirmado } from './payment-status.js';
+import { calcularPagamentosEmAtraso, consolidarPacksMensais, pagamentoEstaConfirmado } from './payment-status.js';
 
 function responder(res, estado, corpo) { res.setHeader('Cache-Control', 'no-store, max-age=0'); res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('X-Robots-Tag', 'noindex, nofollow'); return res.status(estado).json(corpo); }
 function mesAtual() { const partes = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit' }).formatToParts(new Date()); return partes.find(p => p.type === 'year').value + '-' + partes.find(p => p.type === 'month').value; }
@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove();
     exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid));
     const [clientesSnap, packsSnap, sessoesSnap] = await Promise.all([db.collection('crmMigrationClients').get(), db.collection('crmMigrationPacks').get(), db.collection('crmMigrationSessions').get()]);
-    const clientes = clientesSnap.docs.map(d => ({ id: d.id, ...d.data() })); const clientesPorId = new Map(clientes.map(c => [c.id, c])); const todosPacks = packsSnap.docs.map(d => ({ id: d.id, ...d.data() })); const mesReal = mesAtual(); const pedido = String(req.query?.mes || ''); const mes = /^\d{4}-(0[1-9]|1[0-2])$/.test(pedido) ? pedido : mesReal;
+    const clientes = clientesSnap.docs.map(d => ({ id: d.id, ...d.data() })); const clientesPorId = new Map(clientes.map(c => [c.id, c])); const todosPacks = consolidarPacksMensais(packsSnap.docs.map(d => ({ id: d.id, ...d.data() }))); const mesReal = mesAtual(); const pedido = String(req.query?.mes || ''); const mes = /^\d{4}-(0[1-9]|1[0-2])$/.test(pedido) ? pedido : mesReal;
     const packs = todosPacks.filter(p => p.mesAno === mes && clientesPorId.get(p.clientId)?.estado === 'Ativo');
     const sessoes = sessoesSnap.docs.map(d => d.data()).filter(s => s.mesAno === mes && s.estado === 'Confirmada');
     const confirmadas = new Map(); sessoes.forEach(s => confirmadas.set(s.clientId, (confirmadas.get(s.clientId) || 0) + 1));

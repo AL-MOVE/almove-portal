@@ -27,7 +27,7 @@ export default async function handler(req, res) {
     exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid));
     const [clientesSnap, packsSnap] = await Promise.all([db.collection('crmMigrationClients').get(), db.collection('crmMigrationPacks').get()]);
     const clientes = clientesSnap.docs.map(documento => ({ id: documento.id, ...documento.data() }));
-    const packs = packsSnap.docs.map(documento => documento.data());
+    const packs = packsSnap.docs.map(documento => ({ id: documento.id, ...documento.data() }));
     const lista = calcularPagamentosEmAtraso({ clientes, packs, mesAno: mesAtual() });
     return responder(res, 200, { ok: true, clientesEmAtraso: lista, totalEmAtraso: lista.reduce((soma, cliente) => soma + cliente.valorEmAtraso, 0).toFixed(2) });
   } catch (erro) {

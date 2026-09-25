@@ -1,6 +1,7 @@
 import { obterAdminFirebase, obterIdentidadeFirebase } from '../../api/_firebase.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
+import { consolidarPacksMensais, pagamentoEstaConfirmado } from './payment-status.js';
 
 function responder(res, estado, corpo) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -48,7 +49,7 @@ export default async function handler(req, res) {
     const planosAExpirar = [...porPlano.values()].map(item => ({ ...item, diasRestantes: Math.ceil((new Date(item.validade + 'T12:00:00Z').getTime() - baseHoje) / 86400000) }))
       .filter(item => item.diasRestantes <= 7).sort((a, b) => a.diasRestantes - b.diasRestantes);
     const contratosPendentes = clientes.filter(cliente => cliente.contratoFileId && !cliente.assinaturaAceiteEm).map(cliente => ({ idCliente: cliente.id, nome: cliente.nome }));
-    const pendentes = packsSnap.docs.map(documento => documento.data()).filter(pack => pack.mesAno === mes && pack.estadoPagamento !== 'Pago' && porId.has(pack.clientId) && Number(porId.get(pack.clientId).diaPagamento || 0) <= Number(parte('day')))
+    const pendentes = consolidarPacksMensais(packsSnap.docs.map(documento => ({ id: documento.id, ...documento.data() }))).filter(pack => pack.mesAno === mes && !pagamentoEstaConfirmado(pack.estadoPagamento) && porId.has(pack.clientId) && Number(porId.get(pack.clientId).diaPagamento || 0) <= Number(parte('day')))
       .map(pack => ({ idCliente: pack.clientId, nome: porId.get(pack.clientId).nome, valorEmAtraso: Number(pack.preco || 0), mesesEmAtraso: 1 }));
     const centro = { resumo: { clientesAtivos: clientes.length, checkinsHoje: comCheckin.size, semCheckin: semCheckin.length, planosAExpirar: planosAExpirar.length, contratosPendentes: contratosPendentes.length, semAtividade: semAtividade.length }, semCheckin: semCheckin.slice(0, 12), planosAExpirar: planosAExpirar.slice(0, 12), contratosPendentes: contratosPendentes.slice(0, 12), semAtividade: semAtividade.slice(0, 12), geradoEm: parte('hour') + ':' + parte('minute') };
     const itens = [];
