@@ -6,6 +6,20 @@ function responder(res, estado, corpo) { res.setHeader('Cache-Control', 'no-stor
 function texto(valor, maximo = 180) { return String(valor || '').trim().slice(0, maximo); }
 function estado(valor) { const resultado = texto(valor, 16).toUpperCase(); return ['PLANEADA', 'CANCELADA'].includes(resultado) ? resultado : 'REALIZADA'; }
 function duracao(inicio, fim) { const converter = valor => { const partes = texto(valor, 5).split(':'); if (partes.length !== 2) return null; const horas = Number(partes[0]); const minutos = Number(partes[1]); return Number.isFinite(horas) && Number.isFinite(minutos) ? horas * 60 + minutos : null; }; const a = converter(inicio); const b = converter(fim); if (a === null || b === null) return 0; return b >= a ? b - a : 1440 - a + b; }
+function escalaOpcional(entrada, campos, limites, codigo) {
+  if (entrada == null) return null;
+  if (!entrada || typeof entrada !== 'object') throw new Error(codigo + '_INVALIDO');
+  const resultado = { nota: texto(entrada.nota, 500) };
+  const preenchidos = campos.filter(campo => entrada[campo] !== '' && entrada[campo] !== undefined && entrada[campo] !== null);
+  if (!preenchidos.length) return resultado.nota ? resultado : null;
+  if (preenchidos.length !== campos.length) throw new Error(codigo + '_INCOMPLETO');
+  campos.forEach(campo => {
+    const valor = Number(entrada[campo]); const [minimo, maximo] = limites[campo];
+    if (!Number.isInteger(valor) || valor < minimo || valor > maximo) throw new Error(codigo + '_INVALIDO');
+    resultado[campo] = valor;
+  });
+  return resultado;
+}
 
 export default async function handler(req, res) {
   if (!['GET', 'POST'].includes(req.method)) return responder(res, 405, { ok: false });
@@ -26,7 +40,9 @@ export default async function handler(req, res) {
     const cliente = await db.collection('crmMigrationClients').doc(clienteId).get(); if (!cliente.exists) return responder(res, 404, { ok: false, erro: 'CLIENTE_NAO_ENCONTRADO' }); const sessaoRef = sessoesColecao.doc(encodeURIComponent(idSessao)); const existente = await sessaoRef.get();
     if (existente.exists) { const registos = await execucoesColecao.where('idSessao', '==', idSessao).get(); return responder(res, 200, { ok: true, repetido: true, idSessao, seriesRegistadas: registos.size }); }
     const planos = await db.collection('crmMigrationTrainingPlans').where('idCliente', '==', clienteId).get(); const prescritos = new Set(planos.docs.map(documento => documento.data()).filter(item => item.nomePlano === plano && item.nomeTreino === treino).map(item => item.exercicio)); if (!prescritos.size) return responder(res, 404, { ok: false, erro: 'TREINO_NAO_PRESCRITO' });
-    const agora = new Date(); const lote = db.batch(); const estadoSessao = estado(entrada.estado); const horaInicio = texto(entrada.horaInicio, 5); const horaFim = texto(entrada.horaFim, 5); lote.create(sessaoRef, { fonteLinha: null, idSessao, idCliente: clienteId, nomePlano: plano, nomeTreino: treino, data, horaInicio, horaFim, duracaoMin: duracao(horaInicio, horaFim), estado: estadoSessao, notaGeral: texto(entrada.notaGeral, 1000), criadoEm: agora.toISOString(), atualizadoEm: agora.toISOString(), origem: 'firebase-development' }); let seriesRegistadas = 0;
+    const checkin = escalaOpcional(entrada.checkin, ['sono', 'stress', 'cansaco', 'refeicoes', 'doms'], { sono: [1, 5], stress: [1, 5], cansaco: [1, 5], refeicoes: [1, 5], doms: [0, 4] }, 'CHECKIN_PT');
+    const checkout = escalaOpcional(entrada.checkout, ['energia', 'esforco', 'dificuldade'], { energia: [1, 5], esforco: [1, 5], dificuldade: [1, 5] }, 'CHECKOUT_PT');
+    const agora = new Date(); const lote = db.batch(); const estadoSessao = estado(entrada.estado); const horaInicio = texto(entrada.horaInicio, 5); const horaFim = texto(entrada.horaFim, 5); lote.create(sessaoRef, { fonteLinha: null, idSessao, idCliente: clienteId, nomePlano: plano, nomeTreino: treino, data, horaInicio, horaFim, duracaoMin: duracao(horaInicio, horaFim), estado: estadoSessao, notaGeral: texto(entrada.notaGeral, 1000), checkin, checkout, criadoEm: agora.toISOString(), atualizadoEm: agora.toISOString(), origem: 'firebase-development' }); let seriesRegistadas = 0;
     exercicios.forEach(exercicio => { const nome = texto(exercicio?.exercicio, 200); if (!prescritos.has(nome)) return; const series = Array.isArray(exercicio?.series) ? exercicio.series.slice(0, 20) : []; series.forEach((serie, indice) => { if (seriesRegistadas >= 400 || ![serie?.reps, serie?.carga, serie?.velocidade].some(valor => texto(valor, 100))) return; seriesRegistadas += 1; lote.create(execucoesColecao.doc(), { fonteLinha: null, idCliente: clienteId, nomePlano: plano, nomeTreino: treino, data, exercicio: nome, numeroSerie: indice + 1, reps: texto(serie.reps, 100), carga: texto(serie.carga, 100), notas: texto(exercicio.notas, 1000), timestamp: agora.toISOString(), velocidade: texto(serie.velocidade, 40), requestId: idSessao + '-' + seriesRegistadas, tipoSessao: 'PT', registadoPor: identidade.uid, idSessao, origem: 'firebase-development' }); }); });
     if (estadoSessao === 'REALIZADA' && !seriesRegistadas) return responder(res, 400, { ok: false, erro: 'SESSAO_PT_SEM_SERIES' }); lote.create(db.collection('auditLogs').doc(), { action: 'development.pt-session.created', actorUid: identidade.uid, clientId: clienteId, sessionId: idSessao, createdAt: agora }); await lote.commit(); return responder(res, 201, { ok: true, idSessao, seriesRegistadas });
   } catch (erro) { const codigo = String(erro?.code || erro?.message || 'FALHA'); return responder(res, /^FIREBASE_/.test(codigo) ? 401 : 500, { ok: false, erro: codigo }); }

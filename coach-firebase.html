@@ -1798,6 +1798,9 @@
       white-space:nowrap;
     }
     .planos-cta-principal {
+      display:inline-flex;
+      align-items:center;
+      gap:9px;
       width:100%;
       min-height:52px;
       margin:14px 0 18px !important;
@@ -1807,6 +1810,18 @@
       box-shadow:0 12px 26px rgba(8,102,215,.26), inset 0 1px 0 rgba(255,255,255,.20);
       font-size:14px;
     }
+    .planos-cta-principal svg, .sessao-pt-iniciar-icone { flex:0 0 auto; display:block; }
+    .sessao-pt-iniciar { display:inline-flex; align-items:center; justify-content:center; gap:8px; }
+    .sessao-pt-bem-estar { margin-top:14px; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .sessao-pt-bem-estar-card { padding:13px; border:1px solid rgba(148,163,184,.16); border-radius:13px; background:rgba(255,255,255,.025); }
+    .sessao-pt-bem-estar-titulo { display:flex; align-items:center; gap:7px; margin:0 0 5px; color:#f4f8fc; font-size:13px; font-weight:800; }
+    .sessao-pt-bem-estar-titulo svg { width:16px; height:16px; color:#62f1dd; flex:0 0 auto; }
+    .sessao-pt-bem-estar-copy { margin:0 0 11px; color:#91a3b8; font-size:11px; line-height:1.35; }
+    .sessao-pt-escalas { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+    .sessao-pt-escalas .form-group { min-width:0; margin:0; }
+    .sessao-pt-escalas .form-group:last-child { grid-column:1 / -1; }
+    .sessao-pt-escalas select, .sessao-pt-escalas textarea { width:100%; box-sizing:border-box; }
+    .sessao-pt-escalas textarea { min-height:60px; resize:vertical; }
     .notificacoes-wrap { position:relative; }
     .btn-notificacoes {
       position:relative;
@@ -2171,6 +2186,7 @@
       .sessao-pt-grid-principal { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .sessao-pt-grid-tempo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .sessao-pt-grid-tempo .form-group:last-child { grid-column: 1 / -1; }
+      .sessao-pt-bem-estar { grid-template-columns:1fr; }
       .pt-serie-linha { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
       .pt-serie-numero { grid-column: 1 / -1; padding: 0; }
       .pt-velocidade { grid-template-columns: 1fr; margin-left: 0; }
@@ -2183,6 +2199,8 @@
       .sessao-pt-cabecalho h3 { font-size: 20px; }
       .sessao-pt-grid-principal, .sessao-pt-grid-tempo { grid-template-columns: 1fr; }
       .sessao-pt-grid-tempo .form-group:last-child { grid-column: auto; }
+      .sessao-pt-escalas { grid-template-columns:1fr; }
+      .sessao-pt-escalas .form-group:last-child { grid-column:auto; }
       .sessao-pt-rodape { display: grid; grid-template-columns: 1fr 1fr; }
       .sessao-pt-rodape .btn { width: 100%; }
     }
@@ -2285,11 +2303,8 @@
     .coach-workbench-action.is-primary { border-color:rgba(45,212,191,.34); background:linear-gradient(145deg,rgba(9,67,72,.82),rgba(8,21,33,.98)); }
     .coach-dashboard-note { margin:0 0 12px; color:#91a3b8; font-size:12px; }
     .sidebar-sub { font-weight:800; }
-    #btnInstalarCoach.coach-install-disponivel { display:inline-flex !important; align-items:center; gap:6px; }
-    #btnInstalarCoach.coach-install-disponivel::before { content:'⇩'; font-size:14px; line-height:1; }
     .coach-bottom-nav { display:none; }
     @media (max-width: 920px) { .coach-workbench { grid-template-columns:repeat(2,minmax(0,1fr)); } }
-    @media (max-width: 720px) { #btnInstalarCoach.coach-install-disponivel { padding:7px 9px !important; border-radius:9px; font-size:11px !important; } }
     @media (max-width: 700px) {
       #appLayout .main-area { padding-bottom:calc(76px + env(safe-area-inset-bottom)); }
       #appLayout .coach-bottom-nav { position:fixed; z-index:280; right:0; bottom:0; left:0; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:2px; padding:8px 8px calc(8px + env(safe-area-inset-bottom)); border-top:1px solid rgba(148,163,184,.14); background:rgba(7,18,29,.96); box-shadow:0 -10px 30px rgba(0,0,0,.22); backdrop-filter:blur(16px); }
@@ -2530,6 +2545,10 @@
     <div class="sessao-pt-cabecalho"><div><h3 id="sessaoPTTitulo">Sessão PT</h3><div id="sessaoPTCliente"></div></div><div class="sessao-pt-acoes"><button type="button" class="btn btn-secondary" onclick="duplicarUltimaSessaoPTUI()">↻ Repetir última</button><button type="button" class="btn btn-secondary" onclick="fecharModalSessaoPT()" aria-label="Fechar sessão PT">×</button></div></div>
     <div class="sessao-pt-grid-principal"><div class="form-group"><label>Plano</label><select id="sessaoPTPlano" onchange="renderSessaoPTTreinos()"></select></div><div class="form-group"><label>Treino</label><select id="sessaoPTTreino" onchange="renderSessaoPTExercicios()"></select></div><div class="form-group"><label>Data</label><input id="sessaoPTData" type="date"></div><div class="form-group"><label>Estado</label><select id="sessaoPTEstado"><option value="REALIZADA">Realizada</option><option value="PLANEADA">Planeada</option><option value="CANCELADA">Cancelada</option></select></div></div>
     <div class="sessao-pt-grid-tempo"><div class="form-group"><label>Início</label><input id="sessaoPTHoraInicio" type="time"></div><div class="form-group"><label>Fim</label><input id="sessaoPTHoraFim" type="time"></div><div class="form-group"><label>Nota geral da sessão</label><input id="sessaoPTNotaGeral" maxlength="1000" placeholder="Ex.: técnica boa; adaptar ombro direito na próxima"></div></div>
+    <div class="sessao-pt-bem-estar">
+      <section class="sessao-pt-bem-estar-card" aria-labelledby="sessaoPTCheckinTitulo"><h4 class="sessao-pt-bem-estar-titulo" id="sessaoPTCheckinTitulo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Check-in</h4><p class="sessao-pt-bem-estar-copy">Registo antes da sessão, com a escala usada pelo cliente no portal.</p><div class="sessao-pt-escalas"><div class="form-group"><label>Sono</label><select id="sessaoPTCheckinSono"><option value="">—</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div><div class="form-group"><label>Stress</label><select id="sessaoPTCheckinStress"><option value="">—</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div><div class="form-group"><label>Energia</label><select id="sessaoPTCheckinEnergia"><option value="">—</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div><div class="form-group"><label>Refeições</label><select id="sessaoPTCheckinRefeicoes"><option value="">—</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div><div class="form-group"><label>DOMS</label><select id="sessaoPTCheckinDoms"><option value="">—</option><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div><div class="form-group"><label>Nota</label><textarea id="sessaoPTCheckinNota" maxlength="500" placeholder="Opcional"></textarea></div></div></section>
+      <section class="sessao-pt-bem-estar-card" aria-labelledby="sessaoPTCheckoutTitulo"><h4 class="sessao-pt-bem-estar-titulo" id="sessaoPTCheckoutTitulo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>Check-out</h4><p class="sessao-pt-bem-estar-copy">Fecho da sessão, com a escala pós-treino do portal.</p><div class="sessao-pt-escalas"><div class="form-group"><label>Energia</label><select id="sessaoPTCheckoutEnergia"><option value="">—</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div><div class="form-group"><label>Esforço</label><select id="sessaoPTCheckoutEsforco"><option value="">—</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div><div class="form-group"><label>Dificuldade</label><select id="sessaoPTCheckoutDificuldade"><option value="">—</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div><div class="form-group"><label>Nota</label><textarea id="sessaoPTCheckoutNota" maxlength="500" placeholder="Opcional"></textarea></div></div></section>
+    </div>
     <div id="sessaoPTExercicios" class="sessao-pt-exercicios"></div>
     <div class="sessao-pt-rodape"><button type="button" class="btn btn-secondary" onclick="fecharModalSessaoPT()">Cancelar</button><button type="button" class="btn btn-primary" id="btnGuardarSessaoPT" onclick="guardarSessaoPTUI()">Guardar sessão PT</button></div>
   </div>
@@ -2638,7 +2657,6 @@
       <div class="topbar-right">
         <span class="coach-mode-chip" title="Aplicação de trabalho do coach">COACH</span>
         <div class="topbar-date" id="dataAtual"></div>
-        <button type="button" class="btn btn-secondary topbar-quick-action" id="btnInstalarCoach" onclick="instalarCoachPWA()" style="display:none;padding:9px 12px;font-size:12px" title="Instalar aplicação">Instalar app</button>
         <button type="button" class="btn btn-primary topbar-quick-action" onclick="switchTab('criar')">+ Novo cliente</button>
         <button type="button" class="btn btn-secondary topbar-quick-action" id="btnSairSessaoCRM" onclick="terminarSessaoCRM()" style="padding:9px 12px;font-size:12px" title="Terminar sessão">Sair</button>
         <div class="notificacoes-wrap">
@@ -2883,7 +2901,7 @@
     <div style="display: flex; justify-content: space-between; align-items: center; gap:8px; margin-bottom: 16px;">
       <button class="btn btn-secondary" onclick="voltarParaClientes()">← Voltar</button>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
-      <button type="button" class="btn btn-primary" id="btnSessaoPTTopo" onclick="abrirSessaoPTDaFichaUI()" style="width:auto;padding:10px 14px;font-weight:800;box-shadow:0 6px 16px rgba(0,169,157,.25);">▶ Iniciar sessão PT</button>
+      <button type="button" class="btn btn-primary sessao-pt-iniciar" id="btnSessaoPTTopo" onclick="abrirSessaoPTDaFichaUI()" style="width:auto;padding:10px 14px;font-weight:800;box-shadow:0 6px 16px rgba(0,169,157,.25);"><svg class="sessao-pt-iniciar-icone" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Iniciar sessão PT</span></button>
       <button class="btn btn-secondary" id="btnAtualizarDetalheCliente" onclick="atualizarDetalheCliente()" title="Atualizar dados deste cliente" style="display: inline-flex; align-items: center; gap: 6px;">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
         Atualizar
@@ -5645,63 +5663,12 @@ function entrarNaApp(tabInicial) {
   if (tabInicial && tabInicial !== 'dashboard') switchTab(tabInicial);
 }
 
-let eventoInstalacaoCoach = null;
-function coachEstaInstalado() {
-  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-}
-function atualizarAcaoInstalacaoCoach() {
-  const botao = document.getElementById('btnInstalarCoach');
-  if (!botao) return;
-  const instalado = coachEstaInstalado();
-  botao.classList.toggle('coach-install-disponivel', !instalado);
-  botao.style.display = instalado ? 'none' : 'inline-flex';
-  botao.textContent = eventoInstalacaoCoach ? 'Instalar app' : 'Como instalar';
-  botao.setAttribute('aria-label', eventoInstalacaoCoach ? 'Instalar a aplicação André Martins - Personal Trainer' : 'Ver como instalar a aplicação André Martins - Personal Trainer');
-}
-function abrirAjudaInstalacaoCoach() {
-  const existente = document.getElementById('coachInstallOverlay');
-  if (existente) { existente.style.display = 'flex'; return; }
-  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const titulo = ios ? 'Adicionar ao ecrã principal' : 'Instalar André Martins - Personal Trainer';
-  const passos = ios
-    ? '<ol><li>Abre esta página no <strong>Safari</strong>.</li><li>Toca em <strong>Partilhar</strong> (quadrado com seta).</li><li>Escolhe <strong>Adicionar ao ecrã principal</strong>.</li></ol>'
-    : '<ol><li>Abre o menu do browser (⋮).</li><li>Escolhe <strong>Instalar app</strong> ou <strong>Adicionar ao ecrã principal</strong>.</li><li>Confirma para criar o atalho seguro do Coach.</li></ol>';
-  const overlay = document.createElement('div');
-  overlay.id = 'coachInstallOverlay';
-  overlay.setAttribute('role', 'presentation');
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:10020;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(1,7,14,.78);backdrop-filter:blur(6px);';
-  overlay.innerHTML = '<section role="dialog" aria-modal="true" aria-labelledby="coachInstallTitulo" style="width:min(440px,100%);border:1px solid rgba(45,212,191,.34);border-radius:18px;background:#0b1826;color:#edf7ff;box-shadow:0 24px 70px rgba(0,0,0,.45);padding:22px;">' +
-    '<div style="display:flex;align-items:flex-start;gap:14px;"><div style="display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#2dd4bf,#2584df);color:#062232;font-size:22px;font-weight:900;">⇩</div><div><div style="font-size:11px;font-weight:850;letter-spacing:.12em;color:#62f1dd;">André Martins - Personal Trainer</div><h2 id="coachInstallTitulo" style="margin:3px 0 0;font-size:20px;line-height:1.2;">' + titulo + '</h2></div></div>' +
-    '<p style="margin:18px 0 12px;color:#bdd0df;line-height:1.55;">A aplicação instala-se no teu telemóvel e abre como uma app, sem guardar informação sensível no dispositivo.</p>' +
-    '<div style="padding:13px 14px;border:1px solid rgba(148,163,184,.18);border-radius:12px;background:rgba(15,30,46,.7);color:#e8f1f8;line-height:1.7;">' + passos + '</div>' +
-    '<button type="button" class="btn btn-primary" style="width:100%;margin-top:18px;" id="coachInstallFechar">Percebi</button></section>';
-  overlay.onclick = function(evento) { if (evento.target === overlay) overlay.remove(); };
-  document.body.appendChild(overlay);
-  overlay.querySelector('#coachInstallFechar').onclick = function() { overlay.remove(); };
-}
 function prepararCoachPWA() {
-  atualizarAcaoInstalacaoCoach();
-  window.addEventListener('beforeinstallprompt', function(evento) {
-    evento.preventDefault();
-    eventoInstalacaoCoach = evento;
-    atualizarAcaoInstalacaoCoach();
-  });
-  window.addEventListener('appinstalled', function() {
-    eventoInstalacaoCoach = null;
-    atualizarAcaoInstalacaoCoach();
-  });
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/coach-sw.js', { scope: '/coach-firebase.html' }).catch(function(erro) {
       console.warn('Não foi possível preparar a instalação do Coach:', erro);
     });
   }
-}
-async function instalarCoachPWA() {
-  if (!eventoInstalacaoCoach) { abrirAjudaInstalacaoCoach(); return; }
-  eventoInstalacaoCoach.prompt();
-  await eventoInstalacaoCoach.userChoice.catch(function() { return null; });
-  eventoInstalacaoCoach = null;
-  atualizarAcaoInstalacaoCoach();
 }
 
 function switchTab(tab) {
@@ -6994,7 +6961,7 @@ function renderizarDetalheCliente(detalhe) {
     }
 
     html += '<section class="card" style="margin-bottom:16px;border:1px solid rgba(0,169,157,.35);background:linear-gradient(135deg,rgba(0,169,157,.12),rgba(10,25,42,.96))">';
-    html += '<div class="dashboard-section-row" style="margin:0 0 12px;align-items:center"><div><h2 class="section-title" style="margin:0">Sessões e progresso</h2><div style="font-size:12px;color:#91a3b8;margin-top:4px">PT presencial e treino autónomo no mesmo histórico</div></div><button type="button" class="btn btn-primary" style="width:auto;padding:12px 18px;font-size:14px;font-weight:800;box-shadow:0 8px 20px rgba(0,169,157,.22)" onclick="abrirSessaoPTUI(\'' + idEsc + '\', \'' + idParaOnclickCRM(c.nome) + '\')">▶ Iniciar sessão PT</button></div>';
+    html += '<div class="dashboard-section-row" style="margin:0 0 12px;align-items:center"><div><h2 class="section-title" style="margin:0">Sessões e progresso</h2><div style="font-size:12px;color:#91a3b8;margin-top:4px">PT presencial e treino autónomo no mesmo histórico</div></div><button type="button" class="btn btn-primary sessao-pt-iniciar" style="width:auto;padding:12px 18px;font-size:14px;font-weight:800;box-shadow:0 8px 20px rgba(0,169,157,.22)" onclick="abrirSessaoPTUI(\'' + idEsc + '\', \'' + idParaOnclickCRM(c.nome) + '\')"><svg class="sessao-pt-iniciar-icone" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Iniciar sessão PT</span></button></div>';
     html += '<div id="historicoSessoesCMR"><span style="color:#94a3b8;font-size:12px">A carregar histórico…</span></div>';
     html += '<details style="margin-top:14px"><summary style="cursor:pointer;color:#91a3b8;font-size:12px">Ver histórico legado do Tracker</summary><div id="resumoTrackerCMR" style="margin-top:9px"><span style="color:#94a3b8;font-size:12px">A carregar…</span></div></details>';
     html += '</section>';
@@ -7207,8 +7174,16 @@ function verDetalheSessaoUI(idSessao, idCliente) {
   overlay.style.display = 'flex'; conteudo.innerHTML = '<span style="color:#94a3b8">A carregar séries…</span>';
   google.script.run.withSuccessHandler(resultado => {
     const exercicios = (resultado && resultado.exercicios) || [];
+    const escala = (titulo, dados, campos) => {
+      if (!dados) return '';
+      const valores = campos.filter(([chave]) => dados[chave] !== undefined && dados[chave] !== null && dados[chave] !== '').map(([chave, rotulo]) => '<span class="badge">' + escaparHtmlCRM(rotulo) + ' ' + escaparHtmlCRM(dados[chave]) + '</span>').join('');
+      const nota = dados.nota ? '<div style="font-size:12px;color:#cbd5e1;margin-top:6px">' + escaparHtmlCRM(dados.nota) + '</div>' : '';
+      return valores || nota ? '<section style="padding:10px 0;border-bottom:1px solid #253449"><strong>' + escaparHtmlCRM(titulo) + '</strong><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">' + valores + '</div>' + nota + '</section>' : '';
+    };
+    const bemEstar = escala('Check-in', resultado && resultado.checkin, [['sono','Sono'],['stress','Stress'],['cansaco','Energia'],['refeicoes','Refeições'],['doms','DOMS']]) + escala('Check-out', resultado && resultado.checkout, [['energia','Energia'],['esforco','Esforço'],['dificuldade','Dificuldade']]);
     document.getElementById('detalheSessaoTitulo').textContent = 'Detalhe da sessão';
-    conteudo.innerHTML = exercicios.length ? exercicios.map(ex => '<section style="padding:10px 0;border-bottom:1px solid #253449"><strong>' + escaparHtmlCRM(ex.nome) + '</strong><div style="font-size:12px;color:#91a3b8;margin-top:5px">' + ex.series.map((serie, i) => 'S' + (i + 1) + ': ' + escaparHtmlCRM(serie.reps || '—') + (serie.carga ? ' · ' + escaparHtmlCRM(serie.carga) + ' kg' : '') + (serie.velocidade ? ' · ' + escaparHtmlCRM(serie.velocidade) : '')).join('<br>') + '</div>' + (ex.nota ? '<div style="font-size:12px;color:#cbd5e1;margin-top:5px">' + escaparHtmlCRM(ex.nota) + '</div>' : '') + '</section>').join('') : '<span style="color:#94a3b8">Esta sessão não tem séries registadas.</span>';
+    const exerciciosHtml = exercicios.length ? exercicios.map(ex => '<section style="padding:10px 0;border-bottom:1px solid #253449"><strong>' + escaparHtmlCRM(ex.nome) + '</strong><div style="font-size:12px;color:#91a3b8;margin-top:5px">' + ex.series.map((serie, i) => 'S' + (i + 1) + ': ' + escaparHtmlCRM(serie.reps || '—') + (serie.carga ? ' · ' + escaparHtmlCRM(serie.carga) + ' kg' : '') + (serie.velocidade ? ' · ' + escaparHtmlCRM(serie.velocidade) : '')).join('<br>') + '</div>' + (ex.nota ? '<div style="font-size:12px;color:#cbd5e1;margin-top:5px">' + escaparHtmlCRM(ex.nota) + '</div>' : '') + '</section>').join('') : '<span style="color:#94a3b8">Esta sessão não tem séries registadas.</span>';
+    conteudo.innerHTML = bemEstar + exerciciosHtml;
   }).withFailureHandler(err => { conteudo.innerHTML = '<span style="color:#fca5a5">Não foi possível abrir: ' + escaparHtmlCRM(err.message) + '</span>'; }).getDetalheSessaoAtividadeCliente({ idCliente: idCliente, idSessao: idSessao });
 }
 
@@ -7284,6 +7259,33 @@ function abrirSessaoPTDaFichaUI() {
   abrirSessaoPTUI(CLIENTE_DETALHE_ATUAL_ID, titulo ? titulo.textContent.trim() : 'Cliente');
 }
 
+function limparBemEstarSessaoPT() {
+  ['sessaoPTCheckinSono', 'sessaoPTCheckinStress', 'sessaoPTCheckinEnergia', 'sessaoPTCheckinRefeicoes', 'sessaoPTCheckinDoms', 'sessaoPTCheckoutEnergia', 'sessaoPTCheckoutEsforco', 'sessaoPTCheckoutDificuldade'].forEach(id => {
+    const campo = document.getElementById(id); if (campo) campo.value = '';
+  });
+  ['sessaoPTCheckinNota', 'sessaoPTCheckoutNota'].forEach(id => {
+    const campo = document.getElementById(id); if (campo) campo.value = '';
+  });
+}
+
+function lerEscalaSessaoPT(ids, notaId, rotulo) {
+  const valores = ids.map(id => document.getElementById(id).value);
+  const preenchidos = valores.filter(valor => valor !== '').length;
+  const nota = document.getElementById(notaId).value.trim();
+  if (preenchidos && preenchidos !== ids.length) throw new Error('Completa todos os campos de ' + rotulo + ' ou deixa-os em branco.');
+  if (!preenchidos) return nota ? { nota } : null;
+  return { valores: valores.map(Number), nota };
+}
+
+function lerBemEstarSessaoPT() {
+  const checkin = lerEscalaSessaoPT(['sessaoPTCheckinSono', 'sessaoPTCheckinStress', 'sessaoPTCheckinEnergia', 'sessaoPTCheckinRefeicoes', 'sessaoPTCheckinDoms'], 'sessaoPTCheckinNota', 'check-in');
+  const checkout = lerEscalaSessaoPT(['sessaoPTCheckoutEnergia', 'sessaoPTCheckoutEsforco', 'sessaoPTCheckoutDificuldade'], 'sessaoPTCheckoutNota', 'check-out');
+  return {
+    checkin: checkin && { sono: checkin.valores?.[0], stress: checkin.valores?.[1], cansaco: checkin.valores?.[2], refeicoes: checkin.valores?.[3], doms: checkin.valores?.[4], nota: checkin.nota || '' },
+    checkout: checkout && { energia: checkout.valores?.[0], esforco: checkout.valores?.[1], dificuldade: checkout.valores?.[2], nota: checkout.nota || '' }
+  };
+}
+
 function abrirSessaoPTUI(idCliente, nomeCliente) {
   SESSAO_PT_CLIENTE = { id: idCliente, nome: nomeCliente };
   SESSAO_PT_PLANOS = [];
@@ -7294,6 +7296,7 @@ function abrirSessaoPTUI(idCliente, nomeCliente) {
   document.getElementById('sessaoPTHoraInicio').value = '';
   document.getElementById('sessaoPTHoraFim').value = '';
   document.getElementById('sessaoPTNotaGeral').value = '';
+  limparBemEstarSessaoPT();
   SESSAO_PT_DUPLICADA = null;
   SESSAO_PT_EXERCICIO_ATUAL = 0;
   document.getElementById('sessaoPTExercicios').innerHTML = '<div style="color:#9fb0c6;font-size:13px;padding:14px 0;">A carregar prescrições…</div>';
@@ -7452,6 +7455,8 @@ function guardarSessaoPTUI() {
   }).filter(ex => ex.series.some(s => s.reps || s.carga || s.velocidade));
   const estado = document.getElementById('sessaoPTEstado').value;
   if (estado === 'REALIZADA' && !exercicios.length) { showAlert('Regista pelo menos uma série numa sessão realizada.', 'error'); return; }
+  let bemEstar;
+  try { bemEstar = lerBemEstarSessaoPT(); } catch (erro) { showAlert(erro.message, 'error'); return; }
   const plano = SESSAO_PT_PLANOS[Number(document.getElementById('sessaoPTPlano').value) || 0];
   const botao = document.getElementById('btnGuardarSessaoPT');
   if (SESSAO_PT_GUARDAR_TIMEOUT) clearTimeout(SESSAO_PT_GUARDAR_TIMEOUT);
@@ -7472,7 +7477,7 @@ function guardarSessaoPTUI() {
     SESSAO_PT_GUARDAR_TIMEOUT = null;
     botao.disabled = false; botao.textContent = 'Guardar sessão PT';
     showAlert('Não foi possível guardar a sessão PT: ' + err.message, 'error');
-  }).registarSessaoPT({ idCliente: SESSAO_PT_CLIENTE.id, nomePlano: plano.nome, nomeTreino: treino.nome, data: document.getElementById('sessaoPTData').value, estado: estado, horaInicio: document.getElementById('sessaoPTHoraInicio').value, horaFim: document.getElementById('sessaoPTHoraFim').value, notaGeral: document.getElementById('sessaoPTNotaGeral').value.trim(), exercicios: exercicios, idSessao: SESSAO_PT_ID || (SESSAO_PT_ID = 'pt-' + Date.now() + '-' + Math.random().toString(36).slice(2)) });
+  }).registarSessaoPT({ idCliente: SESSAO_PT_CLIENTE.id, nomePlano: plano.nome, nomeTreino: treino.nome, data: document.getElementById('sessaoPTData').value, estado: estado, horaInicio: document.getElementById('sessaoPTHoraInicio').value, horaFim: document.getElementById('sessaoPTHoraFim').value, notaGeral: document.getElementById('sessaoPTNotaGeral').value.trim(), checkin: bemEstar.checkin, checkout: bemEstar.checkout, exercicios: exercicios, idSessao: SESSAO_PT_ID || (SESSAO_PT_ID = 'pt-' + Date.now() + '-' + Math.random().toString(36).slice(2)) });
 }
 
 function abrirModalReplicarPlano() {
@@ -9360,7 +9365,7 @@ window.addEventListener('load', function () {
 (function(){function runner(ok,fail){return new Proxy({}, {get(_,name){if(name==='withSuccessHandler')return f=>runner(f,fail);if(name==='withFailureHandler')return f=>runner(ok,f);return async(...args)=>{try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();if(!t)throw Error('Entra primeiro em dev-crm.html.');let u='/api/dev-crm-dashboard',out;if(name==='getCRMData'){out=(await fetch(u,{headers:{Authorization:'Bearer '+t}}).then(r=>r.json())).crm}else if(name==='getPerfilPT'){out={nome:'André Martins - Personal Trainer'}}else if(['getClienteDetalhe','getHistoricoClienteCRM','getHistoricoAvaliacoesFisicasCRM','getHistoricoAtividadeCliente'].includes(name)){const d=await fetch('/api/dev-crm-client-detail?id='+encodeURIComponent(args[0]),{headers:{Authorization:'Bearer '+t}}).then(r=>r.json());if(!d.ok)throw Error(d.erro||'Erro');out=name==='getClienteDetalhe'?d.detalhe:name==='getHistoricoClienteCRM'?d.notas:name==='getHistoricoAvaliacoesFisicasCRM'?d.avaliacoes:d.atividade}else throw Error('Esta secção está a ser ligada ao Firebase.');ok&&ok(out)}catch(e){fail&&fail(e)}}}})}window.google={script:{run:runner(null,null)}}})();
 </script>
 <script>
-(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(nome!=='getDetalheSessaoAtividadeCliente')return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();const d=await fetch('/api/dev-crm-client-detail?id='+encodeURIComponent(args[0].idCliente),{headers:{Authorization:'Bearer '+t}}).then(r=>r.json());const por={};(d.execucoes||[]).filter(x=>x.idSessao===args[0].idSessao).forEach(x=>{const e=por[x.exercicio]||(por[x.exercicio]={nome:x.exercicio,series:[],nota:x.notas||''});e.series.push({reps:x.reps,carga:x.carga,velocidade:x.velocidade})});ok&&ok({exercicios:Object.values(por)})}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
+(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(nome!=='getDetalheSessaoAtividadeCliente')return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();const d=await fetch('/api/dev-crm-client-detail?id='+encodeURIComponent(args[0].idCliente),{headers:{Authorization:'Bearer '+t}}).then(r=>r.json());if(!d.ok)throw Error(d.erro||'Não foi possível carregar a sessão.');const por={};(d.execucoes||[]).filter(x=>x.idSessao===args[0].idSessao).forEach(x=>{const e=por[x.exercicio]||(por[x.exercicio]={nome:x.exercicio,series:[],nota:x.notas||''});e.series.push({reps:x.reps,carga:x.carga,velocidade:x.velocidade})});const sessao=(d.atividade||[]).find(x=>x.idSessao===args[0].idSessao)||{};ok&&ok({exercicios:Object.values(por),checkin:sessao.checkin||null,checkout:sessao.checkout||null})}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(nome!=='getCheckinsResumoHoje')return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();const r=await fetch('/api/dev-crm-checkins',{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Check-ins indisponíveis.');ok&&ok(d)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();

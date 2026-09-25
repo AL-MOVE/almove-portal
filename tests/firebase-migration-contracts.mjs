@@ -54,9 +54,8 @@ assert.match(coachFirebase, /AlMoveSessaoCRM\.exigirCoach/, 'A interface CRM nã
 assert.match(coachFirebase, /function obterAtalhoPwaCoach\(\)/, 'O Coach deve abrir os atalhos nativos na área certa.');
 assert.ok(coachManifest.shortcuts.some((atalho) => atalho.url === '/coach-firebase.html?abrir=agenda&source=pwa'), 'O Coach deve expor o atalho nativo para a agenda.');
 assert.match(coachFirebase, /terminarSessaoCRM/, 'A equipa deve poder terminar a sessão do CRM neste dispositivo.');
-assert.match(coachFirebase, /beforeinstallprompt/, 'O Coach deve poder pedir a instalação PWA quando o browser a disponibiliza.');
-assert.match(coachFirebase, /abrirAjudaInstalacaoCoach/, 'O Coach móvel deve explicar a instalação quando o browser não abre o pedido automático.');
-assert.match(coachFirebase, /coach-install-disponivel/, 'A ação de instalação não pode ficar escondida pelas regras móveis.');
+assert.match(coachFirebase, /navigator\.serviceWorker\.register\('\/coach-sw\.js'/, 'O Coach deve registar o service worker necessário à PWA.');
+assert.doesNotMatch(coachFirebase, /Como instalar|beforeinstallprompt|btnInstalarCoach/, 'A interface do Coach não deve expor um botão de instalação próprio.');
 assert.match(coachFirebase, /coach-bottom-nav/, 'O Coach móvel deve ter uma navegação diária acessível sem abrir a gaveta.');
 assert.match(coachFirebase, /abrirMenuInferiorCoach/, 'As restantes áreas do Coach devem continuar acessíveis através de Mais.');
 assert.equal(coachManifest.display, 'standalone', 'O Coach instalado deve abrir sem a interface do browser.');
