@@ -2300,6 +2300,36 @@
     }
     @media (max-width: 480px) { .coach-workbench { gap:8px; } .coach-workbench-action { min-height:108px; padding:14px; } .coach-workbench-action strong { font-size:13px; } .coach-mode-chip { display:none; } }
   </style>
+  <style id="coach-mobile-sidebar-fix">
+    /* No telemóvel, a gaveta fica acima do cabeçalho apenas enquanto está
+       aberta. Assim, a marca e o fecho pertencem ao mesmo cabeçalho e não
+       aparece um segundo botão solto por baixo da barra fixa. */
+    @media (max-width: 1024px) {
+      #appLayout .sidebar.mobile-open { z-index: 1100 !important; }
+      #sidebarOverlay { z-index: 1090 !important; }
+      #appLayout .sidebar-header,
+      #appLayout .sidebar.collapsed .sidebar-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        min-height: 42px !important;
+        margin: 0 4px 18px !important;
+        padding: 0 0 14px !important;
+        border-bottom: 1px solid rgba(255,255,255,.10) !important;
+      }
+      #appLayout .sidebar-logo,
+      #appLayout .sidebar.collapsed .sidebar-logo { display: flex !important; }
+      #appLayout .sidebar-toggle,
+      #appLayout .sidebar.collapsed .sidebar-toggle {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin: 0 !important;
+      }
+      #sidebarToggleIcon { font-size: 0 !important; }
+      #sidebarToggleIcon::before { content: '×'; font-size: 24px; line-height: 1; font-weight: 400; }
+    }
+  </style>
 </head>
 <body>
 
