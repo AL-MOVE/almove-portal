@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [page, manifestText, worker, ptSessionEndpoint] = await Promise.all([
+const [page, manifestText, worker, ptSessionEndpoint, agendaEndpoint] = await Promise.all([
   readFile(new URL('../coach-mobile.html', import.meta.url), 'utf8'),
   readFile(new URL('../coach-mobile-manifest.json', import.meta.url), 'utf8'),
   readFile(new URL('../coach-mobile-sw.js', import.meta.url), 'utf8'),
-  readFile(new URL('../server/dev-crm/dev-crm-pt-session.js', import.meta.url), 'utf8')
+  readFile(new URL('../server/dev-crm/dev-crm-pt-session.js', import.meta.url), 'utf8'),
+  readFile(new URL('../server/dev-crm/dev-crm-agenda.js', import.meta.url), 'utf8')
 ]);
 const manifest = JSON.parse(manifestText);
 const scripts = [...page.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(match => match[1]).filter(script => script.trim());
@@ -28,11 +29,15 @@ assert.match(page, /confirm-sheet/);
 assert.match(page, /captureSessionInputs/);
 assert.match(page, /session\.form/);
 assert.match(page, /A sessão foi guardada, mas o plano original não foi atualizado/);
-assert.match(page, /velocidade:/);
 assert.match(page, /rir:/);
+assert.doesNotMatch(page, /data-velocidade/);
+assert.match(page, /coachExerciseLibrary/);
+assert.match(page, /sessionVolume/);
+assert.match(page, /monthly-pt/);
 assert.match(page, /min-width:0/);
 assert.match(ptSessionEndpoint, /nomeOriginal/);
 assert.match(ptSessionEndpoint, /series\.slice\(0, 6\)/);
+assert.match(agendaEndpoint, /modo === 'monthly-pt'/);
 assert.match(page, /navigator\.serviceWorker\.register\('\/coach-mobile-sw\.js'/);
 assert.equal(manifest.start_url, '/coach-mobile.html?source=pwa');
 assert.equal(manifest.display, 'standalone');

@@ -51,7 +51,7 @@ export default async function handler(req, res) {
     const identidade = await obterIdentidadeFirebase(req);
     const { db } = obterFirestoreAlmove();
     exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid));
-    const offsetBruto = Number(req.query?.offset || 0);
+    const modo = String(req.query?.mode || 'semana'); const offsetBruto = Number(req.query?.offset || 0);
     const offset = Number.isFinite(offsetBruto) ? Math.max(-52, Math.min(52, Math.trunc(offsetBruto))) : 0;
     const semanaInicio = inicioSemana(offset);
     const semanaFim = adicionarDias(semanaInicio, 6);
@@ -63,6 +63,7 @@ export default async function handler(req, res) {
     const clientes = clientesSnap.docs.map(documento => ({ id: documento.id, ...documento.data() }))
       .filter(cliente => cliente.estado === 'Ativo').map(cliente => ({ id: cliente.id, nome: String(cliente.nome || '') }));
     const nomes = new Map(clientes.map(cliente => [cliente.id, cliente.nome]));
+    if (modo === 'monthly-pt') { const mes = String(req.query?.mes || dataLisboa().slice(0, 7)); if (!/^\d{4}-\d{2}$/.test(mes)) return responder(res, 400, { ok: false, erro: 'MES_INVALIDO' }); const itens = sessoesSnap.docs.map(documento => ({ id: documento.id, ...documento.data() })).filter(sessao => sessao.mesAno === mes && nomes.has(sessao.clientId)).map(sessao => ({ idCliente: sessao.clientId, clienteNome: nomes.get(sessao.clientId), numero: Number(sessao.numSessao || 0), estado: String(sessao.estado || 'Pendente'), data: String(sessao.dataConfirmada || '') })).sort((a, b) => a.clienteNome.localeCompare(b.clienteNome, 'pt-PT') || a.numero - b.numero); return responder(res, 200, { ok: true, mes, pendentes: itens.filter(item => item.estado === 'Pendente'), concluidas: itens.filter(item => item.estado === 'Confirmada'), canceladas: itens.filter(item => item.estado === 'Cancelada') }); }
     const packs = new Map(consolidarPacksMensais(packsSnap.docs.map(documento => ({ id: documento.id, ...documento.data() }))).filter(pack => pack.mesAno === mesReferencia).map(pack => [pack.clientId, pack]));
     const sessoes = sessoesSnap.docs.map(documento => documento.data())
       .filter(sessao => sessao.estado === 'Confirmada' && String(sessao.dataConfirmada || '').slice(0, 10) >= semanaInicio && String(sessao.dataConfirmada || '').slice(0, 10) <= semanaFim && nomes.has(sessao.clientId));

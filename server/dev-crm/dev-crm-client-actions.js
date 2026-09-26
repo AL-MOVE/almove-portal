@@ -59,8 +59,8 @@ export default async function handler(req, res) {
       const numero = Number(dados.numSessao); if (!Number.isInteger(numero) || numero < 1) return responder(res, 400, { ok: false, erro: 'SESSAO_INVALIDA' });
       const mes = mesAtual(); const sessoes = await db.collection('crmMigrationSessions').where('clientId', '==', clienteId).get(); const sessao = sessoes.docs.find(documento => { const item = documento.data(); return item.mesAno === mes && Number(item.numSessao) === numero; });
       if (!sessao) return responder(res, 404, { ok: false, erro: 'SESSAO_NAO_ENCONTRADA' });
-      const data = texto(dados.dataConfirmada, 10); const confirmar = !!data; if (confirmar && !/^\d{4}-\d{2}-\d{2}$/.test(data)) return responder(res, 400, { ok: false, erro: 'DATA_INVALIDA' });
-      await db.runTransaction(async transacao => { transacao.update(sessao.ref, { estado: confirmar ? 'Confirmada' : 'Pendente', dataConfirmada: confirmar ? data : '', updatedAt: agora }); transacao.create(db.collection('auditLogs').doc(), { ...auditoria, action: confirmar ? 'development.session.confirmed' : 'development.session.unconfirmed', sessionId: sessao.id }); });
+      const data = texto(dados.dataConfirmada, 10); const cancelar = texto(dados.estado, 16) === 'Cancelada'; const confirmar = !!data && !cancelar; if ((confirmar || cancelar) && !/^\d{4}-\d{2}-\d{2}$/.test(data)) return responder(res, 400, { ok: false, erro: 'DATA_INVALIDA' });
+      await db.runTransaction(async transacao => { transacao.update(sessao.ref, { estado: cancelar ? 'Cancelada' : (confirmar ? 'Confirmada' : 'Pendente'), dataConfirmada: confirmar || cancelar ? data : '', updatedAt: agora }); transacao.create(db.collection('auditLogs').doc(), { ...auditoria, action: cancelar ? 'development.session.cancelled' : (confirmar ? 'development.session.confirmed' : 'development.session.unconfirmed'), sessionId: sessao.id }); });
       return responder(res, 200, { ok: true, idCliente: clienteId });
     }
     if (acao === 'set-all-sessions-state') {
