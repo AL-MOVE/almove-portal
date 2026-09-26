@@ -25,11 +25,12 @@ export default async function handler(req, res) {
   if (email !== 'martinssony1998@gmail.com') return responder(res, 503, { ok: false });
 
   let conta;
+  let utilizador;
   try {
     const admin = obterAdminFirebase();
     conta = admin.conta;
     const { auth, app } = admin;
-    const utilizador = await auth.getUserByEmail(email);
+    utilizador = await auth.getUserByEmail(email);
     await getFirestore(app).collection('userAccess').doc(utilizador.uid).set({
       status: 'active', roles: ['coach', 'admin'], updatedAt: new Date()
     }, { merge: true });
@@ -38,7 +39,8 @@ export default async function handler(req, res) {
     console.error(
       'COACH_ROLE_ASSIGNMENT_FAILED',
       String(erro && (erro.code || erro.message) || 'UNKNOWN').slice(0, 160),
-      String(conta?.client_email || 'UNKNOWN').slice(0, 120)
+      String(conta?.client_email || 'UNKNOWN').slice(0, 120),
+      String(utilizador?.uid || 'UNKNOWN').slice(0, 160)
     );
     return responder(res, 502, { ok: false });
   }
