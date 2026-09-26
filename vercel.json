@@ -1,5 +1,15 @@
 {
   "rewrites": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "crm\\.almove\\.pt" }],
+      "destination": "/coach-firebase.html"
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "coach\\.almove\\.pt" }],
+      "destination": "/coach-mobile.html"
+    },
     { "source": "/api/dev-crm-:route", "destination": "/api/dev-crm?route=:route" }
   ],
   "functions": {
