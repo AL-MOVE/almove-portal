@@ -24,15 +24,22 @@ export default async function handler(req, res) {
   const email = String(process.env.COACH_ROLE_ASSIGNMENT_EMAIL || '').trim().toLowerCase();
   if (email !== 'martinssony1998@gmail.com') return responder(res, 503, { ok: false });
 
+  let conta;
   try {
-    const { auth, app } = obterAdminFirebase();
+    const admin = obterAdminFirebase();
+    conta = admin.conta;
+    const { auth, app } = admin;
     const utilizador = await auth.getUserByEmail(email);
     await getFirestore(app).collection('userAccess').doc(utilizador.uid).set({
       status: 'active', roles: ['coach', 'admin'], updatedAt: new Date()
     }, { merge: true });
     return responder(res, 200, { ok: true });
   } catch (erro) {
-    console.error('COACH_ROLE_ASSIGNMENT_FAILED', String(erro && (erro.code || erro.message) || 'UNKNOWN').slice(0, 160));
+    console.error(
+      'COACH_ROLE_ASSIGNMENT_FAILED',
+      String(erro && (erro.code || erro.message) || 'UNKNOWN').slice(0, 160),
+      String(conta?.client_email || 'UNKNOWN').slice(0, 120)
+    );
     return responder(res, 502, { ok: false });
   }
 }
