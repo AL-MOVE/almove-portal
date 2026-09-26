@@ -24,6 +24,7 @@ assert.match(page, /savePlanOriginal/);
 assert.match(page, /exercicioOriginal/);
 assert.match(page, /Máximo 6 séries/);
 assert.match(page, /Abandonar sessão/);
+assert.match(page, /confirm-sheet/);
 assert.match(page, /velocidade:/);
 assert.match(page, /rir:/);
 assert.match(page, /min-width:0/);
