@@ -2191,7 +2191,7 @@
       await window.AlMoveFirebaseAuth.enviarRecuperacao(email, window.location.origin + window.location.pathname);
       entradaPortalEstado.textContent = "Se já definiste uma palavra-passe, receberás o email de recuperação. Para o primeiro acesso, usa o convite enviado pelo teu treinador.";
     } catch (erro) {
-      entradaPortalEstado.textContent = "Não foi possível pedir a recuperação agora. Tenta novamente dentro de momentos.";
+      entradaPortalEstado.textContent = window.AlMoveFirebaseAuth.mensagemErroRecuperacao(erro);
     } finally { btnRecuperarPalavraPasse.disabled = false; }
   });
   formEntradaPortal.addEventListener("submit", async function (evento) {
@@ -2216,14 +2216,7 @@
       } catch (erro) {}
       window.location.replace(window.location.pathname);
     } catch (erro) {
-      const codigo = String((erro && erro.code) || "");
-      if (codigo === "auth/network-request-failed") {
-        entradaPortalEstado.textContent = "Não foi possível contactar o Firebase. Confirma a ligação à internet e tenta novamente.";
-      } else if (codigo === "auth/too-many-requests") {
-        entradaPortalEstado.textContent = "O Firebase bloqueou temporariamente novas tentativas neste dispositivo. Aguarda alguns minutos antes de voltares a tentar.";
-      } else {
-        entradaPortalEstado.textContent = "Email ou palavra-passe inválidos. Se ainda não definiste a palavra-passe, pede ao teu treinador para reenviar o convite.";
-      }
+      entradaPortalEstado.textContent = window.AlMoveFirebaseAuth.mensagemErroEntrada(erro);
     } finally { btnEntradaPortal.disabled = false; }
   });
   atualizarModoEntradaFirebase();
@@ -5897,7 +5890,7 @@
   // ---------- Service worker ----------
   // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
   // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
-  const VERSAO_CLIENTE_PORTAL = "68";
+  const VERSAO_CLIENTE_PORTAL = "69";
   let eventoInstalacaoPortal = null;
   function portalEstaInstalado() {
     return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;

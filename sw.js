@@ -2,7 +2,7 @@
 // A versão sobe com esta atualização visual para que instalações existentes
 // recebam o novo index.html em vez de manterem a versão anterior em cache.
 
-const VERSAO_CACHE = 'almove-portal-v68';
+const VERSAO_CACHE = 'almove-portal-v69';
 const PREFIXO_CACHE_PORTAL = 'almove-portal-';
 
 // O domínio também aloja ferramentas internas. O service worker do cliente

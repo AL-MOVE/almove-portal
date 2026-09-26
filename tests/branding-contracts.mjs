@@ -21,6 +21,6 @@ for (const manifesto of [JSON.parse(manifestoCliente), JSON.parse(manifestoCoach
 }
 assert.match(definicoes, /nome: 'André Martins - Personal Trainer'/);
 assert.match(definicoes, /nome === 'AL MOVE' \? PADRAO\.nome/);
-assert.match(workerCliente, /almove-portal-v68/);
+assert.match(workerCliente, /almove-portal-v69/);
 assert.match(workerCoach, /almove-coach-shell-v4/);
 console.log('Identidade visível e atualização das PWAs validadas.');
