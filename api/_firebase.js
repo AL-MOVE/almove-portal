@@ -32,7 +32,7 @@ export function obterAdminFirebase() {
   const app = getApps().length
     ? getApps()[0]
     : initializeApp({ credential: cert(conta), projectId: projeto });
-  return { projeto, app, auth: getAuth(app), conta };
+  return { projeto, app, auth: getAuth(app) };
 }
 
 /** Verifica a identidade Firebase sem a converter numa sessão Apps Script. */
