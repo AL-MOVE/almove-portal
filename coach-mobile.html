@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#07121d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Coach AM">
+  <link rel="manifest" href="/coach-mobile-manifest.json">
+  <link rel="apple-touch-icon" href="/icons/coach-192.png">
+  <title>André Martins · Coach</title>
+  <style>
+    :root { color-scheme:dark; --bg:#07121d; --panel:#0d1b2b; --panel-strong:#10253a; --line:#26415a; --text:#eef7ff; --muted:#91a3b8; --teal:#22d3c5; --blue:#1677e8; --warn:#fbbf24; --danger:#fb7185; --safe:#55d98c; --radius:18px; font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    * { box-sizing:border-box; }
+    body { min-width:320px; min-height:100dvh; margin:0; color:var(--text); background:radial-gradient(90% 48% at 10% -5%,rgba(6,112,148,.5),transparent 66%),radial-gradient(74% 44% at 100% 33%,rgba(12,100,91,.24),transparent 70%),var(--bg); }
+    button,input,select,textarea { font:inherit; }
+    button { border:0; cursor:pointer; }
+    button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline:3px solid rgba(34,211,197,.48); outline-offset:2px; }
+    .app { width:min(100%,600px); min-height:100dvh; margin:0 auto; background:rgba(5,14,25,.66); border-inline:1px solid rgba(148,163,184,.12); }
+    .topbar { position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:72px; padding:calc(env(safe-area-inset-top) + 12px) 18px 12px; border-bottom:1px solid rgba(148,163,184,.13); background:rgba(7,18,29,.91); backdrop-filter:blur(16px); }
+    .brand { display:flex; align-items:center; gap:10px; min-width:0; }
+    .brand img { width:33px; height:33px; object-fit:contain; flex:none; }
+    .brand strong { display:block; overflow:hidden; font-size:13px; line-height:1.1; text-overflow:ellipsis; white-space:nowrap; }
+    .brand small { display:block; margin-top:4px; color:var(--teal); font-size:10px; font-weight:800; letter-spacing:.09em; }
+    .icon-button { display:grid; width:40px; height:40px; place-items:center; border:1px solid var(--line); border-radius:13px; color:var(--text); background:#122032; }
+    .icon-button svg { width:19px; height:19px; }
+    main { min-height:calc(100dvh - 72px); padding:20px 16px calc(92px + env(safe-area-inset-bottom)); }
+    .eyebrow { margin:0 0 6px; color:var(--teal); font-size:11px; font-weight:900; letter-spacing:.11em; text-transform:uppercase; }
+    h1 { margin:0; font-size:27px; letter-spacing:-.04em; line-height:1.08; }
+    h2 { margin:0; font-size:17px; letter-spacing:-.02em; }
+    p { margin:0; }
+    .subtitle { margin-top:8px; color:var(--muted); font-size:13px; line-height:1.45; }
+    .stack { display:grid; gap:12px; margin-top:20px; }
+    .card { border:1px solid var(--line); border-radius:var(--radius); background:linear-gradient(145deg,rgba(20,40,61,.94),rgba(9,21,34,.96)); box-shadow:0 15px 42px rgba(0,0,0,.13); }
+    .card-inner { padding:16px; }
+    .summary { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .metric { min-height:105px; padding:14px; border:1px solid var(--line); border-radius:15px; background:rgba(8,18,30,.62); }
+    .metric strong { display:block; margin-top:10px; font-size:25px; letter-spacing:-.04em; }
+    .metric span { display:block; color:var(--muted); font-size:11px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; }
+    .metric em { display:block; margin-top:5px; color:#a8bdcc; font-size:11px; font-style:normal; }
+    .metric-accent { border-color:rgba(34,211,197,.34); background:linear-gradient(135deg,rgba(12,120,125,.3),rgba(13,37,59,.85)); }
+    .section-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; margin:24px 1px 10px; }
+    .section-heading button { color:var(--teal); background:transparent; font-size:12px; font-weight:800; }
+    .list { overflow:hidden; }
+    .list-row { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; min-height:71px; padding:13px 15px; border-bottom:1px solid rgba(148,163,184,.12); color:var(--text); text-align:left; background:transparent; }
+    .list-row:last-child { border-bottom:0; }
+    .list-row:active { background:rgba(34,211,197,.08); }
+    .list-main { min-width:0; }
+    .list-main strong { display:block; overflow:hidden; font-size:14px; text-overflow:ellipsis; white-space:nowrap; }
+    .list-main span { display:block; margin-top:4px; overflow:hidden; color:var(--muted); font-size:12px; text-overflow:ellipsis; white-space:nowrap; }
+    .list-side { display:grid; justify-items:end; gap:5px; flex:none; color:var(--muted); font-size:11px; }
+    .amount { color:var(--teal); font-size:15px; font-weight:900; }
+    .badge { display:inline-flex; align-items:center; min-height:24px; padding:0 9px; border:1px solid rgba(148,163,184,.26); border-radius:999px; color:#d4e4ee; background:rgba(148,163,184,.1); font-size:11px; font-weight:800; white-space:nowrap; }
+    .badge.warn { border-color:rgba(251,191,36,.56); color:#fcd66d; background:rgba(251,191,36,.1); }
+    .badge.safe { border-color:rgba(85,217,140,.5); color:#7de6aa; background:rgba(85,217,140,.1); }
+    .button { display:inline-flex; align-items:center; justify-content:center; min-height:46px; gap:8px; padding:0 16px; border-radius:13px; color:#031b22; background:linear-gradient(110deg,var(--teal),#1685ea); font-size:13px; font-weight:900; }
+    .button svg { width:18px; height:18px; flex:none; }
+    .button.secondary { border:1px solid var(--line); color:#dcebf5; background:#152438; }
+    .button.danger { color:#fff; background:#b42343; }
+    .button.full { width:100%; }
+    .quick-action { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; padding:15px; border:1px solid rgba(34,211,197,.3); border-radius:var(--radius); color:var(--text); text-align:left; background:linear-gradient(130deg,rgba(10,117,121,.32),rgba(13,36,55,.9)); }
+    .quick-action strong { display:block; font-size:14px; }
+    .quick-action span { display:block; margin-top:4px; color:#b5d9d9; font-size:12px; }
+    .quick-action svg { width:22px; height:22px; color:var(--teal); flex:none; }
+    .empty { padding:26px 16px; color:var(--muted); font-size:13px; line-height:1.5; text-align:center; }
+    .notice { display:flex; align-items:flex-start; gap:9px; margin-bottom:14px; padding:12px; border:1px solid rgba(251,191,36,.42); border-radius:13px; color:#f9d87b; background:rgba(251,191,36,.08); font-size:12px; line-height:1.45; }
+    .notice svg { width:18px; height:18px; flex:none; }
+    .status { display:none; margin-bottom:14px; padding:11px 12px; border:1px solid rgba(148,163,184,.26); border-radius:12px; color:#c5d9e8; background:rgba(20,40,61,.75); font-size:12px; line-height:1.4; }
+    .status.show { display:block; }
+    .status.error { border-color:rgba(251,113,133,.55); color:#fecdd3; background:rgba(159,18,57,.16); }
+    .status.ok { border-color:rgba(85,217,140,.46); color:#b7f3cf; background:rgba(22,101,52,.18); }
+    .bottom-nav { position:fixed; right:0; bottom:0; left:0; z-index:30; display:flex; width:min(100%,600px); min-height:72px; margin:auto; padding:8px 7px calc(8px + env(safe-area-inset-bottom)); border:1px solid rgba(148,163,184,.16); border-bottom:0; border-radius:22px 22px 0 0; background:rgba(7,18,29,.96); backdrop-filter:blur(18px); box-shadow:0 -14px 36px rgba(0,0,0,.26); }
+    .nav-button { display:grid; flex:1; place-items:center; gap:3px; min-width:0; border-radius:13px; color:#8fa1b6; background:transparent; font-size:10px; font-weight:800; }
+    .nav-button svg { width:19px; height:19px; }
+    .nav-button.active { color:var(--teal); background:rgba(34,211,197,.11); }
+    .back { display:inline-flex; align-items:center; gap:6px; padding:0; color:var(--teal); background:transparent; font-size:12px; font-weight:900; }
+    .back svg { width:17px; height:17px; }
+    .profile-hero { display:grid; grid-template-columns:auto 1fr; gap:14px; align-items:center; padding:17px; }
+    .avatar { display:grid; width:50px; height:50px; place-items:center; border-radius:50%; color:#eaffff; background:linear-gradient(145deg,var(--teal),var(--blue)); font-size:18px; font-weight:900; }
+    .profile-hero strong { font-size:19px; }
+    .profile-hero span { display:block; margin-top:4px; overflow:hidden; color:var(--muted); font-size:12px; text-overflow:ellipsis; white-space:nowrap; }
+    .field { display:grid; gap:6px; }
+    .field label { color:#b9c9d8; font-size:11px; font-weight:800; }
+    .field input,.field select,.field textarea { width:100%; min-height:43px; border:1px solid #355069; border-radius:11px; padding:10px 11px; color:var(--text); background:#0a1929; }
+    .field textarea { min-height:69px; resize:vertical; }
+    .fields { display:grid; gap:10px; }
+    .fields.two { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .fields.three { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .client-facts { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-top:14px; }
+    .fact { padding:11px; border:1px solid rgba(148,163,184,.16); border-radius:12px; background:rgba(7,18,29,.5); }
+    .fact span { display:block; color:var(--muted); font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+    .fact strong { display:block; margin-top:5px; overflow:hidden; font-size:13px; text-overflow:ellipsis; white-space:nowrap; }
+    .session-head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .session-timer { color:var(--teal); font-size:13px; font-weight:900; }
+    .exercise { padding:14px; border:1px solid rgba(148,163,184,.17); border-radius:14px; background:rgba(6,16,27,.46); }
+    .exercise + .exercise { margin-top:10px; }
+    .exercise h3 { margin:0; font-size:14px; }
+    .exercise p { margin-top:4px; color:var(--muted); font-size:11px; }
+    .series { display:grid; grid-template-columns:28px 1fr 1fr 1fr; gap:7px; align-items:end; margin-top:10px; }
+    .series b { align-self:center; color:var(--muted); font-size:12px; text-align:center; }
+    .series .field label { font-size:9px; }
+    .series .field input { min-height:38px; padding:7px; font-size:12px; }
+    .divider { height:1px; margin:17px 0; background:rgba(148,163,184,.15); }
+    .spinner { display:grid; min-height:45vh; place-items:center; color:var(--muted); font-size:13px; }
+    .hidden { display:none !important; }
+    @media (min-width:700px) { .app { min-height:100dvh; box-shadow:0 0 0 1px rgba(148,163,184,.1),0 32px 90px rgba(0,0,0,.35); } }
+    @media (max-width:370px) { main { padding-inline:12px; } .topbar { padding-inline:14px; } .summary { gap:8px; } .metric { padding:12px; } .metric strong { font-size:22px; } .fields.three { grid-template-columns:1fr; } .series { grid-template-columns:25px 1fr 1fr; } .series .field:nth-child(4) { grid-column:2 / -1; } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; transition:none !important; animation:none !important; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"><img src="/icons/coach-192.png" alt="André Martins"><div><strong>André Martins</strong><small>PERSONAL TRAINER · COACH</small></div></div>
+      <button class="icon-button" id="refreshButton" type="button" aria-label="Atualizar dados" title="Atualizar dados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 1-15.6 6"/><path d="M3 12A9 9 0 0 1 18.6 6"/><path d="M3 17v-5h5"/><path d="M21 7v5h-5"/></svg></button>
+    </header>
+    <main id="main"><div class="spinner">A preparar a App Coach…</div></main>
+    <nav class="bottom-nav" id="bottomNav" aria-label="Navegação principal">
+      <button class="nav-button active" data-view="home" type="button" aria-label="Hoje"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="8" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>Hoje</span></button>
+      <button class="nav-button" data-view="agenda" type="button" aria-label="Agenda"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg><span>Agenda</span></button>
+      <button class="nav-button" data-view="clients" type="button" aria-label="Clientes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Clientes</span></button>
+      <button class="nav-button" data-view="alerts" type="button" aria-label="Alertas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg><span>Alertas</span></button>
+      <button class="nav-button" data-view="profile" type="button" aria-label="Perfil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Perfil</span></button>
+    </nav>
+  </div>
+  <script src="/js/firebase-config.js"></script>
+  <script src="/js/firebase-sdk.js"></script>
+  <script src="/js/firebase-auth.js"></script>
+  <script src="/js/firebase-crm-session.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    const main = document.getElementById('main');
+    const state = { view: 'home', context: null, crm: null, agenda: null, checkins: null, weekOffset: 0, selected: null, session: null, loading: false };
+    const svg = {
+      arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>',
+      play: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>',
+      alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 2.9 1.8 17a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 2.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>',
+      back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>'
+    };
+    function el(tag, options, children) { const node = document.createElement(tag); const attrs = options || {}; Object.keys(attrs).forEach(function (key) { if (key === 'className') node.className = attrs[key]; else if (key === 'text') node.textContent = attrs[key]; else if (key === 'html') node.innerHTML = attrs[key]; else if (key === 'type') node.type = attrs[key]; else if (key === 'value') node.value = attrs[key]; else if (key === 'disabled') node.disabled = Boolean(attrs[key]); else node.setAttribute(key, attrs[key]); }); (children || []).forEach(function (child) { if (child) node.append(child); }); return node; }
+    function euro(valor) { return new Intl.NumberFormat('pt-PT', { style: 'currency', currency: 'EUR' }).format(Number(valor || 0)); }
+    function number(valor) { return Number(valor || 0); }
+    function dateLisbon() { return new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()); }
+    function timeNow() { return new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Lisbon', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date()); }
+    function greet() { const hour = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Lisbon', hour: 'numeric', hourCycle: 'h23' }).format(new Date())); return hour < 12 ? 'Bom dia' : hour < 19 ? 'Boa tarde' : 'Boa noite'; }
+    function initials(value) { return String(value || 'AM').split(/\s+/).filter(Boolean).slice(0, 2).map(function (part) { return part[0]; }).join('').toUpperCase(); }
+    function status(message, kind) { const box = document.getElementById('status'); if (!box) return; box.className = 'status show' + (kind ? ' ' + kind : ''); box.textContent = message; }
+    function clearStatus() { const box = document.getElementById('status'); if (box) { box.className = 'status'; box.textContent = ''; } }
+    function setContent(nodes) { main.replaceChildren(); nodes.forEach(function (node) { main.append(node); }); window.scrollTo({ top: 0, behavior: 'auto' }); }
+    function title(eyebrow, heading, subtitle) { const block = el('section'); block.append(el('p', { className: 'eyebrow', text: eyebrow }), el('h1', { text: heading })); if (subtitle) block.append(el('p', { className: 'subtitle', text: subtitle })); return block; }
+    function card(children, className) { return el('section', { className: 'card' + (className ? ' ' + className : '') }, [el('div', { className: 'card-inner' }, children)]); }
+    function button(text, options) { const node = el('button', { className: 'button' + (options && options.kind ? ' ' + options.kind : '') + (options && options.full ? ' full' : ''), type: 'button', text: text }); if (options && options.icon) node.innerHTML = options.icon + '<span>' + text + '</span>'; if (options && options.action) node.addEventListener('click', options.action); return node; }
+    async function api(path, options) { const token = await window.AlMoveFirebaseAuth.token(true); const response = await fetch(path, { method: (options && options.method) || 'GET', headers: Object.assign({ Authorization: 'Bearer ' + token }, (options && options.headers) || {}), body: options && options.body, cache: 'no-store', credentials: 'same-origin' }); let data = null; try { data = await response.json(); } catch (error) { throw new Error('Resposta inválida do servidor.'); } if (!response.ok || !data || data.ok === false) { if (response.status === 401 || response.status === 403) location.replace('/dev-crm.html?next=' + encodeURIComponent('/coach-mobile.html')); throw new Error((data && data.erro) || 'Não foi possível concluir esta operação.'); } return data; }
+    async function loadDashboard() { const data = await api('/api/dev-crm-dashboard'); state.crm = data.crm; return data.crm; }
+    async function loadAgenda() { const data = await api('/api/dev-crm-agenda?offset=' + encodeURIComponent(state.weekOffset)); state.agenda = data; return data; }
+    async function loadCheckins() { const data = await api('/api/dev-crm-checkins'); state.checkins = data; return data; }
+    function metric(label, value, note, accent) { const node = el('article', { className: 'metric' + (accent ? ' metric-accent' : '') }); node.append(el('span', { text: label }), el('strong', { text: value })); if (note) node.append(el('em', { text: note })); return node; }
+    function listRow(primary, secondary, side, action) { const node = el(action ? 'button' : 'div', { className: 'list-row', type: action ? 'button' : undefined }); const left = el('div', { className: 'list-main' }, [el('strong', { text: primary }), el('span', { text: secondary || '' })]); node.append(left); if (side) node.append(side); if (action) node.addEventListener('click', action); return node; }
+    function buildStatus() { return el('div', { id: 'status', className: 'status', role: 'status', 'aria-live': 'polite' }); }
+    function renderHome() {
+      const dashboard = state.crm.dashboard; const agenda = state.agenda; const checkins = state.checkins;
+      const root = [title('APP COACH', greet() + ', André', 'O essencial para orientar o teu dia.'), buildStatus()];
+      const summary = el('div', { className: 'summary stack' });
+      summary.append(metric('Sessões este mês', String(dashboard.sessoesConfirmadas) + '/' + String(dashboard.sessoesTotal), dashboard.taxaConclusao + '% concluído', true));
+      summary.append(metric('Horas realizadas', dashboard.horasConfirmadas + 'h', dashboard.horasContratadas + 'h contratadas'));
+      root.push(summary);
+      const next = agenda && agenda.eventos ? agenda.eventos.filter(function (event) { return event.dia === dateLisbon(); }) : [];
+      root.push(el('div', { className: 'section-heading' }, [el('h2', { text: 'Hoje' }), el('button', { type: 'button', text: 'Ver agenda' })]));
+      root[root.length - 1].lastChild.addEventListener('click', function () { switchView('agenda'); });
+      const todayCard = card([], 'list');
+      const inner = todayCard.firstChild;
+      if (next.length) next.forEach(function (event) { const side = el('div', { className: 'list-side' }, [el('span', { className: 'badge' + (event.tipo === 'AVALIAÇÃO' ? ' warn' : ''), text: event.tipo }), el('span', { text: event.horaInicio || 'Sem hora' })]); inner.append(listRow(event.clienteNome || event.titulo, event.tipo === 'PT' ? 'Sessão confirmada' : event.titulo, side, event.clienteId ? function () { openClient(event.clienteId); } : null)); }); else inner.append(el('p', { className: 'empty', text: 'Não tens marcações registadas para hoje.' }));
+      root.push(todayCard);
+      const pending = (state.crm.pagamentosPendentes || []).length; const late = (dashboard.clientesEmAtraso || 0);
+      root.push(el('div', { className: 'stack' }, [el('button', { className: 'quick-action', type: 'button', html: '<div><strong>Ver alertas operacionais</strong><span>' + (pending ? pending + ' pagamento(s) pendente(s)' : 'Pagamentos e acompanhamento') + '</span></div>' + svg.arrow })]));
+      root[root.length - 1].firstChild.addEventListener('click', function () { switchView('alerts'); });
+      if (checkins) root.push(el('p', { className: 'subtitle', text: checkins.totalComCheckin + ' de ' + checkins.totalAtivos + ' clientes preencheram o check-in de hoje.' }));
+      setContent(root);
+    }
+    function renderAgenda() {
+      const agenda = state.agenda; const root = [title('AGENDA', agenda.tituloSemana || 'Esta semana', 'Sessões confirmadas e avaliações marcadas.'), buildStatus()];
+      const controls = el('div', { className: 'fields two stack' }); controls.append(button('Semana anterior', { kind: 'secondary', action: async function () { state.weekOffset -= 1; await refreshAgenda(); } }), button('Próxima semana', { kind: 'secondary', action: async function () { state.weekOffset += 1; await refreshAgenda(); } })); root.push(controls);
+      const resumo = agenda.resumo || {}; root.push(el('div', { className: 'summary stack' }, [metric('Marcadas', String(resumo.marcadas || 0), String(resumo.esperadas || 0) + ' previstas', true), metric('Em falta', String(resumo.emFalta || 0), String(resumo.avaliacoes || 0) + ' avaliações')]));
+      root.push(el('div', { className: 'section-heading' }, [el('h2', { text: 'Marcações' })]));
+      const list = card([], 'list').firstChild; if (agenda.eventos && agenda.eventos.length) agenda.eventos.forEach(function (event) { const side = el('div', { className: 'list-side' }, [el('span', { className: 'badge' + (event.tipo === 'AVALIAÇÃO' ? ' warn' : ''), text: event.tipo }), el('span', { text: event.dia.slice(8, 10) + '/' + event.dia.slice(5, 7) + ' · ' + (event.horaInicio || 'Sem hora') })]); list.append(listRow(event.clienteNome || event.titulo, event.tipo === 'PT' ? 'Sessão confirmada' : event.titulo, side, event.clienteId ? function () { openClient(event.clienteId); } : null)); }); else list.append(el('p', { className: 'empty', text: 'Não existem marcações nesta semana.' })); root.push(el('section', { className: 'card list' }, [list])); setContent(root);
+    }
+    function renderClients() {
+      const root = [title('CLIENTES', 'Acompanhar alunos', 'Pesquisa, consulta e inicia uma sessão de PT.'), buildStatus()];
+      const search = el('div', { className: 'field stack' }); search.append(el('label', { text: 'Pesquisar cliente' })); const input = el('input', { id: 'clientSearch', type: 'search', placeholder: 'Nome, email ou telemóvel', autocomplete: 'off' }); search.append(input); root.push(search);
+      const wrap = el('section', { className: 'card list stack' }, [el('div', { id: 'clientList' })]); root.push(wrap); setContent(root); input.addEventListener('input', renderClientResults); renderClientResults();
+    }
+    function renderClientResults() { const target = document.getElementById('clientList'); if (!target) return; const term = String(document.getElementById('clientSearch').value || '').trim().toLocaleLowerCase('pt-PT'); target.replaceChildren(); const clients = (state.crm.clientes || []).filter(function (client) { return client.estado === 'Ativo' && (!term || [client.nome, client.email, client.telefone].some(function (value) { return String(value || '').toLocaleLowerCase('pt-PT').includes(term); })); }).sort(function (a, b) { return String(a.nome).localeCompare(String(b.nome), 'pt-PT'); }); if (!clients.length) { target.append(el('p', { className: 'empty', text: 'Nenhum cliente corresponde à pesquisa.' })); return; } clients.forEach(function (client) { const side = el('div', { className: 'list-side' }, [el('span', { className: 'badge safe', text: 'Ativo' })]); target.append(listRow(client.nome || 'Sem nome', client.email || client.telefone || 'Sem contacto', side, function () { openClient(client.id); })); }); }
+    async function openClient(id) { state.loading = true; setContent([el('div', { className: 'spinner', text: 'A carregar ficha do cliente…' })]); try { const result = await Promise.all([api('/api/dev-crm-client-detail?id=' + encodeURIComponent(id)), api('/api/dev-crm-training-plans?action=pt-session-plans&clientId=' + encodeURIComponent(id))]); state.selected = { detail: result[0], plans: result[1].planos || [] }; state.view = 'client'; renderClient(); } catch (error) { state.view = 'clients'; renderClients(); status(error.message, 'error'); } finally { state.loading = false; } }
+    function backToClients() { state.selected = null; switchView('clients'); }
+    function renderClient() {
+      const selected = state.selected; if (!selected) return backToClients(); const detail = selected.detail.detalhe || {}; const client = detail.cliente || {}; const pack = detail.packAtivo || {}; const root = [el('button', { className: 'back', type: 'button', html: svg.back + '<span>Clientes</span>' }), buildStatus()]; root[0].addEventListener('click', backToClients);
+      root.push(card([el('div', { className: 'profile-hero' }, [el('div', { className: 'avatar', text: initials(client.nome) }), el('div', {}, [el('strong', { text: client.nome || 'Cliente' }), el('span', { text: client.email || client.telefone || 'Sem contacto' })])]), el('div', { className: 'client-facts' }, [fact('Estado', client.estado || 'Ativo'), fact('Pack', pack.frequencia || 'Por definir'), fact('Sessões', String(client.totalSessoesConfirmadas || 0)), fact('Último check-in', client.ultimoCheckin ? String(client.ultimoCheckin.dataHora || '').slice(0, 10) : 'Sem registo')]) ]));
+      root.push(el('div', { className: 'section-heading' }, [el('h2', { text: 'Sessão PT' })]));
+      const sessionCard = card([el('p', { className: 'subtitle', text: 'Escolhe o plano e o treino antes de iniciar o acompanhamento.' })]); const fields = el('div', { className: 'fields stack' }); const planSelect = el('select', { id: 'sessionPlan' }); planSelect.append(el('option', { value: '', text: 'Seleciona um plano' })); selected.plans.forEach(function (plan) { planSelect.append(el('option', { value: plan.nome, text: plan.nome })); }); const workoutSelect = el('select', { id: 'sessionWorkout', disabled: true }); workoutSelect.append(el('option', { value: '', text: 'Seleciona primeiro o plano' })); fields.append(field('Plano', planSelect), field('Treino', workoutSelect)); sessionCard.firstChild.append(fields); const start = button('Iniciar sessão PT', { full: true, icon: svg.play, action: function () { beginSession(client, selected.plans); } }); start.style.marginTop = '14px'; sessionCard.firstChild.append(start); planSelect.addEventListener('change', function () { fillWorkouts(selected.plans, planSelect.value, workoutSelect); }); root.push(sessionCard);
+      const activity = selected.detail.atividade || []; if (activity.length) { root.push(el('div', { className: 'section-heading' }, [el('h2', { text: 'Últimas sessões' })])); const list = card([], 'list').firstChild; activity.slice(0, 4).forEach(function (session) { list.append(listRow(session.nomeTreino || session.treino || 'Sessão PT', String(session.data || '').slice(0, 10), el('div', { className: 'list-side' }, [el('span', { className: 'badge', text: session.tipo || 'PT' }), el('span', { text: session.duracaoMin ? session.duracaoMin + ' min' : '' })]))); }); root.push(el('section', { className: 'card list' }, [list])); }
+      setContent(root);
+    }
+    function fact(label, value) { return el('div', { className: 'fact' }, [el('span', { text: label }), el('strong', { text: value || 'Por definir' })]); }
+    function field(label, input) { return el('div', { className: 'field' }, [el('label', { text: label }), input]); }
+    function fillWorkouts(plans, name, select) { select.replaceChildren(); const plan = plans.find(function (item) { return item.nome === name; }); if (!plan || !plan.treinos.length) { select.disabled = true; select.append(el('option', { value: '', text: 'Sem treinos disponíveis' })); return; } select.disabled = false; select.append(el('option', { value: '', text: 'Seleciona um treino' })); plan.treinos.forEach(function (workout) { select.append(el('option', { value: workout.nome, text: workout.nome })); }); }
+    function scaleSelect(id, values) { const select = el('select', { id: id }); select.append(el('option', { value: '', text: 'Não registado' })); values.forEach(function (value) { select.append(el('option', { value: String(value), text: String(value) })); }); return select; }
+    function beginSession(client, plans) { const planName = document.getElementById('sessionPlan').value; const workoutName = document.getElementById('sessionWorkout').value; const plan = plans.find(function (item) { return item.nome === planName; }); const workout = plan && plan.treinos.find(function (item) { return item.nome === workoutName; }); if (!workout) { status('Seleciona um plano e um treino antes de iniciar.', 'error'); return; } state.session = { client: client, plan: planName, workout: workout, startedAt: timeNow(), exercises: workout.exercicios.map(function (exercise) { return { exercise: exercise, rows: Array.from({ length: Math.max(1, Math.min(8, Number(String(exercise.series || '').match(/\d+/)?.[0] || 1))) }, function () { return { reps: '', carga: '', velocidade: '' }; }) }; }) }; state.view = 'session'; renderSession(); }
+    function scaleCard(titleText, copy, fields) { const section = el('section', { className: 'card' }); const inner = section.firstChild || el('div', { className: 'card-inner' }); if (!section.firstChild) section.append(inner); inner.append(el('h2', { text: titleText }), el('p', { className: 'subtitle', text: copy }), el('div', { className: 'fields two stack' }, fields)); return section; }
+    function renderSession() {
+      const session = state.session; if (!session) return backToClients(); const root = [el('button', { className: 'back', type: 'button', html: svg.back + '<span>Ficha de cliente</span>' }), buildStatus()]; root[0].addEventListener('click', function () { if (confirm('Sair sem guardar esta sessão?')) { state.session = null; state.view = 'client'; renderClient(); } });
+      const header = card([el('div', { className: 'session-head' }, [el('div', {}, [el('p', { className: 'eyebrow', text: 'SESSÃO PT EM CURSO' }), el('h1', { text: session.client.nome || 'Cliente' }), el('p', { className: 'subtitle', text: session.plan + ' · ' + session.workout.nome })]), el('span', { className: 'session-timer', text: session.startedAt })])]); root.push(header);
+      root.push(scaleCard('Check-in', 'Registo antes da sessão, com as escalas do portal do cliente.', [field('Sono', scaleSelect('checkinSono', [1,2,3,4,5])), field('Stress', scaleSelect('checkinStress', [1,2,3,4,5])), field('Energia', scaleSelect('checkinEnergia', [1,2,3,4,5])), field('Refeições', scaleSelect('checkinRefeicoes', [1,2,3,4,5])), field('DOMS', scaleSelect('checkinDoms', [0,1,2,3,4])), field('Nota', el('textarea', { id: 'checkinNota', maxlength: '500', placeholder: 'Opcional' }))]));
+      root.push(el('div', { className: 'section-heading' }, [el('h2', { text: 'Exercícios' }), el('span', { className: 'badge', text: session.exercises.length + ' exercícios' })]));
+      const exerciseCard = card([]); session.exercises.forEach(function (item, exerciseIndex) { const box = el('section', { className: 'exercise' }); box.append(el('h3', { text: item.exercise.exercicio || 'Exercício' }), el('p', { text: prescription(item.exercise) })); item.rows.forEach(function (row, rowIndex) { const line = el('div', { className: 'series' }); line.append(el('b', { text: String(rowIndex + 1) }), miniField('Reps', 'series-' + exerciseIndex + '-' + rowIndex + '-reps'), miniField('Carga', 'series-' + exerciseIndex + '-' + rowIndex + '-carga'), miniField('Vel.', 'series-' + exerciseIndex + '-' + rowIndex + '-velocidade')); box.append(line); }); exerciseCard.firstChild.append(box); }); root.push(exerciseCard);
+      root.push(scaleCard('Check-out', 'Fecha a sessão com a escala pós-treino do portal.', [field('Energia', scaleSelect('checkoutEnergia', [1,2,3,4,5])), field('Esforço', scaleSelect('checkoutEsforco', [1,2,3,4,5])), field('Dificuldade', scaleSelect('checkoutDificuldade', [1,2,3,4,5])), field('Nota', el('textarea', { id: 'checkoutNota', maxlength: '500', placeholder: 'Opcional' }))]));
+      const note = el('textarea', { id: 'sessionNote', maxlength: '1000', placeholder: 'Nota geral da sessão, opcional' }); const footer = card([field('Nota geral', note)]); const finish = button('Concluir e guardar sessão', { full: true, icon: svg.play, action: finishSession }); finish.style.marginTop = '14px'; footer.firstChild.append(finish); root.push(footer); setContent(root);
+    }
+    function prescription(exercise) { const reps = exercise.repsMin || exercise.repsMax ? [exercise.repsMin, exercise.repsMax].filter(Boolean).join('–') + ' reps' : ''; const series = exercise.series ? exercise.series + ' séries' : ''; return [series, reps, exercise.rir ? 'RIR ' + exercise.rir : ''].filter(Boolean).join(' · ') || 'Regista as séries realizadas.'; }
+    function miniField(labelText, id) { return field(labelText, el('input', { id: id, inputmode: 'decimal', autocomplete: 'off', maxlength: '20' })); }
+    function optionalScale(prefix, entries, noteId) { const values = {}; let filled = 0; entries.forEach(function (entry) { const raw = document.getElementById(prefix + entry[0]).value; if (raw !== '') { values[entry[1]] = Number(raw); filled += 1; } }); const note = document.getElementById(noteId).value.trim(); if (!filled) return note ? { nota: note } : null; if (filled !== entries.length) throw new Error('Completa todos os campos do ' + (prefix === 'checkin' ? 'check-in' : 'check-out') + ' ou deixa-os em branco.'); values.nota = note; return values; }
+    function collectExercises() { return state.session.exercises.map(function (item, exerciseIndex) { return { exercicio: item.exercise.exercicio, notas: '', series: item.rows.map(function (_, rowIndex) { return { reps: document.getElementById('series-' + exerciseIndex + '-' + rowIndex + '-reps').value.trim(), carga: document.getElementById('series-' + exerciseIndex + '-' + rowIndex + '-carga').value.trim(), velocidade: document.getElementById('series-' + exerciseIndex + '-' + rowIndex + '-velocidade').value.trim() }; }) }; }); }
+    async function finishSession() { const submit = document.querySelector('.button.full:last-child'); try { const checkin = optionalScale('checkin', [['Sono','sono'],['Stress','stress'],['Energia','cansaco'],['Refeicoes','refeicoes'],['Doms','doms']], 'checkinNota'); const checkout = optionalScale('checkout', [['Energia','energia'],['Esforco','esforco'],['Dificuldade','dificuldade']], 'checkoutNota'); const exercises = collectExercises(); const hasSeries = exercises.some(function (item) { return item.series.some(function (serie) { return serie.reps || serie.carga || serie.velocidade; }); }); if (!hasSeries) throw new Error('Regista pelo menos uma série antes de concluir a sessão.'); if (submit) { submit.disabled = true; submit.textContent = 'A guardar…'; }
+        const id = window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2); await api('/api/dev-crm-pt-session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idCliente: state.session.client.id, nomePlano: state.session.plan, nomeTreino: state.session.workout.nome, idSessao: 'coach-mobile-' + id, data: dateLisbon(), horaInicio: state.session.startedAt, horaFim: timeNow(), estado: 'REALIZADA', notaGeral: document.getElementById('sessionNote').value.trim(), checkin: checkin, checkout: checkout, exercicios: exercises }) }); state.session = null; await Promise.all([loadDashboard(), loadAgenda(), loadCheckins()]); state.view = 'client'; await openClient(state.selected.detail.detalhe.cliente.id); } catch (error) { if (submit) { submit.disabled = false; submit.textContent = 'Concluir e guardar sessão'; } status(error.message || 'Não foi possível guardar a sessão.', 'error'); } }
+    function renderAlerts() { const root = [title('ALERTAS', 'Acompanhar pendências', 'Pagamentos por receber, atrasos e check-ins do dia.'), buildStatus()]; const pending = state.crm.pagamentosPendentes || []; const late = state.crm.clientesEmAtraso || []; root.push(el('div', { className: 'summary stack' }, [metric('Por receber', euro(state.crm.dashboard.pendente), pending.length + ' pack(s) pendente(s)', true), metric('Em atraso', String(late.length), late.length ? 'Requer acompanhamento' : 'Sem atrasos')])); root.push(el('div', { className: 'section-heading' }, [el('h2', { text: 'Pagamentos pendentes' })])); const pendingList = card([], 'list').firstChild; if (pending.length) pending.forEach(function (item) { const side = el('div', { className: 'list-side' }, [el('span', { className: 'amount', text: euro(item.valorPendente) }), el('span', { className: 'badge warn', text: item.diaPagamento ? 'Dia ' + item.diaPagamento : 'Dia por definir' })]); pendingList.append(listRow(item.nome, 'Pack do mês atual', side, function () { openClient(item.idCliente); })); }); else pendingList.append(el('p', { className: 'empty', text: 'Não existem pagamentos pendentes este mês.' })); root.push(el('section', { className: 'card list' }, [pendingList])); root.push(el('div', { className: 'section-heading' }, [el('h2', { text: 'Check-ins de hoje' })])); const checkinList = card([], 'list').firstChild; const checked = state.checkins && state.checkins.comCheckin || []; if (checked.length) checked.slice(0, 8).forEach(function (item) { checkinList.append(listRow(item.nome, 'Check-in preenchido', el('div', { className: 'list-side' }, [el('span', { className: 'badge safe', text: 'Recebido' })]))); }); else checkinList.append(el('p', { className: 'empty', text: 'Ainda não há check-ins de clientes hoje.' })); root.push(el('section', { className: 'card list' }, [checkinList])); setContent(root); }
+    function renderProfile() { const root = [title('PERFIL', 'Área do Coach', 'Acesso seguro da equipa no ambiente Development.'), buildStatus()]; const identity = card([el('div', { className: 'profile-hero' }, [el('div', { className: 'avatar', text: initials(state.context.email) }), el('div', {}, [el('strong', { text: 'André Martins' }), el('span', { text: state.context.email || '' })])])]); root.push(identity); const actions = card([button('Abrir CRM completo', { full: true, kind: 'secondary', action: function () { location.href = '/coach-firebase.html'; } }), button('Terminar sessão', { full: true, kind: 'danger', action: async function () { await window.AlMoveSessaoCRM.sair(); location.replace('/dev-crm.html'); } })]); actions.firstChild.style.display = 'grid'; actions.firstChild.style.gap = '10px'; root.push(actions); root.push(el('p', { className: 'subtitle', text: 'A App Coach não guarda dados de clientes no dispositivo. Os dados operacionais são pedidos ao Firebase quando precisas deles.' })); setContent(root); }
+    async function refreshAgenda() { try { await loadAgenda(); if (state.view === 'agenda') renderAgenda(); } catch (error) { status(error.message, 'error'); } }
+    async function refreshAll() { if (state.loading) return; state.loading = true; const control = document.getElementById('refreshButton'); if (control) control.disabled = true; try { await Promise.all([loadDashboard(), loadAgenda(), loadCheckins()]); renderCurrent(); if (document.getElementById('status')) status('Dados atualizados.', 'ok'); } catch (error) { renderCurrent(); if (document.getElementById('status')) status(error.message || 'Não foi possível atualizar os dados.', 'error'); } finally { state.loading = false; if (control) control.disabled = false; } }
+    function renderCurrent() { if (state.view === 'home') return renderHome(); if (state.view === 'agenda') return renderAgenda(); if (state.view === 'clients') return renderClients(); if (state.view === 'alerts') return renderAlerts(); if (state.view === 'profile') return renderProfile(); if (state.view === 'client') return renderClient(); if (state.view === 'session') return renderSession(); renderHome(); }
+    function switchView(view) { if (state.view === 'session' && view !== 'session' && !confirm('Tens uma sessão por guardar. Queres sair?')) return; if (state.view === 'session') state.session = null; state.view = view; document.querySelectorAll('.nav-button').forEach(function (node) { node.classList.toggle('active', node.dataset.view === view); }); renderCurrent(); }
+    function setupNavigation() { document.querySelectorAll('.nav-button').forEach(function (node) { node.addEventListener('click', function () { switchView(node.dataset.view); }); }); document.getElementById('refreshButton').addEventListener('click', refreshAll); window.addEventListener('online', function () { if (document.getElementById('status')) status('Ligação restabelecida. Atualiza para obter os dados mais recentes.', 'ok'); }); window.addEventListener('offline', function () { if (document.getElementById('status')) status('Sem ligação. Os dados operacionais não são guardados offline.', 'error'); }); }
+    async function boot() { try { const config = await window.ALMOVE_FIREBASE_CONFIG.obter(); await window.AlMoveFirebaseAuth.configurar(config); state.context = await window.AlMoveSessaoCRM.obterContexto(); if (!state.context) throw new Error('ACESSO_RECUSADO'); const requested = new URLSearchParams(location.search).get('view'); if (['agenda', 'clients', 'alerts', 'profile'].includes(requested)) state.view = requested; await Promise.all([loadDashboard(), loadAgenda(), loadCheckins()]); setupNavigation(); document.querySelectorAll('.nav-button').forEach(function (node) { node.classList.toggle('active', node.dataset.view === state.view); }); renderCurrent(); if ('serviceWorker' in navigator) navigator.serviceWorker.register('/coach-mobile-sw.js', { scope: '/coach-mobile.html' }).catch(function () {}); } catch (error) { location.replace('/dev-crm.html?next=' + encodeURIComponent('/coach-mobile.html')); } }
+    boot();
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "André Martins · Coach",
+  "short_name": "Coach AM",
+  "id": "/coach-mobile.html",
+  "start_url": "/coach-mobile.html?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#07121d",
+  "theme_color": "#07121d",
+  "lang": "pt-PT",
+  "description": "App operacional de André Martins para agenda, clientes e sessões PT.",
+  "categories": ["health", "fitness", "productivity"],
+  "icons": [
+    { "src": "/icons/coach-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/coach-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Agenda", "short_name": "Agenda", "url": "/coach-mobile.html?view=agenda&source=pwa", "icons": [{ "src": "/icons/coach-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Clientes", "short_name": "Clientes", "url": "/coach-mobile.html?view=clients&source=pwa", "icons": [{ "src": "/icons/coach-192.png", "sizes": "192x192", "type": "image/png" }] }
+  ]
+}
