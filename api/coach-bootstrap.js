@@ -63,7 +63,8 @@ export default async function handler(req, res) {
     });
     if (!respostaFirebase.ok) throw new Error('EMAIL_NAO_ENVIADO');
     return responder(res, 200, { ok: true });
-  } catch {
+  } catch (erro) {
+    console.error('COACH_BOOTSTRAP_FAILED', String(erro && (erro.code || erro.message) || 'UNKNOWN').slice(0, 160));
     return responder(res, 502, { ok: false });
   }
 }
