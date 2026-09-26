@@ -72,7 +72,7 @@ assert.match(browserSdk, /ALMOVE_FIREBASE_SDK/, 'O SDK Firebase deve ser servido
 assert.doesNotMatch(browserAdapter, /www\.gstatic\.com/, 'O adaptador não deve depender de imports externos no browser.');
 assert.match(browserConfig, /projectId: 'almove-portal'/, 'O portal real deve manter a configuração Firebase de produção.');
 assert.match(browserConfig, /\/api\/firebase-config/, 'Uma pré-visualização tem de pedir a configuração Firebase própria à Vercel.');
-assert.match(browserConfig, /location\.hostname === 'portal\.almove\.pt'/, 'A pré-visualização não pode reutilizar a configuração Firebase de produção.');
+assert.match(browserConfig, /DOMINIOS_PRODUCAO\.has\(location\.hostname\)/, 'Só os domínios finais aprovados podem reutilizar a configuração Firebase de produção.');
 assert.match(browserConfig, /CONFIGURACAO_FIREBASE_EM_FALTA/, 'Sem configuração própria, a pré-visualização deve falhar fechada.');
 assert.match(browserConfig, /PREVIEW_VERCEL_PROTEGIDA/, 'A pré-visualização deve identificar quando a Vercel bloqueia a API com SSO.');
 assert.doesNotMatch(browserConfig, /measurementId|getAnalytics/, 'O portal não deve carregar Analytics para autenticação.');

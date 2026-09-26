@@ -12,6 +12,15 @@ const CONFIGURACAO_PRODUCAO = Object.freeze({
   appId: '1:373380729689:web:18e269a5512fc8e65eda48'
 });
 
+// Apenas os domínios finais podem usar a configuração Firebase de produção.
+// Pré-visualizações e origens desconhecidas continuam isoladas pela configuração
+// própria da Vercel, evitando que uma cópia de teste toque em dados reais.
+const DOMINIOS_PRODUCAO = new Set([
+  'portal.almove.pt',
+  'crm.almove.pt',
+  'coach.almove.pt'
+]);
+
 function validarConfiguracaoFirebase(configuracao) {
   if (!configuracao || typeof configuracao !== 'object') return null;
   const campos = ['apiKey', 'authDomain', 'projectId', 'appId'];
@@ -28,7 +37,7 @@ function validarConfiguracaoFirebase(configuracao) {
 
 let configuracaoPreVisualizacao = null;
 async function obterConfiguracaoFirebase() {
-  if (location.hostname === 'portal.almove.pt') return CONFIGURACAO_PRODUCAO;
+  if (DOMINIOS_PRODUCAO.has(location.hostname)) return CONFIGURACAO_PRODUCAO;
   if (configuracaoPreVisualizacao) return configuracaoPreVisualizacao;
   const resposta = await fetch('/api/firebase-config', { cache: 'no-store', credentials: 'same-origin' });
   const tipo = String(resposta.headers.get('content-type') || '');
