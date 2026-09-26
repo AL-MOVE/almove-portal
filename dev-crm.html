@@ -48,13 +48,14 @@
   const destino = AlMoveSessaoCRM.destinoSeguro(new URLSearchParams(location.search).get('next'));
 
   function apresentar(mensagem, classe) { estado.className = classe || ''; estado.textContent = mensagem; }
-  function erroHumano(erro) {
+  function erroHumano(erro, contexto) {
     const codigo = String(erro && (erro.code || erro.message) || '');
     if (codigo.includes('EMAIL_NAO_CONFIRMADO')) return 'Confirma o email antes de entrares. Enviámos uma nova mensagem de confirmação.';
     if (codigo.includes('ACESSO_SEM_PERMISSAO_CRM') || codigo.includes('ACESSO_NAO_ATRIBUIDO')) return 'Esta conta não tem acesso à área de gestão.';
     if (codigo.includes('PREVIEW_VERCEL_PROTEGIDA')) return 'Esta pré-visualização está protegida pela Vercel. Entra na Vercel neste navegador e volta a tentar.';
-    if (codigo.includes('auth/invalid-credential') || codigo.includes('auth/wrong-password') || codigo.includes('auth/user-not-found')) return 'Email ou palavra-passe incorretos.';
-    return 'Não foi possível entrar. Tenta novamente.';
+    if (contexto === 'recuperacao' && AlMoveFirebaseAuth && AlMoveFirebaseAuth.mensagemErroRecuperacao) return AlMoveFirebaseAuth.mensagemErroRecuperacao(erro);
+    if (AlMoveFirebaseAuth && AlMoveFirebaseAuth.mensagemErroEntrada) return AlMoveFirebaseAuth.mensagemErroEntrada(erro);
+    return contexto === 'recuperacao' ? 'Não foi possível pedir a recuperação agora. Tenta novamente dentro de momentos.' : 'Não foi possível entrar. Tenta novamente.';
   }
 
   async function abrirSessaoExistente() {
@@ -87,12 +88,22 @@
   document.querySelector('#recuperar').addEventListener('click', async event => {
     event.preventDefault();
     if (!email.value.trim()) { email.focus(); apresentar('Indica o email para receberes a ligação de recuperação.', 'erro'); return; }
+    const recuperar = document.querySelector('#recuperar');
+    recuperar.setAttribute('aria-busy', 'true');
+    recuperar.setAttribute('aria-disabled', 'true');
+    recuperar.style.pointerEvents = 'none';
+    apresentar('A enviar a ligação de recuperação…');
     try {
       const configuracao = await ALMOVE_FIREBASE_CONFIG.obter();
       await AlMoveFirebaseAuth.configurar(configuracao);
       await AlMoveFirebaseAuth.enviarRecuperacao(email.value, location.origin + '/dev-crm.html');
-      apresentar('Enviámos a ligação para redefinir a palavra-passe.', 'ok');
-    } catch (erro) { apresentar('Não foi possível enviar a ligação. Confirma o email e tenta novamente.', 'erro'); }
+      apresentar('Se esta conta existir, receberás uma ligação para redefinir a palavra-passe. Verifica também Spam e Promoções.', 'ok');
+    } catch (erro) { apresentar(erroHumano(erro, 'recuperacao'), 'erro'); }
+    finally {
+      recuperar.removeAttribute('aria-busy');
+      recuperar.removeAttribute('aria-disabled');
+      recuperar.style.pointerEvents = '';
+    }
   });
 
   abrirSessaoExistente();
