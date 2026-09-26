@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [page, manifestText, worker] = await Promise.all([
+const [page, manifestText, worker, ptSessionEndpoint] = await Promise.all([
   readFile(new URL('../coach-mobile.html', import.meta.url), 'utf8'),
   readFile(new URL('../coach-mobile-manifest.json', import.meta.url), 'utf8'),
-  readFile(new URL('../coach-mobile-sw.js', import.meta.url), 'utf8')
+  readFile(new URL('../coach-mobile-sw.js', import.meta.url), 'utf8'),
+  readFile(new URL('../server/dev-crm/dev-crm-pt-session.js', import.meta.url), 'utf8')
 ]);
 const manifest = JSON.parse(manifestText);
 const scripts = [...page.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(match => match[1]).filter(script => script.trim());
@@ -15,9 +16,19 @@ assert.match(page, /\/api\/dev-crm-dashboard/);
 assert.match(page, /\/api\/dev-crm-agenda/);
 assert.match(page, /\/api\/dev-crm-client-detail/);
 assert.match(page, /\/api\/dev-crm-training-plans/);
+assert.match(page, /\/api\/dev-crm-training-plan-actions/);
 assert.match(page, /\/api\/dev-crm-pt-session/);
 assert.match(page, /checkinSono/);
 assert.match(page, /checkoutEnergia/);
+assert.match(page, /savePlanOriginal/);
+assert.match(page, /exercicioOriginal/);
+assert.match(page, /Máximo 6 séries/);
+assert.match(page, /Abandonar sessão/);
+assert.match(page, /velocidade:/);
+assert.match(page, /rir:/);
+assert.match(page, /min-width:0/);
+assert.match(ptSessionEndpoint, /nomeOriginal/);
+assert.match(ptSessionEndpoint, /series\.slice\(0, 6\)/);
 assert.match(page, /navigator\.serviceWorker\.register\('\/coach-mobile-sw\.js'/);
 assert.equal(manifest.start_url, '/coach-mobile.html?source=pwa');
 assert.equal(manifest.display, 'standalone');
