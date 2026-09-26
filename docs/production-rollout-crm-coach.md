@@ -23,12 +23,16 @@ Publicar duas entradas independentes, mas com a mesma conta de equipa e os mesmo
 3. Criar uma cópia de segurança exportável dos dados de produção antes de qualquer migração.
 4. Criar uma conta de equipa de teste no Firebase de produção e confirmar que não tem função de cliente.
 5. Configurar no ambiente **Production** da Vercel, exclusivamente pelos Secrets, estes valores do projeto Firebase escolhido:
+   - `ALMOVE_CRM_ENV=production`
+   - `ALMOVE_CRM_PROJECT_ID` com o ID do projeto Firebase de produção
    - `FIREBASE_PROJECT_ID`
    - `FIREBASE_SERVICE_ACCOUNT_JSON`
    - `FIREBASE_WEB_CONFIG_JSON`
    - `PORTAL_APPS_SCRIPT_HMAC_SECRET`, caso os fluxos ligados ao portal o exijam
 
 Nunca colocar estes valores no repositório, no JavaScript do browser ou numa captura de ecrã.
+
+`ALMOVE_CRM_PROJECT_ID` e `FIREBASE_PROJECT_ID` têm de apontar para o mesmo projeto. Se um faltar ou não corresponder, o CRM bloqueia o acesso.
 
 ## Alteração de código antes de ligar domínios
 
