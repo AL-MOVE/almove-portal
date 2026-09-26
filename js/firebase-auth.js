@@ -90,7 +90,7 @@
   // errada. Mantemos os erros de credenciais indistintos para não confirmar
   // se um email tem ou não conta.
   function codigoErro(erro) {
-    return String((erro && erro.code) || '').trim().toLowerCase();
+    return String((erro && (erro.code || erro.message)) || '').trim().toLowerCase();
   }
 
   function mensagemErroEntrada(erro) {
@@ -104,9 +104,16 @@
         return 'Esta conta não pode entrar neste momento. Contacta o teu treinador.';
       case 'auth/operation-not-allowed':
         return 'O acesso por email e palavra-passe ainda não está ativo. Contacta o teu treinador.';
+      case 'auth/invalid-email':
+        return 'Confirma o formato do email antes de entrares.';
       case 'auth/invalid-api-key':
       case 'auth/app-not-authorized':
       case 'auth/unauthorized-domain':
+      case 'firebase_nao_configurado':
+      case 'firebase_credencial_invalida':
+      case 'firebase_sdk_em_falta':
+      case 'firebase_nao_inicializado':
+      case 'configuracao_firebase_em_falta':
         return 'A configuração de acesso do portal ainda não está concluída. Contacta o teu treinador.';
       case 'auth/network-request-failed':
         return 'Não foi possível contactar o Firebase. Confirma a ligação à internet e tenta novamente.';
@@ -123,6 +130,11 @@
         return 'Confirma o email antes de pedir a recuperação.';
       case 'auth/operation-not-allowed':
         return 'A recuperação por email ainda não está ativa. Contacta o teu treinador.';
+      case 'firebase_nao_configurado':
+      case 'firebase_credencial_invalida':
+      case 'firebase_sdk_em_falta':
+      case 'firebase_nao_inicializado':
+      case 'configuracao_firebase_em_falta':
       case 'auth/unauthorized-continue-uri':
       case 'auth/invalid-continue-uri':
       case 'auth/unauthorized-domain':

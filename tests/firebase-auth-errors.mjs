@@ -9,9 +9,12 @@ const auth = context.window.AlMoveFirebaseAuth;
 
 assert.match(auth.mensagemErroEntrada({ code: 'auth/invalid-credential' }), /Email ou palavra-passe inválidos/);
 assert.match(auth.mensagemErroEntrada({ code: 'auth/operation-not-allowed' }), /email e palavra-passe ainda não está ativo/);
+assert.match(auth.mensagemErroEntrada(new Error('FIREBASE_NAO_CONFIGURADO')), /configuração de acesso/);
+assert.match(auth.mensagemErroEntrada({ code: 'auth/invalid-email' }), /formato do email/);
 assert.doesNotMatch(auth.mensagemErroEntrada({ code: 'auth/invalid-credential' }), /conta não pode entrar/);
 assert.match(auth.mensagemErroRecuperacao({ code: 'auth/unauthorized-continue-uri' }), /configuração de recuperação/);
 assert.match(auth.mensagemErroRecuperacao({ code: 'auth/network-request-failed' }), /ligação à internet/);
+assert.match(auth.mensagemErroRecuperacao(new Error('CONFIGURACAO_FIREBASE_EM_FALTA')), /configuração de recuperação/);
 assert.match(auth.mensagemErroRecuperacao({ code: 'auth/user-not-found' }), /Não foi possível pedir a recuperação/);
 
 console.log('Mensagens de erro Firebase validadas.');
