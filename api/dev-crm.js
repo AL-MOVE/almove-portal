@@ -1,4 +1,5 @@
-import { obterAdminFirebase, obterIdentidadeFirebase } from './_firebase.js';
+import { obterIdentidadeFirebase } from './_firebase.js';
+import { crmFirebasePermitido, obterAmbienteCrm } from './_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from './_firestore.js';
 import agenda from '../server/dev-crm/dev-crm-agenda.js';
 import avaliacoes from '../server/dev-crm/dev-crm-assessment-schedule.js';
@@ -38,7 +39,7 @@ function responder(res, estado, corpo) {
   return res.status(estado).json(corpo);
 }
 
-/** Sonda temporária: só confirma Vercel → Firestore no projeto de desenvolvimento. */
+/** Sonda autenticada: confirma Vercel → Firestore no ambiente CRM configurado. */
 export default async function handler(req, res) {
   const rota = String(req.query?.route || '');
   if (ROTAS[rota]) return ROTAS[rota](req, res);
@@ -46,14 +47,13 @@ export default async function handler(req, res) {
     res.setHeader('Allow', 'GET');
     return responder(res, 405, { ok: false, erro: 'Método não permitido' });
   }
-  const { projeto } = obterAdminFirebase();
-  if (projeto !== 'almove-portal-dev') return responder(res, 404, { ok: false, erro: 'Indisponível' });
+  if (!crmFirebasePermitido()) return responder(res, 404, { ok: false, erro: 'Indisponível' });
   try {
     const identidade = await obterIdentidadeFirebase(req);
     const { db } = obterFirestoreAlmove();
     const contexto = await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid);
     return responder(res, 200, {
-      ok: true, ambiente: 'development', email: identidade.email,
+      ok: true, ambiente: obterAmbienteCrm().ambiente, email: identidade.email,
       roles: contexto.roles, clientId: contexto.clientId || null
     });
   } catch (erro) {

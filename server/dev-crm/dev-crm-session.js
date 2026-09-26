@@ -1,4 +1,5 @@
-import { cookieSessaoCrmDevelopment, criarSessaoCrmDevelopment, obterAdminFirebase } from '../../api/_firebase.js';
+import { cookieSessaoCrmDevelopment, criarSessaoCrmDevelopment } from '../../api/_firebase.js';
+import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
 import { obterIdentidadeFirebase } from '../../api/_firebase.js';
@@ -11,7 +12,7 @@ function responder(res, estado, corpo) {
 
 export default async function handler(req, res) {
   try {
-    if (obterAdminFirebase().projeto !== 'almove-portal-dev') return responder(res, 404, { ok: false });
+    if (!crmFirebasePermitido()) return responder(res, 404, { ok: false });
   } catch (erro) {
     return responder(res, 503, { ok: false, erro: String(erro.code || erro.message || 'FIREBASE_INDISPONIVEL') });
   }

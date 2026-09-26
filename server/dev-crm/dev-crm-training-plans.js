@@ -1,4 +1,5 @@
-import { obterAdminFirebase, obterIdentidadeFirebase } from '../../api/_firebase.js';
+import { obterIdentidadeFirebase } from '../../api/_firebase.js';
+import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
 
@@ -56,7 +57,7 @@ function detalheTreino(linhas, clienteId, nomePlano, nomeTreino) {
 export default async function handler(req, res) {
   if (req.method !== 'GET') return responder(res, 405, { ok: false });
   try {
-    if (obterAdminFirebase().projeto !== 'almove-portal-dev') return responder(res, 404, { ok: false });
+    if (!crmFirebasePermitido()) return responder(res, 404, { ok: false });
     const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove(); exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid));
     const [planosSnap, clientesSnap] = await Promise.all([db.collection('crmMigrationTrainingPlans').get(), db.collection('crmMigrationClients').get()]);
     const linhas = planosSnap.docs.map(documento => documento.data()); const clientes = new Map(clientesSnap.docs.map(documento => [documento.id, { id: documento.id, ...documento.data() }]));

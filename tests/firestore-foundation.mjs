@@ -16,7 +16,7 @@ assert.deepEqual(validada, {
 assert.throws(() => validarRegistoSerie({}), /DADOS_INVALIDOS_REQUEST_ID/);
 assert.throws(() => validarRegistoSerie({ requestId: 'a', sessionId: 'b', planExerciseId: 'c', setNumber: 21, repetitions: 1 }), /DADOS_INVALIDOS_SET_NUMBER/);
 assert.match(rules, /allow read, write: if false;/, 'O browser não pode aceder diretamente ao Firestore.');
-assert.match(devApi, /projeto !== 'almove-portal-dev'/, 'A sonda CRM não pode existir em produção.');
+assert.match(devApi, /crmFirebasePermitido\(\)/, 'A sonda CRM tem de aceitar apenas o projeto configurado no servidor.');
 assert.match(devApi, /obterIdentidadeFirebase/, 'A sonda CRM tem de validar um token Firebase.');
 assert.match(devApi, /getClientContext/, 'A sonda CRM deve exigir uma atribuição de acesso.');
 

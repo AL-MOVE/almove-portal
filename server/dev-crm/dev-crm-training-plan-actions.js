@@ -1,4 +1,5 @@
-import { obterAdminFirebase, obterIdentidadeFirebase } from '../../api/_firebase.js';
+import { obterIdentidadeFirebase } from '../../api/_firebase.js';
+import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
 
@@ -12,7 +13,7 @@ function corresponde(documento, clienteId, plano, treino = null) { const item = 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return responder(res, 405, { ok: false });
   try {
-    if (obterAdminFirebase().projeto !== 'almove-portal-dev') return responder(res, 404, { ok: false });
+    if (!crmFirebasePermitido()) return responder(res, 404, { ok: false });
     const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove(); exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid));
     const entrada = req.body && typeof req.body === 'object' ? req.body : {}; const acao = texto(entrada.action, 40); const colecao = db.collection('crmMigrationTrainingPlans'); const snapshot = await colecao.get(); const agora = new Date();
     const auditar = (lote, nome, extra = {}) => lote.create(db.collection('auditLogs').doc(), { action: nome, actorUid: identidade.uid, createdAt: agora, ...extra });

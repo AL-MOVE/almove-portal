@@ -1,4 +1,5 @@
-import { obterAdminFirebase, obterIdentidadeFirebase } from '../../api/_firebase.js';
+import { obterIdentidadeFirebase } from '../../api/_firebase.js';
+import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
 import { consolidarPacksMensais } from './payment-status.js';
@@ -33,7 +34,7 @@ function documentoPackDoMes(documentos, mes) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return responder(res, 405, { ok: false });
   try {
-    if (obterAdminFirebase().projeto !== 'almove-portal-dev') return responder(res, 404, { ok: false });
+    if (!crmFirebasePermitido()) return responder(res, 404, { ok: false });
     const identidade = await obterIdentidadeFirebase(req);
     const { db } = obterFirestoreAlmove();
     exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid));

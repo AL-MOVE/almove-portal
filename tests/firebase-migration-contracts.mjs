@@ -19,6 +19,7 @@ const coachManifest = JSON.parse(fs.readFileSync(new URL('../coach-manifest.json
 const coachWorker = fs.readFileSync(new URL('../coach-sw.js', import.meta.url), 'utf8');
 const developmentSettings = fs.readFileSync(new URL('../server/dev-crm/dev-crm-settings.js', import.meta.url), 'utf8');
 const developmentSession = fs.readFileSync(new URL('../server/dev-crm/dev-crm-session.js', import.meta.url), 'utf8');
+const crmEnvironment = fs.readFileSync(new URL('../api/_crm-environment.js', import.meta.url), 'utf8');
 const developmentPayments = fs.readFileSync(new URL('../server/dev-crm/dev-crm-payments.js', import.meta.url), 'utf8');
 const apiDir = new URL('../api/', import.meta.url);
 const funcoesVercel = fs.readdirSync(apiDir).filter(nome => nome.endsWith('.js'))
@@ -46,7 +47,9 @@ assert.match(browserAdapter, /sendEmailVerification/, 'A confirmação do email 
 assert.match(crmSession, /ACESSO_SEM_PERMISSAO_CRM/, 'A página do CRM deve limitar a entrada à equipa.');
 assert.match(crmSession, /\/api\/dev-crm/, 'A sessão do CRM deve ser confirmada pela API antes de abrir a interface.');
 assert.match(crmSession, /\/api\/dev-crm-session/, 'O login CRM deve criar uma sessão HTTP-only para sobreviver ao redirecionamento.');
-assert.match(developmentSession, /almove-portal-dev/, 'A sessão HTTP-only só pode existir em Development.');
+assert.match(developmentSession, /crmFirebasePermitido\(\)/, 'A sessão HTTP-only tem de aceitar apenas o projeto CRM configurado no servidor.');
+assert.match(crmEnvironment, /PROJETO_DEVELOPMENT = 'almove-portal-dev'/, 'Development tem de ficar bloqueado ao projeto Firebase atual.');
+assert.match(crmEnvironment, /ALMOVE_CRM_PROJECT_ID/, 'Production tem de declarar explicitamente o projeto Firebase permitido.');
 const devCrm = fs.readFileSync(new URL('../dev-crm.html', import.meta.url), 'utf8');
 assert.match(devCrm, /reenviarConfirmacao/, 'O verificador CRM deve permitir confirmar contas de desenvolvimento.');
 assert.match(devCrm, /enviarRecuperacao/, 'O login CRM deve permitir recuperar a palavra-passe.');
@@ -104,4 +107,5 @@ assert.match(developmentMigrationPage, /Atualizar cópia Development/, 'A págin
 assert.match(developmentMigrationPage, /mostrarParidade\(origem, dados\.importado \|\| \{\}, dados\.development \|\| \{\}, dados\.destino \|\| \{\}\)/, 'A migração deve expor a origem, a cópia e os registos criados no Development.');
 assert.match(developmentMigrationPage, /registos obsoletos removidos/, 'A migração deve informar quando reconciliou cópias antigas.');
 assert.match(developmentMigrationPage, /token = await obterTokenDaSessao\(true\)/, 'A cópia Development deve renovar a sessão Firebase imediatamente antes de escrever.');
+assert.match(developmentMigration, /obterAmbienteCrm\(\)\.ambiente !== 'development'/, 'A cópia de migração não pode correr em Production.');
 console.log('Contratos de migração Firebase validados.');

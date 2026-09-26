@@ -1,5 +1,6 @@
 import { FieldValue } from 'firebase-admin/firestore';
-import { obterAdminFirebase, obterIdentidadeFirebase } from '../../api/_firebase.js';
+import { obterIdentidadeFirebase } from '../../api/_firebase.js';
+import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { criarRepositorioClientes, exigirEquipa } from '../../api/_crm-development.js';
 
@@ -11,8 +12,7 @@ function responder(res, estado, corpo) {
 }
 
 async function contextoEquipa(req) {
-  const { projeto } = obterAdminFirebase();
-  if (projeto !== 'almove-portal-dev') {
+  if (!crmFirebasePermitido()) {
     const erro = new Error('INDISPONIVEL'); erro.code = 'INDISPONIVEL'; throw erro;
   }
   const identidade = await obterIdentidadeFirebase(req);

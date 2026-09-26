@@ -1,4 +1,5 @@
-import { obterAdminFirebase, obterIdentidadeFirebase } from '../../api/_firebase.js';
+import { obterIdentidadeFirebase } from '../../api/_firebase.js';
+import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
 
@@ -13,7 +14,7 @@ function normalizar(dados = {}) { const perfil = { ...PADRAO, nome: nomePerfil(d
 export default async function handler(req, res) {
   if (!['GET', 'POST'].includes(req.method)) return responder(res, 405, { ok: false });
   try {
-    if (obterAdminFirebase().projeto !== 'almove-portal-dev') return responder(res, 404, { ok: false });
+    if (!crmFirebasePermitido()) return responder(res, 404, { ok: false });
     const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove(); exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid)); const referencia = db.collection('crmDevelopmentSettings').doc('coach-profile');
     if (req.method === 'GET') { const atual = await referencia.get(); return responder(res, 200, { ok: true, perfil: normalizar(atual.exists ? atual.data() : PADRAO) }); }
     const perfil = normalizar(req.body && typeof req.body === 'object' ? req.body : {}); const agora = new Date(); await db.runTransaction(async transacao => { transacao.set(referencia, { ...perfil, updatedAt: agora, updatedBy: identidade.uid }); transacao.create(db.collection('auditLogs').doc(), { action: 'development.settings.profile-updated', actorUid: identidade.uid, createdAt: agora }); }); return responder(res, 200, { ok: true, perfil });

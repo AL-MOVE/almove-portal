@@ -1,4 +1,5 @@
-import { obterAdminFirebase, obterIdentidadeFirebase } from '../../api/_firebase.js';
+import { obterIdentidadeFirebase } from '../../api/_firebase.js';
+import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
 import { consolidarPacksMensais } from './payment-status.js';
@@ -8,7 +9,7 @@ function mesAtual(){const partes=new Intl.DateTimeFormat('en-CA',{timeZone:'Euro
 export default async function handler(req,res){
   if(req.method!=='GET')return responder(res,405,{ok:false});
   try{
-    if(obterAdminFirebase().projeto!=='almove-portal-dev')return responder(res,404,{ok:false});
+    if(!crmFirebasePermitido())return responder(res,404,{ok:false});
     const identidade=await obterIdentidadeFirebase(req),{db}=obterFirestoreAlmove(); exigirEquipa(await criarAdaptadorFirestore({db}).getClientContext(identidade.uid));
     const id=String(req.query?.id||'').trim(); if(!id||id.length>128)return responder(res,400,{ok:false,erro:'CLIENTE_INVALIDO'});
     const clienteSnap=await db.collection('crmMigrationClients').doc(id).get(); if(!clienteSnap.exists)return responder(res,404,{ok:false,erro:'CLIENTE_NAO_ENCONTRADO'});

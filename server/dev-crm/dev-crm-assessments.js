@@ -1,4 +1,5 @@
-import { obterAdminFirebase, obterIdentidadeFirebase } from '../../api/_firebase.js';
+import { obterIdentidadeFirebase } from '../../api/_firebase.js';
+import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
 
@@ -52,7 +53,7 @@ function dadosPublicos(documento, clientes) {
 }
 
 async function contextoDaEquipa(req) {
-  if (obterAdminFirebase().projeto !== 'almove-portal-dev') throw new Error('AMBIENTE_INDISPONIVEL');
+  if (!crmFirebasePermitido()) throw new Error('AMBIENTE_INDISPONIVEL');
   const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove();
   exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid));
   return { db, identidade };

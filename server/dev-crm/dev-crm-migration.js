@@ -1,4 +1,5 @@
-import { obterAssertacaoFirebaseInterna, obterAdminFirebase } from '../../api/_firebase.js';
+import { obterAssertacaoFirebaseInterna } from '../../api/_firebase.js';
+import { crmFirebasePermitido, obterAmbienteCrm } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { normalizarAvaliacaoFisicaLegada, normalizarCheckinLegado, normalizarClienteLegado, normalizarPackLegado, normalizarSessaoLegada } from '../../api/_crm-schema.js';
 
@@ -21,7 +22,7 @@ function responder(res, estado, corpo) {
 export default async function handler(req, res) {
   if (!['GET', 'POST'].includes(req.method)) { res.setHeader('Allow', 'GET, POST'); return responder(res, 405, { ok: false }); }
   try {
-    if (obterAdminFirebase().projeto !== 'almove-portal-dev') return responder(res, 404, { ok: false });
+    if (!crmFirebasePermitido() || obterAmbienteCrm().ambiente !== 'development') return responder(res, 404, { ok: false });
     const { identidade, assertacao } = await obterAssertacaoFirebaseInterna(req, 'crm-migration-development');
     const { db } = obterFirestoreAlmove();
     const contexto = await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid);
