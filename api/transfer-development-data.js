@@ -1,5 +1,5 @@
 import { timingSafeEqual } from 'node:crypto';
-import { Timestamp } from 'firebase-admin/firestore';
+import { FieldPath, Timestamp } from 'firebase-admin/firestore';
 import { obterIdentidadeFirebase, obterAdminFirebase } from './_firebase.js';
 import { obterFirestoreAlmove } from './_firestore.js';
 
@@ -45,15 +45,18 @@ async function transferirFonte(req) {
   if (identidade.email !== EMAIL_AUTORIZADO) throw new Error('ACESSO_RECUSADO');
   const nomeColecao = String(req.query?.collection || '');
   if (!COLECOES_TRANSFERENCIA.has(nomeColecao) || !colecaoPermitida(nomeColecao)) throw new Error('DADOS_INVALIDOS');
+  const cursor = String(req.query?.cursor || '');
   const { db } = obterFirestoreAlmove();
   const documentos = [];
-  const snapshot = await db.collection(nomeColecao).get();
+  let consulta = db.collection(nomeColecao).orderBy(FieldPath.documentId()).limit(5);
+  if (cursor) consulta = consulta.startAfter(cursor);
+  const snapshot = await consulta.get();
   for (const documento of snapshot.docs) await recolherDocumentos(documento, documentos);
   for (let inicio = 0; inicio < documentos.length; inicio += 100) {
     const resposta = await fetch(TARGET_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-ALMOVE-TRANSFER': String(process.env.CRM_DEV_TO_PROD_TRANSFER_SECRET || '') }, body: JSON.stringify({ documents: documentos.slice(inicio, inicio + 100) }) });
-    if (!resposta.ok) throw new Error('DESTINO_INDISPONIVEL');
+    if (!resposta.ok) throw new Error('DESTINO_INDISPONIVEL_' + resposta.status);
   }
-  return { documents: documentos.length, collection: nomeColecao };
+  return { documents: documentos.length, collection: nomeColecao, nextCursor: snapshot.size === 5 ? snapshot.docs[snapshot.docs.length - 1].id : '' };
 }
 async function receberDestino(req) {
   if (!segredoValido(String(req.headers['x-almove-transfer'] || ''))) throw new Error('ACESSO_RECUSADO');
