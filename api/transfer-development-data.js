@@ -9,6 +9,7 @@ const EMAIL_AUTORIZADO = 'martinssony1998@gmail.com';
 const TARGET_URL = 'https://crm.almove.pt/api/transfer-development-data';
 const EXCLUIDAS = new Set(['userAccess', 'auditLogs', 'crmMigrationRuns']);
 const EXTRAS = new Set(['workoutSetEvents', 'workoutSessions', 'trainingPlans', 'clients', 'clientEmailIndex']);
+const COLECOES_TRANSFERENCIA = new Set(['crmMigrationClients', 'crmMigrationPacks', 'crmMigrationPackHistory', 'crmMigrationSessions', 'crmMigrationCheckins', 'crmMigrationPhysicalAssessments', 'crmMigrationNotes', 'crmMigrationTrainingPlans', 'crmMigrationPersonalTrainingSessions', 'crmMigrationTrainingExecutions', 'crmMigrationPostTraining', 'crmMigrationSpecialPackageCatalog', 'crmMigrationSpecialPackages', 'crmMigrationAssessmentRequests', 'crmMigrationPortalAgenda', 'crmMigrationAssessmentWriteRequests', 'crmDevelopmentSettings', 'crmDevelopmentReceipts', 'crmExpenses', ...EXTRAS]);
 
 function responder(res, estado, corpo) { res.setHeader('Cache-Control', 'no-store, max-age=0'); return res.status(estado).json(corpo); }
 function segredoValido(recebido) {
@@ -42,18 +43,17 @@ async function recolherDocumentos(referencia, documentos) {
 async function transferirFonte(req) {
   const identidade = await obterIdentidadeFirebase(req);
   if (identidade.email !== EMAIL_AUTORIZADO) throw new Error('ACESSO_RECUSADO');
+  const nomeColecao = String(req.query?.collection || '');
+  if (!COLECOES_TRANSFERENCIA.has(nomeColecao) || !colecaoPermitida(nomeColecao)) throw new Error('DADOS_INVALIDOS');
   const { db } = obterFirestoreAlmove();
-  const colecoes = await db.listCollections();
   const documentos = [];
-  for (const colecao of colecoes.filter(item => colecaoPermitida(item.id))) {
-    const snapshot = await colecao.get();
-    for (const documento of snapshot.docs) await recolherDocumentos(documento, documentos);
-  }
+  const snapshot = await db.collection(nomeColecao).get();
+  for (const documento of snapshot.docs) await recolherDocumentos(documento, documentos);
   for (let inicio = 0; inicio < documentos.length; inicio += 100) {
     const resposta = await fetch(TARGET_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-ALMOVE-TRANSFER': String(process.env.CRM_DEV_TO_PROD_TRANSFER_SECRET || '') }, body: JSON.stringify({ documents: documentos.slice(inicio, inicio + 100) }) });
     if (!resposta.ok) throw new Error('DESTINO_INDISPONIVEL');
   }
-  return { documents: documentos.length, collections: [...new Set(documentos.map(item => item.path.split('/')[0]))].length };
+  return { documents: documentos.length, collection: nomeColecao };
 }
 async function receberDestino(req) {
   if (!segredoValido(String(req.headers['x-almove-transfer'] || ''))) throw new Error('ACESSO_RECUSADO');
