@@ -62,7 +62,7 @@ async function receberDestino(req) {
   const { db } = obterFirestoreAlmove(); const lote = db.batch();
   for (const item of documentos) {
     const caminho = String(item?.path || ''); const partes = caminho.split('/');
-    if (partes.length < 2 || partes.length % 2 || !colecaoPermitida(partes[0]) || partes.some(parte => !/^[A-Za-z0-9_.@%=-]{1,256}$/.test(parte))) throw new Error('DADOS_INVALIDOS');
+    if (partes.length < 2 || partes.length % 2 || !colecaoPermitida(partes[0]) || partes.some(parte => !parte || parte.length > 1500)) throw new Error('DADOS_INVALIDOS');
     lote.set(db.doc(caminho), descodificar(item.data));
   }
   await lote.commit();
