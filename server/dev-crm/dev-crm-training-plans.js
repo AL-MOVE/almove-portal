@@ -2,6 +2,7 @@ import { obterIdentidadeFirebase } from '../../api/_firebase.js';
 import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
+import { mergeExerciseLibrary } from './exercise-library.js';
 
 function responder(res, estado, corpo) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -59,15 +60,17 @@ export default async function handler(req, res) {
   try {
     if (!crmFirebasePermitido()) return responder(res, 404, { ok: false });
     const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove(); exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid));
-    const [planosSnap, clientesSnap] = await Promise.all([db.collection('crmMigrationTrainingPlans').get(), db.collection('crmMigrationClients').get()]);
+    const [planosSnap, clientesSnap, bibliotecaSnap] = await Promise.all([db.collection('crmMigrationTrainingPlans').get(), db.collection('crmMigrationClients').get(), db.collection('crmExerciseLibrary').get()]);
     const linhas = planosSnap.docs.map(documento => documento.data()); const clientes = new Map(clientesSnap.docs.map(documento => [documento.id, { id: documento.id, ...documento.data() }]));
     const acao = texto(req.query?.action, 24) || 'plans'; const clienteId = texto(req.query?.clientId, 128); const nomePlano = texto(req.query?.plan, 160); const nomeTreino = texto(req.query?.workout, 160);
     if (acao === 'plans') return responder(res, 200, { ok: true, planos: listarPlanos(linhas, clienteId) });
     if (acao === 'workouts') return responder(res, 200, { ok: true, treinos: listarTreinos(linhas, clienteId, nomePlano) });
     if (acao === 'detail') return responder(res, 200, { ok: true, ...detalheTreino(linhas, clienteId, nomePlano, nomeTreino) });
     if (acao === 'library') {
-      const nomes = [...new Set(linhas.map(item => texto(item.exercicio)).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-PT'));
-      return responder(res, 200, { ok: true, exercicios: nomes.map((nome, indice) => ({ id: 'migrado-' + (indice + 1), nome, padraoMovimento: '', grupoMuscular: '', equipamento: '' })), aviso: nomes.length ? '' : 'Ainda não existem exercícios migrados.' });
+      const migrados = linhas.map(item => ({ nome: texto(item.exercicio) })).filter(item => item.nome);
+      const personalizados = bibliotecaSnap.docs.map(documento => ({ id: documento.id, ...documento.data() }));
+      const exercicios = mergeExerciseLibrary({ migrated: migrados, custom: personalizados });
+      return responder(res, 200, { ok: true, exercicios, total: exercicios.length, aviso: '' });
     }
     if (acao === 'replicable') {
       const planos = [];

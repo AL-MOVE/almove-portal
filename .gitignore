@@ -21,3 +21,5 @@ node_modules/
 coverage/
 lighthouse-*.html
 
+.vercel
+.env*
