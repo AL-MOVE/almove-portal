@@ -63,11 +63,12 @@ export default async function handler(req, res) {
     if (!crmFirebasePermitido()) return responder(res, 404, { ok: false });
     const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove(); exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid));
     const acao = texto(req.query?.action, 24) || 'plans'; const clienteId = texto(req.query?.clientId, 128); const nomePlano = texto(req.query?.plan, 160); const nomeTreino = texto(req.query?.workout, 160);
-    const [planosSnap, clientesSnap, bibliotecaSnap, versoesSnap] = await Promise.all([
+    const [planosSnap, clientesSnap, bibliotecaSnap, versoesSnap, modelosSnap] = await Promise.all([
       db.collection('crmMigrationTrainingPlans').get(),
       acao === 'replicable' ? db.collection('crmMigrationClients').get() : Promise.resolve({ docs: [] }),
       acao === 'library' ? db.collection('crmExerciseLibrary').get() : Promise.resolve({ docs: [] }),
-      acao === 'versions' && clienteId ? db.collection('crmTrainingPlanVersions').where('idCliente', '==', clienteId).get() : Promise.resolve({ docs: [] })
+      acao === 'versions' && clienteId ? db.collection('crmTrainingPlanVersions').where('idCliente', '==', clienteId).get() : Promise.resolve({ docs: [] }),
+      acao === 'replicable' ? db.collection('crmTrainingPlanTemplates').get() : Promise.resolve({ docs: [] })
     ]);
     const linhas = planosSnap.docs.map(documento => documento.data()); const clientes = new Map(clientesSnap.docs.map(documento => [documento.id, { id: documento.id, ...documento.data() }]));
     if (acao === 'plans') return responder(res, 200, { ok: true, planos: listarPlanos(linhas, clienteId) });
@@ -103,6 +104,7 @@ export default async function handler(req, res) {
           const treinos = listarTreinos(linhas, idCliente, plano.nome); planos.push({ idCliente, cliente: cliente.nome, estadoCliente: cliente.estado, nomePlano: plano.nome, numTreinos: treinos.length, numExercicios: treinos.reduce((soma, treino) => soma + treino.numExercicios, 0), atualizadoEm: plano.atualizadoEm, dataValidade: plano.validoAte });
         });
       }
+      modelosSnap.docs.forEach(documento => { const modelo = documento.data() || {}; const exercicios = Array.isArray(modelo.exercicios) ? modelo.exercicios : []; planos.push({ idCliente: 'template:' + documento.id, cliente: 'MODELO REUTILIZÁVEL', estadoCliente: 'Modelo', nomePlano: texto(modelo.nomePlano), numTreinos: 1, numExercicios: exercicios.length, atualizadoEm: dataCurta(modelo.atualizadoEm || modelo.criadoEm), dataValidade: dataCurta(modelo.validade), origemTipo: 'MODELO' }); });
       return responder(res, 200, { ok: true, planos: planos.sort((a, b) => (a.cliente + a.nomePlano).localeCompare(b.cliente + b.nomePlano, 'pt-PT')) });
     }
     if (acao === 'pt-session-plans') {
