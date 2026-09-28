@@ -1,13 +1,14 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [page, loginPage, manifestText, worker, ptSessionEndpoint, agendaEndpoint] = await Promise.all([
+const [page, loginPage, manifestText, worker, ptSessionEndpoint, agendaEndpoint, planActionsEndpoint] = await Promise.all([
   readFile(new URL('../coach-mobile.html', import.meta.url), 'utf8'),
   readFile(new URL('../dev-crm.html', import.meta.url), 'utf8'),
   readFile(new URL('../coach-mobile-manifest.json', import.meta.url), 'utf8'),
   readFile(new URL('../coach-mobile-sw.js', import.meta.url), 'utf8'),
   readFile(new URL('../server/dev-crm/dev-crm-pt-session.js', import.meta.url), 'utf8'),
-  readFile(new URL('../server/dev-crm/dev-crm-agenda.js', import.meta.url), 'utf8')
+  readFile(new URL('../server/dev-crm/dev-crm-agenda.js', import.meta.url), 'utf8'),
+  readFile(new URL('../server/dev-crm/dev-crm-training-plan-actions.js', import.meta.url), 'utf8')
 ]);
 const manifest = JSON.parse(manifestText);
 const scripts = [...page.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(match => match[1]).filter(script => script.trim());
@@ -22,18 +23,27 @@ assert.match(page, /\/api\/dev-crm-training-plan-actions/);
 assert.match(page, /\/api\/dev-crm-pt-session/);
 assert.match(page, /checkinSono/);
 assert.match(page, /checkoutEnergia/);
-assert.match(page, /savePlanOriginal/);
+assert.doesNotMatch(page, /savePlanOriginal/);
 assert.match(page, /exercicioOriginal/);
 assert.match(page, /Máximo 6 séries/);
 assert.match(page, /Abandonar sessão/);
 assert.match(page, /confirm-sheet/);
 assert.match(page, /captureSessionInputs/);
 assert.match(page, /session\.form/);
-assert.match(page, /A sessão foi guardada, mas o plano original não foi atualizado/);
+assert.match(page, /A sessão foi guardada, mas a nova versão do plano não foi criada/);
 assert.match(page, /rir:/);
 assert.doesNotMatch(page, /data-velocidade/);
 assert.match(page, /coachExerciseLibrary/);
 assert.match(page, /sessionVolume/);
+assert.match(page, /function addExercise\(\)/);
+assert.match(page, /function removeExercise\(exerciseIndex\)/);
+assert.match(page, /function moveExercise\(exerciseIndex, direction\)/);
+assert.match(page, /function restoreExercise\(exerciseIndex\)/);
+assert.match(page, /function undoSessionChange\(\)/);
+assert.match(page, /function sessionChanges\(\)/);
+assert.match(page, /Guardar apenas nesta sessão/);
+assert.match(page, /Atualizar plano atual/);
+assert.match(page, /save-workout-version/);
 assert.match(page, /monthly-pt/);
 assert.match(page, /PT contigo/);
 assert.match(page, /Autónomo \/ portal/);
@@ -41,7 +51,11 @@ assert.match(page, /plan\.visibilidade === 'PT'/);
 assert.match(page, /min-width:0/);
 assert.match(ptSessionEndpoint, /nomeOriginal/);
 assert.match(ptSessionEndpoint, /series\.slice\(0, 6\)/);
+assert.match(ptSessionEndpoint, /tipoAlteracao/);
+assert.match(ptSessionEndpoint, /alteracoesPlano/);
 assert.match(agendaEndpoint, /modo === 'monthly-pt'/);
+assert.match(planActionsEndpoint, /crmTrainingPlanVersions/);
+assert.match(planActionsEndpoint, /development\.training-workout\.versioned/);
 assert.match(page, /navigator\.serviceWorker\.register\('\/coach-mobile-sw\.js'/);
 assert.match(page, /location\.hostname === 'coach\.almove\.pt'/);
 assert.match(page, /history\.replaceState\(null, '', '\/'/);
@@ -57,7 +71,7 @@ assert.equal(manifest.start_url, '/?source=pwa');
 assert.equal(manifest.display, 'standalone');
 assert.equal(manifest.orientation, 'portrait-primary');
 assert.ok(manifest.icons.some(icon => icon.sizes === '192x192') && manifest.icons.some(icon => icon.sizes === '512x512'));
-assert.match(worker, /almove-coach-mobile-shell-v2/);
+assert.match(worker, /almove-coach-mobile-shell-v3/);
 assert.match(worker, /url\.pathname\.startsWith\('\/api\/'\)/);
 assert.doesNotMatch(worker, /cache\.put\([^\n]*\/api\//);
 scripts.forEach((script, index) => new Function(script));

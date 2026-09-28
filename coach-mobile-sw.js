@@ -1,6 +1,6 @@
 /* O Coach mobile guarda apenas o shell da aplicação. Dados de alunos e chamadas
    autenticadas à API nunca entram em cache no dispositivo. */
-const CACHE = 'almove-coach-mobile-shell-v2';
+const CACHE = 'almove-coach-mobile-shell-v3';
 const SHELL = [
   '/coach-mobile.html',
   '/coach-mobile-manifest.json',
