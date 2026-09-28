@@ -1,14 +1,16 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [page, loginPage, manifestText, worker, ptSessionEndpoint, agendaEndpoint, planActionsEndpoint] = await Promise.all([
+const [page, loginPage, manifestText, worker, ptSessionEndpoint, agendaEndpoint, planActionsEndpoint, plansEndpoint, crmPage] = await Promise.all([
   readFile(new URL('../coach-mobile.html', import.meta.url), 'utf8'),
   readFile(new URL('../dev-crm.html', import.meta.url), 'utf8'),
   readFile(new URL('../coach-mobile-manifest.json', import.meta.url), 'utf8'),
   readFile(new URL('../coach-mobile-sw.js', import.meta.url), 'utf8'),
   readFile(new URL('../server/dev-crm/dev-crm-pt-session.js', import.meta.url), 'utf8'),
   readFile(new URL('../server/dev-crm/dev-crm-agenda.js', import.meta.url), 'utf8'),
-  readFile(new URL('../server/dev-crm/dev-crm-training-plan-actions.js', import.meta.url), 'utf8')
+  readFile(new URL('../server/dev-crm/dev-crm-training-plan-actions.js', import.meta.url), 'utf8'),
+  readFile(new URL('../server/dev-crm/dev-crm-training-plans.js', import.meta.url), 'utf8'),
+  readFile(new URL('../coach-firebase.html', import.meta.url), 'utf8')
 ]);
 const manifest = JSON.parse(manifestText);
 const scripts = [...page.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(match => match[1]).filter(script => script.trim());
@@ -44,6 +46,12 @@ assert.match(page, /function sessionChanges\(\)/);
 assert.match(page, /Guardar apenas nesta sessão/);
 assert.match(page, /Atualizar plano atual/);
 assert.match(page, /save-workout-version/);
+assert.match(page, /Versões do plano/);
+assert.match(page, /function renderPlanVersion\(\)/);
+assert.match(page, /function comparePlanVersion\(/);
+assert.match(page, /Restaurar esta versão/);
+assert.match(page, /restore-workout-version/);
+assert.match(page, /expectedRevision: state\.session\.workout\.revision/);
 assert.match(page, /monthly-pt/);
 assert.match(page, /PT contigo/);
 assert.match(page, /Autónomo \/ portal/);
@@ -56,6 +64,15 @@ assert.match(ptSessionEndpoint, /alteracoesPlano/);
 assert.match(agendaEndpoint, /modo === 'monthly-pt'/);
 assert.match(planActionsEndpoint, /crmTrainingPlanVersions/);
 assert.match(planActionsEndpoint, /development\.training-workout\.versioned/);
+assert.match(planActionsEndpoint, /crmTrainingPlanHeads/);
+assert.match(planActionsEndpoint, /restore-workout-version/);
+assert.match(planActionsEndpoint, /lastUpdateTime/);
+assert.match(planActionsEndpoint, /PLANO_ALTERADO/);
+assert.match(plansEndpoint, /acao === 'versions'/);
+assert.match(plansEndpoint, /where\('idCliente', '==', clienteId\)/);
+assert.match(plansEndpoint, /trainingPlanRevision/);
+assert.match(crmPage, /TREINO_EDITOR_REVISION/);
+assert.match(crmPage, /expectedRevision: TREINO_EDITOR_REVISION/);
 assert.match(page, /navigator\.serviceWorker\.register\('\/coach-mobile-sw\.js'/);
 assert.match(page, /location\.hostname === 'coach\.almove\.pt'/);
 assert.match(page, /history\.replaceState\(null, '', '\/'/);

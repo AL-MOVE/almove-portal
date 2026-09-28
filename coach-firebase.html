@@ -7247,6 +7247,7 @@ let PLANO_CLIENTE_ATUAL = { id: '', nome: '' };
 let PLANO_ATUAL_NOME = '';
 let TREINO_EDITOR_EXERCICIOS = [];
 let TREINO_EDITOR_NOME_ORIGINAL = '';
+let TREINO_EDITOR_REVISION = '';
 let GUARDAR_TREINO_EM_CURSO = false;
 let GUARDAR_TREINO_TIMEOUT = null;
 let GUARDAR_TREINO_TENTATIVA = 0;
@@ -7780,6 +7781,7 @@ function preencherFiltrosBibliotecaExercicios() {
 
 function abrirCriadorTreino(nomeTreino) {
   TREINO_EDITOR_NOME_ORIGINAL = '';
+  TREINO_EDITOR_REVISION = '';
   TREINO_EDITOR_EXERCICIOS = [];
   document.getElementById('inputNomeTreino').value = nomeTreino;
   document.getElementById('inputPesquisaExercicio').value = '';
@@ -7809,6 +7811,7 @@ function abrirEditorTreino(nomeTreino) {
   carregarBibliotecaExercicios(() => pesquisarExerciciosUI());
 
   google.script.run.withSuccessHandler(resultado => {
+    TREINO_EDITOR_REVISION = resultado.revision || '';
     TREINO_EDITOR_EXERCICIOS = (resultado.exercicios || []).map(ex => Object.assign({ tipoPrescricao: 'REPS', descansoSegundos: '60', aquecimento: false, grupoSuperserie: '' }, ex));
     renderExerciciosEscolhidos();
   }).withFailureHandler(err => {
@@ -7970,12 +7973,13 @@ function guardarTreinoUI() {
   }).withFailureHandler(err => {
     if (tentativa !== GUARDAR_TREINO_TENTATIVA) return;
     terminar();
-    showAlert('Erro ao guardar treino: ' + err.message, 'error');
+    showAlert(err.message === 'PLANO_ALTERADO' ? 'Este treino foi alterado no CRM ou Coach depois de o abrires. Reabre o treino para veres a versão mais recente antes de guardar.' : 'Erro ao guardar treino: ' + err.message, 'error');
   }).guardarTreinoCliente({
     idCliente: PLANO_CLIENTE_ATUAL.id,
     nomePlano: PLANO_ATUAL_NOME,
     nomeTreino: nomeTreino,
     nomeTreinoOriginal: TREINO_EDITOR_NOME_ORIGINAL,
+    expectedRevision: TREINO_EDITOR_REVISION,
     exercicios: TREINO_EDITOR_EXERCICIOS,
     dataValidade: dataValidadeParaEnviar,
     // Só um plano acabado de criar define a visibilidade. Ao criar/editar

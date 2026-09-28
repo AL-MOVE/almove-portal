@@ -3,6 +3,7 @@ import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
 import { mergeExerciseLibrary } from './exercise-library.js';
+import { trainingPlanRevision } from './training-plan-revision.js';
 
 function responder(res, estado, corpo) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -44,15 +45,16 @@ function listarPlanos(linhas, clienteId) {
 function listarTreinos(linhas, clienteId, nomePlano) {
   const porTreino = new Map();
   linhas.filter(item => item.idCliente === clienteId && item.nomePlano === nomePlano && item.nomeTreino).forEach(item => {
-    const nome = texto(item.nomeTreino); const atual = porTreino.get(nome) || { nome, numExercicios: 0, atualizadoEm: '', visibilidade: visibilidade(item.visibilidade) };
+    const nome = texto(item.nomeTreino); const atual = porTreino.get(nome) || { nome, numExercicios: 0, atualizadoEm: '', revision: '', visibilidade: visibilidade(item.visibilidade) };
     atual.numExercicios += 1; if (texto(item.atualizadoEm) > atual.atualizadoEm) atual.atualizadoEm = texto(item.atualizadoEm, 32); porTreino.set(nome, atual);
   });
-  return [...porTreino.values()].map(item => ({ ...item, atualizadoEm: dataCurta(item.atualizadoEm) })).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-PT'));
+  return [...porTreino.values()].map(item => ({ ...item, revision: item.atualizadoEm, atualizadoEm: dataCurta(item.atualizadoEm) })).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-PT'));
 }
 
 function detalheTreino(linhas, clienteId, nomePlano, nomeTreino) {
   const selecionadas = linhas.filter(item => item.idCliente === clienteId && item.nomePlano === nomePlano && item.nomeTreino === nomeTreino).sort((a, b) => Number(a.ordem || 0) - Number(b.ordem || 0));
-  return { exercicios: selecionadas.map(item => ({ exercicio: texto(item.exercicio), series: String(item.series ?? ''), repsMin: String(item.repsMin ?? ''), repsMax: String(item.repsMax ?? ''), rir: item.rir == null ? '' : String(item.rir), notas: texto(item.notas, 1500), tipoPrescricao: texto(item.tipoPrescricao).toUpperCase() === 'TEMPO' ? 'TEMPO' : 'REPS', descansoSegundos: String(item.descansoSegundos || 60), aquecimento: item.aquecimento === true || String(item.aquecimento).toLowerCase() === 'true', grupoSuperserie: texto(item.grupoSuperserie, 20).toUpperCase() })), visibilidade: selecionadas.length ? visibilidade(selecionadas[0].visibilidade) : 'CLIENTE' };
+  const revision = trainingPlanRevision(selecionadas);
+  return { exercicios: selecionadas.map(item => ({ exercicio: texto(item.exercicio), series: String(item.series ?? ''), repsMin: String(item.repsMin ?? ''), repsMax: String(item.repsMax ?? ''), rir: item.rir == null ? '' : String(item.rir), notas: texto(item.notas, 1500), tipoPrescricao: texto(item.tipoPrescricao).toUpperCase() === 'TEMPO' ? 'TEMPO' : 'REPS', descansoSegundos: String(item.descansoSegundos || 60), aquecimento: item.aquecimento === true || String(item.aquecimento).toLowerCase() === 'true', grupoSuperserie: texto(item.grupoSuperserie, 20).toUpperCase() })), revision, visibilidade: selecionadas.length ? visibilidade(selecionadas[0].visibilidade) : 'CLIENTE' };
 }
 
 export default async function handler(req, res) {
@@ -60,9 +62,14 @@ export default async function handler(req, res) {
   try {
     if (!crmFirebasePermitido()) return responder(res, 404, { ok: false });
     const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove(); exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid));
-    const [planosSnap, clientesSnap, bibliotecaSnap] = await Promise.all([db.collection('crmMigrationTrainingPlans').get(), db.collection('crmMigrationClients').get(), db.collection('crmExerciseLibrary').get()]);
-    const linhas = planosSnap.docs.map(documento => documento.data()); const clientes = new Map(clientesSnap.docs.map(documento => [documento.id, { id: documento.id, ...documento.data() }]));
     const acao = texto(req.query?.action, 24) || 'plans'; const clienteId = texto(req.query?.clientId, 128); const nomePlano = texto(req.query?.plan, 160); const nomeTreino = texto(req.query?.workout, 160);
+    const [planosSnap, clientesSnap, bibliotecaSnap, versoesSnap] = await Promise.all([
+      db.collection('crmMigrationTrainingPlans').get(),
+      acao === 'replicable' ? db.collection('crmMigrationClients').get() : Promise.resolve({ docs: [] }),
+      acao === 'library' ? db.collection('crmExerciseLibrary').get() : Promise.resolve({ docs: [] }),
+      acao === 'versions' && clienteId ? db.collection('crmTrainingPlanVersions').where('idCliente', '==', clienteId).get() : Promise.resolve({ docs: [] })
+    ]);
+    const linhas = planosSnap.docs.map(documento => documento.data()); const clientes = new Map(clientesSnap.docs.map(documento => [documento.id, { id: documento.id, ...documento.data() }]));
     if (acao === 'plans') return responder(res, 200, { ok: true, planos: listarPlanos(linhas, clienteId) });
     if (acao === 'workouts') return responder(res, 200, { ok: true, treinos: listarTreinos(linhas, clienteId, nomePlano) });
     if (acao === 'detail') return responder(res, 200, { ok: true, ...detalheTreino(linhas, clienteId, nomePlano, nomeTreino) });
@@ -71,6 +78,22 @@ export default async function handler(req, res) {
       const personalizados = bibliotecaSnap.docs.map(documento => ({ id: documento.id, ...documento.data() }));
       const exercicios = mergeExerciseLibrary({ migrated: migrados, custom: personalizados });
       return responder(res, 200, { ok: true, exercicios, total: exercicios.length, aviso: '' });
+    }
+    if (acao === 'versions') {
+      if (!clienteId) return responder(res, 400, { ok: false, erro: 'CLIENTE_OBRIGATORIO' });
+      const versoes = versoesSnap.docs.map(documento => ({ id: documento.id, ...documento.data() })).filter(item => item.idCliente === clienteId && (!nomePlano || item.nomePlano === nomePlano) && (!nomeTreino || item.nomeTreino === nomeTreino)).map(item => ({
+        id: item.id,
+        nomePlano: texto(item.nomePlano),
+        nomeTreino: texto(item.nomeTreino),
+        idSessao: texto(item.idSessao, 180),
+        criadoEm: texto(item.criadoEm, 64),
+        treinador: texto(item.criadoPorEmail || item.criadoPorNome, 160) || 'Treinador',
+        origem: texto(item.origem, 40),
+        restauradoDeVersaoId: texto(item.restauradoDeVersaoId, 180),
+        alteracoes: (Array.isArray(item.alteracoes) ? item.alteracoes : []).slice(0, 120).map(alteracao => ({ label: texto(alteracao?.label, 40), detail: texto(alteracao?.detail, 300) })).filter(alteracao => alteracao.label && alteracao.detail),
+        exercicios: (Array.isArray(item.exercicios) ? item.exercicios : []).slice(0, 100)
+      })).sort((a, b) => b.criadoEm.localeCompare(a.criadoEm));
+      return responder(res, 200, { ok: true, versoes });
     }
     if (acao === 'replicable') {
       const planos = [];
@@ -86,7 +109,7 @@ export default async function handler(req, res) {
       const planos = listarPlanos(linhas, clienteId).map(plano => ({
         nome: plano.nome,
         visibilidade: plano.visibilidade,
-        treinos: listarTreinos(linhas, clienteId, plano.nome).map(treino => ({ nome: treino.nome, exercicios: detalheTreino(linhas, clienteId, plano.nome, treino.nome).exercicios }))
+        treinos: listarTreinos(linhas, clienteId, plano.nome).map(treino => { const detalhe = detalheTreino(linhas, clienteId, plano.nome, treino.nome); return { nome: treino.nome, revision: detalhe.revision, exercicios: detalhe.exercicios }; })
       }));
       return responder(res, 200, { ok: true, planos });
     }
