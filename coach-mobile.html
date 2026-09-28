@@ -11,6 +11,11 @@
   <link rel="manifest" href="/coach-mobile-manifest.json">
   <link rel="apple-touch-icon" href="/icons/coach-192.png">
   <title>André Martins · Coach</title>
+  <script>
+    if (location.hostname === 'coach.almove.pt' && location.pathname === '/coach-mobile.html') {
+      history.replaceState(null, '', '/' + location.search + location.hash);
+    }
+  </script>
   <style>
     :root { color-scheme:dark; --bg:#07121d; --panel:#0d1b2b; --panel-strong:#10253a; --line:#26415a; --text:#eef7ff; --muted:#91a3b8; --teal:#22d3c5; --blue:#1677e8; --warn:#fbbf24; --danger:#fb7185; --safe:#55d98c; --radius:18px; font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
     * { box-sizing:border-box; }
@@ -260,7 +265,7 @@
     function renderCurrent() { if (state.view === 'home') return renderHome(); if (state.view === 'agenda') return renderAgenda(); if (state.view === 'pt-month') return renderPTMonth(); if (state.view === 'clients') return renderClients(); if (state.view === 'alerts') return renderAlerts(); if (state.view === 'profile') return renderProfile(); if (state.view === 'client') return renderClient(); if (state.view === 'session') return renderSession(); renderHome(); }
     function switchView(view) { if (state.view === 'session' && view !== 'session' && !confirm('Tens uma sessão por guardar. Queres sair?')) return; if (state.view === 'session') state.session = null; state.view = view; document.querySelectorAll('.nav-button').forEach(function (node) { node.classList.toggle('active', node.dataset.view === view); }); renderCurrent(); }
     function setupNavigation() { document.querySelectorAll('.nav-button').forEach(function (node) { node.addEventListener('click', function () { switchView(node.dataset.view); }); }); document.getElementById('refreshButton').addEventListener('click', refreshAll); window.addEventListener('online', function () { if (document.getElementById('status')) status('Ligação restabelecida. Atualiza para obter os dados mais recentes.', 'ok'); }); window.addEventListener('offline', function () { if (document.getElementById('status')) status('Sem ligação. Os dados operacionais não são guardados offline.', 'error'); }); }
-    async function boot() { try { const config = await window.ALMOVE_FIREBASE_CONFIG.obter(); await window.AlMoveFirebaseAuth.configurar(config); state.context = await window.AlMoveSessaoCRM.obterContexto(); if (!state.context) throw new Error('ACESSO_RECUSADO'); const requested = new URLSearchParams(location.search).get('view'); if (['agenda', 'clients', 'alerts', 'profile'].includes(requested)) state.view = requested; await Promise.all([loadDashboard(), loadAgenda(), loadCheckins()]); setupNavigation(); document.querySelectorAll('.nav-button').forEach(function (node) { node.classList.toggle('active', node.dataset.view === state.view); }); renderCurrent(); if ('serviceWorker' in navigator) navigator.serviceWorker.register('/coach-mobile-sw.js', { scope: '/coach-mobile.html' }).catch(function () {}); } catch (error) { location.replace('/dev-crm.html?next=' + encodeURIComponent('/coach-mobile.html')); } }
+    async function boot() { try { const config = await window.ALMOVE_FIREBASE_CONFIG.obter(); await window.AlMoveFirebaseAuth.configurar(config); state.context = await window.AlMoveSessaoCRM.obterContexto(); if (!state.context) throw new Error('ACESSO_RECUSADO'); const requested = new URLSearchParams(location.search).get('view'); if (['agenda', 'clients', 'alerts', 'profile'].includes(requested)) state.view = requested; await Promise.all([loadDashboard(), loadAgenda(), loadCheckins()]); setupNavigation(); document.querySelectorAll('.nav-button').forEach(function (node) { node.classList.toggle('active', node.dataset.view === state.view); }); renderCurrent(); if ('serviceWorker' in navigator) navigator.serviceWorker.register('/coach-mobile-sw.js', { scope: '/' }).catch(function () {}); } catch (error) { location.replace('/dev-crm.html?next=' + encodeURIComponent('/coach-mobile.html')); } }
     boot();
   })();
   </script>
