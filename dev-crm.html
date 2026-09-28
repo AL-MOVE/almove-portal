@@ -4,6 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
+  <script>
+    (() => {
+      if (location.hostname !== 'coach.almove.pt' || location.pathname !== '/dev-crm.html') return;
+      const destino = new URLSearchParams(location.search).get('next');
+      if (destino) sessionStorage.setItem('almove:coach-next', destino);
+      history.replaceState(null, '', '/');
+    })();
+  </script>
   <title>Entrar · André Martins - Personal Trainer</title>
   <style>
     :root { color-scheme:dark; font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:#061321; color:#f7fbff; --ink:#061321; --surface:#071827; --surface-raised:#0b2133; --line:#24506b; --line-strong:#335875; --text-muted:#9bb1c3; --accent:#35d6c3; --accent-blue:#1378df; --danger:#fecaca; --success:#83f5dd; --ease-out:cubic-bezier(.23,1,.32,1); }
@@ -45,7 +53,15 @@
   const email = document.querySelector('#email');
   const password = document.querySelector('#password');
   const textoBotaoEntrar = botao.textContent;
-  const destino = AlMoveSessaoCRM.destinoSeguro(new URLSearchParams(location.search).get('next'));
+  const entradaCoach = location.hostname === 'coach.almove.pt';
+  const destinoPedido = new URLSearchParams(location.search).get('next') || (entradaCoach ? sessionStorage.getItem('almove:coach-next') : '');
+  const destino = AlMoveSessaoCRM.destinoSeguro(destinoPedido);
+  const regressoLogin = location.origin + (entradaCoach ? '/dev-crm.html?next=%2Fcoach-mobile.html' : '/dev-crm.html');
+
+  function abrirDestino() {
+    if (entradaCoach) sessionStorage.removeItem('almove:coach-next');
+    location.replace(destino);
+  }
 
   function apresentar(mensagem, classe) { estado.className = classe || ''; estado.textContent = mensagem; }
   function erroHumano(erro, contexto) {
@@ -62,7 +78,7 @@
   async function abrirSessaoExistente() {
     try {
       const contexto = await AlMoveSessaoCRM.obterContexto();
-      if (contexto) location.replace(destino);
+      if (contexto) abrirDestino();
     } catch (erro) {
       if (String(erro.code || erro.message).includes('EMAIL_NAO_CONFIRMADO')) apresentar(erroHumano(erro), 'erro');
     }
@@ -75,14 +91,14 @@
       await AlMoveFirebaseAuth.configurar(configuracao);
       const utilizador = await AlMoveFirebaseAuth.entrar(email.value, password.value);
       if (!utilizador.emailVerified) {
-        await AlMoveFirebaseAuth.reenviarConfirmacao(location.origin + '/dev-crm.html');
+        await AlMoveFirebaseAuth.reenviarConfirmacao(regressoLogin);
         await AlMoveFirebaseAuth.sair();
         throw new Error('EMAIL_NAO_CONFIRMADO');
       }
       await AlMoveSessaoCRM.criarSessaoServidor();
       await AlMoveSessaoCRM.obterContexto();
       apresentar('A abrir o CRM…', 'ok');
-      location.replace(destino);
+      abrirDestino();
     } catch (erro) { apresentar(erroHumano(erro), 'erro'); botao.disabled = false; botao.removeAttribute('aria-busy'); botao.textContent = textoBotaoEntrar; }
   });
 
@@ -97,7 +113,7 @@
     try {
       const configuracao = await ALMOVE_FIREBASE_CONFIG.obter();
       await AlMoveFirebaseAuth.configurar(configuracao);
-      await AlMoveFirebaseAuth.enviarRecuperacao(email.value, location.origin + '/dev-crm.html');
+      await AlMoveFirebaseAuth.enviarRecuperacao(email.value, regressoLogin);
       apresentar('Se esta conta existir, receberás uma ligação para redefinir a palavra-passe. Verifica também Spam e Promoções.', 'ok');
     } catch (erro) { apresentar(erroHumano(erro, 'recuperacao'), 'erro'); }
     finally {

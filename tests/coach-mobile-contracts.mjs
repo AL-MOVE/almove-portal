@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [page, manifestText, worker, ptSessionEndpoint, agendaEndpoint] = await Promise.all([
+const [page, loginPage, manifestText, worker, ptSessionEndpoint, agendaEndpoint] = await Promise.all([
   readFile(new URL('../coach-mobile.html', import.meta.url), 'utf8'),
+  readFile(new URL('../dev-crm.html', import.meta.url), 'utf8'),
   readFile(new URL('../coach-mobile-manifest.json', import.meta.url), 'utf8'),
   readFile(new URL('../coach-mobile-sw.js', import.meta.url), 'utf8'),
   readFile(new URL('../server/dev-crm/dev-crm-pt-session.js', import.meta.url), 'utf8'),
@@ -45,6 +46,12 @@ assert.match(page, /navigator\.serviceWorker\.register\('\/coach-mobile-sw\.js'/
 assert.match(page, /location\.hostname === 'coach\.almove\.pt'/);
 assert.match(page, /history\.replaceState\(null, '', '\/'/);
 assert.match(page, /scope: '\/'/);
+assert.match(loginPage, /location\.hostname !== 'coach\.almove\.pt'/);
+assert.match(loginPage, /sessionStorage\.setItem\('almove:coach-next'/);
+assert.match(loginPage, /history\.replaceState\(null, '', '\/'/);
+assert.match(loginPage, /sessionStorage\.getItem\('almove:coach-next'/);
+assert.match(loginPage, /function abrirDestino\(\)/);
+assert.match(loginPage, /dev-crm\.html\?next=%2Fcoach-mobile\.html/);
 assert.equal(manifest.id, '/');
 assert.equal(manifest.start_url, '/?source=pwa');
 assert.equal(manifest.display, 'standalone');
