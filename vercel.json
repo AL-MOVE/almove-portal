@@ -3,7 +3,7 @@
     {
       "source": "/",
       "has": [{ "type": "host", "value": "crm.almove.pt" }],
-      "destination": "/coach-firebase.html",
+      "destination": "/dev-crm.html?next=%2Fcoach-firebase.html",
       "permanent": false
     },
     {
