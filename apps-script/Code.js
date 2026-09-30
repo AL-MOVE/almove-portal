@@ -1810,6 +1810,9 @@ const API_FUNCOES_PORTAL = {
   getBootstrapPortal: function (token) {
     return getBootstrapPortal_(token);
   },
+  diagnosticarHmacFirebasePortal: function (token) {
+    return diagnosticarHmacFirebasePortal_(token);
+  },
   getProgressoBootstrapPortal: function (token) {
     exigirAcessoSensivelPortal_(token);
     return getProgressoBootstrapPortal_(token);
@@ -2622,7 +2625,7 @@ function validarEstruturaPedidoPortal_(valor, profundidade) {
 }
 
 const FUNCOES_LEITURA_PORTAL_ = new Set([
-  'getBootstrapPortal', 'getProgressoBootstrapPortal', 'getEstadoPortalHoje',
+  'getBootstrapPortal', 'diagnosticarHmacFirebasePortal', 'getProgressoBootstrapPortal', 'getEstadoPortalHoje',
   'getAvaliacaoFisicaPortal', 'getHistoricoAvaliacoesFisicasPortal', 'getPesosDiariosPortal',
   'getPedidoAvaliacaoPortal', 'getAgendaPortal', 'getPlanoAtivoPortal',
   'getResumoInicioPortal', 'getResumoConquistasPortal', 'getMetricasAtividadePortal',
@@ -2878,7 +2881,7 @@ function obterClientePorTokenPortal_(token) {
  * de cinco minutos, assinada com PORTAL_APPS_SCRIPT_HMAC_SECRET. Assim o Apps
  * Script nao precisa de chaves de servico Firebase nem aceita tokens do browser.
  */
-function obterClientePorAssertacaoFirebasePortal_(token) {
+function validarAssertacaoFirebasePortal_(token) {
   const partes = String(token || '').match(/^fb1\.([A-Za-z0-9_-]{20,1000})\.([A-Za-z0-9_-]{20,100})$/);
   if (!partes) return null;
   const segredo = PropertiesService.getScriptProperties().getProperty('PORTAL_APPS_SCRIPT_HMAC_SECRET');
@@ -2901,13 +2904,41 @@ function obterClientePorAssertacaoFirebasePortal_(token) {
       !/^[A-Za-z0-9_-]{6,128}$/.test(String(dados.uid || '')) ||
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
     ) return null;
+    return { dados: dados, email: email };
+  } catch (erro) {
+    Logger.log('Assertacao Firebase inválida: ' + erro.toString());
+  }
+  return null;
+}
+
+function diagnosticarCorrespondenciaEmailPortal_(email) {
+  const emailLimpo = String(email || '').trim().toLowerCase();
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('CLIENTES');
+  if (!sheet || sheet.getLastRow() < 4) return { correspondencias: 0, identificadorPresente: false };
+  const correspondencias = sheet.getRange('A4:Y' + sheet.getLastRow()).getValues()
+    .filter(row => String(row[18] || '').trim().toLowerCase() === emailLimpo)
+    .filter(row => String(row[1] || 'Ativo').trim().toLowerCase() !== 'cancelado');
+  return { correspondencias: correspondencias.length, identificadorPresente: correspondencias.length === 1 && Boolean(String(correspondencias[0][24] || '').trim()) };
+}
+
+function diagnosticarHmacFirebasePortal_(token) {
+  const validada = validarAssertacaoFirebasePortal_(token);
+  if (!validada) return { assinaturaValida: false, correspondencias: 0, identificadorPresente: false };
+  const correspondencia = diagnosticarCorrespondenciaEmailPortal_(validada.email);
+  return { assinaturaValida: true, correspondencias: correspondencia.correspondencias, identificadorPresente: correspondencia.identificadorPresente };
+}
+
+function obterClientePorAssertacaoFirebasePortal_(token) {
+  const validada = validarAssertacaoFirebasePortal_(token);
+  if (!validada) return null;
+  try {
     // No piloto o email Firebase confirmado identifica o cliente. A função
     // recusa duplicados e clientes cancelados; assim uma conta só entra se o
     // email existir uma única vez no CRM.
-    const cliente = obterClientePorEmailPortal_(email);
+    const cliente = obterClientePorEmailPortal_(validada.email);
     if (!cliente || cliente.duplicado || !cliente.idCliente) return null;
     return Object.assign({}, cliente, {
-      tokenPortalOriginal: 'firebase:' + String(dados.uid),
+      tokenPortalOriginal: 'firebase:' + String(validada.dados.uid),
       eSessao: true,
       autenticacao: 'firebase'
     });
