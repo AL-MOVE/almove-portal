@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 
 const applications = [
   { name: 'Portal', url: 'https://portal.almove.pt/', marker: /Entra no teu acompanhamento|id="inicioSaudacao"/ },
-  { name: 'CRM', url: 'https://crm.almove.pt/', marker: /Hoje no Coach|coach-firebase/ },
+  { name: 'CRM', url: 'https://crm.almove.pt/', marker: /Entrar na área de gestão|Hoje no Coach|coach-firebase/ },
   { name: 'Coach', url: 'https://coach.almove.pt/', marker: /App Coach|coach-mobile|Entrar na área de gestão/ }
 ];
 
