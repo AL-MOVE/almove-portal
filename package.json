@@ -6,7 +6,11 @@
     "node": ">=22 <25"
   },
   "scripts": {
-    "build:firebase": "node scripts/build-firebase-sdk.mjs"
+    "build:firebase": "node scripts/build-firebase-sdk.mjs",
+    "test": "node scripts/run-tests.mjs",
+    "verify:production": "node scripts/verify-production.mjs",
+    "verify:portal-hmac": "node scripts/verify-portal-hmac.mjs",
+    "firestore:backups": "node scripts/firestore-backups.mjs list"
   },
   "dependencies": {
     "esbuild": "^0.28.2",

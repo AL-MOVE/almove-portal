@@ -23,13 +23,14 @@ import planos from '../server/dev-crm/dev-crm-training-plans.js';
 import definicoes from '../server/dev-crm/dev-crm-settings.js';
 import sessao from '../server/dev-crm/dev-crm-session.js';
 import despesas from '../server/dev-crm/dev-crm-expenses.js';
+import operacoes from '../server/dev-crm/dev-crm-ops.js';
 
 const ROTAS = Object.freeze({
   agenda, 'assessment-schedule': avaliacoes, assessments: avaliacoesAvancadas, checkins, 'client-actions': acoesCliente, 'client-create': criarCliente,
   'client-detail': detalheCliente, clients: clientes, command: comando, dashboard, migration: migracao, payments: pagamentos,
   'pt-session': sessaoPt, receipts: recibos, renewals: renovacoes, 'special-package-actions': acoesPacotesEspeciais,
   'special-packages': pacotesEspeciais, 'training-plan-actions': acoesPlanos, 'training-plans': planos, settings: definicoes, session: sessao,
-  expenses: despesas
+  expenses: despesas, ops: operacoes
 });
 
 function responder(res, estado, corpo) {

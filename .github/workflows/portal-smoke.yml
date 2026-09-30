@@ -13,19 +13,15 @@ permissions:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      - name: Validar contratos locais
-        run: |
-          node tests/hotfix-contracts.mjs
-          node tests/perfil-contracts.mjs
-          node tests/api-contracts.mjs
-      - name: Testar portal publicado
-        env:
-          PORTAL_BASE_URL: https://portal.almove.pt
-          PORTAL_TEST_EMAIL: ${{ secrets.PORTAL_TEST_EMAIL }}
-        run: node tests/portal-smoke.mjs
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Validar contratos locais e isolamento
+        run: npm test
+      - name: Testar CRM, Coach e Portal publicados
+        run: npm run verify:production
