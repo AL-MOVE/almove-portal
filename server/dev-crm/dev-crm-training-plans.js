@@ -3,6 +3,7 @@ import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
 import { mergeExerciseLibrary } from './exercise-library.js';
+import { buildExerciseLibraryOptions, normalizeExerciseLibrarySettings } from './exercise-library-settings.js';
 import { trainingPlanRevision } from './training-plan-revision.js';
 
 function responder(res, estado, corpo) {
@@ -63,12 +64,13 @@ export default async function handler(req, res) {
     if (!crmFirebasePermitido()) return responder(res, 404, { ok: false });
     const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove(); exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid));
     const acao = texto(req.query?.action, 24) || 'plans'; const clienteId = texto(req.query?.clientId, 128); const nomePlano = texto(req.query?.plan, 160); const nomeTreino = texto(req.query?.workout, 160);
-    const [planosSnap, clientesSnap, bibliotecaSnap, versoesSnap, modelosSnap] = await Promise.all([
+    const [planosSnap, clientesSnap, bibliotecaSnap, versoesSnap, modelosSnap, bibliotecaConfigSnap] = await Promise.all([
       db.collection('crmMigrationTrainingPlans').get(),
       acao === 'replicable' ? db.collection('crmMigrationClients').get() : Promise.resolve({ docs: [] }),
       acao === 'library' ? db.collection('crmExerciseLibrary').get() : Promise.resolve({ docs: [] }),
       acao === 'versions' && clienteId ? db.collection('crmTrainingPlanVersions').where('idCliente', '==', clienteId).get() : Promise.resolve({ docs: [] }),
-      acao === 'replicable' ? db.collection('crmTrainingPlanTemplates').get() : Promise.resolve({ docs: [] })
+      acao === 'replicable' ? db.collection('crmTrainingPlanTemplates').get() : Promise.resolve({ docs: [] }),
+      acao === 'library' ? db.collection('crmDevelopmentSettings').doc('exercise-library').get() : Promise.resolve({ exists: false, data: () => ({}) })
     ]);
     const linhas = planosSnap.docs.map(documento => documento.data()); const clientes = new Map(clientesSnap.docs.map(documento => [documento.id, { id: documento.id, ...documento.data() }]));
     if (acao === 'plans') return responder(res, 200, { ok: true, planos: listarPlanos(linhas, clienteId) });
@@ -78,7 +80,8 @@ export default async function handler(req, res) {
       const migrados = linhas.map(item => ({ nome: texto(item.exercicio) })).filter(item => item.nome);
       const personalizados = bibliotecaSnap.docs.map(documento => ({ id: documento.id, ...documento.data() }));
       const exercicios = mergeExerciseLibrary({ migrated: migrados, custom: personalizados });
-      return responder(res, 200, { ok: true, exercicios, total: exercicios.length, aviso: '' });
+      const configuracao = normalizeExerciseLibrarySettings(bibliotecaConfigSnap.exists ? bibliotecaConfigSnap.data() : {});
+      return responder(res, 200, { ok: true, exercicios, configuracao, opcoes: buildExerciseLibraryOptions(exercicios, configuracao), total: exercicios.length, aviso: '' });
     }
     if (acao === 'versions') {
       if (!clienteId) return responder(res, 400, { ok: false, erro: 'CLIENTE_OBRIGATORIO' });

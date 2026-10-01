@@ -10,7 +10,7 @@ const merged = mergeExerciseLibrary({
   ],
   custom: [
     { id: 'custom-squat', nome: 'agachamento com barra', grupoMuscular: 'Personalizado', equipamento: 'Rack' },
-    { id: 'custom-special', nome: 'Exercício Personalizado', padraoMovimento: 'Teste', musculosPrincipais: ['Glúteo máximo', 'Quadríceps'], musculosSecundarios: 'Gémeos, Core', instrucoes: 'Manter o tronco estável.' }
+    { id: 'custom-special', nome: 'Exercício Personalizado', padraoMovimento: 'Teste', classificacao: 'Secundário', metricaPrincipal: 'Tempo', musculosPrincipais: ['Glúteo máximo', 'Quadríceps'], musculosSecundarios: 'Gémeos, Core', instrucoes: 'Manter o tronco estável.' }
   ]
 });
 
@@ -22,6 +22,8 @@ assert.ok(merged.some(item => item.nome === 'Exercício Personalizado'));
 assert.deepEqual(merged.find(item => item.id === 'custom-special')?.musculosPrincipais, ['Glúteo máximo', 'Quadríceps']);
 assert.deepEqual(merged.find(item => item.id === 'custom-special')?.musculosSecundarios, ['Gémeos', 'Core']);
 assert.equal(merged.find(item => item.id === 'custom-special')?.instrucoes, 'Manter o tronco estável.');
+assert.equal(merged.find(item => item.id === 'custom-special')?.classificacao, 'Secundário');
+assert.equal(merged.find(item => item.id === 'custom-special')?.metricaPrincipal, 'Tempo');
 assert.deepEqual(merged, merged.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-PT')));
 
 console.log('Biblioteca global de exercícios validada.');

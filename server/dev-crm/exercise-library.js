@@ -115,6 +115,8 @@ function clean(item) {
     padraoMovimento: String(source.padraoMovimento || '').trim().slice(0, 100),
     grupoMuscular: String(source.grupoMuscular || '').trim().slice(0, 100),
     equipamento: String(source.equipamento || '').trim().slice(0, 100),
+    classificacao: String(source.classificacao || '').trim().slice(0, 100),
+    metricaPrincipal: String(source.metricaPrincipal || '').trim().slice(0, 100),
     musculosPrincipais: muscleList(source.musculosPrincipais),
     musculosSecundarios: muscleList(source.musculosSecundarios),
     instrucoes: String(source.instrucoes || '').trim().slice(0, 2000)
@@ -138,6 +140,8 @@ export function mergeExerciseLibrary({ base = BASE_EXERCISE_LIBRARY, migrated = 
       padraoMovimento: (overwriteMetadata && item.padraoMovimento) || current.padraoMovimento || item.padraoMovimento,
       grupoMuscular: (overwriteMetadata && item.grupoMuscular) || current.grupoMuscular || item.grupoMuscular,
       equipamento: (overwriteMetadata && item.equipamento) || current.equipamento || item.equipamento,
+      classificacao: (overwriteMetadata && item.classificacao) || current.classificacao || item.classificacao,
+      metricaPrincipal: (overwriteMetadata && item.metricaPrincipal) || current.metricaPrincipal || item.metricaPrincipal,
       musculosPrincipais: (overwriteMetadata && item.musculosPrincipais.length ? item.musculosPrincipais : null) || current.musculosPrincipais || item.musculosPrincipais,
       musculosSecundarios: (overwriteMetadata && item.musculosSecundarios.length ? item.musculosSecundarios : null) || current.musculosSecundarios || item.musculosSecundarios,
       instrucoes: (overwriteMetadata && item.instrucoes) || current.instrucoes || item.instrucoes

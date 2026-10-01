@@ -2526,16 +2526,34 @@
     <div class="form-group" style="margin-bottom:12px;"><label>Nome do exercício</label><input id="inputExercicioPersonalizadoNome" type="text" maxlength="200" placeholder="Ex.: Remada unilateral na polia"></div>
     <div id="camposBibliotecaExercicio" style="display:none;">
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;">
-        <div class="form-group"><label>Grupo muscular</label><input id="inputExercicioGrupoMuscular" type="text" maxlength="100" placeholder="Ex.: Costas e bíceps"></div>
-        <div class="form-group"><label>Padrão de movimento</label><input id="inputExercicioPadraoMovimento" type="text" maxlength="100" placeholder="Ex.: Puxar horizontal"></div>
-        <div class="form-group"><label>Equipamento</label><input id="inputExercicioEquipamento" type="text" maxlength="100" placeholder="Ex.: Polia"></div>
+        <div class="form-group"><label>Grupo muscular</label><select id="inputExercicioGrupoMuscular"><option value="">Escolhe…</option></select></div>
+        <div class="form-group"><label>Padrão de movimento</label><select id="inputExercicioPadraoMovimento"><option value="">Escolhe…</option></select></div>
+        <div class="form-group"><label>Equipamento / máquina</label><select id="inputExercicioEquipamento"><option value="">Escolhe…</option></select></div>
+        <div class="form-group"><label>Classificação</label><select id="inputExercicioClassificacao"><option value="">Escolhe…</option></select></div>
+        <div class="form-group"><label>Métrica principal</label><select id="inputExercicioMetrica"><option value="">Escolhe…</option></select></div>
       </div>
-      <div class="form-group" style="margin-top:12px;"><label>Músculos principais</label><input id="inputExercicioMusculosPrincipais" type="text" maxlength="500" placeholder="Ex.: grande dorsal, romboides — separa por vírgulas"></div>
-      <div class="form-group" style="margin-top:12px;"><label>Músculos secundários</label><input id="inputExercicioMusculosSecundarios" type="text" maxlength="500" placeholder="Ex.: bíceps, deltoide posterior — opcional"></div>
-      <div class="form-group" style="margin-top:12px;"><label>Instruções técnicas</label><textarea id="inputExercicioInstrucoes" maxlength="2000" rows="4" placeholder="Posição inicial, execução, amplitude e cuidados técnicos."></textarea></div>
+      <div class="form-group" style="margin-top:12px;"><label>Músculos principais</label><input id="inputExercicioMusculosPrincipais" type="text" maxlength="500" readonly placeholder="Seleciona abaixo"><details style="margin-top:6px;" open><summary style="cursor:pointer;color:#5eead4;font-size:11px;">Escolher músculos</summary><div id="sugestoesMusculosPrincipais" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;"></div></details></div>
+      <div class="form-group" style="margin-top:12px;"><label>Músculos secundários</label><input id="inputExercicioMusculosSecundarios" type="text" maxlength="500" readonly placeholder="Opcional; seleciona abaixo"><details style="margin-top:6px;"><summary style="cursor:pointer;color:#5eead4;font-size:11px;">Escolher músculos</summary><div id="sugestoesMusculosSecundarios" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;"></div></details></div>
+      <div class="form-group" style="margin-top:12px;"><label>Descrição e instruções técnicas</label><textarea id="inputExercicioInstrucoes" maxlength="2000" rows="4" placeholder="Escreve a descrição, posição inicial, execução, amplitude e cuidados técnicos."></textarea></div>
     </div>
     <div id="erroExercicioPersonalizado" role="alert" style="display:none;margin-top:12px;padding:10px 12px;border:1px solid rgba(248,113,113,.35);border-radius:9px;background:rgba(127,29,29,.16);color:#fca5a5;font-size:12px;"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:20px;"><button type="button" class="btn btn-secondary" onclick="fecharModalExercicioPersonalizado()">Cancelar</button><button type="button" class="btn btn-primary" id="btnConfirmarExercicioPersonalizado" onclick="confirmarExercicioPersonalizadoUI()">Adicionar ao treino</button></div>
+  </div>
+</div>
+
+<div id="modalDefinicoesBibliotecaOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:10006;align-items:center;justify-content:center;padding:16px;overflow-y:auto;" aria-hidden="true">
+  <div role="dialog" aria-modal="true" aria-labelledby="modalDefinicoesBibliotecaTitulo" style="background:#0f1419;border:1px solid #2d3748;border-radius:14px;padding:22px;max-width:820px;width:100%;margin:24px 0;max-height:90vh;overflow-y:auto;box-shadow:0 24px 72px rgba(0,0,0,.45);">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:18px;"><div><h3 id="modalDefinicoesBibliotecaTitulo" style="font-size:18px;color:#f8fafc;margin:0 0 4px;">Opções da biblioteca de exercícios</h3><p style="font-size:12px;color:#91a3b8;margin:0;">Uma opção por linha. As opções já usadas em exercícios continuam sempre disponíveis.</p></div><button type="button" class="btn btn-secondary" style="width:auto;padding:4px 10px;" onclick="fecharDefinicoesBibliotecaExercicios()" aria-label="Fechar">×</button></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;">
+      <div class="form-group"><label>Grupos musculares</label><textarea id="configExercicioGrupos" rows="7"></textarea></div>
+      <div class="form-group"><label>Padrões de movimento</label><textarea id="configExercicioPadroes" rows="7"></textarea></div>
+      <div class="form-group"><label>Equipamentos e máquinas</label><textarea id="configExercicioEquipamentos" rows="7"></textarea></div>
+      <div class="form-group"><label>Músculos</label><textarea id="configExercicioMusculos" rows="7"></textarea></div>
+      <div class="form-group"><label>Classificações</label><textarea id="configExercicioClassificacoes" rows="7" placeholder="Principal&#10;Secundário&#10;Acessório"></textarea></div>
+      <div class="form-group"><label>Métricas disponíveis</label><textarea id="configExercicioMetricas" rows="7" placeholder="Carga e repetições&#10;Tempo&#10;Distância"></textarea></div>
+    </div>
+    <div id="erroDefinicoesBiblioteca" role="alert" style="display:none;margin-top:12px;padding:10px 12px;border:1px solid rgba(248,113,113,.35);border-radius:9px;background:rgba(127,29,29,.16);color:#fca5a5;font-size:12px;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:20px;"><button type="button" class="btn btn-secondary" onclick="fecharDefinicoesBibliotecaExercicios()">Cancelar</button><button type="button" class="btn btn-primary" id="btnGuardarDefinicoesBiblioteca" onclick="guardarDefinicoesBibliotecaExerciciosUI()">Guardar opções</button></div>
   </div>
 </div>
 
@@ -3197,6 +3215,11 @@
         <div class="settings-card-icon">↻</div>
         <div><h3>Atualização segura</h3><p>Atualiza os dados do CRM sem alterar sessões, pagamentos ou calendário.</p></div>
         <button type="button" class="btn btn-secondary" onclick="atualizarDadosCMRDasDefinicoes()">Atualizar dados</button>
+      </article>
+      <article class="settings-card settings-card-wide">
+        <div class="settings-card-icon">▦</div>
+        <div><h3>Biblioteca de exercícios</h3><p>Gere grupos musculares, máquinas, padrões, músculos, classificações e métricas usadas nos novos exercícios.</p></div>
+        <button type="button" class="btn btn-secondary" onclick="abrirDefinicoesBibliotecaExercicios()">Gerir opções</button>
       </article>
     </div>
   </section>
@@ -6193,6 +6216,82 @@ function renderDefinicoesCMR() {
   }
 }
 
+function preencherDefinicoesBibliotecaExercicios(configuracao) {
+  const config = configuracao || {};
+  const mapa = { configExercicioGrupos: 'gruposMusculares', configExercicioPadroes: 'padroesMovimento', configExercicioEquipamentos: 'equipamentos', configExercicioMusculos: 'musculos', configExercicioClassificacoes: 'classificacoes', configExercicioMetricas: 'metricas' };
+  Object.entries(mapa).forEach(([id, chave]) => {
+    const campo = document.getElementById(id);
+    if (campo) campo.value = (config[chave] || []).join('\n');
+  });
+}
+
+function abrirDefinicoesBibliotecaExercicios() {
+  const overlay = document.getElementById('modalDefinicoesBibliotecaOverlay');
+  const erro = document.getElementById('erroDefinicoesBiblioteca');
+  const botao = document.getElementById('btnGuardarDefinicoesBiblioteca');
+  erro.style.display = 'none';
+  erro.textContent = '';
+  botao.disabled = true;
+  botao.textContent = 'A carregar…';
+  overlay.style.display = 'flex';
+  overlay.setAttribute('aria-hidden', 'false');
+  google.script.run.withSuccessHandler(configuracao => {
+    BIBLIOTECA_EXERCICIOS_CONFIG = configuracao || {};
+    preencherDefinicoesBibliotecaExercicios(BIBLIOTECA_EXERCICIOS_CONFIG);
+    botao.disabled = false;
+    botao.textContent = 'Guardar opções';
+  }).withFailureHandler(err => {
+    botao.disabled = false;
+    botao.textContent = 'Tentar novamente';
+    erro.textContent = 'Não foi possível carregar as opções: ' + err.message;
+    erro.style.display = 'block';
+  }).getDefinicoesBibliotecaExercicios();
+}
+
+function fecharDefinicoesBibliotecaExercicios() {
+  const overlay = document.getElementById('modalDefinicoesBibliotecaOverlay');
+  if (overlay) { overlay.style.display = 'none'; overlay.setAttribute('aria-hidden', 'true'); }
+}
+
+function linhasDefinicaoBiblioteca(id) {
+  const campo = document.getElementById(id);
+  return String(campo ? campo.value : '').split('\n').map(item => item.trim()).filter(Boolean);
+}
+
+function guardarDefinicoesBibliotecaExerciciosUI() {
+  const configuracao = {
+    gruposMusculares: linhasDefinicaoBiblioteca('configExercicioGrupos'),
+    padroesMovimento: linhasDefinicaoBiblioteca('configExercicioPadroes'),
+    equipamentos: linhasDefinicaoBiblioteca('configExercicioEquipamentos'),
+    musculos: linhasDefinicaoBiblioteca('configExercicioMusculos'),
+    classificacoes: linhasDefinicaoBiblioteca('configExercicioClassificacoes'),
+    metricas: linhasDefinicaoBiblioteca('configExercicioMetricas')
+  };
+  if (Object.values(configuracao).some(lista => !lista.length)) {
+    const erro = document.getElementById('erroDefinicoesBiblioteca');
+    erro.textContent = 'Mantém pelo menos uma opção em cada categoria.';
+    erro.style.display = 'block';
+    return;
+  }
+  const botao = document.getElementById('btnGuardarDefinicoesBiblioteca');
+  botao.disabled = true;
+  botao.textContent = 'A guardar…';
+  google.script.run.withSuccessHandler(resultado => {
+    BIBLIOTECA_EXERCICIOS_CONFIG = resultado || configuracao;
+    BIBLIOTECA_EXERCICIOS_CACHE = null;
+    BIBLIOTECA_EXERCICIOS_OPCOES = BIBLIOTECA_EXERCICIOS_CONFIG;
+    fecharDefinicoesBibliotecaExercicios();
+    carregarBibliotecaExercicios();
+    showAlert('Opções da biblioteca atualizadas.', 'success');
+  }).withFailureHandler(err => {
+    botao.disabled = false;
+    botao.textContent = 'Guardar opções';
+    const erro = document.getElementById('erroDefinicoesBiblioteca');
+    erro.textContent = 'Não foi possível guardar as opções: ' + err.message;
+    erro.style.display = 'block';
+  }).guardarDefinicoesBibliotecaExercicios(configuracao);
+}
+
 function atualizarDadosCMRDasDefinicoes() {
   loadData();
 }
@@ -7854,6 +7953,8 @@ function voltarParaTreinosDoPlano() {
 
 let BIBLIOTECA_EXERCICIOS_CACHE = null;
 let BIBLIOTECA_EXERCICIOS_AVISO = '';
+let BIBLIOTECA_EXERCICIOS_CONFIG = {};
+let BIBLIOTECA_EXERCICIOS_OPCOES = {};
 let MODO_EXERCICIO_PERSONALIZADO = 'livre';
 
 function carregarBibliotecaExercicios(callback) {
@@ -7861,6 +7962,8 @@ function carregarBibliotecaExercicios(callback) {
   google.script.run.withSuccessHandler(resultado => {
     BIBLIOTECA_EXERCICIOS_CACHE = resultado.exercicios || [];
     BIBLIOTECA_EXERCICIOS_AVISO = resultado.aviso || '';
+    BIBLIOTECA_EXERCICIOS_CONFIG = resultado.configuracao || {};
+    BIBLIOTECA_EXERCICIOS_OPCOES = resultado.opcoes || BIBLIOTECA_EXERCICIOS_CONFIG;
     preencherFiltrosBibliotecaExercicios();
     if (callback) callback();
   }).withFailureHandler(err => {
@@ -7957,7 +8060,7 @@ function pesquisarExerciciosUI() {
   const equipamento = document.getElementById('filtroExercicioEquipamento').value;
   const movimento = document.getElementById('filtroExercicioMovimento').value;
   const resultados = BIBLIOTECA_EXERCICIOS_CACHE.filter(ex =>
-    (!termo || [ex.nome, ex.grupoMuscular, ex.equipamento, ex.padraoMovimento].concat(ex.musculosPrincipais || [], ex.musculosSecundarios || []).join(' ').toLowerCase().includes(termo)) &&
+    (!termo || [ex.nome, ex.grupoMuscular, ex.equipamento, ex.padraoMovimento, ex.classificacao, ex.metricaPrincipal].concat(ex.musculosPrincipais || [], ex.musculosSecundarios || []).join(' ').toLowerCase().includes(termo)) &&
     (!grupo || ex.grupoMuscular === grupo) &&
     (!equipamento || ex.equipamento === equipamento) &&
     (!movimento || ex.padraoMovimento === movimento)
@@ -7980,7 +8083,7 @@ function renderResultadosPesquisaExercicio(resultados, aviso) {
     return '<div class="cliente-item" style="cursor: pointer; padding: 8px 12px;" onclick="adicionarExercicioAoTreino(\'' + nomeEsc + '\')">' +
       '<div class="cliente-info">' +
       '<div class="cliente-nome" style="font-size: 13px;">' + escaparHtmlCRM(ex.nome) + '</div>' +
-      '<div class="cliente-meta"><span style="color: #64748b; font-size: 11px;">' + [ex.grupoMuscular, ex.equipamento, ex.padraoMovimento].filter(Boolean).map(escaparHtmlCRM).join(' · ') + '</span>' +
+      '<div class="cliente-meta"><span style="color: #64748b; font-size: 11px;">' + [ex.grupoMuscular, ex.equipamento, ex.padraoMovimento, ex.classificacao, ex.metricaPrincipal].filter(Boolean).map(escaparHtmlCRM).join(' · ') + '</span>' +
       ((ex.musculosPrincipais || []).length ? '<span style="color:#91a3b8;font-size:10px;display:block;margin-top:2px;">Músculos: ' + ex.musculosPrincipais.map(escaparHtmlCRM).join(', ') + '</span>' : '') + '</div>' +
       '</div><span style="color: #00a99d; font-size: 18px;">+</span></div>';
   }).join('');
@@ -8000,7 +8103,7 @@ function abrirModalExercicioPersonalizado(modo) {
   const campos = document.getElementById('camposBibliotecaExercicio');
   const erro = document.getElementById('erroExercicioPersonalizado');
   const botao = document.getElementById('btnConfirmarExercicioPersonalizado');
-  ['inputExercicioPersonalizadoNome', 'inputExercicioGrupoMuscular', 'inputExercicioPadraoMovimento', 'inputExercicioEquipamento', 'inputExercicioMusculosPrincipais', 'inputExercicioMusculosSecundarios', 'inputExercicioInstrucoes'].forEach(id => {
+  ['inputExercicioPersonalizadoNome', 'inputExercicioGrupoMuscular', 'inputExercicioPadraoMovimento', 'inputExercicioEquipamento', 'inputExercicioClassificacao', 'inputExercicioMetrica', 'inputExercicioMusculosPrincipais', 'inputExercicioMusculosSecundarios', 'inputExercicioInstrucoes'].forEach(id => {
     const campo = document.getElementById(id);
     if (campo) campo.value = '';
   });
@@ -8013,6 +8116,14 @@ function abrirModalExercicioPersonalizado(modo) {
   erro.textContent = '';
   botao.disabled = false;
   botao.textContent = biblioteca ? 'Guardar e adicionar ao treino' : 'Adicionar ao treino';
+  if (biblioteca) {
+    preencherOpcoesFormularioExercicio();
+    const classificacoes = BIBLIOTECA_EXERCICIOS_OPCOES.classificacoes || [];
+    const metricas = BIBLIOTECA_EXERCICIOS_OPCOES.metricas || [];
+    document.getElementById('inputExercicioClassificacao').value = classificacoes.includes('Principal') ? 'Principal' : (classificacoes[0] || '');
+    document.getElementById('inputExercicioMetrica').value = metricas.includes('Carga e repetições') ? 'Carga e repetições' : (metricas[0] || '');
+    renderSugestoesMusculosExercicio();
+  }
   overlay.style.display = 'flex';
   overlay.setAttribute('aria-hidden', 'false');
   setTimeout(() => document.getElementById('inputExercicioPersonalizadoNome').focus(), 0);
@@ -8023,6 +8134,37 @@ function fecharModalExercicioPersonalizado() {
   if (!overlay) return;
   overlay.style.display = 'none';
   overlay.setAttribute('aria-hidden', 'true');
+}
+
+function preencherOpcoesFormularioExercicio() {
+  const mapa = { inputExercicioGrupoMuscular: 'gruposMusculares', inputExercicioPadraoMovimento: 'padroesMovimento', inputExercicioEquipamento: 'equipamentos', inputExercicioClassificacao: 'classificacoes', inputExercicioMetrica: 'metricas' };
+  Object.entries(mapa).forEach(([id, chave]) => {
+    const campo = document.getElementById(id);
+    if (campo) campo.innerHTML = '<option value="">Escolhe…</option>' + (BIBLIOTECA_EXERCICIOS_OPCOES[chave] || []).map(valor => '<option value="' + escaparHtmlCRM(valor) + '">' + escaparHtmlCRM(valor) + '</option>').join('');
+  });
+}
+
+function alternarMusculoExercicio(idInput, musculo) {
+  const campo = document.getElementById(idInput);
+  if (!campo) return;
+  const atual = listaExercicioPersonalizado(idInput);
+  const chave = musculo.toLocaleLowerCase('pt-PT');
+  const existe = atual.some(item => item.toLocaleLowerCase('pt-PT') === chave);
+  campo.value = (existe ? atual.filter(item => item.toLocaleLowerCase('pt-PT') !== chave) : atual.concat(musculo)).join(', ');
+  renderSugestoesMusculosExercicio();
+}
+
+function renderSugestoesMusculosExercicio() {
+  const musculos = BIBLIOTECA_EXERCICIOS_OPCOES.musculos || [];
+  [['sugestoesMusculosPrincipais', 'inputExercicioMusculosPrincipais'], ['sugestoesMusculosSecundarios', 'inputExercicioMusculosSecundarios']].forEach(([containerId, inputId]) => {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const ativos = new Set(listaExercicioPersonalizado(inputId).map(item => item.toLocaleLowerCase('pt-PT')));
+    container.innerHTML = musculos.map(musculo => {
+      const ativo = ativos.has(musculo.toLocaleLowerCase('pt-PT'));
+      return '<button type="button" class="btn btn-secondary" style="width:auto;padding:4px 8px;font-size:10px;' + (ativo ? 'border-color:#2dd4bf;color:#5eead4;background:rgba(13,148,136,.18);' : '') + '" onclick="alternarMusculoExercicio(\'' + inputId + '\',\'' + idParaOnclickCRM(musculo) + '\')">' + escaparHtmlCRM(musculo) + '</button>';
+    }).join('');
+  });
 }
 
 function erroExercicioPersonalizado(mensagem) {
@@ -8062,6 +8204,8 @@ function confirmarExercicioPersonalizadoUI() {
     grupoMuscular: valorExercicioPersonalizado('inputExercicioGrupoMuscular'),
     padraoMovimento: valorExercicioPersonalizado('inputExercicioPadraoMovimento'),
     equipamento: valorExercicioPersonalizado('inputExercicioEquipamento'),
+    classificacao: valorExercicioPersonalizado('inputExercicioClassificacao'),
+    metricaPrincipal: valorExercicioPersonalizado('inputExercicioMetrica'),
     musculosPrincipais: listaExercicioPersonalizado('inputExercicioMusculosPrincipais'),
     musculosSecundarios: listaExercicioPersonalizado('inputExercicioMusculosSecundarios'),
     instrucoes: valorExercicioPersonalizado('inputExercicioInstrucoes')
@@ -9626,7 +9770,7 @@ window.addEventListener('load', function () {
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const acoes={criarPack:'create-pack',definirEstadoCliente:'set-status',pagarPack:'mark-paid',definirEstadoTodasSessoes:'set-all-sessions-state',confirmarSessao:'toggle-session',atualizarDataSessaoConfirmada:'toggle-session',registarNotaClienteCRM:'add-note',guardarAvaliacaoFisicaCRM:'add-assessment',editarDadosCliente:'edit-client',definirPrecoPersonalizado:'set-price',editarPack:'edit-pack',gerarSessoesEmFalta:'generate-sessions',guardarModoEspecialCliente:'set-special-mode',removerModoEspecialCliente:'remove-special-mode',suspenderProximoMes:'schedule-suspension',cancelarSuspensao:'clear-suspension',cancelarProximoMes:'schedule-cancellation',cancelarAgendamentoCancelamento:'clear-cancellation'};if(!acoes[nome])return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),entrada=args[0]||{},corpo={...entrada,action:acoes[nome]};const r=await fetch('/api/dev-crm-client-actions',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify(corpo)}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Alteração indisponível.');const detalhe=await fetch('/api/dev-crm-client-detail?id='+encodeURIComponent(corpo.idCliente),{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!detalhe.ok)throw Error(detalhe.erro||'Alteração guardada, mas não foi possível atualizar a ficha.');if(nome==='registarNotaClienteCRM')return ok&&ok(detalhe.notas);if(nome==='guardarAvaliacaoFisicaCRM')return ok&&ok({sucesso:true});const crm=await fetch('/api/dev-crm-dashboard',{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!crm.ok||!crm.crm)throw Error(crm.erro||'Alteração guardada, mas não foi possível atualizar o CRM.');ok&&ok(nome==='definirEstadoCliente'?crm.crm:{crm:crm.crm,detalhe:detalhe.detalhe})}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
-(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(!['getPerfilPT','guardarPerfilPT'].includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),opcoes={headers:{Authorization:'Bearer '+t}};if(nome==='guardarPerfilPT'){opcoes.method='POST';opcoes.headers['Content-Type']='application/json';opcoes.body=JSON.stringify(args[0]||{});}const r=await fetch('/api/dev-crm-settings',opcoes),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Definições indisponíveis.');ok&&ok(d.perfil)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
+(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(!['getPerfilPT','guardarPerfilPT','getDefinicoesBibliotecaExercicios','guardarDefinicoesBibliotecaExercicios'].includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),opcoes={headers:{Authorization:'Bearer '+t}};if(nome==='guardarPerfilPT'||nome==='guardarDefinicoesBibliotecaExercicios'){opcoes.method='POST';opcoes.headers['Content-Type']='application/json';opcoes.body=JSON.stringify(nome==='guardarDefinicoesBibliotecaExercicios'?{action:'save-exercise-library-settings',biblioteca:args[0]||{}}:args[0]||{});}const r=await fetch('/api/dev-crm-settings',opcoes),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Definições indisponíveis.');ok&&ok(nome.includes('DefinicoesBiblioteca')?d.biblioteca:d.perfil)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const acoes={criarPacoteEspecial:'create-package',alterarEstadoPacoteEspecial:'set-package-state',guardarProdutoEspecial:'save-product'};if(!acoes[nome])return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),entrada=args[0]||{},r=await fetch('/api/dev-crm-special-package-actions',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({...entrada,action:acoes[nome]})}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Pacotes especiais indisponíveis.');const atualizado=await fetch('/api/dev-crm-special-packages',{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!atualizado.ok)throw Error(atualizado.erro||'Alteração guardada, mas a lista não atualizou.');ok&&ok(atualizado)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
