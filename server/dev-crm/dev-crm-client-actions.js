@@ -6,6 +6,7 @@ import { consolidarPacksMensais } from './payment-status.js';
 
 const MEDIDAS = ['pesoKg', 'alturaCm', 'massaGordaPercent', 'cinturaCm', 'abdomenCm', 'bracoDireitoCm', 'bracoEsquerdoCm', 'pernaDireitaCm', 'pernaEsquerdaCm'];
 const FREQUENCIAS = new Set(['1x30', '2x30', '3x30', '1x45', '2x45', '3x45', '1x60', '2x60', '3x60']);
+const ESTADOS_PAGAMENTO = new Set(['Pago', 'Pendente']);
 
 function responder(res, estado, corpo) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -44,6 +45,31 @@ export default async function handler(req, res) {
     const cliente = db.collection('crmMigrationClients').doc(clienteId); const clienteSnap = await cliente.get();
     if (!clienteSnap.exists) return responder(res, 404, { ok: false, erro: 'CLIENTE_NAO_ENCONTRADO' });
     const agora = new Date(); const auditoria = { actorUid: identidade.uid, clientId: clienteId, createdAt: agora };
+
+    if (acao === 'create-pack') {
+      const frequencia = texto(dados.frequencia, 16); const estadoPagamento = texto(dados.estadoPagamento, 16);
+      if (!FREQUENCIAS.has(frequencia)) return responder(res, 400, { ok: false, erro: 'FREQUENCIA_INVALIDA' });
+      if (!ESTADOS_PAGAMENTO.has(estadoPagamento)) return responder(res, 400, { ok: false, erro: 'ESTADO_PAGAMENTO_INVALIDO' });
+      const mes = mesAtual();
+      const [packsSnap, historicoSnap] = await Promise.all([
+        db.collection('crmMigrationPacks').where('clientId', '==', clienteId).get(),
+        db.collection('crmMigrationPackHistory').where('clientId', '==', clienteId).get()
+      ]);
+      const packs = packsSnap.docs.map(documento => ({ id: documento.id, ...documento.data() }));
+      if (consolidarPacksMensais(packs).some(pack => pack.mesAno === mes)) return responder(res, 409, { ok: false, erro: 'PACK_JA_EXISTE' });
+      const anteriores = packs.concat(historicoSnap.docs.map(documento => ({ id: documento.id, ...documento.data() })))
+        .filter(pack => String(pack.mesAno || '') < mes)
+        .sort((a, b) => String(b.mesAno || '').localeCompare(String(a.mesAno || '')));
+      const precoAnterior = Number(anteriores[0]?.preco); const precoPersonalizado = Number(clienteSnap.data()?.precoPersonalizado);
+      const preco = Number.isFinite(precoAnterior) ? precoAnterior : (Number.isFinite(precoPersonalizado) ? precoPersonalizado : 0);
+      const total = Number(frequencia.split('x')[0]) * 4; const duracaoMinutos = Number(frequencia.split('x')[1]);
+      const packId = encodeURIComponent(clienteId) + '-' + mes + '-development'; const pack = db.collection('crmMigrationPacks').doc(packId); const lote = db.batch();
+      lote.create(pack, { clientId: clienteId, mesAno: mes, frequencia, sessoesTotal: total, sessoesConfirmadas: 0, duracaoMinutos, estadoPagamento, preco, origem: 'firebase-development', createdAt: agora, createdBy: identidade.uid, ...(estadoPagamento === 'Pago' ? { pagoEm: agora } : {}) });
+      for (let numero = 1; numero <= total; numero += 1) lote.create(db.collection('crmMigrationSessions').doc(packId + '-s' + numero), { clientId: clienteId, mesAno: mes, numSessao: numero, estado: 'Pendente', dataConfirmada: '', origem: 'firebase-development', createdAt: agora });
+      lote.create(db.collection('auditLogs').doc(), { ...auditoria, action: 'development.pack.created', packId, frequency: frequencia, total, paymentStatus: estadoPagamento, price: preco });
+      await lote.commit();
+      return responder(res, 201, { ok: true, idCliente: clienteId, packId });
+    }
 
     if (acao === 'set-status') {
       const estado = texto(dados.novoEstado, 16); if (!['Ativo', 'Pausado', 'Cancelado'].includes(estado)) return responder(res, 400, { ok: false, erro: 'ESTADO_INVALIDO' });
