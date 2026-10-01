@@ -15,6 +15,7 @@ function numero(valor, minimo, maximo, padrao = 0) { const resultado = Number(va
 function corresponde(documento, clienteId, plano, treino = null) { const item = documento.data(); return item.idCliente === clienteId && item.nomePlano === plano && (treino === null || item.nomeTreino === treino); }
 function cabecaId(clienteId, plano, treino) { return createHash('sha256').update([clienteId, plano, treino].join('\u0000')).digest('hex').slice(0, 48); }
 function nomeNormalizado(valor) { return normalizeTrainingPlanName(valor); }
+function listaMusculos(valor) { return (Array.isArray(valor) ? valor : String(valor || '').split(',')).map(item => texto(item, 80)).filter(Boolean).slice(0, 12); }
 function planoExiste(documentos, clienteId, plano) { const alvo = nomeNormalizado(plano); return documentos.some(documento => documento.data()?.idCliente === clienteId && nomeNormalizado(documento.data()?.nomePlano) === alvo); }
 function revisaoDocumentos(documentos) { return trainingPlanRevision(documentos.map(documento => documento.data())); }
 function revisaoAtualPlano(cabecaSnap, documentos) { const cabeca = texto(cabecaSnap?.data()?.revision, 64); const conteudo = revisaoDocumentos(documentos); return cabeca > conteudo ? cabeca : conteudo; }
@@ -28,6 +29,14 @@ export default async function handler(req, res) {
     const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove(); exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid));
     const entrada = req.body && typeof req.body === 'object' ? req.body : {}; const acao = texto(entrada.action, 40); const colecao = db.collection('crmMigrationTrainingPlans'); const snapshot = await colecao.get(); const agora = new Date();
     const auditar = (lote, nome, extra = {}) => lote.create(db.collection('auditLogs').doc(), { action: nome, actorUid: identidade.uid, createdAt: agora, ...extra });
+    if (acao === 'save-library-exercise') {
+      const nome = texto(entrada.nome, 200); const grupoMuscular = texto(entrada.grupoMuscular, 100); const padraoMovimento = texto(entrada.padraoMovimento, 100); const equipamento = texto(entrada.equipamento, 100); const musculosPrincipais = listaMusculos(entrada.musculosPrincipais); const musculosSecundarios = listaMusculos(entrada.musculosSecundarios); const instrucoes = texto(entrada.instrucoes, 2000);
+      if (!nome || !grupoMuscular || !padraoMovimento || !equipamento || !musculosPrincipais.length) return responder(res, 400, { ok: false, erro: 'EXERCICIO_BIBLIOTECA_INVALIDO' });
+      const nomeChave = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-PT').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 100);
+      const id = nomeChave || createHash('sha256').update(nome).digest('hex').slice(0, 40); const referencia = db.collection('crmExerciseLibrary').doc(id); const lote = db.batch(); const exercicio = { nome, nomeNormalizado: nomeNormalizado(nome), grupoMuscular, padraoMovimento, equipamento, musculosPrincipais, musculosSecundarios, instrucoes, atualizadoEm: agora, atualizadoPor: identidade.uid, atualizadoPorEmail: identidade.email, origem: 'firebase-development' };
+      lote.set(referencia, exercicio, { merge: true }); auditar(lote, 'development.exercise-library.saved', { exerciseId: id, exerciseName: nome }); await lote.commit();
+      return responder(res, 200, { ok: true, exercicio: { id, ...exercicio, atualizadoEm: agora.toISOString() } });
+    }
     if (acao === 'save-as-new-plan') {
       const clienteId = texto(entrada.idCliente, 128); const plano = texto(entrada.nomePlano); const treino = texto(entrada.nomeTreino); const sessaoId = texto(entrada.idSessao, 180); const inicio = dataISO(entrada.dataInicio); const validade = dataISO(entrada.dataValidade); const acesso = visibilidade(entrada.visibilidade); const guardarModelo = entrada.guardarComoModelo === true; const exercicios = Array.isArray(entrada.exercicios) ? entrada.exercicios.slice(0, 100) : [];
       if (!clienteId || !plano || !treino || !sessaoId || !inicio || !validade || validade < inicio || !exercicios.length) return responder(res, 400, { ok: false, erro: 'NOVO_PLANO_INVALIDO' });

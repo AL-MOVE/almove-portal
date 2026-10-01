@@ -2520,6 +2520,25 @@
   </div>
 </div>
 
+<div id="modalExercicioPersonalizadoOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:10004;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
+  <div role="dialog" aria-modal="true" aria-labelledby="modalExercicioPersonalizadoTitulo" style="background:#0f1419;border:1px solid #2d3748;border-radius:14px;padding:22px;max-width:680px;width:100%;margin:24px 0;max-height:90vh;overflow-y:auto;box-shadow:0 24px 72px rgba(0,0,0,.45);">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:18px;"><div><h3 id="modalExercicioPersonalizadoTitulo" style="font-size:18px;color:#f8fafc;margin:0 0 4px;">Novo exercício</h3><p id="modalExercicioPersonalizadoAjuda" style="font-size:12px;color:#91a3b8;margin:0;"></p></div><button type="button" class="btn btn-secondary" style="width:auto;padding:4px 10px;" onclick="fecharModalExercicioPersonalizado()" aria-label="Fechar">×</button></div>
+    <div class="form-group" style="margin-bottom:12px;"><label>Nome do exercício</label><input id="inputExercicioPersonalizadoNome" type="text" maxlength="200" placeholder="Ex.: Remada unilateral na polia"></div>
+    <div id="camposBibliotecaExercicio" style="display:none;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;">
+        <div class="form-group"><label>Grupo muscular</label><input id="inputExercicioGrupoMuscular" type="text" maxlength="100" placeholder="Ex.: Costas e bíceps"></div>
+        <div class="form-group"><label>Padrão de movimento</label><input id="inputExercicioPadraoMovimento" type="text" maxlength="100" placeholder="Ex.: Puxar horizontal"></div>
+        <div class="form-group"><label>Equipamento</label><input id="inputExercicioEquipamento" type="text" maxlength="100" placeholder="Ex.: Polia"></div>
+      </div>
+      <div class="form-group" style="margin-top:12px;"><label>Músculos principais</label><input id="inputExercicioMusculosPrincipais" type="text" maxlength="500" placeholder="Ex.: grande dorsal, romboides — separa por vírgulas"></div>
+      <div class="form-group" style="margin-top:12px;"><label>Músculos secundários</label><input id="inputExercicioMusculosSecundarios" type="text" maxlength="500" placeholder="Ex.: bíceps, deltoide posterior — opcional"></div>
+      <div class="form-group" style="margin-top:12px;"><label>Instruções técnicas</label><textarea id="inputExercicioInstrucoes" maxlength="2000" rows="4" placeholder="Posição inicial, execução, amplitude e cuidados técnicos."></textarea></div>
+    </div>
+    <div id="erroExercicioPersonalizado" role="alert" style="display:none;margin-top:12px;padding:10px 12px;border:1px solid rgba(248,113,113,.35);border-radius:9px;background:rgba(127,29,29,.16);color:#fca5a5;font-size:12px;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:20px;"><button type="button" class="btn btn-secondary" onclick="fecharModalExercicioPersonalizado()">Cancelar</button><button type="button" class="btn btn-primary" id="btnConfirmarExercicioPersonalizado" onclick="confirmarExercicioPersonalizadoUI()">Adicionar ao treino</button></div>
+  </div>
+</div>
+
 <!-- Criar um plano sem depender dos diálogos prompt(), que podem ser bloqueados em mobile/PWA. -->
 <div id="modalCriarPlanoOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:10002;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
   <div role="dialog" aria-modal="true" aria-labelledby="modalCriarPlanoTitulo" style="background:#0f1419;border:1px solid #2d3748;border-radius:14px;padding:22px;max-width:560px;width:100%;margin:24px 0;box-shadow:0 24px 72px rgba(0,0,0,.45);">
@@ -3216,7 +3235,10 @@
       <select id="filtroExercicioMovimento" aria-label="Filtrar por padrão de movimento" onchange="pesquisarExerciciosUI()" style="flex:1;min-width:150px;"><option value="">Todos os padrões</option></select>
     </div>
     <div id="resultadosPesquisaExercicio" style="max-width: 720px; margin-bottom: 8px; max-height: 320px; overflow-y: auto;"></div>
-    <button type="button" class="btn btn-secondary" style="margin-bottom: 20px;" onclick="adicionarExercicioLivre()">+ Exercício fora da biblioteca</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+      <button type="button" class="btn btn-secondary" style="width:auto;" onclick="abrirModalExercicioPersonalizado('livre')">+ Usar só neste treino</button>
+      <button type="button" class="btn btn-primary" style="width:auto;" onclick="abrirModalExercicioPersonalizado('biblioteca')">+ Adicionar à biblioteca</button>
+    </div>
 
     <h3 style="font-size: 13px; color: #64748b; text-transform: uppercase; margin-bottom: 10px;">Exercícios escolhidos (<span id="exerciciosEscolhidosContagem">0</span>)</h3>
     <div id="exerciciosEscolhidosLista" style="max-width: 600px; margin-bottom: 20px;"></div>
@@ -7771,6 +7793,7 @@ function voltarParaTreinosDoPlano() {
 
 let BIBLIOTECA_EXERCICIOS_CACHE = null;
 let BIBLIOTECA_EXERCICIOS_AVISO = '';
+let MODO_EXERCICIO_PERSONALIZADO = 'livre';
 
 function carregarBibliotecaExercicios(callback) {
   if (BIBLIOTECA_EXERCICIOS_CACHE) { if (callback) callback(); return; }
@@ -7873,7 +7896,7 @@ function pesquisarExerciciosUI() {
   const equipamento = document.getElementById('filtroExercicioEquipamento').value;
   const movimento = document.getElementById('filtroExercicioMovimento').value;
   const resultados = BIBLIOTECA_EXERCICIOS_CACHE.filter(ex =>
-    (!termo || [ex.nome, ex.grupoMuscular, ex.equipamento, ex.padraoMovimento].join(' ').toLowerCase().includes(termo)) &&
+    (!termo || [ex.nome, ex.grupoMuscular, ex.equipamento, ex.padraoMovimento].concat(ex.musculosPrincipais || [], ex.musculosSecundarios || []).join(' ').toLowerCase().includes(termo)) &&
     (!grupo || ex.grupoMuscular === grupo) &&
     (!equipamento || ex.equipamento === equipamento) &&
     (!movimento || ex.padraoMovimento === movimento)
@@ -7896,7 +7919,8 @@ function renderResultadosPesquisaExercicio(resultados, aviso) {
     return '<div class="cliente-item" style="cursor: pointer; padding: 8px 12px;" onclick="adicionarExercicioAoTreino(\'' + nomeEsc + '\')">' +
       '<div class="cliente-info">' +
       '<div class="cliente-nome" style="font-size: 13px;">' + escaparHtmlCRM(ex.nome) + '</div>' +
-      '<div class="cliente-meta"><span style="color: #64748b; font-size: 11px;">' + [ex.grupoMuscular, ex.equipamento, ex.padraoMovimento].filter(Boolean).map(escaparHtmlCRM).join(' · ') + '</span></div>' +
+      '<div class="cliente-meta"><span style="color: #64748b; font-size: 11px;">' + [ex.grupoMuscular, ex.equipamento, ex.padraoMovimento].filter(Boolean).map(escaparHtmlCRM).join(' · ') + '</span>' +
+      ((ex.musculosPrincipais || []).length ? '<span style="color:#91a3b8;font-size:10px;display:block;margin-top:2px;">Músculos: ' + ex.musculosPrincipais.map(escaparHtmlCRM).join(', ') + '</span>' : '') + '</div>' +
       '</div><span style="color: #00a99d; font-size: 18px;">+</span></div>';
   }).join('');
 }
@@ -7908,11 +7932,105 @@ function adicionarExercicioAoTreino(nomeExercicio) {
   document.getElementById('resultadosPesquisaExercicio').innerHTML = '';
 }
 
-function adicionarExercicioLivre() {
-  const nome = prompt('Nome do exercício:');
-  if (!nome || !nome.trim()) return;
-  TREINO_EDITOR_EXERCICIOS.push({ exercicio: nome.trim(), series: '3', repsMin: '8', repsMax: '12', rir: '', notas: '', tipoPrescricao: 'REPS', descansoSegundos: '60', aquecimento: false, grupoSuperserie: '' });
+function abrirModalExercicioPersonalizado(modo) {
+  MODO_EXERCICIO_PERSONALIZADO = modo === 'biblioteca' ? 'biblioteca' : 'livre';
+  const biblioteca = MODO_EXERCICIO_PERSONALIZADO === 'biblioteca';
+  const overlay = document.getElementById('modalExercicioPersonalizadoOverlay');
+  const campos = document.getElementById('camposBibliotecaExercicio');
+  const erro = document.getElementById('erroExercicioPersonalizado');
+  const botao = document.getElementById('btnConfirmarExercicioPersonalizado');
+  ['inputExercicioPersonalizadoNome', 'inputExercicioGrupoMuscular', 'inputExercicioPadraoMovimento', 'inputExercicioEquipamento', 'inputExercicioMusculosPrincipais', 'inputExercicioMusculosSecundarios', 'inputExercicioInstrucoes'].forEach(id => {
+    const campo = document.getElementById(id);
+    if (campo) campo.value = '';
+  });
+  document.getElementById('modalExercicioPersonalizadoTitulo').textContent = biblioteca ? 'Adicionar exercício à biblioteca' : 'Usar exercício só neste treino';
+  document.getElementById('modalExercicioPersonalizadoAjuda').textContent = biblioteca
+    ? 'Fica disponível para usar noutros planos e treinos.'
+    : 'É adicionado a este treino sem entrar na biblioteca geral.';
+  campos.style.display = biblioteca ? 'block' : 'none';
+  erro.style.display = 'none';
+  erro.textContent = '';
+  botao.disabled = false;
+  botao.textContent = biblioteca ? 'Guardar e adicionar ao treino' : 'Adicionar ao treino';
+  overlay.style.display = 'flex';
+  overlay.setAttribute('aria-hidden', 'false');
+  setTimeout(() => document.getElementById('inputExercicioPersonalizadoNome').focus(), 0);
+}
+
+function fecharModalExercicioPersonalizado() {
+  const overlay = document.getElementById('modalExercicioPersonalizadoOverlay');
+  if (!overlay) return;
+  overlay.style.display = 'none';
+  overlay.setAttribute('aria-hidden', 'true');
+}
+
+function erroExercicioPersonalizado(mensagem) {
+  const erro = document.getElementById('erroExercicioPersonalizado');
+  erro.textContent = mensagem;
+  erro.style.display = 'block';
+}
+
+function valorExercicioPersonalizado(id) {
+  const campo = document.getElementById(id);
+  return campo ? campo.value.trim() : '';
+}
+
+function listaExercicioPersonalizado(id) {
+  return valorExercicioPersonalizado(id).split(',').map(item => item.trim()).filter(Boolean);
+}
+
+function adicionarExercicioPersonalizadoAoTreino(nome) {
+  TREINO_EDITOR_EXERCICIOS.push({ exercicio: nome, series: '3', repsMin: '8', repsMax: '12', rir: '', notas: '', tipoPrescricao: 'REPS', descansoSegundos: '60', aquecimento: false, grupoSuperserie: '' });
   renderExerciciosEscolhidos();
+  const pesquisa = document.getElementById('inputPesquisaExercicio');
+  if (pesquisa) pesquisa.value = '';
+  const resultados = document.getElementById('resultadosPesquisaExercicio');
+  if (resultados) resultados.innerHTML = '';
+}
+
+function confirmarExercicioPersonalizadoUI() {
+  const nome = valorExercicioPersonalizado('inputExercicioPersonalizadoNome');
+  if (!nome) return erroExercicioPersonalizado('Indica o nome do exercício.');
+  if (MODO_EXERCICIO_PERSONALIZADO !== 'biblioteca') {
+    adicionarExercicioPersonalizadoAoTreino(nome);
+    fecharModalExercicioPersonalizado();
+    return;
+  }
+  const exercicio = {
+    nome,
+    grupoMuscular: valorExercicioPersonalizado('inputExercicioGrupoMuscular'),
+    padraoMovimento: valorExercicioPersonalizado('inputExercicioPadraoMovimento'),
+    equipamento: valorExercicioPersonalizado('inputExercicioEquipamento'),
+    musculosPrincipais: listaExercicioPersonalizado('inputExercicioMusculosPrincipais'),
+    musculosSecundarios: listaExercicioPersonalizado('inputExercicioMusculosSecundarios'),
+    instrucoes: valorExercicioPersonalizado('inputExercicioInstrucoes')
+  };
+  if (!exercicio.grupoMuscular || !exercicio.padraoMovimento || !exercicio.equipamento || !exercicio.musculosPrincipais.length) {
+    return erroExercicioPersonalizado('Preenche o grupo muscular, padrão de movimento, equipamento e pelo menos um músculo principal.');
+  }
+  const botao = document.getElementById('btnConfirmarExercicioPersonalizado');
+  botao.disabled = true;
+  botao.textContent = 'A guardar…';
+  google.script.run.withSuccessHandler(resultado => {
+    const guardado = resultado && resultado.exercicio ? resultado.exercicio : exercicio;
+    const chave = String(guardado.nome || '').trim().toLocaleLowerCase('pt-PT');
+    BIBLIOTECA_EXERCICIOS_CACHE = (BIBLIOTECA_EXERCICIOS_CACHE || []).filter(item => String(item.nome || '').trim().toLocaleLowerCase('pt-PT') !== chave);
+    BIBLIOTECA_EXERCICIOS_CACHE.push(guardado);
+    BIBLIOTECA_EXERCICIOS_CACHE.sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-PT'));
+    BIBLIOTECA_EXERCICIOS_AVISO = '';
+    preencherFiltrosBibliotecaExercicios();
+    adicionarExercicioPersonalizadoAoTreino(guardado.nome || nome);
+    fecharModalExercicioPersonalizado();
+    showAlert('Exercício guardado na biblioteca e adicionado ao treino.', 'success');
+  }).withFailureHandler(err => {
+    botao.disabled = false;
+    botao.textContent = 'Guardar e adicionar ao treino';
+    erroExercicioPersonalizado('Não foi possível guardar o exercício: ' + (err && err.message ? err.message : 'erro desconhecido'));
+  }).guardarExercicioBiblioteca(exercicio);
+}
+
+function adicionarExercicioLivre() {
+  abrirModalExercicioPersonalizado('livre');
 }
 
 function removerExercicioDoTreino(idx) {
@@ -9462,7 +9580,7 @@ window.addEventListener('load', function () {
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const suportadas=['getListaPlanosCliente','getTreinosDoPlano','getTreinoDetalhe','getBibliotecaExercicios','getPlanosParaReplicar'];if(!suportadas.includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();let url='/api/dev-crm-training-plans';if(nome==='getListaPlanosCliente')url+='?action=plans&clientId='+encodeURIComponent(args[0]);if(nome==='getTreinosDoPlano')url+='?action=workouts&clientId='+encodeURIComponent(args[0])+'&plan='+encodeURIComponent(args[1]);if(nome==='getTreinoDetalhe')url+='?action=detail&clientId='+encodeURIComponent(args[0])+'&plan='+encodeURIComponent(args[1])+'&workout='+encodeURIComponent(args[2]);if(nome==='getBibliotecaExercicios')url+='?action=library';if(nome==='getPlanosParaReplicar')url+='?action=replicable';const r=await fetch(url,{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Planos de treino indisponíveis.');ok&&ok(d)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
-(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const acoes={guardarTreinoCliente:'save-workout',apagarTreinoCliente:'delete-workout',apagarPlanoCompleto:'delete-plan',renovarValidadePlano:'renew-validity',definirVisibilidadePlano:'set-visibility',replicarPlanoParaCliente:'replicate-plan'};if(!acoes[nome])return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),entrada=args[0]||{},r=await fetch('/api/dev-crm-training-plan-actions',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({...entrada,action:acoes[nome]})}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Não foi possível alterar o plano.');if(nome==='guardarTreinoCliente')return ok&&ok({sucesso:true});const destinoId=nome==='replicarPlanoParaCliente'?entrada.destinoIdCliente:entrada.idCliente;const url='/api/dev-crm-training-plans?action=plans&clientId='+encodeURIComponent(destinoId);if(nome==='apagarTreinoCliente'){const treinoUrl='/api/dev-crm-training-plans?action=workouts&clientId='+encodeURIComponent(entrada.idCliente)+'&plan='+encodeURIComponent(entrada.nomePlano);const lista=await fetch(treinoUrl,{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());return ok&&ok(lista)}const lista=await fetch(url,{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!lista.ok)throw Error(lista.erro||'Alteração guardada, mas a lista não atualizou.');ok&&ok(lista)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
+(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const acoes={guardarTreinoCliente:'save-workout',apagarTreinoCliente:'delete-workout',apagarPlanoCompleto:'delete-plan',renovarValidadePlano:'renew-validity',definirVisibilidadePlano:'set-visibility',replicarPlanoParaCliente:'replicate-plan',guardarExercicioBiblioteca:'save-library-exercise'};if(!acoes[nome])return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),entrada=args[0]||{},r=await fetch('/api/dev-crm-training-plan-actions',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({...entrada,action:acoes[nome]})}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Não foi possível alterar o plano.');if(nome==='guardarTreinoCliente')return ok&&ok({sucesso:true});if(nome==='guardarExercicioBiblioteca')return ok&&ok(d);const destinoId=nome==='replicarPlanoParaCliente'?entrada.destinoIdCliente:entrada.idCliente;const url='/api/dev-crm-training-plans?action=plans&clientId='+encodeURIComponent(destinoId);if(nome==='apagarTreinoCliente'){const treinoUrl='/api/dev-crm-training-plans?action=workouts&clientId='+encodeURIComponent(entrada.idCliente)+'&plan='+encodeURIComponent(entrada.nomePlano);const lista=await fetch(treinoUrl,{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());return ok&&ok(lista)}const lista=await fetch(url,{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!lista.ok)throw Error(lista.erro||'Alteração guardada, mas a lista não atualizou.');ok&&ok(lista)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(!['getTreinosParaSessaoPT','getUltimaSessaoPTCliente','registarSessaoPT'].includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();if(nome==='getTreinosParaSessaoPT'){const r=await fetch('/api/dev-crm-training-plans?action=pt-session-plans&clientId='+encodeURIComponent(args[0]),{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok)throw Error(d.erro||'Modo PT indisponível.');return ok&&ok(d)}if(nome==='getUltimaSessaoPTCliente'){const r=await fetch('/api/dev-crm-pt-session?clientId='+encodeURIComponent(args[0]),{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok)throw Error(d.erro||'Sessão anterior indisponível.');return ok&&ok(d)}const r=await fetch('/api/dev-crm-pt-session',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify(args[0]||{})}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Não foi possível guardar a sessão PT.');ok&&ok(d)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
