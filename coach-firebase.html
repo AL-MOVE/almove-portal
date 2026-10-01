@@ -2539,7 +2539,16 @@
   </div>
 </div>
 
-<!-- Criar um plano sem depender dos diálogos prompt(), que podem ser bloqueados em mobile/PWA. -->
+<div id="modalEntradaPlanoOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:10005;align-items:center;justify-content:center;padding:16px;overflow-y:auto;" aria-hidden="true">
+  <div role="dialog" aria-modal="true" aria-labelledby="modalEntradaPlanoTitulo" style="background:#0f1419;border:1px solid #2d3748;border-radius:14px;padding:22px;max-width:520px;width:100%;box-shadow:0 24px 72px rgba(0,0,0,.45);">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:18px;"><div><h3 id="modalEntradaPlanoTitulo" style="font-size:18px;color:#f8fafc;margin:0 0 4px;"></h3><p id="modalEntradaPlanoAjuda" style="font-size:12px;color:#91a3b8;margin:0;"></p></div><button type="button" class="btn btn-secondary" style="width:auto;padding:4px 10px;" onclick="fecharModalEntradaPlano()" aria-label="Fechar">×</button></div>
+    <div class="form-group"><label id="modalEntradaPlanoLabel" for="inputEntradaPlano"></label><input id="inputEntradaPlano" type="text" maxlength="100"></div>
+    <div id="erroEntradaPlano" role="alert" style="display:none;margin-top:12px;padding:10px 12px;border:1px solid rgba(248,113,113,.35);border-radius:9px;background:rgba(127,29,29,.16);color:#fca5a5;font-size:12px;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:20px;"><button type="button" class="btn btn-secondary" onclick="fecharModalEntradaPlano()">Cancelar</button><button type="button" class="btn btn-primary" id="btnConfirmarEntradaPlano" onclick="confirmarEntradaPlanoUI()">Continuar</button></div>
+  </div>
+</div>
+
+<!-- Criar um plano sem depender dos diálogos nativos, que podem ser bloqueados em mobile/PWA. -->
 <div id="modalCriarPlanoOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:10002;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
   <div role="dialog" aria-modal="true" aria-labelledby="modalCriarPlanoTitulo" style="background:#0f1419;border:1px solid #2d3748;border-radius:14px;padding:22px;max-width:560px;width:100%;margin:24px 0;box-shadow:0 24px 72px rgba(0,0,0,.45);">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:18px;">
@@ -7670,10 +7679,65 @@ function renderListaPlanos(planos) {
   }).join('');
 }
 
+let MODO_ENTRADA_PLANO = '';
+let PLANO_ENTRADA_ALVO = '';
+
+function abrirModalEntradaPlano(modo, nomePlano) {
+  MODO_ENTRADA_PLANO = modo;
+  PLANO_ENTRADA_ALVO = nomePlano || '';
+  const renovar = modo === 'renovar-validade';
+  const overlay = document.getElementById('modalEntradaPlanoOverlay');
+  const input = document.getElementById('inputEntradaPlano');
+  document.getElementById('modalEntradaPlanoTitulo').textContent = renovar ? 'Renovar validade' : 'Adicionar novo treino';
+  document.getElementById('modalEntradaPlanoAjuda').textContent = renovar ? 'A nova validade é calculada a partir de hoje.' : 'O treino será adicionado ao plano atual.';
+  document.getElementById('modalEntradaPlanoLabel').textContent = renovar ? 'Validade em semanas' : 'Nome do treino';
+  input.type = renovar ? 'number' : 'text';
+  input.inputMode = renovar ? 'numeric' : 'text';
+  input.min = renovar ? '1' : '';
+  input.max = renovar ? '104' : '';
+  input.maxLength = renovar ? 3 : 100;
+  input.placeholder = renovar ? 'Ex.: 8' : 'Ex.: PULL';
+  input.value = renovar ? '8' : '';
+  const erro = document.getElementById('erroEntradaPlano');
+  erro.style.display = 'none';
+  erro.textContent = '';
+  document.getElementById('btnConfirmarEntradaPlano').textContent = renovar ? 'Renovar validade' : 'Escolher exercícios';
+  overlay.style.display = 'flex';
+  overlay.setAttribute('aria-hidden', 'false');
+  setTimeout(() => input.focus(), 0);
+}
+
+function fecharModalEntradaPlano() {
+  const overlay = document.getElementById('modalEntradaPlanoOverlay');
+  if (overlay) { overlay.style.display = 'none'; overlay.setAttribute('aria-hidden', 'true'); }
+}
+
+function erroEntradaPlano(mensagem) {
+  const erro = document.getElementById('erroEntradaPlano');
+  erro.textContent = mensagem;
+  erro.style.display = 'block';
+}
+
+function confirmarEntradaPlanoUI() {
+  const valor = document.getElementById('inputEntradaPlano').value.trim();
+  if (MODO_ENTRADA_PLANO === 'renovar-validade') {
+    const semanas = Number(valor);
+    if (!Number.isInteger(semanas) || semanas < 1 || semanas > 104) return erroEntradaPlano('Indica um número de semanas entre 1 e 104.');
+    fecharModalEntradaPlano();
+    executarRenovacaoValidade(PLANO_ENTRADA_ALVO, semanas);
+    return;
+  }
+  if (!valor) return erroEntradaPlano('Indica o nome do treino.');
+  fecharModalEntradaPlano();
+  PLANO_NOVA_VALIDADE = '';
+  abrirCriadorTreino(valor);
+}
+
 function renovarValidadeUI(nomePlano) {
-  const semanasStr = prompt('Renovar validade por quantas semanas a partir de hoje?', '8');
-  if (!semanasStr) return;
-  const semanas = Number(semanasStr) > 0 ? Number(semanasStr) : 8;
+  abrirModalEntradaPlano('renovar-validade', nomePlano);
+}
+
+function executarRenovacaoValidade(nomePlano, semanas) {
   const dataValidade = new Date(Date.now() + semanas * 7 * 24 * 60 * 60 * 1000);
   google.script.run.withSuccessHandler(resultado => {
     renderListaPlanos(resultado.planos || []);
@@ -7779,10 +7843,7 @@ function apagarTreinoUI(nomeTreino) {
 }
 
 function pedirNovoTreino() {
-  const nomeTreino = prompt('Nome do novo treino (ex: PULL):');
-  if (!nomeTreino || !nomeTreino.trim()) return;
-  PLANO_NOVA_VALIDADE = ''; // este treino junta-se a um plano já existente — herda a validade dele
-  abrirCriadorTreino(nomeTreino.trim());
+  abrirModalEntradaPlano('novo-treino');
 }
 
 function voltarParaTreinosDoPlano() {
