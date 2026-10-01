@@ -2520,6 +2520,24 @@
   </div>
 </div>
 
+<!-- Criar um plano sem depender dos diálogos prompt(), que podem ser bloqueados em mobile/PWA. -->
+<div id="modalCriarPlanoOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:10002;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
+  <div role="dialog" aria-modal="true" aria-labelledby="modalCriarPlanoTitulo" style="background:#0f1419;border:1px solid #2d3748;border-radius:14px;padding:22px;max-width:560px;width:100%;margin:24px 0;box-shadow:0 24px 72px rgba(0,0,0,.45);">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:18px;">
+      <div><h3 id="modalCriarPlanoTitulo" style="font-size:18px;color:#f8fafc;margin:0 0 4px;">Criar plano de raiz</h3><p style="font-size:12px;color:#91a3b8;margin:0;">Define o plano e o primeiro treino. Os exercícios são escolhidos no passo seguinte.</p></div>
+      <button type="button" class="btn btn-secondary" style="width:auto;padding:4px 10px;" onclick="fecharModalCriarPlano()" aria-label="Fechar">×</button>
+    </div>
+    <div class="form-group" style="margin-bottom:12px;"><label>Nome do plano</label><input id="inputNovoPlanoNome" type="text" maxlength="100" placeholder="Ex.: T1 — Tonificação"></div>
+    <div class="form-group" style="margin-bottom:12px;"><label>Nome do primeiro treino</label><input id="inputNovoPlanoTreino" type="text" maxlength="100" placeholder="Ex.: PUSH"></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+      <div class="form-group"><label>Visibilidade</label><select id="inputNovoPlanoVisibilidade"><option value="CLIENTE">Autónomo / Portal</option><option value="PT">PT privado</option></select></div>
+      <div class="form-group"><label>Validade em semanas</label><input id="inputNovoPlanoSemanas" type="number" min="1" max="104" value="8" inputmode="numeric"></div>
+    </div>
+    <div id="erroNovoPlano" role="alert" style="display:none;margin-top:12px;padding:10px 12px;border:1px solid rgba(248,113,113,.35);border-radius:9px;background:rgba(127,29,29,.16);color:#fca5a5;font-size:12px;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:20px;"><button type="button" class="btn btn-secondary" onclick="fecharModalCriarPlano()">Cancelar</button><button type="button" class="btn btn-primary" onclick="confirmarCriarPlanoUI()">Escolher exercícios</button></div>
+  </div>
+</div>
+
 <!-- Copiar um plano existente sem transportar qualquer histórico do aluno de origem. -->
 <div id="modalReplicarPlanoOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:10001;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
   <div style="background:#0f1419;border:1px solid #2d3748;border-radius:14px;padding:22px;max-width:780px;width:100%;margin:24px 0;max-height:90vh;overflow-y:auto;">
@@ -7661,18 +7679,36 @@ let PLANO_NOVA_VALIDADE = '';
 let PLANO_NOVA_VISIBILIDADE = 'CLIENTE';
 
 function criarNovoPlano() {
-  const nomePlano = prompt('Nome do plano (ex: T1-Tonificação):');
-  if (!nomePlano || !nomePlano.trim()) return;
-  const nomeTreino = prompt('Nome do primeiro treino dentro deste plano (ex: PUSH):');
-  if (!nomeTreino || !nomeTreino.trim()) return;
-  const semanasStr = prompt('Válido por quantas semanas? (deixa em branco para 8)');
-  const semanas = semanasStr && Number(semanasStr) > 0 ? Number(semanasStr) : 8;
-  const visibilidade = prompt('Visibilidade: PT para exclusivo presencial; CLIENTE para aparecer no Portal.', 'CLIENTE');
-  if (visibilidade === null) return;
-  PLANO_NOVA_VISIBILIDADE = String(visibilidade).trim().toUpperCase() === 'PT' ? 'PT' : 'CLIENTE';
+  if (!PLANO_CLIENTE_ATUAL.id) { showAlert('Abre primeiro a ficha de um cliente.', 'error'); return; }
+  document.getElementById('inputNovoPlanoNome').value = '';
+  document.getElementById('inputNovoPlanoTreino').value = '';
+  document.getElementById('inputNovoPlanoVisibilidade').value = 'CLIENTE';
+  document.getElementById('inputNovoPlanoSemanas').value = '8';
+  document.getElementById('erroNovoPlano').style.display = 'none';
+  document.getElementById('modalCriarPlanoOverlay').style.display = 'flex';
+  setTimeout(() => document.getElementById('inputNovoPlanoNome').focus(), 0);
+}
+
+function fecharModalCriarPlano() {
+  const overlay = document.getElementById('modalCriarPlanoOverlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function confirmarCriarPlanoUI() {
+  const nomePlano = document.getElementById('inputNovoPlanoNome').value.trim();
+  const nomeTreino = document.getElementById('inputNovoPlanoTreino').value.trim();
+  const semanas = Number(document.getElementById('inputNovoPlanoSemanas').value);
+  const erro = document.getElementById('erroNovoPlano');
+  let mensagem = '';
+  if (!nomePlano) mensagem = 'Indica o nome do plano.';
+  else if (!nomeTreino) mensagem = 'Indica o nome do primeiro treino.';
+  else if (!Number.isInteger(semanas) || semanas < 1 || semanas > 104) mensagem = 'A validade deve ficar entre 1 e 104 semanas.';
+  if (mensagem) { erro.textContent = mensagem; erro.style.display = 'block'; return; }
+  PLANO_NOVA_VISIBILIDADE = document.getElementById('inputNovoPlanoVisibilidade').value === 'PT' ? 'PT' : 'CLIENTE';
   PLANO_NOVA_VALIDADE = new Date(Date.now() + semanas * 7 * 24 * 60 * 60 * 1000).toISOString();
-  PLANO_ATUAL_NOME = nomePlano.trim();
-  abrirCriadorTreino(nomeTreino.trim());
+  PLANO_ATUAL_NOME = nomePlano;
+  fecharModalCriarPlano();
+  abrirCriadorTreino(nomeTreino);
 }
 
 // ==================== TREINOS DENTRO DE UM PLANO ====================
