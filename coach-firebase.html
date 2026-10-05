@@ -8042,8 +8042,12 @@ function abrirEditorTreino(nomeTreino) {
   }).getTreinoDetalhe(PLANO_CLIENTE_ATUAL.id, PLANO_ATUAL_NOME, nomeTreino);
 }
 
+function normalizarPesquisaExercicio(valor) {
+  return String(valor || '').trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('pt-PT');
+}
+
 function pesquisarExerciciosUI() {
-  const termo = document.getElementById('inputPesquisaExercicio').value.toLowerCase().trim();
+  const termo = normalizarPesquisaExercicio(document.getElementById('inputPesquisaExercicio').value);
 
   if (!BIBLIOTECA_EXERCICIOS_CACHE) {
     // Ainda a carregar — tenta outra vez assim que a biblioteca chegar.
@@ -8060,7 +8064,7 @@ function pesquisarExerciciosUI() {
   const equipamento = document.getElementById('filtroExercicioEquipamento').value;
   const movimento = document.getElementById('filtroExercicioMovimento').value;
   const resultados = BIBLIOTECA_EXERCICIOS_CACHE.filter(ex =>
-    (!termo || [ex.nome, ex.grupoMuscular, ex.equipamento, ex.padraoMovimento, ex.classificacao, ex.metricaPrincipal].concat(ex.musculosPrincipais || [], ex.musculosSecundarios || []).join(' ').toLowerCase().includes(termo)) &&
+    (!termo || normalizarPesquisaExercicio([ex.nome, ex.nomeAlternativo, ex.exercicioBase, ex.variacao, ex.grupoMuscular, ex.equipamento, ex.padraoMovimento, ex.classificacao, ex.metricaPrincipal, ex.nivel, ex.planoMovimento, ex.categoriaTreino, ex.cadeiaCinetica, ex.tipoContracao, ex.lateralidade].concat(ex.musculosPrincipais || [], ex.musculosSecundarios || []).join(' ')).includes(termo)) &&
     (!grupo || ex.grupoMuscular === grupo) &&
     (!equipamento || ex.equipamento === equipamento) &&
     (!movimento || ex.padraoMovimento === movimento)
@@ -8083,7 +8087,8 @@ function renderResultadosPesquisaExercicio(resultados, aviso) {
     return '<div class="cliente-item" style="cursor: pointer; padding: 8px 12px;" onclick="adicionarExercicioAoTreino(\'' + nomeEsc + '\')">' +
       '<div class="cliente-info">' +
       '<div class="cliente-nome" style="font-size: 13px;">' + escaparHtmlCRM(ex.nome) + '</div>' +
-      '<div class="cliente-meta"><span style="color: #64748b; font-size: 11px;">' + [ex.grupoMuscular, ex.equipamento, ex.padraoMovimento, ex.classificacao, ex.metricaPrincipal].filter(Boolean).map(escaparHtmlCRM).join(' · ') + '</span>' +
+      '<div class="cliente-meta">' + (ex.nomeAlternativo ? '<span style="color:#94a3b8;font-size:10px;display:block;margin-top:2px;">Também: ' + escaparHtmlCRM(ex.nomeAlternativo) + '</span>' : '') +
+      '<span style="color: #64748b; font-size: 11px;">' + [ex.grupoMuscular, ex.equipamento, ex.padraoMovimento, ex.nivel, ex.categoriaTreino, ex.classificacao, ex.metricaPrincipal].filter(Boolean).map(escaparHtmlCRM).join(' · ') + '</span>' +
       ((ex.musculosPrincipais || []).length ? '<span style="color:#91a3b8;font-size:10px;display:block;margin-top:2px;">Músculos: ' + ex.musculosPrincipais.map(escaparHtmlCRM).join(', ') + '</span>' : '') + '</div>' +
       '</div><span style="color: #00a99d; font-size: 18px;">+</span></div>';
   }).join('');

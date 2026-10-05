@@ -27,8 +27,31 @@
     if (target.length < 2) return [];
     return cleanItems(items).map(function (item) {
       const name = normalize(item.nome);
-      const haystack = normalize([item.nome, item.padraoMovimento, item.grupoMuscular, item.equipamento].join(' '));
-      const score = name === target ? 100 : name.startsWith(target) ? 50 : name.includes(target) ? 30 : haystack.includes(target) ? 10 : 0;
+      const alternativeName = normalize(item.nomeAlternativo);
+      const haystack = normalize([
+        item.nome,
+        item.nomeAlternativo,
+        item.exercicioBase,
+        item.variacao,
+        item.padraoMovimento,
+        item.grupoMuscular,
+        item.equipamento,
+        item.nivel,
+        item.planoMovimento,
+        item.categoriaTreino,
+        item.cadeiaCinetica,
+        item.tipoContracao,
+        item.lateralidade,
+        (item.musculosPrincipais || []).join(' '),
+        (item.musculosSecundarios || []).join(' ')
+      ].join(' '));
+      const score = name === target ? 100
+        : alternativeName === target ? 90
+          : name.startsWith(target) ? 50
+            : alternativeName.startsWith(target) ? 40
+              : name.includes(target) ? 30
+                : alternativeName.includes(target) ? 20
+                  : haystack.includes(target) ? 10 : 0;
       return { item: item, score: score };
     }).filter(function (entry) { return entry.score; })
       .sort(function (a, b) { return b.score - a.score || a.item.nome.localeCompare(b.item.nome, 'pt-PT'); })
