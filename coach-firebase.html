@@ -2535,6 +2535,11 @@
       <div class="form-group" style="margin-top:12px;"><label>Músculos principais</label><input id="inputExercicioMusculosPrincipais" type="text" maxlength="500" readonly placeholder="Seleciona abaixo"><details style="margin-top:6px;" open><summary style="cursor:pointer;color:#5eead4;font-size:11px;">Escolher músculos</summary><div id="sugestoesMusculosPrincipais" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;"></div></details></div>
       <div class="form-group" style="margin-top:12px;"><label>Músculos secundários</label><input id="inputExercicioMusculosSecundarios" type="text" maxlength="500" readonly placeholder="Opcional; seleciona abaixo"><details style="margin-top:6px;"><summary style="cursor:pointer;color:#5eead4;font-size:11px;">Escolher músculos</summary><div id="sugestoesMusculosSecundarios" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;"></div></details></div>
       <div class="form-group" style="margin-top:12px;"><label>Descrição e instruções técnicas</label><textarea id="inputExercicioInstrucoes" maxlength="2000" rows="4" placeholder="Escreve a descrição, posição inicial, execução, amplitude e cuidados técnicos."></textarea></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:12px;">
+        <div class="form-group"><label>Imagem (URL, opcional)</label><input id="inputExercicioImagem" type="url" maxlength="1000" inputmode="url" placeholder="https://…/exercicio.jpg"></div>
+        <div class="form-group"><label>Vídeo (URL, opcional)</label><input id="inputExercicioVideo" type="url" maxlength="1000" inputmode="url" placeholder="https://…/video"></div>
+      </div>
+      <p style="font-size:10px;color:#64748b;margin:7px 0 0;line-height:1.45;">Usa apenas imagens ou vídeos teus, ou conteúdos com autorização de utilização. Estes detalhes ficam disponíveis no Portal do cliente.</p>
     </div>
     <div id="erroExercicioPersonalizado" role="alert" style="display:none;margin-top:12px;padding:10px 12px;border:1px solid rgba(248,113,113,.35);border-radius:9px;background:rgba(127,29,29,.16);color:#fca5a5;font-size:12px;"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:20px;"><button type="button" class="btn btn-secondary" onclick="fecharModalExercicioPersonalizado()">Cancelar</button><button type="button" class="btn btn-primary" id="btnConfirmarExercicioPersonalizado" onclick="confirmarExercicioPersonalizadoUI()">Adicionar ao treino</button></div>
@@ -8095,7 +8100,8 @@ function renderResultadosPesquisaExercicio(resultados, aviso) {
 }
 
 function adicionarExercicioAoTreino(nomeExercicio) {
-  TREINO_EDITOR_EXERCICIOS.push({ exercicio: nomeExercicio, series: '3', repsMin: '8', repsMax: '12', rir: '', notas: '', tipoPrescricao: 'REPS', descansoSegundos: '60', aquecimento: false, grupoSuperserie: '' });
+  const metadados = (BIBLIOTECA_EXERCICIOS_CACHE || []).find(item => String(item.nome || '').trim().toLocaleLowerCase('pt-PT') === String(nomeExercicio || '').trim().toLocaleLowerCase('pt-PT'));
+  TREINO_EDITOR_EXERCICIOS.push(novoExercicioEditor(nomeExercicio, metadados));
   renderExerciciosEscolhidos();
   document.getElementById('inputPesquisaExercicio').value = '';
   document.getElementById('resultadosPesquisaExercicio').innerHTML = '';
@@ -8108,7 +8114,7 @@ function abrirModalExercicioPersonalizado(modo) {
   const campos = document.getElementById('camposBibliotecaExercicio');
   const erro = document.getElementById('erroExercicioPersonalizado');
   const botao = document.getElementById('btnConfirmarExercicioPersonalizado');
-  ['inputExercicioPersonalizadoNome', 'inputExercicioGrupoMuscular', 'inputExercicioPadraoMovimento', 'inputExercicioEquipamento', 'inputExercicioClassificacao', 'inputExercicioMetrica', 'inputExercicioMusculosPrincipais', 'inputExercicioMusculosSecundarios', 'inputExercicioInstrucoes'].forEach(id => {
+  ['inputExercicioPersonalizadoNome', 'inputExercicioGrupoMuscular', 'inputExercicioPadraoMovimento', 'inputExercicioEquipamento', 'inputExercicioClassificacao', 'inputExercicioMetrica', 'inputExercicioMusculosPrincipais', 'inputExercicioMusculosSecundarios', 'inputExercicioInstrucoes', 'inputExercicioImagem', 'inputExercicioVideo'].forEach(id => {
     const campo = document.getElementById(id);
     if (campo) campo.value = '';
   });
@@ -8187,8 +8193,13 @@ function listaExercicioPersonalizado(id) {
   return valorExercicioPersonalizado(id).split(',').map(item => item.trim()).filter(Boolean);
 }
 
-function adicionarExercicioPersonalizadoAoTreino(nome) {
-  TREINO_EDITOR_EXERCICIOS.push({ exercicio: nome, series: '3', repsMin: '8', repsMax: '12', rir: '', notas: '', tipoPrescricao: 'REPS', descansoSegundos: '60', aquecimento: false, grupoSuperserie: '' });
+function novoExercicioEditor(nome, metadados) {
+  const info = metadados || {};
+  return { exercicio: nome, series: '3', repsMin: '8', repsMax: '12', rir: '', notas: '', tipoPrescricao: 'REPS', descansoSegundos: '60', aquecimento: false, grupoSuperserie: '', instrucoes: info.instrucoes || '', urlImagem: info.urlImagem || '', urlVideo: info.urlVideo || '' };
+}
+
+function adicionarExercicioPersonalizadoAoTreino(nome, metadados) {
+  TREINO_EDITOR_EXERCICIOS.push(novoExercicioEditor(nome, metadados));
   renderExerciciosEscolhidos();
   const pesquisa = document.getElementById('inputPesquisaExercicio');
   if (pesquisa) pesquisa.value = '';
@@ -8213,7 +8224,9 @@ function confirmarExercicioPersonalizadoUI() {
     metricaPrincipal: valorExercicioPersonalizado('inputExercicioMetrica'),
     musculosPrincipais: listaExercicioPersonalizado('inputExercicioMusculosPrincipais'),
     musculosSecundarios: listaExercicioPersonalizado('inputExercicioMusculosSecundarios'),
-    instrucoes: valorExercicioPersonalizado('inputExercicioInstrucoes')
+    instrucoes: valorExercicioPersonalizado('inputExercicioInstrucoes'),
+    urlImagem: valorExercicioPersonalizado('inputExercicioImagem'),
+    urlVideo: valorExercicioPersonalizado('inputExercicioVideo')
   };
   if (!exercicio.grupoMuscular || !exercicio.padraoMovimento || !exercicio.equipamento || !exercicio.musculosPrincipais.length) {
     return erroExercicioPersonalizado('Preenche o grupo muscular, padrão de movimento, equipamento e pelo menos um músculo principal.');
@@ -8229,7 +8242,7 @@ function confirmarExercicioPersonalizadoUI() {
     BIBLIOTECA_EXERCICIOS_CACHE.sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-PT'));
     BIBLIOTECA_EXERCICIOS_AVISO = '';
     preencherFiltrosBibliotecaExercicios();
-    adicionarExercicioPersonalizadoAoTreino(guardado.nome || nome);
+    adicionarExercicioPersonalizadoAoTreino(guardado.nome || nome, guardado);
     fecharModalExercicioPersonalizado();
     showAlert('Exercício guardado na biblioteca e adicionado ao treino.', 'success');
   }).withFailureHandler(err => {

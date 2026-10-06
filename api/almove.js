@@ -1,4 +1,6 @@
 import { obterAssertacaoFirebasePortal } from './_firebase.js';
+import { obterFirestoreAlmove } from './_firestore.js';
+import { enrichPortalPlans } from '../server/portal-exercise-enrichment.js';
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyiOl7KkXMYSFv9lKKVb2sMspvwER2P5IMlpNQcr9csLyEDnzJqvVqisE-XVuAHgeUV/exec';
 
@@ -36,6 +38,20 @@ function estadoErroAplicacao(erro) {
   if (/duplicado|já existe|limiteAtingido/i.test(mensagem)) return 409;
   if (/inválid|Indica |Não podes|exige POST|Função desconhecida|demasiad/i.test(mensagem)) return 400;
   return 502;
+}
+
+async function enriquecerRespostaPortal(fn, json) {
+  if (fn !== 'getPlanoAtivoPortal' || !json?.ok) return json;
+  let personalizados = [];
+  try {
+    const { db } = obterFirestoreAlmove();
+    const snapshot = await db.collection('crmExerciseLibrary').get();
+    personalizados = snapshot.docs.map(documento => ({ id: documento.id, ...documento.data() }));
+  } catch {
+    // O catálogo base continua disponível mesmo se a biblioteca personalizada
+    // estiver temporariamente indisponível.
+  }
+  return enrichPortalPlans(json, personalizados);
 }
 
 export default async function handler(req, res) {
@@ -98,7 +114,7 @@ export default async function handler(req, res) {
     catch { return responder(res, 502, { ok: false, erro: 'Resposta inválida do serviço de dados' }, requestId); }
     if (!resposta.ok) return responder(res, 502, json, requestId);
     if (json && json.ok === false) return responder(res, estadoErroAplicacao(json.erro), json, requestId);
-    return responder(res, 200, json, requestId);
+    return responder(res, 200, await enriquecerRespostaPortal(fn, json), requestId);
   } catch (erro) {
     const mensagem = erro && erro.name === 'AbortError' ? 'O serviço de dados excedeu o tempo limite' : 'Não foi possível contactar o serviço de dados';
     return responder(res, 504, { ok: false, erro: mensagem }, requestId);
