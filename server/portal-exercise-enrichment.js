@@ -22,6 +22,7 @@ function exerciseIndex(custom = []) {
 
   exercises.forEach(exercise => {
     exact.set(key(exercise.nome), exercise);
+    addAlias(exercise.substituiNome, exercise);
     addAlias(exercise.nomeAlternativo, exercise);
     addAlias(exercise.exercicioBase, exercise);
   });
@@ -35,7 +36,9 @@ function enrichExercise(exercise, indexes) {
   if (!catalog) return exercise;
   return {
     ...exercise,
-    imagemUrl: exercise.imagemUrl || exercise.imageUrl || catalog.urlImagem || '',
+    imagemUrl: exercise.imagemUrl || exercise.imageUrl || exercise.imagemInicioUrl || catalog.urlImagemInicial || catalog.urlImagem || '',
+    imagemInicioUrl: exercise.imagemInicioUrl || exercise.urlImagemInicial || exercise.imagemUrl || exercise.imageUrl || catalog.urlImagemInicial || catalog.urlImagem || '',
+    imagemFinalUrl: exercise.imagemFinalUrl || exercise.urlImagemFinal || catalog.urlImagemFinal || '',
     linkVideo: exercise.linkVideo || exercise.videoUrl || catalog.urlVideo || '',
     instrucoes: exercise.instrucoes || catalog.instrucoes || '',
     contraindicacoes: exercise.contraindicacoes || catalog.contraindicacoes || '',

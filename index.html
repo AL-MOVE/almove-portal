@@ -935,7 +935,11 @@
     .exec-info-titulo > span svg { width:22px; height:22px; }
     .exec-info-titulo small { display:block; margin-bottom:3px; color:var(--accent); font-size:9px; font-weight:900; letter-spacing:.1em; }
     .exec-info-titulo h2 { margin:0; color:#fff; font-size:21px; line-height:1.12; letter-spacing:-.035em; }
-    .exec-info-imagem { display:block; width:100%; max-height:280px; margin:0 0 12px; object-fit:cover; border:1px solid var(--border); border-radius:17px; background:#091426; }
+    .exec-info-imagens { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:0 0 12px; }
+    .exec-info-imagens.uma-imagem { grid-template-columns:1fr; }
+    .exec-info-figura { overflow:hidden; margin:0; border:1px solid var(--border); border-radius:17px; background:#091426; }
+    .exec-info-imagem { display:block; width:100%; aspect-ratio:4 / 3; object-fit:cover; background:#091426; }
+    .exec-info-figura figcaption { padding:8px 10px; color:var(--text-soft); font-size:10px; font-weight:850; letter-spacing:.04em; text-transform:uppercase; }
     .exec-info-link { display:grid; grid-template-columns:35px 1fr 16px; align-items:center; gap:10px; min-height:62px; margin-bottom:10px; padding:12px; border:1px solid rgba(56,189,248,.30); border-radius:15px; background:rgba(11,92,194,.10); color:#9bd8ff; text-decoration:none; transition:transform .18s ease,border-color .18s ease; }
     .exec-info-link:active { transform:scale(.985); }
     .exec-info-link > svg:first-child { width:35px; height:35px; padding:8px; border-radius:11px; background:rgba(14,165,233,.15); }
@@ -957,7 +961,7 @@
     .exec-info-voltar { width:100%; min-height:46px; display:inline-flex; align-items:center; justify-content:center; gap:7px; margin-top:15px; border:1px solid var(--border); border-radius:13px; background:rgba(255,255,255,.055); color:var(--text); font:inherit; font-size:12px; font-weight:850; cursor:pointer; }
     .exec-info-voltar svg { width:16px; height:16px; }
     .exec-info-voltar:active { transform:scale(.98); }
-    @media (max-width:390px) { .exec-header { gap:8px; } .exec-acoes-exercicio { gap:4px; } .exec-historico-btn, .btn-detalhes-exercicio { padding:5px 7px; font-size:9px; } }
+    @media (max-width:390px) { .exec-header { gap:8px; } .exec-acoes-exercicio { gap:4px; } .exec-historico-btn, .btn-detalhes-exercicio { padding:5px 7px; font-size:9px; } .exec-info-imagens { grid-template-columns:1fr; } }
   </style>
 
   <style id="correcoes-treino-escalas">
@@ -4761,7 +4765,7 @@
   }
 
   function resolverImagemExercicio(exercicio) {
-    const imagemDoPlano = obterLinkSeguroExercicio(obterCampoExercicio(exercicio, ["imagemUrl", "imageUrl", "imagem", "image", "fotoUrl", "foto"]));
+    const imagemDoPlano = obterLinkSeguroExercicio(obterCampoExercicio(exercicio, ["imagemInicioUrl", "urlImagemInicial", "imagemUrl", "imageUrl", "imagem", "image", "fotoUrl", "foto"]));
     if (imagemDoPlano) return imagemDoPlano;
     const catalogo = window.ALMOVE_EXERCISE_MEDIA;
     const chave = normalizarChaveImagemExercicio(exercicio && exercicio.exercicio);
@@ -4775,12 +4779,13 @@
     if (!imagem) {
       return '<span class="' + classe + ' imagem-indisponivel" aria-hidden="true"><span class="' + classe + '-fallback">' + fallback + '</span></span>';
     }
-    return '<span class="' + classe + '"><img loading="lazy" decoding="async" src="' + escaparTextoExercicio(imagem) + '" alt="' + escaparTextoExercicio(textoAlternativo) + '" onerror="this.parentElement.classList.add(\'imagem-indisponivel\')"><span class="' + classe + '-fallback" aria-hidden="true">' + fallback + '</span></span>';
+    return '<span class="' + classe + '"><img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="' + escaparTextoExercicio(imagem) + '" alt="' + escaparTextoExercicio(textoAlternativo) + '" onerror="this.parentElement.classList.add(\'imagem-indisponivel\')"><span class="' + classe + '-fallback" aria-hidden="true">' + fallback + '</span></span>';
   }
 
   function obterDetalhesExercicio(exercicio) {
     return {
-      imagem: resolverImagemExercicio(exercicio),
+      imagemInicial: resolverImagemExercicio(exercicio),
+      imagemFinal: obterLinkSeguroExercicio(obterCampoExercicio(exercicio, ["imagemFinalUrl", "urlImagemFinal"])),
       link: obterLinkSeguroExercicio(obterCampoExercicio(exercicio, ["linkVideo", "videoUrl", "urlVideo", "link", "url", "video"])),
       notas: obterCampoExercicio(exercicio, ["notasTreinador", "notasExercicio", "instrucoes", "execucao", "descricao"]),
       dicas: obterCampoExercicio(exercicio, ["dicas", "dica", "cuidados", "errosEvitar"])
@@ -4789,10 +4794,13 @@
 
   function construirPaginaDetalhesExercicio(exercicio, indice, total) {
     const detalhes = obterDetalhesExercicio(exercicio);
-    const temConteudo = detalhes.imagem || detalhes.link || detalhes.notas || detalhes.dicas;
+    const temConteudo = detalhes.imagemInicial || detalhes.imagemFinal || detalhes.link || detalhes.notas || detalhes.dicas;
     let conteudo = '';
-    if (detalhes.imagem) {
-      conteudo += '<img class="exec-info-imagem" loading="lazy" decoding="async" src="' + escaparTextoExercicio(detalhes.imagem) + '" alt="Demonstração de ' + escaparTextoExercicio(exercicio.exercicio) + '">';
+    if (detalhes.imagemInicial || detalhes.imagemFinal) {
+      const imagens = [];
+      if (detalhes.imagemInicial) imagens.push('<figure class="exec-info-figura"><img class="exec-info-imagem" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="' + escaparTextoExercicio(detalhes.imagemInicial) + '" alt="Posição inicial de ' + escaparTextoExercicio(exercicio.exercicio) + '"><figcaption>Início</figcaption></figure>');
+      if (detalhes.imagemFinal) imagens.push('<figure class="exec-info-figura"><img class="exec-info-imagem" loading="lazy" decoding="async" referrerpolicy="no-referrer" src="' + escaparTextoExercicio(detalhes.imagemFinal) + '" alt="Posição final de ' + escaparTextoExercicio(exercicio.exercicio) + '"><figcaption>Final</figcaption></figure>');
+      conteudo += '<div class="exec-info-imagens' + (imagens.length === 1 ? ' uma-imagem' : '') + '">' + imagens.join('') + '</div>';
     }
     if (detalhes.link) {
       conteudo += '<a class="exec-info-link" href="' + escaparTextoExercicio(detalhes.link) + '" target="_blank" rel="noopener noreferrer">' + iconeAlMove("link") + '<span><strong>Abrir vídeo ou ligação</strong><small>Ver técnica do exercício</small></span>' + iconeNativoSvg("setaDireita") + '</a>';

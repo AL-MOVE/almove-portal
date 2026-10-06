@@ -22,6 +22,7 @@ function clean(item) {
   return {
     id: string('id'),
     nome: String(source.nome || source.exercicio || '').trim().slice(0, 200),
+    substituiNome: string('substituiNome', 200),
     nomeAlternativo: string('nomeAlternativo', 200),
     exercicioBase: string('exercicioBase', 200),
     variacao: string('variacao', 300),
@@ -39,6 +40,8 @@ function clean(item) {
     planoMovimento: string('planoMovimento'),
     categoriaTreino: string('categoriaTreino'),
     urlImagem: string('urlImagem', 1000),
+    urlImagemInicial: string('urlImagemInicial', 1000) || string('urlImagem', 1000),
+    urlImagemFinal: string('urlImagemFinal', 1000),
     urlVideo: string('urlVideo', 1000),
     instrucoes: string('instrucoes', 2000),
     contraindicacoes: string('contraindicacoes', 2000),
@@ -50,6 +53,7 @@ function clean(item) {
 export function mergeExerciseLibrary({ base = BASE_EXERCISE_LIBRARY, migrated = [], custom = [] } = {}) {
   const merged = new Map();
   const add = (raw, overwriteMetadata) => {
+    const source = typeof raw === 'string' ? { nome: raw } : (raw || {});
     const item = clean(raw);
     const normalized = key(item.nome);
     if (!normalized) return;
@@ -58,11 +62,13 @@ export function mergeExerciseLibrary({ base = BASE_EXERCISE_LIBRARY, migrated = 
       merged.set(normalized, { ...item, id: item.id || idFromName(item.nome) });
       return;
     }
-    const value = field => (overwriteMetadata && item[field]) || current[field] || item[field];
-    const list = field => (overwriteMetadata && item[field].length ? item[field] : null) || current[field] || item[field];
+    const provided = field => Object.prototype.hasOwnProperty.call(source, field);
+    const value = field => (overwriteMetadata && provided(field)) ? item[field] : (current[field] || item[field]);
+    const list = field => (overwriteMetadata && provided(field)) ? item[field] : (current[field] || item[field]);
     merged.set(normalized, {
       id: (overwriteMetadata && item.id) || current.id || item.id || idFromName(item.nome),
       nome: (overwriteMetadata && item.nome) || current.nome,
+      substituiNome: value('substituiNome'),
       nomeAlternativo: value('nomeAlternativo'),
       exercicioBase: value('exercicioBase'),
       variacao: value('variacao'),
@@ -80,6 +86,8 @@ export function mergeExerciseLibrary({ base = BASE_EXERCISE_LIBRARY, migrated = 
       planoMovimento: value('planoMovimento'),
       categoriaTreino: value('categoriaTreino'),
       urlImagem: value('urlImagem'),
+      urlImagemInicial: value('urlImagemInicial'),
+      urlImagemFinal: value('urlImagemFinal'),
       urlVideo: value('urlVideo'),
       instrucoes: value('instrucoes'),
       contraindicacoes: value('contraindicacoes'),
@@ -90,6 +98,12 @@ export function mergeExerciseLibrary({ base = BASE_EXERCISE_LIBRARY, migrated = 
 
   base.forEach(item => add(item, false));
   migrated.forEach(item => add(item, false));
-  custom.forEach(item => add(item, true));
+  custom.forEach(raw => {
+    const item = clean(raw);
+    const previous = key(item.substituiNome);
+    const current = key(item.nome);
+    if (previous && previous !== current) merged.delete(previous);
+    add(raw, true);
+  });
   return [...merged.values()].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-PT'));
 }

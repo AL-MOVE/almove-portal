@@ -38,6 +38,22 @@ assert.deepEqual(merged.find(item => item.id === 'custom-special')?.musculosSecu
 assert.equal(merged.find(item => item.id === 'custom-special')?.instrucoes, 'Manter o tronco estável.');
 assert.equal(merged.find(item => item.id === 'custom-special')?.classificacao, 'Secundário');
 assert.equal(merged.find(item => item.id === 'custom-special')?.metricaPrincipal, 'Tempo');
+
+const renamed = mergeExerciseLibrary({ custom: [{
+  id: 'rename-safe',
+  nome: 'Elevação lateral na polia — edição AL MOVE',
+  substituiNome: catalogExercise.nome,
+  urlImagemInicial: 'https://media.almove.pt/inicio.jpg',
+  urlImagemFinal: 'https://media.almove.pt/fim.jpg',
+  urlVideo: '',
+  ativo: false
+}] });
+assert.equal(renamed.some(item => item.nome === catalogExercise.nome), false, 'A edição com novo nome deve substituir o nome antigo no catálogo.');
+assert.equal(renamed.find(item => item.id === 'rename-safe')?.substituiNome, catalogExercise.nome);
+assert.equal(renamed.find(item => item.id === 'rename-safe')?.urlImagemInicial, 'https://media.almove.pt/inicio.jpg');
+assert.equal(renamed.find(item => item.id === 'rename-safe')?.urlImagemFinal, 'https://media.almove.pt/fim.jpg');
+assert.equal(renamed.find(item => item.id === 'rename-safe')?.urlVideo, '', 'Uma edição deve conseguir limpar media antiga.');
+assert.equal(renamed.find(item => item.id === 'rename-safe')?.ativo, false);
 assert.deepEqual(merged, merged.slice().sort((a, b) => a.nome.localeCompare(b.nome, 'pt-PT')));
 
 console.log('Biblioteca global de exercícios validada.');

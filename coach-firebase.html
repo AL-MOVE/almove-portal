@@ -2520,10 +2520,16 @@
   </div>
 </div>
 
+<style id="biblioteca-exercicios-design">
+  .exercise-library-header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}.exercise-library-header p{max-width:650px;color:#91a3b8;font-size:12px}.exercise-library-actions{display:flex;gap:8px;flex-wrap:wrap}.exercise-library-toolbar{display:grid;grid-template-columns:minmax(240px,2fr) repeat(3,minmax(150px,1fr));gap:10px;padding:14px;border:1px solid rgba(45,212,191,.18);border-radius:14px;background:rgba(8,18,29,.72)}.exercise-library-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}.exercise-library-stat{padding:13px;border:1px solid rgba(148,163,184,.15);border-radius:12px;background:rgba(255,255,255,.035)}.exercise-library-stat strong{display:block;color:#fff;font-size:20px;line-height:1}.exercise-library-stat span{display:block;margin-top:5px;color:#7f91a7;font-size:10px;text-transform:uppercase;letter-spacing:.06em}.exercise-library-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:10px}.exercise-library-card{display:grid;grid-template-columns:84px 1fr;gap:12px;min-width:0;padding:12px;border:1px solid rgba(148,163,184,.16);border-radius:14px;background:linear-gradient(145deg,rgba(14,28,42,.9),rgba(8,16,25,.88))}.exercise-library-card.inactive{opacity:.64}.exercise-library-thumb{position:relative;width:84px;aspect-ratio:1;border:1px solid rgba(148,163,184,.14);border-radius:11px;overflow:hidden;background:#08111c;color:#52657a;display:grid;place-items:center;font-size:10px;text-align:center}.exercise-library-thumb img{width:100%;height:100%;object-fit:cover}.exercise-library-thumb .end-marker{position:absolute;right:4px;bottom:4px;padding:2px 5px;border-radius:999px;background:rgba(5,8,16,.86);color:#5eead4;font-size:8px;font-weight:800}.exercise-library-card-body{min-width:0}.exercise-library-card h3{margin:0;color:#f8fafc;font-size:13px;line-height:1.25}.exercise-library-meta{margin-top:5px;color:#8ea0b5;font-size:10px;line-height:1.45}.exercise-library-tags{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}.exercise-library-tag{padding:2px 6px;border-radius:999px;border:1px solid rgba(45,212,191,.2);background:rgba(13,148,136,.1);color:#99f6e4;font-size:9px}.exercise-library-card-actions{display:flex;gap:6px;margin-top:9px}.exercise-library-empty{grid-column:1/-1;padding:34px;border:1px dashed rgba(148,163,184,.25);border-radius:14px;color:#91a3b8;text-align:center}.exercise-media-preview{display:grid;place-items:center;aspect-ratio:4/3;margin-top:7px;border:1px dashed rgba(148,163,184,.24);border-radius:11px;overflow:hidden;background:#08111c;color:#64748b;font-size:10px}.exercise-media-preview img{width:100%;height:100%;object-fit:cover}.exercise-media-preview.erro{border-color:rgba(248,113,113,.35);color:#fca5a5}.exercise-library-loading{grid-column:1/-1;display:flex;align-items:center;justify-content:center;min-height:160px;color:#91a3b8}
+  @media(max-width:980px){.exercise-library-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.exercise-library-toolbar>input{grid-column:1/-1}}
+  @media(max-width:640px){.exercise-library-header{display:block}.exercise-library-actions{margin-top:12px}.exercise-library-actions .btn{flex:1}.exercise-library-toolbar{grid-template-columns:1fr}.exercise-library-toolbar>input{grid-column:auto}.exercise-library-list{grid-template-columns:1fr}.exercise-library-card{grid-template-columns:70px 1fr}.exercise-library-thumb{width:70px}.exercise-library-stats{gap:6px}.exercise-library-stat{padding:10px 8px}.exercise-library-stat strong{font-size:17px}}
+</style>
+
 <div id="modalExercicioPersonalizadoOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:10004;align-items:center;justify-content:center;padding:16px;overflow-y:auto;">
   <div role="dialog" aria-modal="true" aria-labelledby="modalExercicioPersonalizadoTitulo" style="background:#0f1419;border:1px solid #2d3748;border-radius:14px;padding:22px;max-width:680px;width:100%;margin:24px 0;max-height:90vh;overflow-y:auto;box-shadow:0 24px 72px rgba(0,0,0,.45);">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:18px;"><div><h3 id="modalExercicioPersonalizadoTitulo" style="font-size:18px;color:#f8fafc;margin:0 0 4px;">Novo exercício</h3><p id="modalExercicioPersonalizadoAjuda" style="font-size:12px;color:#91a3b8;margin:0;"></p></div><button type="button" class="btn btn-secondary" style="width:auto;padding:4px 10px;" onclick="fecharModalExercicioPersonalizado()" aria-label="Fechar">×</button></div>
-    <div class="form-group" style="margin-bottom:12px;"><label>Nome do exercício</label><input id="inputExercicioPersonalizadoNome" type="text" maxlength="200" placeholder="Ex.: Remada unilateral na polia"></div>
+    <div class="form-group" style="margin-bottom:12px;"><label>Nome do exercício</label><input id="inputExercicioPersonalizadoNome" type="text" maxlength="200" placeholder="Ex.: Remada unilateral na polia" oninput="atualizarPrevisualizacoesExercicio()"></div>
     <div id="camposBibliotecaExercicio" style="display:none;">
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;">
         <div class="form-group"><label>Grupo muscular</label><select id="inputExercicioGrupoMuscular"><option value="">Escolhe…</option></select></div>
@@ -2535,11 +2541,15 @@
       <div class="form-group" style="margin-top:12px;"><label>Músculos principais</label><input id="inputExercicioMusculosPrincipais" type="text" maxlength="500" readonly placeholder="Seleciona abaixo"><details style="margin-top:6px;" open><summary style="cursor:pointer;color:#5eead4;font-size:11px;">Escolher músculos</summary><div id="sugestoesMusculosPrincipais" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;"></div></details></div>
       <div class="form-group" style="margin-top:12px;"><label>Músculos secundários</label><input id="inputExercicioMusculosSecundarios" type="text" maxlength="500" readonly placeholder="Opcional; seleciona abaixo"><details style="margin-top:6px;"><summary style="cursor:pointer;color:#5eead4;font-size:11px;">Escolher músculos</summary><div id="sugestoesMusculosSecundarios" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px;"></div></details></div>
       <div class="form-group" style="margin-top:12px;"><label>Descrição e instruções técnicas</label><textarea id="inputExercicioInstrucoes" maxlength="2000" rows="4" placeholder="Escreve a descrição, posição inicial, execução, amplitude e cuidados técnicos."></textarea></div>
+      <div class="form-group" style="margin-top:12px;"><label>Cuidados e contraindicações</label><textarea id="inputExercicioContraindicacoes" maxlength="2000" rows="3" placeholder="Opcional — limitações, erros a evitar ou indicação para adaptar o exercício."></textarea></div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:12px;">
-        <div class="form-group"><label>Imagem (URL, opcional)</label><input id="inputExercicioImagem" type="url" maxlength="1000" inputmode="url" placeholder="https://…/exercicio.jpg"></div>
-        <div class="form-group"><label>Vídeo (URL, opcional)</label><input id="inputExercicioVideo" type="url" maxlength="1000" inputmode="url" placeholder="https://…/video"></div>
+        <div class="form-group"><label>Imagem de início (URL segura)</label><input id="inputExercicioImagemInicial" type="url" maxlength="1000" inputmode="url" placeholder="https://…/inicio.jpg" oninput="atualizarPrevisualizacoesExercicio()"><div id="previewExercicioImagemInicial" class="exercise-media-preview"><span>Sem imagem de início</span></div></div>
+        <div class="form-group"><label>Imagem de fim (URL segura)</label><input id="inputExercicioImagemFinal" type="url" maxlength="1000" inputmode="url" placeholder="https://…/fim.jpg" oninput="atualizarPrevisualizacoesExercicio()"><div id="previewExercicioImagemFinal" class="exercise-media-preview"><span>Sem imagem de fim</span></div></div>
       </div>
-      <p style="font-size:10px;color:#64748b;margin:7px 0 0;line-height:1.45;">Usa apenas imagens ou vídeos teus, ou conteúdos com autorização de utilização. Estes detalhes ficam disponíveis no Portal do cliente.</p>
+      <div class="form-group" style="margin-top:12px;"><label>Ligação de vídeo ou demonstração</label><input id="inputExercicioVideo" type="url" maxlength="1000" inputmode="url" placeholder="https://…/video"></div>
+      <label id="estadoAtivoExercicio" style="display:none;align-items:center;gap:8px;margin-top:14px;color:#cbd5e1;font-size:12px;"><input id="inputExercicioAtivo" type="checkbox" checked> Disponível para usar em novos planos</label>
+      <div id="avisoRenomearExercicio" style="display:none;margin-top:12px;padding:10px 12px;border:1px solid rgba(250,204,21,.3);border-radius:10px;background:rgba(161,98,7,.12);color:#fde68a;font-size:11px;line-height:1.45;">O nome anterior ficará ligado a este exercício para preservar planos e sessões antigas.</div>
+      <p style="font-size:10px;color:#64748b;margin:10px 0 0;line-height:1.45;">Usa URLs HTTPS de imagens tuas ou licenciadas. As posições de início e fim ajudam a orientar, mas não substituem as instruções nem um vídeo quando o movimento for complexo.</p>
     </div>
     <div id="erroExercicioPersonalizado" role="alert" style="display:none;margin-top:12px;padding:10px 12px;border:1px solid rgba(248,113,113,.35);border-radius:9px;background:rgba(127,29,29,.16);color:#fca5a5;font-size:12px;"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:20px;"><button type="button" class="btn btn-secondary" onclick="fecharModalExercicioPersonalizado()">Cancelar</button><button type="button" class="btn btn-primary" id="btnConfirmarExercicioPersonalizado" onclick="confirmarExercicioPersonalizadoUI()">Adicionar ao treino</button></div>
@@ -2694,6 +2704,11 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/><path d="M9 3v4h6V3"/></svg>
       <span class="nav-item-label">Avaliações</span>
       <span class="nav-alert" id="navBadgeAvaliacoes"></span>
+    </button>
+    <div class="nav-section">Conteúdo</div>
+    <button class="nav-item" data-tab="bibliotecaExercicios" data-label="Exercícios" onclick="switchTab('bibliotecaExercicios')">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11v11h-11z"/><path d="M3 9v6M21 9v6M6.5 12H3M21 12h-3.5"/></svg>
+      <span class="nav-item-label">Exercícios</span>
     </button>
     <div class="nav-section">Conta</div>
     <button type="button" class="nav-item" data-tab="definicoes" data-label="Definições" onclick="switchTab('definicoes')" aria-label="Definições">
@@ -3198,6 +3213,23 @@
         <div id="checkinsResumoMensalConteudo" style="margin-top:12px;color:#91a3b8;font-size:12px;">Escolhe um cliente acima e carrega em “Ver resumo”.</div>
       </div>
     </div>
+  </section>
+
+  <!-- ========== BIBLIOTECA DE EXERCÍCIOS ========== -->
+  <section id="bibliotecaExercicios" class="view">
+    <div class="exercise-library-header">
+      <div><div class="eyebrow">Conteúdo do treino</div><h2 class="section-title">Biblioteca de exercícios</h2><p>Pesquisa e mantém o catálogo usado no CRM, App Coach e Portal do cliente. A imagem inicial serve de miniatura; no detalhe, o cliente vê as posições de início e fim.</p></div>
+      <div class="exercise-library-actions"><button type="button" class="btn btn-secondary" style="width:auto" onclick="abrirDefinicoesBibliotecaExercicios()">Gerir opções</button><button type="button" class="btn btn-primary" style="width:auto" onclick="abrirNovoExercicioBiblioteca()">+ Novo exercício</button></div>
+    </div>
+    <div class="exercise-library-toolbar">
+      <input id="gestaoExercicioPesquisa" type="search" placeholder="Pesquisar nome, músculo, máquina…" oninput="renderGestaoBibliotecaExercicios()" aria-label="Pesquisar exercícios">
+      <select id="gestaoExercicioGrupo" onchange="renderGestaoBibliotecaExercicios()"><option value="">Todos os grupos</option></select>
+      <select id="gestaoExercicioEquipamento" onchange="renderGestaoBibliotecaExercicios()"><option value="">Todo o equipamento</option></select>
+      <select id="gestaoExercicioMedia" onchange="renderGestaoBibliotecaExercicios()"><option value="">Todos os conteúdos</option><option value="completa">Duas imagens</option><option value="incompleta">Media incompleta</option><option value="sem-media">Sem imagens</option><option value="inativos">Inativos</option></select>
+    </div>
+    <div class="exercise-library-stats"><div class="exercise-library-stat"><strong id="gestaoExercicioTotal">—</strong><span>Total no catálogo</span></div><div class="exercise-library-stat"><strong id="gestaoExercicioComMedia">—</strong><span>Com início e fim</span></div><div class="exercise-library-stat"><strong id="gestaoExercicioVisiveis">—</strong><span>Resultados visíveis</span></div></div>
+    <div id="gestaoExercicioAviso" style="display:none;margin-bottom:12px;padding:11px 13px;border:1px solid rgba(250,204,21,.28);border-radius:11px;background:rgba(161,98,7,.12);color:#fde68a;font-size:11px"></div>
+    <div id="gestaoExercicioLista" class="exercise-library-list"><div class="exercise-library-loading">A carregar biblioteca…</div></div>
   </section>
 
   <!-- ========== DEFINIÇÕES ========== -->
@@ -5883,6 +5915,7 @@ function renderAbaAtiva(tab) {
     if (tab === 'clientes') renderClientes();
     if (tab === 'inativos') renderClientesInativos();
     if (tab === 'financas') abrirFinancasCRM(false);
+    if (tab === 'bibliotecaExercicios') abrirGestaoBibliotecaExercicios();
     if (tab === 'definicoes') renderDefinicoesCMR();
   } catch (e) {
     console.error('Erro ao renderizar a aba ' + tab + ':', e);
@@ -7961,6 +7994,7 @@ let BIBLIOTECA_EXERCICIOS_AVISO = '';
 let BIBLIOTECA_EXERCICIOS_CONFIG = {};
 let BIBLIOTECA_EXERCICIOS_OPCOES = {};
 let MODO_EXERCICIO_PERSONALIZADO = 'livre';
+let EXERCICIO_BIBLIOTECA_EDICAO = null;
 
 function carregarBibliotecaExercicios(callback) {
   if (BIBLIOTECA_EXERCICIOS_CACHE) { if (callback) callback(); return; }
@@ -7970,12 +8004,83 @@ function carregarBibliotecaExercicios(callback) {
     BIBLIOTECA_EXERCICIOS_CONFIG = resultado.configuracao || {};
     BIBLIOTECA_EXERCICIOS_OPCOES = resultado.opcoes || BIBLIOTECA_EXERCICIOS_CONFIG;
     preencherFiltrosBibliotecaExercicios();
+    preencherFiltrosGestaoBiblioteca();
+    if (document.getElementById('bibliotecaExercicios')?.classList.contains('active')) renderGestaoBibliotecaExercicios();
     if (callback) callback();
   }).withFailureHandler(err => {
     BIBLIOTECA_EXERCICIOS_CACHE = [];
     showAlert('Erro ao carregar biblioteca de exercícios: ' + err.message, 'error');
     if (callback) callback();
   }).getBibliotecaExercicios();
+}
+
+function abrirGestaoBibliotecaExercicios() {
+  if (!BIBLIOTECA_EXERCICIOS_CACHE) {
+    const lista = document.getElementById('gestaoExercicioLista');
+    if (lista) lista.innerHTML = '<div class="exercise-library-loading">A carregar biblioteca…</div>';
+    carregarBibliotecaExercicios(renderGestaoBibliotecaExercicios);
+    return;
+  }
+  preencherFiltrosGestaoBiblioteca();
+  renderGestaoBibliotecaExercicios();
+}
+
+function preencherFiltrosGestaoBiblioteca() {
+  const preencher = (id, chave, textoPadrao) => {
+    const select = document.getElementById(id);
+    if (!select) return;
+    const atual = select.value;
+    const valores = [...new Set((BIBLIOTECA_EXERCICIOS_CACHE || []).map(item => String(item[chave] || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-PT'));
+    select.innerHTML = '<option value="">' + textoPadrao + '</option>' + valores.map(valor => '<option value="' + escaparHtmlCRM(valor) + '">' + escaparHtmlCRM(valor) + '</option>').join('');
+    select.value = valores.includes(atual) ? atual : '';
+  };
+  preencher('gestaoExercicioGrupo', 'grupoMuscular', 'Todos os grupos');
+  preencher('gestaoExercicioEquipamento', 'equipamento', 'Todo o equipamento');
+}
+
+function mediaInicialExercicio(exercicio) { return String(exercicio?.urlImagemInicial || exercicio?.urlImagem || '').trim(); }
+function mediaFinalExercicio(exercicio) { return String(exercicio?.urlImagemFinal || '').trim(); }
+function urlMediaSeguraGestao(valor) {
+  if (!valor) return '';
+  try { const url = new URL(valor, window.location.origin); return (url.protocol === 'https:' || url.origin === window.location.origin) ? url.href : ''; } catch (_) { return ''; }
+}
+
+function renderGestaoBibliotecaExercicios() {
+  const lista = document.getElementById('gestaoExercicioLista');
+  if (!lista || !BIBLIOTECA_EXERCICIOS_CACHE) return;
+  const termo = normalizarPesquisaExercicio(document.getElementById('gestaoExercicioPesquisa')?.value || '');
+  const grupo = document.getElementById('gestaoExercicioGrupo')?.value || '';
+  const equipamento = document.getElementById('gestaoExercicioEquipamento')?.value || '';
+  const media = document.getElementById('gestaoExercicioMedia')?.value || '';
+  const todos = BIBLIOTECA_EXERCICIOS_CACHE || [];
+  const completos = todos.filter(ex => mediaInicialExercicio(ex) && mediaFinalExercicio(ex)).length;
+  const resultados = todos.filter(ex => {
+    const inicial = mediaInicialExercicio(ex), final = mediaFinalExercicio(ex);
+    const correspondeMedia = !media || (media === 'completa' && inicial && final) || (media === 'incompleta' && (!inicial || !final)) || (media === 'sem-media' && !inicial && !final) || (media === 'inativos' && ex.ativo === false);
+    return correspondeMedia && (!grupo || ex.grupoMuscular === grupo) && (!equipamento || ex.equipamento === equipamento) && (!termo || normalizarPesquisaExercicio([ex.nome, ex.nomeAlternativo, ex.exercicioBase, ex.grupoMuscular, ex.equipamento, ex.padraoMovimento].concat(ex.musculosPrincipais || [], ex.musculosSecundarios || []).join(' ')).includes(termo));
+  });
+  setText('gestaoExercicioTotal', todos.length);
+  setText('gestaoExercicioComMedia', completos);
+  setText('gestaoExercicioVisiveis', resultados.length);
+  const aviso = document.getElementById('gestaoExercicioAviso');
+  if (aviso) { aviso.style.display = BIBLIOTECA_EXERCICIOS_AVISO ? 'block' : 'none'; aviso.textContent = BIBLIOTECA_EXERCICIOS_AVISO || ''; }
+  if (!resultados.length) { lista.innerHTML = '<div class="exercise-library-empty"><strong>Nenhum exercício encontrado</strong><div style="margin-top:5px">Altera a pesquisa ou os filtros.</div></div>'; return; }
+  const limite = 100;
+  lista.innerHTML = resultados.slice(0, limite).map(ex => {
+    const inicial = urlMediaSeguraGestao(mediaInicialExercicio(ex));
+    const temFinal = Boolean(urlMediaSeguraGestao(mediaFinalExercicio(ex)));
+    const id = idParaOnclickCRM(ex.id || ex.nome);
+    const imagem = inicial ? '<img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="' + escaparHtmlCRM(inicial) + '" alt="" onerror="this.remove()">' : '<span>Sem<br>imagem</span>';
+    const tags = [ex.grupoMuscular, ex.equipamento, ex.padraoMovimento].filter(Boolean).slice(0, 3).map(valor => '<span class="exercise-library-tag">' + escaparHtmlCRM(valor) + '</span>').join('');
+    return '<article class="exercise-library-card' + (ex.ativo === false ? ' inactive' : '') + '"><div class="exercise-library-thumb">' + imagem + (temFinal ? '<span class="end-marker">+ final</span>' : '') + '</div><div class="exercise-library-card-body"><h3>' + escaparHtmlCRM(ex.nome) + '</h3><div class="exercise-library-meta">' + (ex.ativo === false ? 'Inativo · ' : '') + escaparHtmlCRM((ex.musculosPrincipais || []).join(', ') || 'Músculos por completar') + '</div><div class="exercise-library-tags">' + tags + '</div><div class="exercise-library-card-actions"><button type="button" class="btn btn-secondary" style="width:auto;padding:6px 10px;font-size:10px" onclick="abrirEditarExercicioBiblioteca(\'' + id + '\')">Editar detalhes</button></div></div></article>';
+  }).join('') + (resultados.length > limite ? '<div class="exercise-library-empty">A mostrar os primeiros ' + limite + ' de ' + resultados.length + '. Afina a pesquisa para encontrar o exercício pretendido.</div>' : '');
+}
+
+function abrirNovoExercicioBiblioteca() { abrirModalExercicioPersonalizado('gestao-novo'); }
+function abrirEditarExercicioBiblioteca(id) {
+  const exercicio = (BIBLIOTECA_EXERCICIOS_CACHE || []).find(item => String(item.id || item.nome) === String(id));
+  if (!exercicio) return showAlert('Não foi possível localizar o exercício.', 'error');
+  abrirModalExercicioPersonalizado('gestao-editar', exercicio);
 }
 
 function alterarVisibilidadePlanoUI(nomePlano, atual) {
@@ -8068,7 +8173,7 @@ function pesquisarExerciciosUI() {
   const grupo = document.getElementById('filtroExercicioGrupo').value;
   const equipamento = document.getElementById('filtroExercicioEquipamento').value;
   const movimento = document.getElementById('filtroExercicioMovimento').value;
-  const resultados = BIBLIOTECA_EXERCICIOS_CACHE.filter(ex =>
+  const resultados = BIBLIOTECA_EXERCICIOS_CACHE.filter(ex => ex.ativo !== false &&
     (!termo || normalizarPesquisaExercicio([ex.nome, ex.nomeAlternativo, ex.exercicioBase, ex.variacao, ex.grupoMuscular, ex.equipamento, ex.padraoMovimento, ex.classificacao, ex.metricaPrincipal, ex.nivel, ex.planoMovimento, ex.categoriaTreino, ex.cadeiaCinetica, ex.tipoContracao, ex.lateralidade].concat(ex.musculosPrincipais || [], ex.musculosSecundarios || []).join(' ')).includes(termo)) &&
     (!grupo || ex.grupoMuscular === grupo) &&
     (!equipamento || ex.equipamento === equipamento) &&
@@ -8107,26 +8212,32 @@ function adicionarExercicioAoTreino(nomeExercicio) {
   document.getElementById('resultadosPesquisaExercicio').innerHTML = '';
 }
 
-function abrirModalExercicioPersonalizado(modo) {
-  MODO_EXERCICIO_PERSONALIZADO = modo === 'biblioteca' ? 'biblioteca' : 'livre';
-  const biblioteca = MODO_EXERCICIO_PERSONALIZADO === 'biblioteca';
+function abrirModalExercicioPersonalizado(modo, exercicioEdicao) {
+  MODO_EXERCICIO_PERSONALIZADO = ['biblioteca', 'gestao-novo', 'gestao-editar'].includes(modo) ? modo : 'livre';
+  EXERCICIO_BIBLIOTECA_EDICAO = modo === 'gestao-editar' ? (exercicioEdicao || null) : null;
+  const biblioteca = MODO_EXERCICIO_PERSONALIZADO !== 'livre';
+  const gestao = MODO_EXERCICIO_PERSONALIZADO.indexOf('gestao-') === 0;
+  const editando = MODO_EXERCICIO_PERSONALIZADO === 'gestao-editar';
   const overlay = document.getElementById('modalExercicioPersonalizadoOverlay');
   const campos = document.getElementById('camposBibliotecaExercicio');
   const erro = document.getElementById('erroExercicioPersonalizado');
   const botao = document.getElementById('btnConfirmarExercicioPersonalizado');
-  ['inputExercicioPersonalizadoNome', 'inputExercicioGrupoMuscular', 'inputExercicioPadraoMovimento', 'inputExercicioEquipamento', 'inputExercicioClassificacao', 'inputExercicioMetrica', 'inputExercicioMusculosPrincipais', 'inputExercicioMusculosSecundarios', 'inputExercicioInstrucoes', 'inputExercicioImagem', 'inputExercicioVideo'].forEach(id => {
+  ['inputExercicioPersonalizadoNome', 'inputExercicioGrupoMuscular', 'inputExercicioPadraoMovimento', 'inputExercicioEquipamento', 'inputExercicioClassificacao', 'inputExercicioMetrica', 'inputExercicioMusculosPrincipais', 'inputExercicioMusculosSecundarios', 'inputExercicioInstrucoes', 'inputExercicioContraindicacoes', 'inputExercicioImagemInicial', 'inputExercicioImagemFinal', 'inputExercicioVideo'].forEach(id => {
     const campo = document.getElementById(id);
     if (campo) campo.value = '';
   });
-  document.getElementById('modalExercicioPersonalizadoTitulo').textContent = biblioteca ? 'Adicionar exercício à biblioteca' : 'Usar exercício só neste treino';
+  document.getElementById('modalExercicioPersonalizadoTitulo').textContent = editando ? 'Editar exercício' : (biblioteca ? 'Adicionar exercício à biblioteca' : 'Usar exercício só neste treino');
   document.getElementById('modalExercicioPersonalizadoAjuda').textContent = biblioteca
-    ? 'Fica disponível para usar noutros planos e treinos.'
+    ? (gestao ? 'Os detalhes ficam disponíveis no CRM, na App Coach e no Portal do cliente.' : 'Fica disponível para usar noutros planos e treinos.')
     : 'É adicionado a este treino sem entrar na biblioteca geral.';
   campos.style.display = biblioteca ? 'block' : 'none';
   erro.style.display = 'none';
   erro.textContent = '';
   botao.disabled = false;
-  botao.textContent = biblioteca ? 'Guardar e adicionar ao treino' : 'Adicionar ao treino';
+  botao.textContent = gestao ? (editando ? 'Guardar alterações' : 'Adicionar à biblioteca') : (biblioteca ? 'Guardar e adicionar ao treino' : 'Adicionar ao treino');
+  document.getElementById('estadoAtivoExercicio').style.display = editando ? 'flex' : 'none';
+  document.getElementById('inputExercicioAtivo').checked = !editando || EXERCICIO_BIBLIOTECA_EDICAO?.ativo !== false;
+  document.getElementById('avisoRenomearExercicio').style.display = 'none';
   if (biblioteca) {
     preencherOpcoesFormularioExercicio();
     const classificacoes = BIBLIOTECA_EXERCICIOS_OPCOES.classificacoes || [];
@@ -8134,10 +8245,44 @@ function abrirModalExercicioPersonalizado(modo) {
     document.getElementById('inputExercicioClassificacao').value = classificacoes.includes('Principal') ? 'Principal' : (classificacoes[0] || '');
     document.getElementById('inputExercicioMetrica').value = metricas.includes('Carga e repetições') ? 'Carga e repetições' : (metricas[0] || '');
     renderSugestoesMusculosExercicio();
+    if (editando) preencherEdicaoExercicioBiblioteca(EXERCICIO_BIBLIOTECA_EDICAO);
   }
+  atualizarPrevisualizacoesExercicio();
   overlay.style.display = 'flex';
   overlay.setAttribute('aria-hidden', 'false');
   setTimeout(() => document.getElementById('inputExercicioPersonalizadoNome').focus(), 0);
+}
+
+function preencherEdicaoExercicioBiblioteca(exercicio) {
+  const definir = (id, valor) => { const campo = document.getElementById(id); if (campo) campo.value = valor || ''; };
+  definir('inputExercicioPersonalizadoNome', exercicio.nome);
+  definir('inputExercicioGrupoMuscular', exercicio.grupoMuscular);
+  definir('inputExercicioPadraoMovimento', exercicio.padraoMovimento);
+  definir('inputExercicioEquipamento', exercicio.equipamento);
+  definir('inputExercicioClassificacao', exercicio.classificacao);
+  definir('inputExercicioMetrica', exercicio.metricaPrincipal);
+  definir('inputExercicioMusculosPrincipais', (exercicio.musculosPrincipais || []).join(', '));
+  definir('inputExercicioMusculosSecundarios', (exercicio.musculosSecundarios || []).join(', '));
+  definir('inputExercicioInstrucoes', exercicio.instrucoes);
+  definir('inputExercicioContraindicacoes', exercicio.contraindicacoes);
+  definir('inputExercicioImagemInicial', mediaInicialExercicio(exercicio));
+  definir('inputExercicioImagemFinal', mediaFinalExercicio(exercicio));
+  definir('inputExercicioVideo', exercicio.urlVideo);
+  renderSugestoesMusculosExercicio();
+}
+
+function atualizarPrevisualizacoesExercicio() {
+  [['inputExercicioImagemInicial', 'previewExercicioImagemInicial', 'Sem imagem de início'], ['inputExercicioImagemFinal', 'previewExercicioImagemFinal', 'Sem imagem de fim']].forEach(([campoId, previewId, vazio]) => {
+    const preview = document.getElementById(previewId); if (!preview) return;
+    const valor = valorExercicioPersonalizado(campoId);
+    const url = urlMediaSeguraGestao(valor);
+    preview.classList.toggle('erro', Boolean(valor && !url));
+    preview.innerHTML = url ? '<img loading="lazy" decoding="async" referrerpolicy="no-referrer" src="' + escaparHtmlCRM(url) + '" alt="Pré-visualização" onerror="this.parentElement.classList.add(\'erro\');this.parentElement.innerHTML=\'<span>Não foi possível carregar a imagem</span>\'">' : '<span>' + (valor ? 'Usa uma ligação HTTPS válida' : vazio) + '</span>';
+  });
+  if (EXERCICIO_BIBLIOTECA_EDICAO) {
+    const alterado = valorExercicioPersonalizado('inputExercicioPersonalizadoNome') !== String(EXERCICIO_BIBLIOTECA_EDICAO.nome || '');
+    document.getElementById('avisoRenomearExercicio').style.display = alterado ? 'block' : 'none';
+  }
 }
 
 function fecharModalExercicioPersonalizado() {
@@ -8195,7 +8340,8 @@ function listaExercicioPersonalizado(id) {
 
 function novoExercicioEditor(nome, metadados) {
   const info = metadados || {};
-  return { exercicio: nome, series: '3', repsMin: '8', repsMax: '12', rir: '', notas: '', tipoPrescricao: 'REPS', descansoSegundos: '60', aquecimento: false, grupoSuperserie: '', instrucoes: info.instrucoes || '', urlImagem: info.urlImagem || '', urlVideo: info.urlVideo || '' };
+  const urlImagemInicial = info.urlImagemInicial || info.urlImagem || '';
+  return { exercicio: nome, series: '3', repsMin: '8', repsMax: '12', rir: '', notas: '', tipoPrescricao: 'REPS', descansoSegundos: '60', aquecimento: false, grupoSuperserie: '', instrucoes: info.instrucoes || '', urlImagem: urlImagemInicial, urlImagemInicial, urlImagemFinal: info.urlImagemFinal || '', urlVideo: info.urlVideo || '' };
 }
 
 function adicionarExercicioPersonalizadoAoTreino(nome, metadados) {
@@ -8216,7 +8362,9 @@ function confirmarExercicioPersonalizadoUI() {
     return;
   }
   const exercicio = {
+    id: EXERCICIO_BIBLIOTECA_EDICAO?.id || '',
     nome,
+    substituiNome: EXERCICIO_BIBLIOTECA_EDICAO?.nome || '',
     grupoMuscular: valorExercicioPersonalizado('inputExercicioGrupoMuscular'),
     padraoMovimento: valorExercicioPersonalizado('inputExercicioPadraoMovimento'),
     equipamento: valorExercicioPersonalizado('inputExercicioEquipamento'),
@@ -8225,29 +8373,39 @@ function confirmarExercicioPersonalizadoUI() {
     musculosPrincipais: listaExercicioPersonalizado('inputExercicioMusculosPrincipais'),
     musculosSecundarios: listaExercicioPersonalizado('inputExercicioMusculosSecundarios'),
     instrucoes: valorExercicioPersonalizado('inputExercicioInstrucoes'),
-    urlImagem: valorExercicioPersonalizado('inputExercicioImagem'),
-    urlVideo: valorExercicioPersonalizado('inputExercicioVideo')
+    contraindicacoes: valorExercicioPersonalizado('inputExercicioContraindicacoes'),
+    urlImagemInicial: valorExercicioPersonalizado('inputExercicioImagemInicial'),
+    urlImagemFinal: valorExercicioPersonalizado('inputExercicioImagemFinal'),
+    urlVideo: valorExercicioPersonalizado('inputExercicioVideo'),
+    ativo: document.getElementById('inputExercicioAtivo')?.checked !== false
   };
   if (!exercicio.grupoMuscular || !exercicio.padraoMovimento || !exercicio.equipamento || !exercicio.musculosPrincipais.length) {
     return erroExercicioPersonalizado('Preenche o grupo muscular, padrão de movimento, equipamento e pelo menos um músculo principal.');
   }
+  const urlsInvalidas = [exercicio.urlImagemInicial, exercicio.urlImagemFinal, exercicio.urlVideo].filter(Boolean).filter(url => !/^https:\/\//i.test(url));
+  if (urlsInvalidas.length) return erroExercicioPersonalizado('As imagens e a ligação devem usar endereços HTTPS completos.');
+  const modoGestao = MODO_EXERCICIO_PERSONALIZADO.indexOf('gestao-') === 0;
   const botao = document.getElementById('btnConfirmarExercicioPersonalizado');
   botao.disabled = true;
   botao.textContent = 'A guardar…';
   google.script.run.withSuccessHandler(resultado => {
     const guardado = resultado && resultado.exercicio ? resultado.exercicio : exercicio;
     const chave = String(guardado.nome || '').trim().toLocaleLowerCase('pt-PT');
-    BIBLIOTECA_EXERCICIOS_CACHE = (BIBLIOTECA_EXERCICIOS_CACHE || []).filter(item => String(item.nome || '').trim().toLocaleLowerCase('pt-PT') !== chave);
+    const idAnterior = String(EXERCICIO_BIBLIOTECA_EDICAO?.id || '');
+    const nomeAnterior = String(EXERCICIO_BIBLIOTECA_EDICAO?.nome || '').trim().toLocaleLowerCase('pt-PT');
+    BIBLIOTECA_EXERCICIOS_CACHE = (BIBLIOTECA_EXERCICIOS_CACHE || []).filter(item => !(idAnterior && String(item.id || '') === idAnterior) && String(item.nome || '').trim().toLocaleLowerCase('pt-PT') !== chave && (!nomeAnterior || String(item.nome || '').trim().toLocaleLowerCase('pt-PT') !== nomeAnterior));
     BIBLIOTECA_EXERCICIOS_CACHE.push(guardado);
     BIBLIOTECA_EXERCICIOS_CACHE.sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-PT'));
     BIBLIOTECA_EXERCICIOS_AVISO = '';
     preencherFiltrosBibliotecaExercicios();
-    adicionarExercicioPersonalizadoAoTreino(guardado.nome || nome, guardado);
+    preencherFiltrosGestaoBiblioteca();
+    if (!modoGestao) adicionarExercicioPersonalizadoAoTreino(guardado.nome || nome, guardado);
     fecharModalExercicioPersonalizado();
-    showAlert('Exercício guardado na biblioteca e adicionado ao treino.', 'success');
+    if (modoGestao) renderGestaoBibliotecaExercicios();
+    showAlert(modoGestao ? 'Exercício guardado na biblioteca.' : 'Exercício guardado na biblioteca e adicionado ao treino.', 'success');
   }).withFailureHandler(err => {
     botao.disabled = false;
-    botao.textContent = 'Guardar e adicionar ao treino';
+    botao.textContent = modoGestao ? (EXERCICIO_BIBLIOTECA_EDICAO ? 'Guardar alterações' : 'Adicionar à biblioteca') : 'Guardar e adicionar ao treino';
     erroExercicioPersonalizado('Não foi possível guardar o exercício: ' + (err && err.message ? err.message : 'erro desconhecido'));
   }).guardarExercicioBiblioteca(exercicio);
 }
