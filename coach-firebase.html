@@ -8255,12 +8255,21 @@ function abrirModalExercicioPersonalizado(modo, exercicioEdicao) {
 
 function preencherEdicaoExercicioBiblioteca(exercicio) {
   const definir = (id, valor) => { const campo = document.getElementById(id); if (campo) campo.value = valor || ''; };
+  const definirSelect = (id, valor, padrao) => {
+    const campo = document.getElementById(id); if (!campo) return;
+    const pretendido = String(valor || padrao || '').trim();
+    if (!pretendido) { campo.value = ''; return; }
+    const chave = normalizarPesquisaExercicio(pretendido);
+    const opcao = Array.from(campo.options).find(item => normalizarPesquisaExercicio(item.value) === chave);
+    if (opcao) campo.value = opcao.value;
+    else { campo.add(new Option(pretendido, pretendido)); campo.value = pretendido; }
+  };
   definir('inputExercicioPersonalizadoNome', exercicio.nome);
-  definir('inputExercicioGrupoMuscular', exercicio.grupoMuscular);
-  definir('inputExercicioPadraoMovimento', exercicio.padraoMovimento);
-  definir('inputExercicioEquipamento', exercicio.equipamento);
-  definir('inputExercicioClassificacao', exercicio.classificacao);
-  definir('inputExercicioMetrica', exercicio.metricaPrincipal);
+  definirSelect('inputExercicioGrupoMuscular', exercicio.grupoMuscular);
+  definirSelect('inputExercicioPadraoMovimento', exercicio.padraoMovimento);
+  definirSelect('inputExercicioEquipamento', exercicio.equipamento);
+  definirSelect('inputExercicioClassificacao', exercicio.classificacao, 'Principal');
+  definirSelect('inputExercicioMetrica', exercicio.metricaPrincipal, 'Carga e repetições');
   definir('inputExercicioMusculosPrincipais', (exercicio.musculosPrincipais || []).join(', '));
   definir('inputExercicioMusculosSecundarios', (exercicio.musculosSecundarios || []).join(', '));
   definir('inputExercicioInstrucoes', exercicio.instrucoes);
