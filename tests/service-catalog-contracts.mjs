@@ -9,7 +9,7 @@ import {
 } from '../server/dev-crm/service-catalog.js';
 
 assert.equal(serviceByCode(DEFAULT_SERVICE_CATALOG, '1x45').preco, 119);
-assert.equal(serviceByCode(DEFAULT_SERVICE_CATALOG, '2x45').preco, 219);
+assert.equal(serviceByCode(DEFAULT_SERVICE_CATALOG, '2x45').preco, 225);
 assert.deepEqual(packShapeForService(serviceByCode(DEFAULT_SERVICE_CATALOG, '2x45')), {
   frequencia: '2x45', sessoesTotal: 8, duracaoMinutos: 45, servicoId: '2x45', servicoNome: 'PT - 2x45 min'
 });
@@ -18,7 +18,7 @@ assert.deepEqual(priceForService({
   catalogo: DEFAULT_SERVICE_CATALOG,
   codigo: '2x45',
   cliente: { precoPersonalizado: 99, precoPersonalizadoServico: '1x45' }
-}), { preco: 219, origem: 'catalogo', servico: serviceByCode(DEFAULT_SERVICE_CATALOG, '2x45') });
+}), { preco: 225, origem: 'catalogo', servico: serviceByCode(DEFAULT_SERVICE_CATALOG, '2x45') });
 
 assert.equal(priceForService({
   catalogo: DEFAULT_SERVICE_CATALOG,
@@ -27,7 +27,7 @@ assert.equal(priceForService({
 }).preco, 189.9);
 
 assert.equal(priceForService({
-  catalogo: DEFAULT_SERVICE_CATALOG,
+  catalogo: DEFAULT_SERVICE_CATALOG.map(item => item.codigo === '1x30' ? { ...item, preco: null } : item),
   codigo: '1x30',
   packsAnteriores: [
     { frequencia: '2x45', mesAno: '2026-09', preco: 219 },
@@ -35,14 +35,16 @@ assert.equal(priceForService({
   ]
 }).preco, 89);
 
-assert.throws(() => priceForService({ catalogo: DEFAULT_SERVICE_CATALOG, codigo: '1x30', permitirLegado: false }), /SERVICO_SEM_PRECO/);
+assert.throws(() => priceForService({ catalogo: DEFAULT_SERVICE_CATALOG.map(item => item.codigo === '1x30' ? { ...item, preco: null } : item), codigo: '1x30', permitirLegado: false }), /SERVICO_SEM_PRECO/);
 const inativo = DEFAULT_SERVICE_CATALOG.map(item => item.codigo === '1x45' ? { ...item, ativo: false } : item);
 assert.throws(() => priceForService({ catalogo: inativo, codigo: '1x45' }), /SERVICO_INDISPONIVEL/);
 assert.equal(priceForService({ catalogo: inativo, codigo: '1x45', permitirServicoInativo: true }).preco, 119);
 assert.throws(() => normalizeServiceCatalog([
-  { id: 'a', codigo: 'duo', nome: 'Duo A', sessoesPorSemana: 1, duracaoMinutos: 45, preco: 100 },
-  { id: 'b', codigo: 'duo', nome: 'Duo B', sessoesPorSemana: 2, duracaoMinutos: 45, preco: 180 }
+  { id: 'a', codigo: 'duo', nome: 'Duo A', sessoesPorMes: 4, duracaoMinutos: 45, preco: 100 },
+  { id: 'b', codigo: 'duo', nome: 'Duo B', sessoesPorMes: 8, duracaoMinutos: 45, preco: 180 }
 ]), /CODIGO_SERVICO_DUPLICADO/);
+assert.equal(serviceByCode(DEFAULT_SERVICE_CATALOG, 'basic').preco, 15);
+assert.equal(packShapeForService(serviceByCode(DEFAULT_SERVICE_CATALOG, 'plus-2')).sessoesTotal, 2);
 
 const actions = fs.readFileSync(new URL('../server/dev-crm/dev-crm-client-actions.js', import.meta.url), 'utf8');
 const renewals = fs.readFileSync(new URL('../server/dev-crm/dev-crm-renewals.js', import.meta.url), 'utf8');

@@ -2544,7 +2544,7 @@
   .service-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.service-modal-head h3{margin:3px 0 5px;color:#f8fafc;font-size:21px}.service-modal-head p{max-width:720px;margin:0;color:#91a3b8;font-size:12px;line-height:1.55}.service-modal-head>.btn{width:auto;padding:6px 11px}
   .service-safety-note{margin:16px 0;padding:11px 13px;border:1px solid rgba(56,189,248,.2);border-radius:12px;background:rgba(14,116,144,.1);color:#bae6fd;font-size:11px;line-height:1.5}
   .service-table-head,.service-editor-row{display:grid;grid-template-columns:minmax(260px,2fr) minmax(190px,1.2fr) minmax(130px,.75fr) minmax(90px,.55fr);gap:10px;align-items:end}.service-table-head{padding:0 12px 6px;color:#70839a;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
-  .service-editor-list{display:grid;gap:8px}.service-editor-row{padding:12px;border:1px solid rgba(148,163,184,.15);border-radius:14px;background:rgba(255,255,255,.025)}.service-editor-row.inactive{opacity:.62}.service-editor-main{display:grid;grid-template-columns:minmax(140px,1.5fr) minmax(90px,.7fr);gap:8px}.service-editor-schedule{display:grid;grid-template-columns:1fr 1fr;gap:8px}.service-editor-row label{display:block;color:#8193a9;font-size:9px;font-weight:750;text-transform:uppercase;letter-spacing:.045em}.service-editor-row input{margin-top:4px;padding:9px 10px;font-size:12px}.service-editor-active{display:flex;align-items:center;gap:7px;min-height:42px;color:#cbd5e1;font-size:11px}.service-editor-active input{width:auto;margin:0}.service-editor-price{position:relative}.service-editor-price:before{content:'€';position:absolute;left:10px;bottom:10px;color:#5eead4;font-size:12px}.service-editor-price input{padding-left:25px}.service-modal-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px}.service-modal-actions .btn{width:auto}.service-modal-actions #estadoCatalogoServicos{flex:1;min-width:160px;color:#91a3b8;font-size:11px}
+  .service-editor-list{display:grid;gap:8px}.service-editor-row{padding:12px;border:1px solid rgba(148,163,184,.15);border-radius:14px;background:rgba(255,255,255,.025)}.service-editor-row.inactive{opacity:.62}.service-editor-main{display:grid;grid-template-columns:minmax(140px,1.5fr) minmax(90px,.7fr);gap:8px}.service-editor-main .service-description{grid-column:1/-1}.service-editor-schedule{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.service-editor-row label{display:block;color:#8193a9;font-size:9px;font-weight:750;text-transform:uppercase;letter-spacing:.045em}.service-editor-row input{margin-top:4px;padding:9px 10px;font-size:12px}.service-editor-active{display:flex;align-items:center;gap:7px;min-height:42px;color:#cbd5e1;font-size:11px}.service-editor-active input{width:auto;margin:0}.service-editor-price{position:relative}.service-editor-price:before{content:'€';position:absolute;left:10px;bottom:10px;color:#5eead4;font-size:12px}.service-editor-price input{padding-left:25px}.service-modal-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px}.service-modal-actions .btn{width:auto}.service-modal-actions #estadoCatalogoServicos{flex:1;min-width:160px;color:#91a3b8;font-size:11px}
   .price-preview{margin-top:8px;padding:9px 11px;border:1px solid rgba(45,212,191,.15);border-radius:10px;background:rgba(13,148,136,.07);color:#99f6e4;font-size:11px;line-height:1.45}.price-preview.warning{border-color:rgba(250,204,21,.22);background:rgba(161,98,7,.1);color:#fde68a}
   @media(max-width:760px){.service-modal{padding:16px}.service-table-head{display:none}.service-editor-row{grid-template-columns:1fr;align-items:start}.service-editor-main,.service-editor-schedule{grid-template-columns:1fr 1fr}.service-modal-actions .btn{flex:1}.service-modal-actions #estadoCatalogoServicos{flex-basis:100%;order:-1}}
 </style>
@@ -5665,15 +5665,20 @@ let CATALOGO_SERVICOS = {
   revision: 0,
   configured: false,
   servicos: [
-    {id:'1x30',codigo:'1x30',nome:'PT - 1x30 min',sessoesPorSemana:1,duracaoMinutos:30,preco:null,ativo:true,ordem:0},
-    {id:'2x30',codigo:'2x30',nome:'PT - 2x30 min',sessoesPorSemana:2,duracaoMinutos:30,preco:null,ativo:true,ordem:1},
-    {id:'3x30',codigo:'3x30',nome:'PT - 3x30 min',sessoesPorSemana:3,duracaoMinutos:30,preco:null,ativo:true,ordem:2},
-    {id:'1x45',codigo:'1x45',nome:'PT - 1x45 min',sessoesPorSemana:1,duracaoMinutos:45,preco:119,ativo:true,ordem:3},
-    {id:'2x45',codigo:'2x45',nome:'PT - 2x45 min',sessoesPorSemana:2,duracaoMinutos:45,preco:219,ativo:true,ordem:4},
-    {id:'3x45',codigo:'3x45',nome:'PT - 3x45 min',sessoesPorSemana:3,duracaoMinutos:45,preco:null,ativo:true,ordem:5},
-    {id:'1x60',codigo:'1x60',nome:'PT - 1x60 min',sessoesPorSemana:1,duracaoMinutos:60,preco:null,ativo:true,ordem:6},
-    {id:'2x60',codigo:'2x60',nome:'PT - 2x60 min',sessoesPorSemana:2,duracaoMinutos:60,preco:null,ativo:true,ordem:7},
-    {id:'3x60',codigo:'3x60',nome:'PT - 3x60 min',sessoesPorSemana:3,duracaoMinutos:60,preco:null,ativo:true,ordem:8}
+    {id:'1x30',codigo:'1x30',nome:'PT - 1x30 min',descricao:'Personal Training',sessoesPorMes:4,duracaoMinutos:30,preco:79,validadeDias:60,ativo:true,ordem:0},
+    {id:'2x30',codigo:'2x30',nome:'PT - 2x30 min',descricao:'Personal Training',sessoesPorMes:8,duracaoMinutos:30,preco:159,validadeDias:60,ativo:true,ordem:1},
+    {id:'3x30',codigo:'3x30',nome:'PT - 3x30 min',descricao:'Personal Training',sessoesPorMes:12,duracaoMinutos:30,preco:215,validadeDias:60,ativo:true,ordem:2},
+    {id:'1x45',codigo:'1x45',nome:'PT - 1x45 min',descricao:'Personal Training',sessoesPorMes:4,duracaoMinutos:45,preco:119,validadeDias:60,ativo:true,ordem:3},
+    {id:'2x45',codigo:'2x45',nome:'PT - 2x45 min',descricao:'Personal Training',sessoesPorMes:8,duracaoMinutos:45,preco:225,validadeDias:60,ativo:true,ordem:4},
+    {id:'3x45',codigo:'3x45',nome:'PT - 3x45 min',descricao:'Personal Training',sessoesPorMes:12,duracaoMinutos:45,preco:315,validadeDias:60,ativo:true,ordem:5},
+    {id:'1x60',codigo:'1x60',nome:'PT - 1x60 min',descricao:'Personal Training',sessoesPorMes:4,duracaoMinutos:60,preco:149,validadeDias:60,ativo:true,ordem:6},
+    {id:'2x60',codigo:'2x60',nome:'PT - 2x60 min',descricao:'Personal Training',sessoesPorMes:8,duracaoMinutos:60,preco:285,validadeDias:60,ativo:true,ordem:7},
+    {id:'3x60',codigo:'3x60',nome:'PT - 3x60 min',descricao:'Personal Training',sessoesPorMes:12,duracaoMinutos:60,preco:415,validadeDias:60,ativo:true,ordem:8},
+    {id:'basic',codigo:'basic',nome:'BASIC',descricao:'APP + Plano de Treino',sessoesPorMes:0,duracaoMinutos:0,preco:15,validadeDias:60,ativo:true,ordem:9},
+    {id:'standard',codigo:'standard',nome:'STANDARD',descricao:'APP + Plano de TR+AV',sessoesPorMes:0,duracaoMinutos:0,preco:30,validadeDias:60,ativo:true,ordem:10},
+    {id:'plus-1',codigo:'plus-1',nome:'PLUS 1',descricao:'APP + TR + AV + 1PT',sessoesPorMes:1,duracaoMinutos:0,preco:60,validadeDias:60,ativo:true,ordem:11},
+    {id:'plus-2',codigo:'plus-2',nome:'PLUS 2',descricao:'APP + TR + AV + 2PT',sessoesPorMes:2,duracaoMinutos:0,preco:90,validadeDias:60,ativo:true,ordem:12},
+    {id:'plus-max',codigo:'plus-max',nome:'PLUS MAX',descricao:'APP + TR + AV + 4PT',sessoesPorMes:4,duracaoMinutos:0,preco:149,validadeDias:60,ativo:true,ordem:13}
   ]
 };
 
@@ -9232,8 +9237,8 @@ function renderCatalogoServicosEditor() {
   alvo.innerHTML = CATALOGO_SERVICOS_EDITOR.map((item, indice) => {
     const existente = !String(item.id || '').startsWith('novo-');
     return '<div class="service-editor-row' + (item.ativo === false ? ' inactive' : '') + '" data-service-index="' + indice + '" data-service-id="' + escaparHtmlCRM(item.id) + '">' +
-      '<div class="service-editor-main"><label>Nome<input data-service-field="nome" maxlength="120" value="' + escaparHtmlCRM(item.nome || '') + '" placeholder="Ex.: PT Duo 45 min"></label><label>Código<input data-service-field="codigo" maxlength="32" value="' + escaparHtmlCRM(item.codigo || '') + '" placeholder="ex.: duo45"' + (existente ? ' readonly title="Para preservar o histórico, cria um serviço novo se precisares de outro código."' : '') + '></label></div>' +
-      '<div class="service-editor-schedule"><label>Sessões/semana<input data-service-field="sessoesPorSemana" type="number" min="1" max="14" value="' + Number(item.sessoesPorSemana || 1) + '"></label><label>Minutos<input data-service-field="duracaoMinutos" type="number" min="5" max="300" value="' + Number(item.duracaoMinutos || 45) + '"></label></div>' +
+      '<div class="service-editor-main"><label>Nome<input data-service-field="nome" maxlength="120" value="' + escaparHtmlCRM(item.nome || '') + '" placeholder="Ex.: PT Duo 45 min"></label><label>Código<input data-service-field="codigo" maxlength="32" value="' + escaparHtmlCRM(item.codigo || '') + '" placeholder="ex.: duo45"' + (existente ? ' readonly title="Para preservar o histórico, cria um serviço novo se precisares de outro código."' : '') + '></label><label class="service-description">Descrição<input data-service-field="descricao" maxlength="250" value="' + escaparHtmlCRM(item.descricao || '') + '" placeholder="O que está incluído"></label></div>' +
+      '<div class="service-editor-schedule"><label>Sessões/mês<input data-service-field="sessoesPorMes" type="number" min="0" max="100" value="' + Number(item.sessoesPorMes || 0) + '"></label><label>Minutos<input data-service-field="duracaoMinutos" type="number" min="0" max="300" value="' + Number(item.duracaoMinutos || 0) + '"></label><label>Validade/dias<input data-service-field="validadeDias" type="number" min="1" max="730" value="' + Number(item.validadeDias || 60) + '"></label></div>' +
       '<label class="service-editor-price">Preço mensal<input data-service-field="preco" type="number" min="0" max="100000" step="0.01" value="' + (item.preco === null || item.preco === undefined ? '' : Number(item.preco).toFixed(2)) + '" placeholder="Por definir"></label>' +
       '<label class="service-editor-active"><input data-service-field="ativo" type="checkbox"' + (item.ativo !== false ? ' checked' : '') + '> Disponível</label>' +
       '</div>';
@@ -9242,7 +9247,7 @@ function renderCatalogoServicosEditor() {
 
 function adicionarServicoEditor() {
   const ordem = CATALOGO_SERVICOS_EDITOR.length;
-  CATALOGO_SERVICOS_EDITOR.push({ id: 'novo-' + Date.now(), codigo: '', nome: '', sessoesPorSemana: 1, duracaoMinutos: 45, preco: null, ativo: true, ordem: ordem });
+  CATALOGO_SERVICOS_EDITOR.push({ id: 'novo-' + Date.now(), codigo: '', nome: '', descricao: '', sessoesPorMes: 4, duracaoMinutos: 45, preco: null, validadeDias: 60, ativo: true, ordem: ordem });
   renderCatalogoServicosEditor();
   const ultimo = document.querySelector('#listaServicosEditor .service-editor-row:last-child input[data-service-field="nome"]');
   if (ultimo) ultimo.focus();
@@ -9257,9 +9262,11 @@ function lerCatalogoServicosEditor() {
       id: String(idAtual || '').startsWith('novo-') ? codigo : idAtual,
       codigo: codigo,
       nome: campo('nome').value.trim(),
-      sessoesPorSemana: Number(campo('sessoesPorSemana').value),
+      descricao: campo('descricao').value.trim(),
+      sessoesPorMes: Number(campo('sessoesPorMes').value),
       duracaoMinutos: Number(campo('duracaoMinutos').value),
       preco: campo('preco').value === '' ? null : Number(campo('preco').value),
+      validadeDias: Number(campo('validadeDias').value),
       ativo: campo('ativo').checked,
       ordem: ordem
     };
@@ -9274,8 +9281,9 @@ function mensagemErroCatalogoServicos(erro) {
     CODIGO_SERVICO_INVALIDO: 'Cada serviço precisa de um código curto, sem espaços nem acentos.',
     NOME_SERVICO_INVALIDO: 'Todos os serviços precisam de nome.',
     PRECO_SERVICO_INVALIDO: 'Revê os preços. Usa um número positivo ou deixa vazio para definir depois.',
-    SESSOES_SERVICO_INVALIDAS: 'As sessões por semana têm de estar entre 1 e 14.',
-    DURACAO_SERVICO_INVALIDA: 'A duração tem de estar entre 5 e 300 minutos.'
+    SESSOES_SERVICO_INVALIDAS: 'As sessões por mês têm de estar entre 0 e 100.',
+    DURACAO_SERVICO_INVALIDA: 'A duração tem de estar entre 0 e 300 minutos.',
+    VALIDADE_SERVICO_INVALIDA: 'A validade tem de estar entre 1 e 730 dias.'
   };
   return mensagens[codigo] || codigo || 'Não foi possível guardar a tabela.';
 }

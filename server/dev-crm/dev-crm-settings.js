@@ -42,5 +42,5 @@ export default async function handler(req, res) {
       return responder(res, 200, { ok: true, catalogo: catalogoGuardado });
     }
     const perfil = normalizar(req.body && typeof req.body === 'object' ? req.body : {}); const agora = new Date(); await db.runTransaction(async transacao => { transacao.set(referencia, { ...perfil, updatedAt: agora, updatedBy: identidade.uid }); transacao.create(db.collection('auditLogs').doc(), { action: 'development.settings.profile-updated', actorUid: identidade.uid, createdAt: agora }); }); return responder(res, 200, { ok: true, perfil });
-  } catch (erro) { const codigo = String(erro?.code || erro?.message || 'FALHA'); const estado = /^FIREBASE_/.test(codigo) ? 401 : (codigo === 'CATALOGO_SERVICOS_CONFLITO' ? 409 : (/^(CODIGO_|ID_|NOME_|PRECO_|SESSOES_|DURACAO_|DEMASIADOS_)/.test(codigo) ? 400 : 500)); return responder(res, estado, { ok: false, erro: codigo }); }
+  } catch (erro) { const codigo = String(erro?.code || erro?.message || 'FALHA'); const estado = /^FIREBASE_/.test(codigo) ? 401 : (codigo === 'CATALOGO_SERVICOS_CONFLITO' ? 409 : (/^(CODIGO_|ID_|NOME_|PRECO_|SESSOES_|DURACAO_|VALIDADE_|DEMASIADOS_)/.test(codigo) ? 400 : 500)); return responder(res, estado, { ok: false, erro: codigo }); }
 }

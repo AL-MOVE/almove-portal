@@ -1,22 +1,29 @@
 const DEFAULT_ROWS = [
-  ['1x30', 'PT - 1x30 min', 1, 30, null],
-  ['2x30', 'PT - 2x30 min', 2, 30, null],
-  ['3x30', 'PT - 3x30 min', 3, 30, null],
-  ['1x45', 'PT - 1x45 min', 1, 45, 119],
-  ['2x45', 'PT - 2x45 min', 2, 45, 219],
-  ['3x45', 'PT - 3x45 min', 3, 45, null],
-  ['1x60', 'PT - 1x60 min', 1, 60, null],
-  ['2x60', 'PT - 2x60 min', 2, 60, null],
-  ['3x60', 'PT - 3x60 min', 3, 60, null]
+  ['1x30', 'PT - 1x30 min', 'Personal Training', 4, 30, 79, 60],
+  ['2x30', 'PT - 2x30 min', 'Personal Training', 8, 30, 159, 60],
+  ['3x30', 'PT - 3x30 min', 'Personal Training', 12, 30, 215, 60],
+  ['1x45', 'PT - 1x45 min', 'Personal Training', 4, 45, 119, 60],
+  ['2x45', 'PT - 2x45 min', 'Personal Training', 8, 45, 225, 60],
+  ['3x45', 'PT - 3x45 min', 'Personal Training', 12, 45, 315, 60],
+  ['1x60', 'PT - 1x60 min', 'Personal Training', 4, 60, 149, 60],
+  ['2x60', 'PT - 2x60 min', 'Personal Training', 8, 60, 285, 60],
+  ['3x60', 'PT - 3x60 min', 'Personal Training', 12, 60, 415, 60],
+  ['basic', 'BASIC', 'APP + Plano de Treino', 0, 0, 15, 60],
+  ['standard', 'STANDARD', 'APP + Plano de TR+AV', 0, 0, 30, 60],
+  ['plus-1', 'PLUS 1', 'APP + TR + AV + 1PT', 1, 0, 60, 60],
+  ['plus-2', 'PLUS 2', 'APP + TR + AV + 2PT', 2, 0, 90, 60],
+  ['plus-max', 'PLUS MAX', 'APP + TR + AV + 4PT', 4, 0, 149, 60]
 ];
 
-export const DEFAULT_SERVICE_CATALOG = Object.freeze(DEFAULT_ROWS.map(([codigo, nome, sessoesPorSemana, duracaoMinutos, preco], ordem) => Object.freeze({
+export const DEFAULT_SERVICE_CATALOG = Object.freeze(DEFAULT_ROWS.map(([codigo, nome, descricao, sessoesPorMes, duracaoMinutos, preco, validadeDias], ordem) => Object.freeze({
   id: codigo,
   codigo,
   nome,
-  sessoesPorSemana,
+  descricao,
+  sessoesPorMes,
   duracaoMinutos,
   preco,
+  validadeDias,
   ativo: true,
   ordem
 })));
@@ -53,9 +60,11 @@ export function normalizeService(input = {}, ordem = 0) {
     id: idSeguro(input.id, codigo),
     codigo,
     nome,
-    sessoesPorSemana: inteiro(input.sessoesPorSemana, 1, 14, 'SESSOES_SERVICO_INVALIDAS'),
-    duracaoMinutos: inteiro(input.duracaoMinutos, 5, 300, 'DURACAO_SERVICO_INVALIDA'),
+    descricao: texto(input.descricao, 250),
+    sessoesPorMes: inteiro(input.sessoesPorMes ?? (Number(input.sessoesPorSemana) * 4), 0, 100, 'SESSOES_SERVICO_INVALIDAS'),
+    duracaoMinutos: inteiro(input.duracaoMinutos, 0, 300, 'DURACAO_SERVICO_INVALIDA'),
     preco: preco(input.preco),
+    validadeDias: inteiro(input.validadeDias ?? 60, 1, 730, 'VALIDADE_SERVICO_INVALIDA'),
     ativo: input.ativo !== false,
     ordem: Number.isInteger(Number(input.ordem)) ? Number(input.ordem) : ordem
   };
@@ -110,7 +119,7 @@ export function priceForService({ catalogo, codigo, cliente = {}, packsAnteriore
 export function packShapeForService(servico) {
   return {
     frequencia: servico.codigo,
-    sessoesTotal: servico.sessoesPorSemana * 4,
+    sessoesTotal: servico.sessoesPorMes,
     duracaoMinutos: servico.duracaoMinutos,
     servicoId: servico.id,
     servicoNome: servico.nome
