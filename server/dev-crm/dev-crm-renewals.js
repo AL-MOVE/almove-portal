@@ -2,8 +2,8 @@ import { obterIdentidadeFirebase } from '../../api/_firebase.js';
 import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
+import { loadServiceCatalog, packShapeForService, priceForService, serviceByCode } from './service-catalog.js';
 
-const FREQUENCIAS = new Set(['1x30', '2x30', '3x30', '1x45', '2x45', '3x45', '1x60', '2x60', '3x60']);
 function responder(res, estado, corpo) { res.setHeader('Cache-Control', 'no-store, max-age=0'); res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('X-Robots-Tag', 'noindex, nofollow'); return res.status(estado).json(corpo); }
 function mesAtual() { const partes = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit' }).formatToParts(new Date()); return partes.find(item => item.type === 'year').value + '-' + partes.find(item => item.type === 'month').value; }
 function tituloMes() { return new Intl.DateTimeFormat('pt-PT', { timeZone: 'Europe/Lisbon', month: 'long', year: 'numeric' }).format(new Date()); }
@@ -30,14 +30,16 @@ export default async function handler(req, res) {
     const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove(); exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid));
     if (req.method === 'GET') return responder(res, 200, { ok: true, ...(await candidatos(db)) });
     const itens = Array.isArray(req.body?.itens) ? req.body.itens.slice(0, 100) : []; if (!itens.length) return responder(res, 400, { ok: false, erro: 'RENOVACAO_SEM_ITENS' });
-    const mes = mesAtual(); const [clientesSnap, packsSnap] = await Promise.all([db.collection('crmMigrationClients').get(), db.collection('crmMigrationPacks').get()]); const clientes = new Map(clientesSnap.docs.map(documento => [documento.id, documento.data()])); const existentes = packsSnap.docs.map(documento => ({ id: documento.id, ...documento.data() })); const agora = new Date(); const lote = db.batch(); let criados = 0;
+    const mes = mesAtual(); const [clientesSnap, packsSnap, historicoSnap, catalogo] = await Promise.all([db.collection('crmMigrationClients').get(), db.collection('crmMigrationPacks').get(), db.collection('crmMigrationPackHistory').get(), loadServiceCatalog(db)]); const clientes = new Map(clientesSnap.docs.map(documento => [documento.id, documento.data()])); const existentes = packsSnap.docs.map(documento => ({ id: documento.id, ...documento.data() })); const historico = historicoSnap.docs.map(documento => ({ id: documento.id, ...documento.data() })); const agora = new Date(); const lote = db.batch(); let criados = 0;
     for (const item of itens) {
-      const clientId = String(item?.idCliente || '').trim(); const frequencia = String(item?.frequencia || '').trim(); if (!clientes.has(clientId) || clientes.get(clientId).estado !== 'Ativo' || !FREQUENCIAS.has(frequencia)) continue; if (existentes.some(pack => pack.clientId === clientId && pack.mesAno === mes)) continue;
-      const anterior = ultimaFrequencia(existentes, clientId, mes); const total = Number(frequencia.split('x')[0]) * 4; const duracaoMinutos = Number(frequencia.split('x')[1]); const packId = idSeguro(clientId) + '-' + mes + '-development'; const packRef = db.collection('crmMigrationPacks').doc(packId);
-      lote.create(packRef, { clientId, mesAno: mes, frequencia, sessoesTotal: total, sessoesConfirmadas: 0, duracaoMinutos, estadoPagamento: 'Pendente', preco: Number(anterior?.preco || 0), origem: 'firebase-development', createdAt: agora, createdBy: identidade.uid });
+      const clientId = String(item?.idCliente || '').trim(); const frequencia = String(item?.frequencia || '').trim(); if (!clientes.has(clientId) || clientes.get(clientId).estado !== 'Ativo') continue; if (existentes.some(pack => pack.clientId === clientId && pack.mesAno === mes)) continue;
+      let servico; try { servico = serviceByCode(catalogo.servicos, frequencia); } catch { continue; }
+      const anterioresCliente = existentes.concat(historico).filter(pack => pack.clientId === clientId && String(pack.mesAno || '') < mes); const calculo = priceForService({ catalogo: catalogo.servicos, codigo: frequencia, cliente: clientes.get(clientId), packsAnteriores: anterioresCliente }); const formato = packShapeForService(servico); const total = formato.sessoesTotal; const packId = idSeguro(clientId) + '-' + mes + '-development'; const packRef = db.collection('crmMigrationPacks').doc(packId);
+      lote.create(packRef, { clientId, mesAno: mes, ...formato, sessoesConfirmadas: 0, estadoPagamento: 'Pendente', preco: calculo.preco, precoOrigem: calculo.origem, origem: 'firebase-development', createdAt: agora, createdBy: identidade.uid });
+      lote.update(db.collection('crmMigrationClients').doc(clientId), { servicoAtual: servico.nome, ...(clientes.get(clientId).precoPersonalizadoServico !== frequencia ? { precoPersonalizado: null, precoPersonalizadoServico: '' } : {}), updatedAt: agora, updatedBy: identidade.uid });
       for (let numero = 1; numero <= total; numero += 1) lote.create(db.collection('crmMigrationSessions').doc(packId + '-s' + numero), { clientId, mesAno: mes, numSessao: numero, estado: 'Pendente', dataConfirmada: '', origem: 'firebase-development', createdAt: agora });
-      lote.create(db.collection('auditLogs').doc(), { action: 'development.pack.renewed', actorUid: identidade.uid, clientId, packId, createdAt: agora }); criados += 1;
+      lote.create(db.collection('auditLogs').doc(), { action: 'development.pack.renewed', actorUid: identidade.uid, clientId, packId, frequency: frequencia, price: calculo.preco, priceSource: calculo.origem, createdAt: agora }); criados += 1;
     }
     if (!criados) return responder(res, 200, { ok: true, criados: 0 }); await lote.commit(); return responder(res, 201, { ok: true, criados });
-  } catch (erro) { const codigo = String(erro?.code || erro?.message || 'FALHA'); return responder(res, /^FIREBASE_/.test(codigo) ? 401 : 500, { ok: false, erro: codigo }); }
+  } catch (erro) { const codigo = String(erro?.code || erro?.message || 'FALHA'); return responder(res, /^FIREBASE_/.test(codigo) ? 401 : (/^(SERVICO_|PRECO_)/.test(codigo) ? 400 : 500), { ok: false, erro: codigo }); }
 }

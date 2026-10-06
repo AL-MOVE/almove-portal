@@ -3,9 +3,9 @@ import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
 import { consolidarPacksMensais } from './payment-status.js';
+import { frequencyFromServiceName, loadServiceCatalog, packShapeForService, priceForService, serviceByCode } from './service-catalog.js';
 
 const MEDIDAS = ['pesoKg', 'alturaCm', 'massaGordaPercent', 'cinturaCm', 'abdomenCm', 'bracoDireitoCm', 'bracoEsquerdoCm', 'pernaDireitaCm', 'pernaEsquerdaCm'];
-const FREQUENCIAS = new Set(['1x30', '2x30', '3x30', '1x45', '2x45', '3x45', '1x60', '2x60', '3x60']);
 const ESTADOS_PAGAMENTO = new Set(['Pago', 'Pendente']);
 
 function responder(res, estado, corpo) {
@@ -48,25 +48,26 @@ export default async function handler(req, res) {
 
     if (acao === 'create-pack') {
       const frequencia = texto(dados.frequencia, 16); const estadoPagamento = texto(dados.estadoPagamento, 16);
-      if (!FREQUENCIAS.has(frequencia)) return responder(res, 400, { ok: false, erro: 'FREQUENCIA_INVALIDA' });
       if (!ESTADOS_PAGAMENTO.has(estadoPagamento)) return responder(res, 400, { ok: false, erro: 'ESTADO_PAGAMENTO_INVALIDO' });
       const mes = mesAtual();
-      const [packsSnap, historicoSnap] = await Promise.all([
+      const [packsSnap, historicoSnap, catalogo] = await Promise.all([
         db.collection('crmMigrationPacks').where('clientId', '==', clienteId).get(),
-        db.collection('crmMigrationPackHistory').where('clientId', '==', clienteId).get()
+        db.collection('crmMigrationPackHistory').where('clientId', '==', clienteId).get(),
+        loadServiceCatalog(db)
       ]);
       const packs = packsSnap.docs.map(documento => ({ id: documento.id, ...documento.data() }));
       if (consolidarPacksMensais(packs).some(pack => pack.mesAno === mes)) return responder(res, 409, { ok: false, erro: 'PACK_JA_EXISTE' });
       const anteriores = packs.concat(historicoSnap.docs.map(documento => ({ id: documento.id, ...documento.data() })))
         .filter(pack => String(pack.mesAno || '') < mes)
         .sort((a, b) => String(b.mesAno || '').localeCompare(String(a.mesAno || '')));
-      const precoAnterior = Number(anteriores[0]?.preco); const precoPersonalizado = Number(clienteSnap.data()?.precoPersonalizado);
-      const preco = Number.isFinite(precoAnterior) ? precoAnterior : (Number.isFinite(precoPersonalizado) ? precoPersonalizado : 0);
-      const total = Number(frequencia.split('x')[0]) * 4; const duracaoMinutos = Number(frequencia.split('x')[1]);
+      const calculo = priceForService({ catalogo: catalogo.servicos, codigo: frequencia, cliente: clienteSnap.data(), packsAnteriores: anteriores });
+      const formato = packShapeForService(calculo.servico); const preco = calculo.preco; const total = formato.sessoesTotal; const duracaoMinutos = formato.duracaoMinutos;
       const packId = encodeURIComponent(clienteId) + '-' + mes + '-development'; const pack = db.collection('crmMigrationPacks').doc(packId); const lote = db.batch();
-      lote.create(pack, { clientId: clienteId, mesAno: mes, frequencia, sessoesTotal: total, sessoesConfirmadas: 0, duracaoMinutos, estadoPagamento, preco, origem: 'firebase-development', createdAt: agora, createdBy: identidade.uid, ...(estadoPagamento === 'Pago' ? { pagoEm: agora } : {}) });
+      lote.create(pack, { clientId: clienteId, mesAno: mes, ...formato, sessoesConfirmadas: 0, estadoPagamento, preco, precoOrigem: calculo.origem, origem: 'firebase-development', createdAt: agora, createdBy: identidade.uid, ...(estadoPagamento === 'Pago' ? { pagoEm: agora } : {}) });
+      const clienteAtual = clienteSnap.data() || {}; const alterouServico = frequencyFromServiceName(clienteAtual.servicoAtual) !== frequencia; const personalizadoCompativel = clienteAtual.precoPersonalizadoServico === frequencia;
+      lote.update(cliente, { servicoAtual: calculo.servico.nome, ...(alterouServico && !personalizadoCompativel ? { precoPersonalizado: null, precoPersonalizadoServico: '' } : {}), updatedAt: agora, updatedBy: identidade.uid });
       for (let numero = 1; numero <= total; numero += 1) lote.create(db.collection('crmMigrationSessions').doc(packId + '-s' + numero), { clientId: clienteId, mesAno: mes, numSessao: numero, estado: 'Pendente', dataConfirmada: '', origem: 'firebase-development', createdAt: agora });
-      lote.create(db.collection('auditLogs').doc(), { ...auditoria, action: 'development.pack.created', packId, frequency: frequencia, total, paymentStatus: estadoPagamento, price: preco });
+      lote.create(db.collection('auditLogs').doc(), { ...auditoria, action: 'development.pack.created', packId, frequency: frequencia, total, paymentStatus: estadoPagamento, price: preco, priceSource: calculo.origem });
       await lote.commit();
       return responder(res, 201, { ok: true, idCliente: clienteId, packId });
     }
@@ -121,14 +122,17 @@ export default async function handler(req, res) {
     }
     if (acao === 'set-price') {
       const preco = dados.preco === '' || dados.preco == null ? null : Number(dados.preco); if (preco !== null && (!Number.isFinite(preco) || preco < 0 || preco > 100000)) return responder(res, 400, { ok: false, erro: 'PRECO_INVALIDO' });
-      const packs = await db.collection('crmMigrationPacks').where('clientId', '==', clienteId).get(); const pack = documentoPackDoMes(packs.docs, mesAtual()); const lote = db.batch(); lote.update(cliente, { precoPersonalizado: preco, updatedAt: agora, updatedBy: identidade.uid }); if (pack && preco !== null) lote.update(pack.ref, { preco, updatedAt: agora }); lote.create(db.collection('auditLogs').doc(), { ...auditoria, action: 'development.client.price-changed', price: preco }); await lote.commit();
+      const [packs, historico, catalogo] = await Promise.all([db.collection('crmMigrationPacks').where('clientId', '==', clienteId).get(), db.collection('crmMigrationPackHistory').where('clientId', '==', clienteId).get(), loadServiceCatalog(db)]); const pack = documentoPackDoMes(packs.docs, mesAtual()); const codigo = texto(pack?.data()?.frequencia || frequencyFromServiceName(clienteSnap.data()?.servicoAtual), 32); if (!codigo) return responder(res, 409, { ok: false, erro: 'SERVICO_CLIENTE_NAO_DEFINIDO' });
+      const servico = serviceByCode(catalogo.servicos, codigo); const clienteParaCalculo = { ...clienteSnap.data(), precoPersonalizado: preco, precoPersonalizadoServico: preco === null ? '' : codigo }; const anteriores = packs.docs.concat(historico.docs).map(documento => ({ id: documento.id, ...documento.data() })).filter(item => item.id !== pack?.id); const calculo = priceForService({ catalogo: catalogo.servicos, codigo, cliente: clienteParaCalculo, packsAnteriores: anteriores });
+      if (pack && pack.data().estadoPagamento === 'Pago' && Number(pack.data().preco) !== calculo.preco && dados.confirmarReprecificacao !== true) return responder(res, 409, { ok: false, erro: 'PACK_PAGO_REQUER_CONFIRMACAO' });
+      const lote = db.batch(); lote.update(cliente, { precoPersonalizado: preco, precoPersonalizadoServico: preco === null ? '' : codigo, updatedAt: agora, updatedBy: identidade.uid }); if (pack) lote.update(pack.ref, { preco: calculo.preco, precoOrigem: calculo.origem, servicoId: servico.id, servicoNome: servico.nome, updatedAt: agora }); lote.create(db.collection('auditLogs').doc(), { ...auditoria, action: 'development.client.price-changed', customPrice: preco, appliedPrice: calculo.preco, frequency: codigo, priceSource: calculo.origem }); await lote.commit();
       return responder(res, 200, { ok: true, idCliente: clienteId });
     }
     if (acao === 'edit-pack' || acao === 'generate-sessions') {
-      const packs = await db.collection('crmMigrationPacks').where('clientId', '==', clienteId).get(); const pack = documentoPackDoMes(packs.docs, mesAtual()); if (!pack) return responder(res, 404, { ok: false, erro: 'PACK_NAO_ENCONTRADO' }); const sessoes = await db.collection('crmMigrationSessions').where('clientId', '==', clienteId).get(); const atuais = sessoes.docs.filter(documento => documento.data().mesAno === mesAtual()); const lote = db.batch(); let total = Number(pack.data().sessoesTotal || 0); let frequencia = String(pack.data().frequencia || '');
-      if (acao === 'edit-pack') { frequencia = texto(dados.frequencia, 16); if (!FREQUENCIAS.has(frequencia)) return responder(res, 400, { ok: false, erro: 'FREQUENCIA_INVALIDA' }); const desejado = Number(frequencia.split('x')[0]) * 4; const confirmadas = atuais.filter(documento => documento.data().estado === 'Confirmada').length; total = Math.max(desejado, confirmadas); lote.update(pack.ref, { frequencia, sessoesTotal: total, duracaoMinutos: Number(frequencia.split('x')[1]), updatedAt: agora }); const pendentesAEliminar = atuais.filter(documento => documento.data().estado !== 'Confirmada' && Number(documento.data().numSessao) > total); pendentesAEliminar.forEach(documento => lote.delete(documento.ref)); }
+      const [packs, historico, sessoes, catalogo] = await Promise.all([db.collection('crmMigrationPacks').where('clientId', '==', clienteId).get(), db.collection('crmMigrationPackHistory').where('clientId', '==', clienteId).get(), db.collection('crmMigrationSessions').where('clientId', '==', clienteId).get(), loadServiceCatalog(db)]); const pack = documentoPackDoMes(packs.docs, mesAtual()); if (!pack) return responder(res, 404, { ok: false, erro: 'PACK_NAO_ENCONTRADO' }); const atuais = sessoes.docs.filter(documento => documento.data().mesAno === mesAtual()); const lote = db.batch(); let total = Number(pack.data().sessoesTotal || 0); let frequencia = String(pack.data().frequencia || ''); let precoAudit = Number(pack.data().preco || 0); let precoOrigemAudit = String(pack.data().precoOrigem || 'anterior');
+      if (acao === 'edit-pack') { frequencia = texto(dados.frequencia, 32); const servico = serviceByCode(catalogo.servicos, frequencia); const mudou = frequencia !== String(pack.data().frequencia || ''); const clienteAtual = clienteSnap.data() || {}; const personalizadoCompativel = clienteAtual.precoPersonalizadoServico === frequencia; const clienteParaCalculo = mudou && !personalizadoCompativel ? { ...clienteAtual, precoPersonalizado: null, precoPersonalizadoServico: '' } : clienteAtual; const anteriores = packs.docs.concat(historico.docs).map(documento => ({ id: documento.id, ...documento.data() })).filter(item => item.id !== pack.id); const calculo = priceForService({ catalogo: catalogo.servicos, codigo: frequencia, cliente: clienteParaCalculo, packsAnteriores: anteriores }); if (pack.data().estadoPagamento === 'Pago' && Number(pack.data().preco) !== calculo.preco && dados.confirmarReprecificacao !== true) return responder(res, 409, { ok: false, erro: 'PACK_PAGO_REQUER_CONFIRMACAO' }); const formato = packShapeForService(servico); const desejado = formato.sessoesTotal; const confirmadas = atuais.filter(documento => documento.data().estado === 'Confirmada').length; total = Math.max(desejado, confirmadas); precoAudit = calculo.preco; precoOrigemAudit = calculo.origem; lote.update(pack.ref, { ...formato, sessoesTotal: total, preco: calculo.preco, precoOrigem: calculo.origem, updatedAt: agora }); lote.update(cliente, { servicoAtual: servico.nome, ...(mudou && !personalizadoCompativel ? { precoPersonalizado: null, precoPersonalizadoServico: '' } : {}), updatedAt: agora, updatedBy: identidade.uid }); const pendentesAEliminar = atuais.filter(documento => documento.data().estado !== 'Confirmada' && Number(documento.data().numSessao) > total); pendentesAEliminar.forEach(documento => lote.delete(documento.ref)); }
       const numeros = new Set(atuais.filter(documento => acao !== 'edit-pack' || !(documento.data().estado !== 'Confirmada' && Number(documento.data().numSessao) > total)).map(documento => Number(documento.data().numSessao))); for (let numero = 1; numero <= total; numero += 1) { if (numeros.has(numero)) continue; lote.create(db.collection('crmMigrationSessions').doc(encodeURIComponent(clienteId) + '-' + mesAtual() + '-generated-' + numero), { clientId: clienteId, mesAno: mesAtual(), numSessao: numero, estado: 'Pendente', dataConfirmada: '', origem: 'firebase-development', createdAt: agora }); }
-      lote.create(db.collection('auditLogs').doc(), { ...auditoria, action: acao === 'edit-pack' ? 'development.pack.edited' : 'development.sessions.generated', frequency: frequencia, total }); await lote.commit(); return responder(res, 200, { ok: true, idCliente: clienteId });
+      lote.create(db.collection('auditLogs').doc(), { ...auditoria, action: acao === 'edit-pack' ? 'development.pack.edited' : 'development.sessions.generated', frequency: frequencia, total, ...(acao === 'edit-pack' ? { price: precoAudit, priceSource: precoOrigemAudit } : {}) }); await lote.commit(); return responder(res, 200, { ok: true, idCliente: clienteId });
     }
     if (acao === 'set-special-mode') {
       const modo = texto(dados.modo, 16); const dataInicio = texto(dados.dataInicio, 10); const dataFim = texto(dados.dataFim, 10); if (!['Férias', 'Deload'].includes(modo) || !/^\d{4}-\d{2}-\d{2}$/.test(dataInicio) || !/^\d{4}-\d{2}-\d{2}$/.test(dataFim) || dataFim < dataInicio) return responder(res, 400, { ok: false, erro: 'MODO_INVALIDO' }); await db.runTransaction(async transacao => { transacao.update(cliente, { modoEspecial: { modo, dataInicio, dataFim, ativo: true }, updatedAt: agora, updatedBy: identidade.uid }); transacao.create(db.collection('auditLogs').doc(), { ...auditoria, action: 'development.client.special-mode-set', modo, dataInicio, dataFim }); }); return responder(res, 200, { ok: true, idCliente: clienteId });
@@ -141,6 +145,6 @@ export default async function handler(req, res) {
     }
     return responder(res, 400, { ok: false, erro: 'ACAO_INVALIDA' });
   } catch (erro) {
-    const codigo = String(erro?.code || erro?.message || 'FALHA'); return responder(res, /^FIREBASE_/.test(codigo) ? 401 : 500, { ok: false, erro: codigo });
+    const codigo = String(erro?.code || erro?.message || 'FALHA'); const pedidoInvalido = /^(SERVICO_|CODIGO_|PRECO_|DURACAO_|SESSOES_)/.test(codigo); return responder(res, /^FIREBASE_/.test(codigo) ? 401 : (pedidoInvalido ? 400 : 500), { ok: false, erro: codigo });
   }
 }

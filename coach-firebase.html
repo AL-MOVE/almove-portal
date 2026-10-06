@@ -2520,6 +2520,35 @@
   </div>
 </div>
 
+<div id="modalServicosOverlay" class="service-modal-overlay" style="display:none;">
+  <div class="service-modal" role="dialog" aria-modal="true" aria-labelledby="modalServicosTitulo">
+    <div class="service-modal-head">
+      <div><div class="eyebrow">Definições comerciais</div><h3 id="modalServicosTitulo">Serviços e preços</h3><p>Os preços guardados aqui são aplicados a packs novos ou quando alteras a frequência. Packs e recibos antigos mantêm o valor original.</p></div>
+      <button type="button" class="btn btn-secondary" onclick="fecharModalServicos()" aria-label="Fechar">×</button>
+    </div>
+    <div class="service-safety-note"><strong>Regra de segurança:</strong> um serviço usado deixa de aceitar novos packs quando é desativado, mas continua visível no histórico. O código é a referência interna e deve ser único.</div>
+    <div class="service-table-head"><span>Serviço</span><span>Agenda</span><span>Preço mensal</span><span>Estado</span></div>
+    <div id="listaServicosEditor" class="service-editor-list"></div>
+    <div class="service-modal-actions">
+      <button type="button" class="btn btn-secondary" onclick="adicionarServicoEditor()">+ Novo serviço</button>
+      <span id="estadoCatalogoServicos" aria-live="polite"></span>
+      <button type="button" class="btn btn-secondary" onclick="fecharModalServicos()">Cancelar</button>
+      <button type="button" class="btn btn-primary" id="btnGuardarCatalogoServicos" onclick="guardarCatalogoServicosUI()">Guardar tabela</button>
+    </div>
+  </div>
+</div>
+
+<style id="servicos-precos-design">
+  .service-modal-overlay{position:fixed;inset:0;z-index:10008;align-items:center;justify-content:center;padding:16px;overflow:auto;background:rgba(2,6,12,.78);backdrop-filter:blur(8px)}
+  .service-modal{width:min(1000px,100%);max-height:92vh;overflow:auto;margin:auto;padding:24px;border:1px solid rgba(45,212,191,.24);border-radius:20px;background:linear-gradient(145deg,#0d1c2a,#08121e);box-shadow:0 30px 90px rgba(0,0,0,.5)}
+  .service-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.service-modal-head h3{margin:3px 0 5px;color:#f8fafc;font-size:21px}.service-modal-head p{max-width:720px;margin:0;color:#91a3b8;font-size:12px;line-height:1.55}.service-modal-head>.btn{width:auto;padding:6px 11px}
+  .service-safety-note{margin:16px 0;padding:11px 13px;border:1px solid rgba(56,189,248,.2);border-radius:12px;background:rgba(14,116,144,.1);color:#bae6fd;font-size:11px;line-height:1.5}
+  .service-table-head,.service-editor-row{display:grid;grid-template-columns:minmax(260px,2fr) minmax(190px,1.2fr) minmax(130px,.75fr) minmax(90px,.55fr);gap:10px;align-items:end}.service-table-head{padding:0 12px 6px;color:#70839a;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+  .service-editor-list{display:grid;gap:8px}.service-editor-row{padding:12px;border:1px solid rgba(148,163,184,.15);border-radius:14px;background:rgba(255,255,255,.025)}.service-editor-row.inactive{opacity:.62}.service-editor-main{display:grid;grid-template-columns:minmax(140px,1.5fr) minmax(90px,.7fr);gap:8px}.service-editor-schedule{display:grid;grid-template-columns:1fr 1fr;gap:8px}.service-editor-row label{display:block;color:#8193a9;font-size:9px;font-weight:750;text-transform:uppercase;letter-spacing:.045em}.service-editor-row input{margin-top:4px;padding:9px 10px;font-size:12px}.service-editor-active{display:flex;align-items:center;gap:7px;min-height:42px;color:#cbd5e1;font-size:11px}.service-editor-active input{width:auto;margin:0}.service-editor-price{position:relative}.service-editor-price:before{content:'€';position:absolute;left:10px;bottom:10px;color:#5eead4;font-size:12px}.service-editor-price input{padding-left:25px}.service-modal-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px}.service-modal-actions .btn{width:auto}.service-modal-actions #estadoCatalogoServicos{flex:1;min-width:160px;color:#91a3b8;font-size:11px}
+  .price-preview{margin-top:8px;padding:9px 11px;border:1px solid rgba(45,212,191,.15);border-radius:10px;background:rgba(13,148,136,.07);color:#99f6e4;font-size:11px;line-height:1.45}.price-preview.warning{border-color:rgba(250,204,21,.22);background:rgba(161,98,7,.1);color:#fde68a}
+  @media(max-width:760px){.service-modal{padding:16px}.service-table-head{display:none}.service-editor-row{grid-template-columns:1fr;align-items:start}.service-editor-main,.service-editor-schedule{grid-template-columns:1fr 1fr}.service-modal-actions .btn{flex:1}.service-modal-actions #estadoCatalogoServicos{flex-basis:100%;order:-1}}
+</style>
+
 <style id="biblioteca-exercicios-design">
   .exercise-library-header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}.exercise-library-header p{max-width:650px;color:#91a3b8;font-size:12px}.exercise-library-actions{display:flex;gap:8px;flex-wrap:wrap}.exercise-library-toolbar{display:grid;grid-template-columns:minmax(240px,2fr) repeat(3,minmax(150px,1fr));gap:10px;padding:14px;border:1px solid rgba(45,212,191,.18);border-radius:14px;background:rgba(8,18,29,.72)}.exercise-library-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}.exercise-library-stat{padding:13px;border:1px solid rgba(148,163,184,.15);border-radius:12px;background:rgba(255,255,255,.035)}.exercise-library-stat strong{display:block;color:#fff;font-size:20px;line-height:1}.exercise-library-stat span{display:block;margin-top:5px;color:#7f91a7;font-size:10px;text-transform:uppercase;letter-spacing:.06em}.exercise-library-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:10px}.exercise-library-card{display:grid;grid-template-columns:84px 1fr;gap:12px;min-width:0;padding:12px;border:1px solid rgba(148,163,184,.16);border-radius:14px;background:linear-gradient(145deg,rgba(14,28,42,.9),rgba(8,16,25,.88))}.exercise-library-card.inactive{opacity:.64}.exercise-library-thumb{position:relative;width:84px;aspect-ratio:1;border:1px solid rgba(148,163,184,.14);border-radius:11px;overflow:hidden;background:#08111c;color:#52657a;display:grid;place-items:center;font-size:10px;text-align:center}.exercise-library-thumb img{width:100%;height:100%;object-fit:cover}.exercise-library-thumb .end-marker{position:absolute;right:4px;bottom:4px;padding:2px 5px;border-radius:999px;background:rgba(5,8,16,.86);color:#5eead4;font-size:8px;font-weight:800}.exercise-library-card-body{min-width:0}.exercise-library-card h3{margin:0;color:#f8fafc;font-size:13px;line-height:1.25}.exercise-library-meta{margin-top:5px;color:#8ea0b5;font-size:10px;line-height:1.45}.exercise-library-tags{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}.exercise-library-tag{padding:2px 6px;border-radius:999px;border:1px solid rgba(45,212,191,.2);background:rgba(13,148,136,.1);color:#99f6e4;font-size:9px}.exercise-library-card-actions{display:flex;gap:6px;margin-top:9px}.exercise-library-empty{grid-column:1/-1;padding:34px;border:1px dashed rgba(148,163,184,.25);border-radius:14px;color:#91a3b8;text-align:center}.exercise-media-preview{display:grid;place-items:center;aspect-ratio:4/3;margin-top:7px;border:1px dashed rgba(148,163,184,.24);border-radius:11px;overflow:hidden;background:#08111c;color:#64748b;font-size:10px}.exercise-media-preview img{width:100%;height:100%;object-fit:cover}.exercise-media-preview.erro{border-color:rgba(248,113,113,.35);color:#fca5a5}.exercise-library-loading{grid-column:1/-1;display:flex;align-items:center;justify-content:center;min-height:160px;color:#91a3b8}
   @media(max-width:980px){.exercise-library-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.exercise-library-toolbar>input{grid-column:1/-1}}
@@ -3242,6 +3271,11 @@
         <div class="settings-card-icon">◉</div>
         <div><h3>Meu perfil</h3><p>Dados usados em contratos, relatórios e comunicações aos clientes.</p></div>
         <button type="button" class="btn btn-primary" onclick="abrirModalPerfil()">Editar perfil</button>
+      </article>
+      <article class="settings-card">
+        <div class="settings-card-icon">€</div>
+        <div><h3>Serviços e preços</h3><p>Cria serviços, altera preços padrão e desativa opções antigas sem mexer no histórico.</p></div>
+        <button type="button" class="btn btn-primary" onclick="abrirModalServicos()">Gerir tabela</button>
       </article>
       <article class="settings-card">
         <div class="settings-card-icon">◐</div>
@@ -5627,6 +5661,64 @@ let mesVisualizado = null;
 let agendaSemanaOffset = 0;
 let AGENDA_DADOS = null;
 let agendaMostrarSoFaltam = false;
+let CATALOGO_SERVICOS = {
+  revision: 0,
+  configured: false,
+  servicos: [
+    {id:'1x30',codigo:'1x30',nome:'PT - 1x30 min',sessoesPorSemana:1,duracaoMinutos:30,preco:null,ativo:true,ordem:0},
+    {id:'2x30',codigo:'2x30',nome:'PT - 2x30 min',sessoesPorSemana:2,duracaoMinutos:30,preco:null,ativo:true,ordem:1},
+    {id:'3x30',codigo:'3x30',nome:'PT - 3x30 min',sessoesPorSemana:3,duracaoMinutos:30,preco:null,ativo:true,ordem:2},
+    {id:'1x45',codigo:'1x45',nome:'PT - 1x45 min',sessoesPorSemana:1,duracaoMinutos:45,preco:119,ativo:true,ordem:3},
+    {id:'2x45',codigo:'2x45',nome:'PT - 2x45 min',sessoesPorSemana:2,duracaoMinutos:45,preco:219,ativo:true,ordem:4},
+    {id:'3x45',codigo:'3x45',nome:'PT - 3x45 min',sessoesPorSemana:3,duracaoMinutos:45,preco:null,ativo:true,ordem:5},
+    {id:'1x60',codigo:'1x60',nome:'PT - 1x60 min',sessoesPorSemana:1,duracaoMinutos:60,preco:null,ativo:true,ordem:6},
+    {id:'2x60',codigo:'2x60',nome:'PT - 2x60 min',sessoesPorSemana:2,duracaoMinutos:60,preco:null,ativo:true,ordem:7},
+    {id:'3x60',codigo:'3x60',nome:'PT - 3x60 min',sessoesPorSemana:3,duracaoMinutos:60,preco:null,ativo:true,ordem:8}
+  ]
+};
+
+function servicosAtivosCRM() {
+  return (CATALOGO_SERVICOS.servicos || []).filter(item => item.ativo !== false).sort((a,b) => Number(a.ordem||0)-Number(b.ordem||0));
+}
+
+function servicoCRM(codigo) {
+  return (CATALOGO_SERVICOS.servicos || []).find(item => item.codigo === codigo) || null;
+}
+
+function opcoesServicosCRM(valor, incluirVazio, incluirInativoAtual) {
+  let lista = servicosAtivosCRM();
+  const atual = servicoCRM(valor);
+  if (incluirInativoAtual && atual && !lista.some(item => item.id === atual.id)) lista = [atual].concat(lista);
+  return (incluirVazio ? '<option value="">Sem serviço</option>' : '') + lista.map(item => {
+    const preco = item.preco === null || item.preco === undefined ? 'preço por definir' : '€' + Number(item.preco).toFixed(2);
+    return '<option value="' + escaparHtmlCRM(item.codigo) + '"' + (item.codigo === valor ? ' selected' : '') + '>' + escaparHtmlCRM(item.nome) + ' · ' + preco + (item.ativo === false ? ' · inativo' : '') + '</option>';
+  }).join('');
+}
+
+function opcoesNomesServicosCRM(valor, incluirVazio) {
+  let lista = servicosAtivosCRM();
+  const atual = (CATALOGO_SERVICOS.servicos || []).find(item => item.nome === valor);
+  if (atual && !lista.some(item => item.id === atual.id)) lista = [atual].concat(lista);
+  return (incluirVazio ? '<option value="">Sem serviço</option>' : '') + lista.map(item => '<option value="' + escaparHtmlCRM(item.nome) + '"' + (item.nome === valor ? ' selected' : '') + '>' + escaparHtmlCRM(item.nome) + (item.ativo === false ? ' · inativo' : '') + '</option>').join('');
+}
+
+function nomeServicoPorCodigoCRM(codigo) {
+  const item = servicoCRM(codigo);
+  return item ? item.nome : codigo;
+}
+
+function carregarCatalogoServicosCRM(callback) {
+  google.script.run.withSuccessHandler(catalogo => {
+    if (catalogo && Array.isArray(catalogo.servicos)) CATALOGO_SERVICOS = catalogo;
+    const select = document.getElementById('novoClienteServico');
+    if (select) { const atual = select.value; select.innerHTML = opcoesNomesServicosCRM(atual, true); }
+    FREQUENCIAS_DISPONIVEIS = servicosAtivosCRM().map(item => item.codigo);
+    if (typeof callback === 'function') callback(CATALOGO_SERVICOS);
+  }).withFailureHandler(err => {
+    console.warn('Não foi possível atualizar o catálogo de serviços:', err);
+    if (typeof callback === 'function') callback(CATALOGO_SERVICOS);
+  }).getCatalogoServicos();
+}
 
 // ==================== SIDEBAR COLLAPSE ====================
 
@@ -5757,6 +5849,7 @@ function init(tabInicial) {
   const mesResumoCheckins = document.getElementById('mesResumoCheckins');
   if (mesResumoCheckins) mesResumoCheckins.value = new Date().toISOString().slice(0, 7);
   loadData();
+  carregarCatalogoServicosCRM();
   carregarAvatarInicial();
   if (tabInicial && tabInicial !== 'dashboard') switchTab(tabInicial);
 }
@@ -6772,6 +6865,7 @@ function renderClientesInativos() {
 
 let CLIENTE_DETALHE_ATUAL_ID = '';
 let CLIENTE_DETALHE_ATUAL = null;
+let PACK_ATIVO_ATUAL = null;
 let PEDIDO_DETALHE_ATUAL = 0;
 
 function renderizarPreviewDetalheCliente(idCliente) {
@@ -6860,11 +6954,10 @@ function atualizarDetalheCliente() {
 function formularioEditarDadosHtmlCRM(cliente, idCliente) {
   const esc = valor => escaparHtmlCRM(valor == null ? '' : valor);
   const idEsc = idParaOnclickCRM(idCliente);
-  const servicos = ['', 'PT - 1x30 min', 'PT - 2x30 min', 'PT - 3x30 min', 'PT - 1x45 min', 'PT - 2x45 min', 'PT - 3x45 min', 'PT - 1x60 min', 'PT - 2x60 min', 'PT - 3x60 min'];
   const metodos = [['', 'Por definir'], ['Stripe', 'Stripe (cartão)'], ['Transferência', 'Transferência'], ['Mão', 'Em mão']];
   return '<div id="editarDadosForm" hidden class="editar-dados-form" aria-live="polite">' +
     '<div class="form-group"><label>Contacto</label><input type="tel" inputmode="tel" id="inputEditarContacto" value="' + esc(cliente.contacto) + '" placeholder="912345678"><button type="button" class="btn btn-secondary btn-contactos" onclick="procurarContactosGoogleCliente(\'' + idEsc + '\', \'' + idParaOnclickCRM(cliente.nome) + '\')">⌕ Procurar nos Contactos Google</button><div id="resultadoContactosGoogle"></div></div>' +
-    '<div class="form-group"><label>Serviço atual</label><select id="inputEditarServico">' + servicos.map(servico => '<option value="' + esc(servico) + '"' + (cliente.servicoAtual === servico ? ' selected' : '') + '>' + esc(servico || 'Sem serviço') + '</option>').join('') + '</select></div>' +
+    '<div class="form-group"><label>Serviço atual</label><select id="inputEditarServico">' + opcoesNomesServicosCRM(cliente.servicoAtual || '', true) + '</select><small style="display:block;margin-top:5px;color:#70839a">A frequência e o preço do mês são alterados no pack ativo abaixo.</small></div>' +
     '<div class="form-group"><label>NIF</label><input type="text" inputmode="numeric" id="inputEditarNif" value="' + esc(cliente.nif) + '" placeholder="123456789" maxlength="9"></div>' +
     '<div class="form-group"><label>Morada</label><input type="text" id="inputEditarMorada" value="' + esc(cliente.morada) + '" placeholder="Rua Exemplo, 123, Cantanhede"></div>' +
     '<div class="form-group"><label>Email</label><input type="email" inputmode="email" id="inputEditarEmail" value="' + esc(cliente.email) + '" placeholder="email@exemplo.com"></div>' +
@@ -6885,6 +6978,7 @@ function graficoResumoAvaliacaoClienteHTML(avaliacoes) {
 function renderizarDetalheCliente(detalhe) {
     const c = detalhe.cliente;
     CLIENTE_DETALHE_ATUAL = c;
+    PACK_ATIVO_ATUAL = detalhe.packAtivo || null;
     const idEsc = idParaOnclickCRM(c.id);
     let html = '';
 
@@ -6893,7 +6987,7 @@ function renderizarDetalheCliente(detalhe) {
     html += '<div class="detail-avatar">' + escaparHtmlCRM(c.nome.charAt(0).toUpperCase()) + '</div>';
     html += '<div class="detail-info">';
     html += '<h1>' + escaparHtmlCRM(c.nome) + '</h1>';
-    if (c.precoPersonalizado) html += '<div style="margin-top:6px;"><span class="desconto-patch">↓ Preço especial · €' + c.precoPersonalizado.toFixed(2) + '</span></div>';
+    if (c.precoPersonalizado !== null && c.precoPersonalizado !== undefined) html += '<div style="margin-top:6px;"><span class="desconto-patch">Preço especial · €' + Number(c.precoPersonalizado).toFixed(2) + '</span></div>';
     html += '<p>' + escaparHtmlCRM(c.servicoAtual || '—') + ' · ' + escaparHtmlCRM(c.contacto || '—') + '</p>';
     html += '<p style="margin-top: 8px; color: #94a3b8; font-size: 12px;">' + escaparHtmlCRM(c.notas || 'Sem notas') + '</p>';
     html += '</div></div>';
@@ -7062,8 +7156,9 @@ function renderizarDetalheCliente(detalhe) {
 
     html += '<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">';
     html += '<span style="font-size: 12px; color: #64748b;">Preço personalizado:</span>';
-    html += '<span style="font-size: 13px; font-weight: 700; color: ' + (c.precoPersonalizado ? '#ff9e9e' : '#94a3b8') + ';">';
-    html += (c.precoPersonalizado ? '↓ €' + c.precoPersonalizado.toFixed(2) + ' · desconto' : 'Nenhum (usa preço padrão)');
+    const temPrecoEspecial = c.precoPersonalizado !== null && c.precoPersonalizado !== undefined;
+    html += '<span style="font-size: 13px; font-weight: 700; color: ' + (temPrecoEspecial ? '#ffb4b4' : '#94a3b8') + ';">';
+    html += (temPrecoEspecial ? '€' + Number(c.precoPersonalizado).toFixed(2) + ' · apenas ' + escaparHtmlCRM(c.precoPersonalizadoServico || (detalhe.packAtivo && detalhe.packAtivo.frequencia) || 'serviço atual') : 'Nenhum (usa preço padrão)');
     html += '</span>';
     html += '<button type="button" class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px;" onclick="toggleEditarPreco()">Editar</button>';
     html += '</div>';
@@ -7071,7 +7166,8 @@ function renderizarDetalheCliente(detalhe) {
     html += '<div id="editarPrecoForm" style="display: none; margin-bottom: 20px; padding: 16px; background: #0a0e14; border-radius: 8px; max-width: 300px;">';
     html += '<div class="form-group" style="margin-bottom: 12px;">';
     html += '<label>Preço personalizado (€) — deixa vazio para remover</label>';
-    html += '<input type="number" id="inputPrecoPersonalizado" step="0.01" placeholder="ex: 99.00" value="' + (c.precoPersonalizado || '') + '">';
+    html += '<input type="number" id="inputPrecoPersonalizado" step="0.01" min="0" placeholder="ex: 99.00" value="' + (temPrecoEspecial ? Number(c.precoPersonalizado).toFixed(2) : '') + '">';
+    html += '<div class="price-preview">Deixa vazio para voltar ao preço padrão do serviço. Um preço especial fica associado apenas à frequência atual.</div>';
     html += '</div>';
     html += '<button type="button" class="btn btn-primary" onclick="salvarPrecoPersonalizado(\'' + idEsc + '\')">Guardar</button>';
     html += '</div>';
@@ -7091,17 +7187,8 @@ function renderizarDetalheCliente(detalhe) {
 
       html += '<div id="editarPackForm" style="display: none; margin-bottom: 16px; padding: 16px; background: #0a0e14; border-radius: 8px;">';
       html += '<div class="form-group" style="margin-bottom: 12px;"><label>Nova frequência</label>';
-      html += '<select id="editarFrequencia">';
-      const freqs = ['1x30','2x30','3x30','1x45','2x45','3x45','1x60','2x60','3x60'];
-      const freqLabels = {
-        '1x30':'1x por semana (30 min)','2x30':'2x por semana (30 min)','3x30':'3x por semana (30 min)',
-        '1x45':'1x por semana (45 min)','2x45':'2x por semana (45 min)','3x45':'3x por semana (45 min)',
-        '1x60':'1x por semana (60 min)','2x60':'2x por semana (60 min)','3x60':'3x por semana (60 min)'
-      };
-      freqs.forEach(f => {
-        html += '<option value="' + f + '"' + (p.frequencia === f ? ' selected' : '') + '>' + freqLabels[f] + '</option>';
-      });
-      html += '</select></div>';
+      html += '<select id="editarFrequencia" onchange="atualizarPreviaPrecoPack()">' + opcoesServicosCRM(p.frequencia, false, true) + '</select></div>';
+      html += '<div id="previsaoPrecoPack" class="price-preview"></div>';
       html += '<button type="button" class="btn btn-primary" onclick="salvarEdicaoPack(\'' + idEsc + '\')">Guardar alteração</button>';
       html += '</div>';
 
@@ -7132,17 +7219,8 @@ function renderizarDetalheCliente(detalhe) {
       html += '<p style="color: #64748b; margin-bottom: 20px;">Sem pack ativo este mês</p>';
       html += '<div style="max-width: 400px; margin: 0 auto; text-align: left;">';
       html += '<div class="form-group"><label>Frequência *</label>';
-      html += '<select id="detalheFrequencia" required><option value="">Selecionar...</option>';
-      html += '<option value="1x30">1x por semana (30 min)</option>';
-      html += '<option value="2x30">2x por semana (30 min)</option>';
-      html += '<option value="3x30">3x por semana (30 min)</option>';
-      html += '<option value="1x45">1x por semana (45 min)</option>';
-      html += '<option value="2x45">2x por semana (45 min)</option>';
-      html += '<option value="3x45">3x por semana (45 min)</option>';
-      html += '<option value="1x60">1x por semana (60 min)</option>';
-      html += '<option value="2x60">2x por semana (60 min)</option>';
-      html += '<option value="3x60">3x por semana (60 min)</option>';
-      html += '</select></div>';
+      html += '<select id="detalheFrequencia" required onchange="atualizarPreviaPrecoNovoPack()"><option value="">Selecionar...</option>' + opcoesServicosCRM('', false, false) + '</select></div>';
+      html += '<div id="previsaoPrecoNovoPack" class="price-preview warning">Escolhe um serviço para confirmar o preço mensal.</div>';
       html += '<div class="form-group"><label>Estado pagamento *</label>';
       html += '<select id="detalheEstadoPagamento" required><option value="Pendente">Pendente</option><option value="Pago">Pago</option></select></div>';
       html += '<button type="button" class="btn btn-primary" onclick="criarPackInline(\'' + idEsc + '\')">Criar pack</button>';
@@ -8577,8 +8655,36 @@ function criarPackInline(idCliente) {
     showAlert('Pack criado com sucesso!', 'success');
     renderizarDetalheCliente(resultado.detalhe);
   }).withFailureHandler(err => {
-    showAlert('Erro ao criar pack: ' + err.message, 'error');
+    const codigo = String(err && err.message || '');
+    showAlert(codigo === 'SERVICO_SEM_PRECO' ? 'Este serviço ainda não tem preço. Define-o em Definições → Serviços e preços.' : 'Erro ao criar pack: ' + codigo, 'error');
   }).criarPack({ idCliente: idCliente, frequencia: frequencia, estadoPagamento: estadoPagamento });
+}
+
+function textoPrecoServicoCRM(codigo, usarEspecial) {
+  const servico = servicoCRM(codigo);
+  if (!servico) return 'Serviço indisponível.';
+  const especialCompativel = usarEspecial && CLIENTE_DETALHE_ATUAL && CLIENTE_DETALHE_ATUAL.precoPersonalizado !== null && CLIENTE_DETALHE_ATUAL.precoPersonalizado !== undefined && CLIENTE_DETALHE_ATUAL.precoPersonalizadoServico === codigo;
+  if (especialCompativel) return 'Será aplicado o preço especial de €' + Number(CLIENTE_DETALHE_ATUAL.precoPersonalizado).toFixed(2) + ' para ' + servico.nome + '.';
+  if (servico.preco === null || servico.preco === undefined) return 'O preço padrão de ' + servico.nome + ' ainda está por definir. Abre Definições → Serviços e preços.';
+  return 'Novo valor mensal: €' + Number(servico.preco).toFixed(2) + '. O pack atual será atualizado; os meses anteriores não mudam.';
+}
+
+function atualizarPreviaPrecoPack() {
+  const campo = document.getElementById('editarFrequencia');
+  const alvo = document.getElementById('previsaoPrecoPack');
+  if (!campo || !alvo) return;
+  const servico = servicoCRM(campo.value);
+  alvo.textContent = textoPrecoServicoCRM(campo.value, true);
+  alvo.classList.toggle('warning', !servico || servico.preco === null || servico.preco === undefined);
+}
+
+function atualizarPreviaPrecoNovoPack() {
+  const campo = document.getElementById('detalheFrequencia');
+  const alvo = document.getElementById('previsaoPrecoNovoPack');
+  if (!campo || !alvo) return;
+  const servico = servicoCRM(campo.value);
+  alvo.textContent = campo.value ? textoPrecoServicoCRM(campo.value, true) : 'Escolhe um serviço para confirmar o preço mensal.';
+  alvo.classList.toggle('warning', !servico || servico.preco === null || servico.preco === undefined);
 }
 
 function toggleGrupoAcoes(idGrupo) {
@@ -8702,7 +8808,7 @@ function toggleEditarPreco() {
   if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
 }
 
-function salvarPrecoPersonalizado(idCliente) {
+function salvarPrecoPersonalizado(idCliente, confirmarReprecificacao) {
   const valor = document.getElementById('inputPrecoPersonalizado').value;
   google.script.run.withSuccessHandler(resultado => {
     DATA = resultado.crm;
@@ -8710,16 +8816,21 @@ function salvarPrecoPersonalizado(idCliente) {
     showAlert('Preço atualizado!', 'success');
     renderizarDetalheCliente(resultado.detalhe);
   }).withFailureHandler(err => {
-    showAlert('Erro ao guardar preço: ' + err.message, 'error');
-  }).definirPrecoPersonalizado({ idCliente: idCliente, preco: valor });
+    const codigo = String(err && err.message || '');
+    if (codigo === 'PACK_PAGO_REQUER_CONFIRMACAO' && !confirmarReprecificacao) {
+      if (window.confirm('Este pack já está pago. Queres mesmo alterar o valor do pack deste mês? Os meses anteriores não serão alterados.')) salvarPrecoPersonalizado(idCliente, true);
+      return;
+    }
+    showAlert(codigo === 'SERVICO_SEM_PRECO' ? 'Não é possível remover o preço especial enquanto o serviço não tiver um preço padrão nas Definições.' : 'Erro ao guardar preço: ' + codigo, 'error');
+  }).definirPrecoPersonalizado({ idCliente: idCliente, preco: valor, confirmarReprecificacao: confirmarReprecificacao === true });
 }
 
 function toggleEditarPack() {
   const form = document.getElementById('editarPackForm');
-  if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  if (form) { form.style.display = form.style.display === 'none' ? 'block' : 'none'; if (form.style.display === 'block') atualizarPreviaPrecoPack(); }
 }
 
-function salvarEdicaoPack(idCliente) {
+function salvarEdicaoPack(idCliente, confirmarReprecificacao) {
   const novaFrequencia = document.getElementById('editarFrequencia').value;
   google.script.run.withSuccessHandler(resultado => {
     DATA = resultado.crm;
@@ -8727,8 +8838,13 @@ function salvarEdicaoPack(idCliente) {
     showAlert('Pack atualizado!', 'success');
     renderizarDetalheCliente(resultado.detalhe);
   }).withFailureHandler(err => {
-    showAlert('Erro ao editar pack: ' + err.message, 'error');
-  }).editarPack({ idCliente: idCliente, frequencia: novaFrequencia });
+    const codigo = String(err && err.message || '');
+    if (codigo === 'PACK_PAGO_REQUER_CONFIRMACAO' && !confirmarReprecificacao) {
+      if (window.confirm('Este pack já está pago. Queres alterar a frequência e o valor deste mês? O histórico anterior fica intacto.')) salvarEdicaoPack(idCliente, true);
+      return;
+    }
+    showAlert(codigo === 'SERVICO_SEM_PRECO' ? 'Define primeiro o preço deste serviço em Definições → Serviços e preços.' : 'Erro ao editar pack: ' + codigo, 'error');
+  }).editarPack({ idCliente: idCliente, frequencia: novaFrequencia, confirmarReprecificacao: confirmarReprecificacao === true });
 }
 
 function gerarSessoesEmFalta(idCliente) {
@@ -9094,6 +9210,96 @@ function mostrarQRPortal(idCliente) {
 
 // ==================== MEU PERFIL ====================
 
+let CATALOGO_SERVICOS_EDITOR = [];
+
+function abrirModalServicos() {
+  carregarCatalogoServicosCRM(() => {
+    CATALOGO_SERVICOS_EDITOR = (CATALOGO_SERVICOS.servicos || []).map(item => ({...item}));
+    renderCatalogoServicosEditor();
+    const estado = document.getElementById('estadoCatalogoServicos');
+    if (estado) estado.textContent = CATALOGO_SERVICOS.configured ? 'Tabela central ativa.' : 'Confirma os preços em falta antes de usares esses serviços.';
+    document.getElementById('modalServicosOverlay').style.display = 'flex';
+  });
+}
+
+function fecharModalServicos() {
+  document.getElementById('modalServicosOverlay').style.display = 'none';
+}
+
+function renderCatalogoServicosEditor() {
+  const alvo = document.getElementById('listaServicosEditor');
+  if (!alvo) return;
+  alvo.innerHTML = CATALOGO_SERVICOS_EDITOR.map((item, indice) => {
+    const existente = !String(item.id || '').startsWith('novo-');
+    return '<div class="service-editor-row' + (item.ativo === false ? ' inactive' : '') + '" data-service-index="' + indice + '" data-service-id="' + escaparHtmlCRM(item.id) + '">' +
+      '<div class="service-editor-main"><label>Nome<input data-service-field="nome" maxlength="120" value="' + escaparHtmlCRM(item.nome || '') + '" placeholder="Ex.: PT Duo 45 min"></label><label>Código<input data-service-field="codigo" maxlength="32" value="' + escaparHtmlCRM(item.codigo || '') + '" placeholder="ex.: duo45"' + (existente ? ' readonly title="Para preservar o histórico, cria um serviço novo se precisares de outro código."' : '') + '></label></div>' +
+      '<div class="service-editor-schedule"><label>Sessões/semana<input data-service-field="sessoesPorSemana" type="number" min="1" max="14" value="' + Number(item.sessoesPorSemana || 1) + '"></label><label>Minutos<input data-service-field="duracaoMinutos" type="number" min="5" max="300" value="' + Number(item.duracaoMinutos || 45) + '"></label></div>' +
+      '<label class="service-editor-price">Preço mensal<input data-service-field="preco" type="number" min="0" max="100000" step="0.01" value="' + (item.preco === null || item.preco === undefined ? '' : Number(item.preco).toFixed(2)) + '" placeholder="Por definir"></label>' +
+      '<label class="service-editor-active"><input data-service-field="ativo" type="checkbox"' + (item.ativo !== false ? ' checked' : '') + '> Disponível</label>' +
+      '</div>';
+  }).join('');
+}
+
+function adicionarServicoEditor() {
+  const ordem = CATALOGO_SERVICOS_EDITOR.length;
+  CATALOGO_SERVICOS_EDITOR.push({ id: 'novo-' + Date.now(), codigo: '', nome: '', sessoesPorSemana: 1, duracaoMinutos: 45, preco: null, ativo: true, ordem: ordem });
+  renderCatalogoServicosEditor();
+  const ultimo = document.querySelector('#listaServicosEditor .service-editor-row:last-child input[data-service-field="nome"]');
+  if (ultimo) ultimo.focus();
+}
+
+function lerCatalogoServicosEditor() {
+  return Array.from(document.querySelectorAll('#listaServicosEditor .service-editor-row')).map((linha, ordem) => {
+    const campo = nome => linha.querySelector('[data-service-field="' + nome + '"]');
+    const codigo = campo('codigo').value.trim();
+    const idAtual = linha.dataset.serviceId;
+    return {
+      id: String(idAtual || '').startsWith('novo-') ? codigo : idAtual,
+      codigo: codigo,
+      nome: campo('nome').value.trim(),
+      sessoesPorSemana: Number(campo('sessoesPorSemana').value),
+      duracaoMinutos: Number(campo('duracaoMinutos').value),
+      preco: campo('preco').value === '' ? null : Number(campo('preco').value),
+      ativo: campo('ativo').checked,
+      ordem: ordem
+    };
+  });
+}
+
+function mensagemErroCatalogoServicos(erro) {
+  const codigo = String(erro && erro.message ? erro.message : erro || '');
+  const mensagens = {
+    CATALOGO_SERVICOS_CONFLITO: 'A tabela foi alterada noutro ecrã. Fecha e volta a abrir antes de guardar.',
+    CODIGO_SERVICO_DUPLICADO: 'Existem dois serviços com o mesmo código.',
+    CODIGO_SERVICO_INVALIDO: 'Cada serviço precisa de um código curto, sem espaços nem acentos.',
+    NOME_SERVICO_INVALIDO: 'Todos os serviços precisam de nome.',
+    PRECO_SERVICO_INVALIDO: 'Revê os preços. Usa um número positivo ou deixa vazio para definir depois.',
+    SESSOES_SERVICO_INVALIDAS: 'As sessões por semana têm de estar entre 1 e 14.',
+    DURACAO_SERVICO_INVALIDA: 'A duração tem de estar entre 5 e 300 minutos.'
+  };
+  return mensagens[codigo] || codigo || 'Não foi possível guardar a tabela.';
+}
+
+function guardarCatalogoServicosUI() {
+  const botao = document.getElementById('btnGuardarCatalogoServicos');
+  const estado = document.getElementById('estadoCatalogoServicos');
+  const servicos = lerCatalogoServicosEditor();
+  if (servicos.some(item => !item.nome || !item.codigo)) { estado.textContent = 'Preenche o nome e o código de todos os serviços.'; return; }
+  if (botao) botao.disabled = true;
+  if (estado) estado.textContent = 'A guardar…';
+  google.script.run.withSuccessHandler(catalogo => {
+    CATALOGO_SERVICOS = catalogo;
+    FREQUENCIAS_DISPONIVEIS = servicosAtivosCRM().map(item => item.codigo);
+    if (estado) estado.textContent = 'Tabela guardada. Os novos preços já estão ativos.';
+    if (botao) botao.disabled = false;
+    showAlert('Serviços e preços atualizados.', 'success');
+    window.setTimeout(fecharModalServicos, 650);
+  }).withFailureHandler(err => {
+    if (estado) estado.textContent = mensagemErroCatalogoServicos(err);
+    if (botao) botao.disabled = false;
+  }).guardarCatalogoServicos({ servicos: servicos, revision: CATALOGO_SERVICOS.revision || 0 });
+}
+
 let assinaturaBase64Atual = '';
 let fotoPerfilBase64Atual = '';
 
@@ -9425,7 +9631,7 @@ function verHistoricoAcessosPortal(idCliente) {
 // ==================== RENOVAR MÊS ====================
 
 let renovarItens = [];
-const FREQUENCIAS_DISPONIVEIS = ['1x30', '2x30', '3x30', '1x45', '2x45', '3x45', '1x60', '2x60', '3x60'];
+let FREQUENCIAS_DISPONIVEIS = ['1x30', '2x30', '3x30', '1x45', '2x45', '3x45', '1x60', '2x60', '3x60'];
 
 function abrirRenovacao() {
   switchTab('renovar');
@@ -9955,7 +10161,7 @@ window.addEventListener('load', function () {
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const acoes={criarPack:'create-pack',definirEstadoCliente:'set-status',pagarPack:'mark-paid',definirEstadoTodasSessoes:'set-all-sessions-state',confirmarSessao:'toggle-session',atualizarDataSessaoConfirmada:'toggle-session',registarNotaClienteCRM:'add-note',guardarAvaliacaoFisicaCRM:'add-assessment',editarDadosCliente:'edit-client',definirPrecoPersonalizado:'set-price',editarPack:'edit-pack',gerarSessoesEmFalta:'generate-sessions',guardarModoEspecialCliente:'set-special-mode',removerModoEspecialCliente:'remove-special-mode',suspenderProximoMes:'schedule-suspension',cancelarSuspensao:'clear-suspension',cancelarProximoMes:'schedule-cancellation',cancelarAgendamentoCancelamento:'clear-cancellation'};if(!acoes[nome])return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),entrada=args[0]||{},corpo={...entrada,action:acoes[nome]};const r=await fetch('/api/dev-crm-client-actions',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify(corpo)}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Alteração indisponível.');const detalhe=await fetch('/api/dev-crm-client-detail?id='+encodeURIComponent(corpo.idCliente),{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!detalhe.ok)throw Error(detalhe.erro||'Alteração guardada, mas não foi possível atualizar a ficha.');if(nome==='registarNotaClienteCRM')return ok&&ok(detalhe.notas);if(nome==='guardarAvaliacaoFisicaCRM')return ok&&ok({sucesso:true});const crm=await fetch('/api/dev-crm-dashboard',{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!crm.ok||!crm.crm)throw Error(crm.erro||'Alteração guardada, mas não foi possível atualizar o CRM.');ok&&ok(nome==='definirEstadoCliente'?crm.crm:{crm:crm.crm,detalhe:detalhe.detalhe})}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
-(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(!['getPerfilPT','guardarPerfilPT','getDefinicoesBibliotecaExercicios','guardarDefinicoesBibliotecaExercicios'].includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),opcoes={headers:{Authorization:'Bearer '+t}};if(nome==='guardarPerfilPT'||nome==='guardarDefinicoesBibliotecaExercicios'){opcoes.method='POST';opcoes.headers['Content-Type']='application/json';opcoes.body=JSON.stringify(nome==='guardarDefinicoesBibliotecaExercicios'?{action:'save-exercise-library-settings',biblioteca:args[0]||{}}:args[0]||{});}const r=await fetch('/api/dev-crm-settings',opcoes),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Definições indisponíveis.');ok&&ok(nome.includes('DefinicoesBiblioteca')?d.biblioteca:d.perfil)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
+(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(!['getPerfilPT','guardarPerfilPT','getDefinicoesBibliotecaExercicios','guardarDefinicoesBibliotecaExercicios','getCatalogoServicos','guardarCatalogoServicos'].includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),opcoes={headers:{Authorization:'Bearer '+t}};if(['guardarPerfilPT','guardarDefinicoesBibliotecaExercicios','guardarCatalogoServicos'].includes(nome)){opcoes.method='POST';opcoes.headers['Content-Type']='application/json';opcoes.body=JSON.stringify(nome==='guardarDefinicoesBibliotecaExercicios'?{action:'save-exercise-library-settings',biblioteca:args[0]||{}}:nome==='guardarCatalogoServicos'?{action:'save-service-catalog',catalogo:args[0]||{}}:args[0]||{});}const r=await fetch('/api/dev-crm-settings',opcoes),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Definições indisponíveis.');ok&&ok(nome.includes('DefinicoesBiblioteca')?d.biblioteca:nome.includes('CatalogoServicos')?d.catalogo:d.perfil)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const acoes={criarPacoteEspecial:'create-package',alterarEstadoPacoteEspecial:'set-package-state',guardarProdutoEspecial:'save-product'};if(!acoes[nome])return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),entrada=args[0]||{},r=await fetch('/api/dev-crm-special-package-actions',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({...entrada,action:acoes[nome]})}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Pacotes especiais indisponíveis.');const atualizado=await fetch('/api/dev-crm-special-packages',{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!atualizado.ok)throw Error(atualizado.erro||'Alteração guardada, mas a lista não atualizou.');ok&&ok(atualizado)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();

@@ -3,6 +3,7 @@ import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
 import { normalizeExerciseLibrarySettings } from './exercise-library-settings.js';
+import { loadServiceCatalog, normalizeServiceCatalog } from './service-catalog.js';
 
 const PADRAO = Object.freeze({ nome: 'André Martins - Personal Trainer', nif: '', morada: '', contacto: '', horasAvisoCancelamento: 12, diasAvisoDenuncia: 30, fidelizacaoMeses: 3, seguroCompanhia: '', seguroApolice: '', seguroCapital: '', seguroRiscos: '', ralEntidade: '', ralWebsite: '', comarca: '', prazoRespostaReclamacoesDias: 10, assinatura: '', fotoPerfil: '' });
 function responder(res, estado, corpo) { res.setHeader('Cache-Control', 'no-store, max-age=0'); res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('X-Robots-Tag', 'noindex, nofollow'); return res.status(estado).json(corpo); }
@@ -16,9 +17,30 @@ export default async function handler(req, res) {
   if (!['GET', 'POST'].includes(req.method)) return responder(res, 405, { ok: false });
   try {
     if (!crmFirebasePermitido()) return responder(res, 404, { ok: false });
-    const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove(); exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid)); const referencia = db.collection('crmDevelopmentSettings').doc('coach-profile'); const bibliotecaRef = db.collection('crmDevelopmentSettings').doc('exercise-library');
-    if (req.method === 'GET') { const [atual, bibliotecaSnap] = await Promise.all([referencia.get(), bibliotecaRef.get()]); return responder(res, 200, { ok: true, perfil: normalizar(atual.exists ? atual.data() : PADRAO), biblioteca: normalizeExerciseLibrarySettings(bibliotecaSnap.exists ? bibliotecaSnap.data() : {}) }); }
+    const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove(); exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid)); const referencia = db.collection('crmDevelopmentSettings').doc('coach-profile'); const bibliotecaRef = db.collection('crmDevelopmentSettings').doc('exercise-library'); const servicosRef = db.collection('crmDevelopmentSettings').doc('service-catalog');
+    if (req.method === 'GET') { const [atual, bibliotecaSnap, catalogo] = await Promise.all([referencia.get(), bibliotecaRef.get(), loadServiceCatalog(db)]); return responder(res, 200, { ok: true, perfil: normalizar(atual.exists ? atual.data() : PADRAO), biblioteca: normalizeExerciseLibrarySettings(bibliotecaSnap.exists ? bibliotecaSnap.data() : {}), catalogo }); }
     if (req.body?.action === 'save-exercise-library-settings') { const biblioteca = normalizeExerciseLibrarySettings(req.body.biblioteca || {}); const agora = new Date(); await db.runTransaction(async transacao => { transacao.set(bibliotecaRef, { ...biblioteca, updatedAt: agora, updatedBy: identidade.uid }); transacao.create(db.collection('auditLogs').doc(), { action: 'development.settings.exercise-library-updated', actorUid: identidade.uid, createdAt: agora }); }); return responder(res, 200, { ok: true, biblioteca }); }
+    if (req.body?.action === 'save-service-catalog') {
+      const enviados = normalizeServiceCatalog(req.body.catalogo?.servicos || []);
+      const revisaoEsperada = Number(req.body.catalogo?.revision || 0);
+      const agora = new Date();
+      let catalogoGuardado;
+      await db.runTransaction(async transacao => {
+        const atual = await transacao.get(servicosRef);
+        const dadosAtuais = atual.exists ? atual.data() : {};
+        const revisaoAtual = Number(dadosAtuais?.revision || 0);
+        if (revisaoEsperada !== revisaoAtual) throw new Error('CATALOGO_SERVICOS_CONFLITO');
+        const anteriores = normalizeServiceCatalog(dadosAtuais?.servicos);
+        const idsEnviados = new Set(enviados.map(item => item.id));
+        const preservados = anteriores.filter(item => !idsEnviados.has(item.id)).map(item => ({ ...item, ativo: false }));
+        const servicos = normalizeServiceCatalog(enviados.concat(preservados));
+        const revision = revisaoAtual + 1;
+        catalogoGuardado = { servicos, revision, configured: true };
+        transacao.set(servicosRef, { servicos, revision, updatedAt: agora, updatedBy: identidade.uid });
+        transacao.create(db.collection('auditLogs').doc(), { action: 'development.settings.service-catalog-updated', actorUid: identidade.uid, createdAt: agora, revision, services: servicos.map(item => ({ id: item.id, code: item.codigo, active: item.ativo, price: item.preco })) });
+      });
+      return responder(res, 200, { ok: true, catalogo: catalogoGuardado });
+    }
     const perfil = normalizar(req.body && typeof req.body === 'object' ? req.body : {}); const agora = new Date(); await db.runTransaction(async transacao => { transacao.set(referencia, { ...perfil, updatedAt: agora, updatedBy: identidade.uid }); transacao.create(db.collection('auditLogs').doc(), { action: 'development.settings.profile-updated', actorUid: identidade.uid, createdAt: agora }); }); return responder(res, 200, { ok: true, perfil });
-  } catch (erro) { const codigo = String(erro?.code || erro?.message || 'FALHA'); return responder(res, /^FIREBASE_/.test(codigo) ? 401 : 500, { ok: false, erro: codigo }); }
+  } catch (erro) { const codigo = String(erro?.code || erro?.message || 'FALHA'); const estado = /^FIREBASE_/.test(codigo) ? 401 : (codigo === 'CATALOGO_SERVICOS_CONFLITO' ? 409 : (/^(CODIGO_|ID_|NOME_|PRECO_|SESSOES_|DURACAO_|DEMASIADOS_)/.test(codigo) ? 400 : 500)); return responder(res, estado, { ok: false, erro: codigo }); }
 }
