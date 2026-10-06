@@ -90,8 +90,8 @@ export function frequencyFromServiceName(nome) {
   return texto(nome, 120).match(/(\d+x\d+)/i)?.[1] || '';
 }
 
-export function priceForService({ catalogo, codigo, cliente = {}, packsAnteriores = [], permitirLegado = true }) {
-  const servico = serviceByCode(catalogo, codigo);
+export function priceForService({ catalogo, codigo, cliente = {}, packsAnteriores = [], permitirLegado = true, permitirServicoInativo = false }) {
+  const servico = serviceByCode(catalogo, codigo, { permitirInativo: permitirServicoInativo });
   const personalizado = cliente.precoPersonalizado === '' || cliente.precoPersonalizado == null ? null : Number(cliente.precoPersonalizado);
   const codigoPersonalizado = texto(cliente.precoPersonalizadoServico, 32);
   if (Number.isFinite(personalizado) && codigoPersonalizado === servico.codigo) {

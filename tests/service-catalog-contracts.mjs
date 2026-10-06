@@ -36,6 +36,9 @@ assert.equal(priceForService({
 }).preco, 89);
 
 assert.throws(() => priceForService({ catalogo: DEFAULT_SERVICE_CATALOG, codigo: '1x30', permitirLegado: false }), /SERVICO_SEM_PRECO/);
+const inativo = DEFAULT_SERVICE_CATALOG.map(item => item.codigo === '1x45' ? { ...item, ativo: false } : item);
+assert.throws(() => priceForService({ catalogo: inativo, codigo: '1x45' }), /SERVICO_INDISPONIVEL/);
+assert.equal(priceForService({ catalogo: inativo, codigo: '1x45', permitirServicoInativo: true }).preco, 119);
 assert.throws(() => normalizeServiceCatalog([
   { id: 'a', codigo: 'duo', nome: 'Duo A', sessoesPorSemana: 1, duracaoMinutos: 45, preco: 100 },
   { id: 'b', codigo: 'duo', nome: 'Duo B', sessoesPorSemana: 2, duracaoMinutos: 45, preco: 180 }
