@@ -7174,7 +7174,7 @@ function renderizarDetalheCliente(detalhe) {
     html += '<input type="number" id="inputPrecoPersonalizado" step="0.01" min="0" placeholder="ex: 99.00" value="' + (temPrecoEspecial ? Number(c.precoPersonalizado).toFixed(2) : '') + '">';
     html += '<div class="price-preview">Deixa vazio para voltar ao preço padrão do serviço. Um preço especial fica associado apenas à frequência atual.</div>';
     html += '</div>';
-    html += '<button type="button" class="btn btn-primary" onclick="salvarPrecoPersonalizado(\'' + idEsc + '\')">Guardar</button>';
+    html += '<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn btn-primary" style="width:auto" onclick="salvarPrecoPersonalizado(\'' + idEsc + '\')">Aplicar preço especial</button><button type="button" class="btn btn-secondary" style="width:auto" onclick="usarPrecoPadraoCliente(\'' + idEsc + '\')">Usar preço padrão</button></div>';
     html += '</div>';
 
     if (detalhe.packAtivo) {
@@ -7194,7 +7194,7 @@ function renderizarDetalheCliente(detalhe) {
       html += '<div class="form-group" style="margin-bottom: 12px;"><label>Nova frequência</label>';
       html += '<select id="editarFrequencia" onchange="atualizarPreviaPrecoPack()">' + opcoesServicosCRM(p.frequencia, false, true) + '</select></div>';
       html += '<div id="previsaoPrecoPack" class="price-preview"></div>';
-      html += '<button type="button" class="btn btn-primary" onclick="salvarEdicaoPack(\'' + idEsc + '\')">Guardar alteração</button>';
+      html += '<button type="button" class="btn btn-primary" onclick="salvarEdicaoPack(\'' + idEsc + '\')">Atualizar pack e preço</button>';
       html += '</div>';
 
       html += '<div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">';
@@ -8828,6 +8828,12 @@ function salvarPrecoPersonalizado(idCliente, confirmarReprecificacao) {
     }
     showAlert(codigo === 'SERVICO_SEM_PRECO' ? 'Não é possível remover o preço especial enquanto o serviço não tiver um preço padrão nas Definições.' : 'Erro ao guardar preço: ' + codigo, 'error');
   }).definirPrecoPersonalizado({ idCliente: idCliente, preco: valor, confirmarReprecificacao: confirmarReprecificacao === true });
+}
+
+function usarPrecoPadraoCliente(idCliente) {
+  const campo = document.getElementById('inputPrecoPersonalizado');
+  if (campo) campo.value = '';
+  salvarPrecoPersonalizado(idCliente, false);
 }
 
 function toggleEditarPack() {
