@@ -99,6 +99,39 @@ export default async function handler(req, res) {
       auditar(lote, 'development.training-workout.restored', { clientId: clienteId, planName: plano, workoutName: treino, restoredVersionId: versaoId, recoveryVersionId: copiaAtualRef.id, previousRevision: revisaoAtual, revision: novaRevisao }); await lote.commit();
       return responder(res, 200, { ok: true, revision: novaRevisao, recoveryVersionId: copiaAtualRef.id });
     }
+    if (acao === 'rename-plan') {
+      const clienteId = texto(entrada.idCliente, 128); const planoAnterior = texto(entrada.nomePlanoAnterior); const planoNovo = texto(entrada.nomePlanoNovo);
+      const anteriorNormalizado = nomeNormalizado(planoAnterior); const novoNormalizado = nomeNormalizado(planoNovo);
+      if (!clienteId || !planoAnterior || !planoNovo || planoNovo.length > 100) return responder(res, 400, { ok: false, erro: 'NOME_PLANO_INVALIDO' });
+      const documentos = snapshot.docs.filter(documento => documento.data()?.idCliente === clienteId && nomeNormalizado(documento.data()?.nomePlano) === anteriorNormalizado);
+      if (!documentos.length) return responder(res, 404, { ok: false, erro: 'PLANO_NAO_ENCONTRADO' });
+      const colisao = snapshot.docs.some(documento => documento.data()?.idCliente === clienteId && nomeNormalizado(documento.data()?.nomePlano) === novoNormalizado && nomeNormalizado(documento.data()?.nomePlano) !== anteriorNormalizado);
+      if (colisao) return responder(res, 409, { ok: false, erro: 'PLANO_DESTINO_JA_EXISTE' });
+      if (planoAnterior === planoNovo) return responder(res, 200, { ok: true, inalterado: true });
+      const [cabecasSnap, versoesSnap] = await Promise.all([
+        db.collection('crmTrainingPlanHeads').where('idCliente', '==', clienteId).get(),
+        db.collection('crmTrainingPlanVersions').where('idCliente', '==', clienteId).get()
+      ]);
+      const cabecas = cabecasSnap.docs.filter(documento => nomeNormalizado(documento.data()?.nomePlano) === anteriorNormalizado);
+      const versoes = versoesSnap.docs.filter(documento => nomeNormalizado(documento.data()?.nomePlano) === anteriorNormalizado);
+      const totalOperacoes = documentos.length + cabecas.length * 2 + versoes.length + 3;
+      if (totalOperacoes > 490) return responder(res, 409, { ok: false, erro: 'PLANO_DEMASIADO_GRANDE_PARA_RENOMEAR' });
+      const lote = db.batch(); const atualizadoEm = agora.toISOString();
+      documentos.forEach(documento => lote.update(documento.ref, { nomePlano: planoNovo, atualizadoEm, renomeadoDe: planoAnterior, renomeadoEm: atualizadoEm }));
+      cabecas.forEach(documento => {
+        const dados = documento.data() || {}; const destino = db.collection('crmTrainingPlanHeads').doc(cabecaId(clienteId, planoNovo, texto(dados.nomeTreino)));
+        lote.set(destino, { ...dados, nomePlano: planoNovo, revision: atualizadoEm, atualizadoEm: agora, atualizadoPor: identidade.uid, atualizadoPorEmail: identidade.email, renomeadoDe: planoAnterior }, { merge: true });
+        if (destino.path !== documento.ref.path) lote.delete(documento.ref);
+      });
+      versoes.forEach(documento => lote.update(documento.ref, { nomePlano: planoNovo, nomePlanoOriginal: texto(documento.data()?.nomePlanoOriginal) || planoAnterior, renomeadoEm: atualizadoEm }));
+      const reservaAnterior = db.collection('crmTrainingPlanNames').doc(cabecaId(clienteId, anteriorNormalizado, 'plano'));
+      const reservaNova = db.collection('crmTrainingPlanNames').doc(cabecaId(clienteId, novoNormalizado, 'plano'));
+      lote.set(reservaNova, { idCliente: clienteId, nomePlano: planoNovo, nomeNormalizado: novoNormalizado, criadoEm: agora, criadoPor: identidade.uid, renomeadoDe: planoAnterior }, { merge: true });
+      if (reservaNova.path !== reservaAnterior.path) lote.delete(reservaAnterior);
+      auditar(lote, 'development.training-plan.renamed', { clientId: clienteId, previousPlanName: planoAnterior, planName: planoNovo, versionCount: versoes.length });
+      await lote.commit();
+      return responder(res, 200, { ok: true, nomePlano: planoNovo });
+    }
     if (acao === 'delete-workout' || acao === 'delete-plan' || acao === 'renew-validity' || acao === 'set-visibility') {
       const clienteId = texto(entrada.idCliente, 128); const plano = texto(entrada.nomePlano); const treino = acao === 'delete-workout' ? texto(entrada.nomeTreino) : null; const documentos = snapshot.docs.filter(documento => corresponde(documento, clienteId, plano, treino)); if (!clienteId || !plano || !documentos.length) return responder(res, 404, { ok: false, erro: 'PLANO_NAO_ENCONTRADO' }); const lote = db.batch();
       if (acao === 'delete-workout' || acao === 'delete-plan') documentos.forEach(documento => lote.delete(documento.ref));

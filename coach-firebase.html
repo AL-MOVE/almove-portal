@@ -2347,6 +2347,68 @@
       #sidebarToggleIcon::before { content: '×'; font-size: 24px; line-height: 1; font-weight: 400; }
     }
   </style>
+  <style id="sidebar-motion-fix">
+    /* O cabeçalho e os ícones mantêm a posição durante a contração. Evita o
+       salto causado pela mudança de linha/coluna e mantém os badges longe do
+       controlo de expandir. */
+    @media (min-width: 1025px) {
+      #appLayout .sidebar {
+        transition: width .38s cubic-bezier(.22,1,.36,1), padding .38s cubic-bezier(.22,1,.36,1) !important;
+        will-change: width, padding;
+      }
+      #appLayout .sidebar-header,
+      #appLayout .sidebar.collapsed .sidebar-header {
+        position: relative !important;
+        display: block !important;
+        min-height: 40px !important;
+        margin-bottom: 20px !important;
+        padding: 0 4px !important;
+      }
+      #appLayout .sidebar-logo {
+        position: absolute;
+        inset: 3px 38px auto 4px;
+        transition: opacity .18s ease, transform .34s cubic-bezier(.22,1,.36,1) !important;
+      }
+      #appLayout .sidebar-toggle,
+      #appLayout .sidebar.collapsed .sidebar-toggle {
+        position: absolute !important;
+        z-index: 4;
+        top: 50%;
+        right: 0;
+        margin: 0 !important;
+        transform: translateY(-50%);
+        transition: right .38s cubic-bezier(.22,1,.36,1), transform .38s cubic-bezier(.22,1,.36,1), background-color .18s ease, color .18s ease !important;
+      }
+      #appLayout .sidebar.collapsed .sidebar-logo {
+        opacity: 0;
+        transform: translateX(-10px);
+        pointer-events: none;
+      }
+      #appLayout .sidebar.collapsed .sidebar-toggle {
+        right: 50%;
+        transform: translate(50%,-50%);
+      }
+      #appLayout .nav-item {
+        transition: background-color .18s ease, color .18s ease, width .38s cubic-bezier(.22,1,.36,1), padding .38s cubic-bezier(.22,1,.36,1), gap .28s ease !important;
+      }
+      #appLayout .sidebar.collapsed .nav-item {
+        justify-content: flex-start !important;
+        gap: 0 !important;
+        padding-right: 13px !important;
+        padding-left: 13px !important;
+      }
+      #appLayout .sidebar-text,
+      #appLayout .nav-item-label {
+        transition: opacity .16s ease, max-width .34s cubic-bezier(.22,1,.36,1), transform .34s cubic-bezier(.22,1,.36,1) !important;
+      }
+      #appLayout .nav-alert { z-index: 1; transition: opacity .12s ease, transform .18s ease !important; }
+      #appLayout .sidebar.collapsed .nav-alert:not(:empty) { display: inline-flex !important; opacity: 0; visibility: hidden; transform: scale(.75); }
+      #appLayout .nav-alert:empty { display: none !important; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #appLayout .sidebar, #appLayout .sidebar *, #sidebarOverlay { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
+  </style>
 </head>
 <body>
 
@@ -8104,8 +8166,9 @@ function renderListaPlanos(planos) {
       badgeValidade +
       (p.atualizadoEm ? '<span style="color: #64748b; font-size: 12px;">atualizado em ' + escaparHtmlCRM(p.atualizadoEm) + '</span>' : '') +
       '</div></div>' +
-      '<div style="display:flex;gap:6px;">' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">' +
       '<button type="button" class="btn btn-secondary" style="padding:4px 10px;font-size:11px;" onclick="alterarVisibilidadePlanoUI(\'' + nomeEsc + '\', \'' + idParaOnclickCRM(p.visibilidade) + '\')">' + (p.visibilidade === 'PT' ? 'Tornar visível' : 'Ocultar no Portal') + '</button>' +
+      '<button type="button" class="btn btn-secondary" style="padding:4px 10px;font-size:11px;" onclick="renomearPlanoUI(\'' + nomeEsc + '\')">Renomear</button>' +
       '<button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" onclick="renovarValidadeUI(\'' + nomeEsc + '\')">Renovar validade</button>' +
       '<button type="button" class="btn btn-secondary" style="color: #dc2626; padding: 4px 10px; font-size: 11px;" onclick="apagarPlanoUI(\'' + nomeEsc + '\')">Apagar</button>' +
       '</div></div>';
@@ -8119,22 +8182,23 @@ function abrirModalEntradaPlano(modo, nomePlano) {
   MODO_ENTRADA_PLANO = modo;
   PLANO_ENTRADA_ALVO = nomePlano || '';
   const renovar = modo === 'renovar-validade';
+  const renomear = modo === 'renomear-plano';
   const overlay = document.getElementById('modalEntradaPlanoOverlay');
   const input = document.getElementById('inputEntradaPlano');
-  document.getElementById('modalEntradaPlanoTitulo').textContent = renovar ? 'Renovar validade' : 'Adicionar novo treino';
-  document.getElementById('modalEntradaPlanoAjuda').textContent = renovar ? 'A nova validade é calculada a partir de hoje.' : 'O treino será adicionado ao plano atual.';
-  document.getElementById('modalEntradaPlanoLabel').textContent = renovar ? 'Validade em semanas' : 'Nome do treino';
+  document.getElementById('modalEntradaPlanoTitulo').textContent = renovar ? 'Renovar validade' : renomear ? 'Renomear plano' : 'Adicionar novo treino';
+  document.getElementById('modalEntradaPlanoAjuda').textContent = renovar ? 'A nova validade é calculada a partir de hoje.' : renomear ? 'O novo nome será aplicado aos treinos e às versões guardadas deste plano.' : 'O treino será adicionado ao plano atual.';
+  document.getElementById('modalEntradaPlanoLabel').textContent = renovar ? 'Validade em semanas' : renomear ? 'Novo nome do plano' : 'Nome do treino';
   input.type = renovar ? 'number' : 'text';
   input.inputMode = renovar ? 'numeric' : 'text';
   input.min = renovar ? '1' : '';
   input.max = renovar ? '104' : '';
   input.maxLength = renovar ? 3 : 100;
-  input.placeholder = renovar ? 'Ex.: 8' : 'Ex.: PULL';
-  input.value = renovar ? '8' : '';
+  input.placeholder = renovar ? 'Ex.: 8' : renomear ? 'Ex.: T1 — Força geral' : 'Ex.: PULL';
+  input.value = renovar ? '8' : renomear ? PLANO_ENTRADA_ALVO : '';
   const erro = document.getElementById('erroEntradaPlano');
   erro.style.display = 'none';
   erro.textContent = '';
-  document.getElementById('btnConfirmarEntradaPlano').textContent = renovar ? 'Renovar validade' : 'Escolher exercícios';
+  document.getElementById('btnConfirmarEntradaPlano').textContent = renovar ? 'Renovar validade' : renomear ? 'Alterar nome' : 'Escolher exercícios';
   overlay.style.display = 'flex';
   overlay.setAttribute('aria-hidden', 'false');
   setTimeout(() => input.focus(), 0);
@@ -8160,6 +8224,21 @@ function confirmarEntradaPlanoUI() {
     executarRenovacaoValidade(PLANO_ENTRADA_ALVO, semanas);
     return;
   }
+  if (MODO_ENTRADA_PLANO === 'renomear-plano') {
+    if (!valor) return erroEntradaPlano('Indica o novo nome do plano.');
+    if (valor.length > 100) return erroEntradaPlano('Usa um nome com até 100 caracteres.');
+    if (valor.localeCompare(PLANO_ENTRADA_ALVO, 'pt', { sensitivity: 'accent' }) === 0) return erroEntradaPlano('Escolhe um nome diferente do atual.');
+    const botao = document.getElementById('btnConfirmarEntradaPlano');
+    botao.disabled = true; botao.textContent = 'A alterar…';
+    google.script.run.withSuccessHandler(resultado => {
+      botao.disabled = false; fecharModalEntradaPlano(); renderListaPlanos(resultado.planos || []); showAlert('Nome do plano atualizado.', 'success');
+    }).withFailureHandler(err => {
+      botao.disabled = false; botao.textContent = 'Alterar nome';
+      const codigo = String(err && err.message || '');
+      erroEntradaPlano(codigo.includes('PLANO_DESTINO_JA_EXISTE') ? 'Já existe um plano com esse nome para este aluno.' : codigo.includes('PLANO_DEMASIADO_GRANDE') ? 'Este plano tem demasiados registos para ser renomeado de uma só vez. Avisa-me.' : 'Não foi possível alterar o nome. Tenta novamente.');
+    }).renomearPlano({ idCliente: PLANO_CLIENTE_ATUAL.id, nomePlanoAnterior: PLANO_ENTRADA_ALVO, nomePlanoNovo: valor });
+    return;
+  }
   if (!valor) return erroEntradaPlano('Indica o nome do treino.');
   fecharModalEntradaPlano();
   PLANO_NOVA_VALIDADE = '';
@@ -8168,6 +8247,10 @@ function confirmarEntradaPlanoUI() {
 
 function renovarValidadeUI(nomePlano) {
   abrirModalEntradaPlano('renovar-validade', nomePlano);
+}
+
+function renomearPlanoUI(nomePlano) {
+  abrirModalEntradaPlano('renomear-plano', nomePlano);
 }
 
 function executarRenovacaoValidade(nomePlano, semanas) {
@@ -10450,7 +10533,24 @@ window.addEventListener('load', function () {
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const suportadas=['getListaPlanosCliente','getTreinosDoPlano','getTreinoDetalhe','getBibliotecaExercicios','getPlanosParaReplicar'];if(!suportadas.includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();let url='/api/dev-crm-training-plans';if(nome==='getListaPlanosCliente')url+='?action=plans&clientId='+encodeURIComponent(args[0]);if(nome==='getTreinosDoPlano')url+='?action=workouts&clientId='+encodeURIComponent(args[0])+'&plan='+encodeURIComponent(args[1]);if(nome==='getTreinoDetalhe')url+='?action=detail&clientId='+encodeURIComponent(args[0])+'&plan='+encodeURIComponent(args[1])+'&workout='+encodeURIComponent(args[2]);if(nome==='getBibliotecaExercicios')url+='?action=library';if(nome==='getPlanosParaReplicar')url+='?action=replicable';const r=await fetch(url,{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Planos de treino indisponíveis.');ok&&ok(d)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
-(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const acoes={guardarTreinoCliente:'save-workout',apagarTreinoCliente:'delete-workout',apagarPlanoCompleto:'delete-plan',renovarValidadePlano:'renew-validity',definirVisibilidadePlano:'set-visibility',replicarPlanoParaCliente:'replicate-plan',guardarExercicioBiblioteca:'save-library-exercise'};if(!acoes[nome])return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),entrada=args[0]||{},r=await fetch('/api/dev-crm-training-plan-actions',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({...entrada,action:acoes[nome]})}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Não foi possível alterar o plano.');if(nome==='guardarTreinoCliente')return ok&&ok({sucesso:true});if(nome==='guardarExercicioBiblioteca')return ok&&ok(d);const destinoId=nome==='replicarPlanoParaCliente'?entrada.destinoIdCliente:entrada.idCliente;const url='/api/dev-crm-training-plans?action=plans&clientId='+encodeURIComponent(destinoId);if(nome==='apagarTreinoCliente'){const treinoUrl='/api/dev-crm-training-plans?action=workouts&clientId='+encodeURIComponent(entrada.idCliente)+'&plan='+encodeURIComponent(entrada.nomePlano);const lista=await fetch(treinoUrl,{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());return ok&&ok(lista)}const lista=await fetch(url,{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!lista.ok)throw Error(lista.erro||'Alteração guardada, mas a lista não atualizou.');ok&&ok(lista)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
+(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const acoes={guardarTreinoCliente:'save-workout',apagarTreinoCliente:'delete-workout',apagarPlanoCompleto:'delete-plan',renovarValidadePlano:'renew-validity',definirVisibilidadePlano:'set-visibility',replicarPlanoParaCliente:'replicate-plan',guardarExercicioBiblioteca:'save-library-exercise',renomearPlano:'rename-plan'};if(!acoes[nome])return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),entrada=args[0]||{},r=await fetch('/api/dev-crm-training-plan-actions',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({...entrada,action:acoes[nome]})}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Não foi possível alterar o plano.');if(nome==='guardarTreinoCliente')return ok&&ok({sucesso:true});if(nome==='guardarExercicioBiblioteca')return ok&&ok(d);const destinoId=nome==='replicarPlanoParaCliente'?entrada.destinoIdCliente:entrada.idCliente;const url='/api/dev-crm-training-plans?action=plans&clientId='+encodeURIComponent(destinoId);if(nome==='apagarTreinoCliente'){const treinoUrl='/api/dev-crm-training-plans?action=workouts&clientId='+encodeURIComponent(entrada.idCliente)+'&plan='+encodeURIComponent(entrada.nomePlano);const lista=await fetch(treinoUrl,{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());return ok&&ok(lista)}const lista=await fetch(url,{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!lista.ok)throw Error(lista.erro||'Alteração guardada, mas a lista não atualizou.');ok&&ok(lista)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
+</script>
+<script>
+(function(){
+  const anterior=google.script.run;
+  const nomes=new Set(['enviarConvitePortalCliente','obterLinkPortalCliente','revogarERegenerarTokenPortal','getHistoricoAcessosPortal']);
+  function mensagem(codigo){const mapa={CLIENTE_SEM_EMAIL_VALIDO:'Este aluno não tem um email válido.',EMAIL_ASSOCIADO_A_VARIOS_CLIENTES:'Este email está associado a mais do que um aluno ativo. Corrige os emails antes de enviar.',AGUARDA_UM_MINUTO_PARA_REENVIAR:'Aguarda um minuto antes de voltar a enviar o convite.',CONTA_PORTAL_DESATIVADA:'A conta deste aluno está desativada no Firebase.'};return mapa[codigo]||codigo||'Não foi possível concluir.';}
+  async function pedido(token,action,idCliente,method='POST'){
+    const url='/api/dev-crm-portal-access'+(method==='GET'?'?action='+encodeURIComponent(action)+'&clientId='+encodeURIComponent(idCliente):'');
+    const opcoes={method,headers:{Authorization:'Bearer '+token}};
+    if(method==='POST'){opcoes.headers['Content-Type']='application/json';opcoes.body=JSON.stringify({action,idCliente});}
+    const resposta=await fetch(url,opcoes),dados=await resposta.json();
+    if(!resposta.ok||!dados.ok)throw Error(mensagem(dados.erro));
+    return dados;
+  }
+  function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(!nomes.has(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const configuracao=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(configuracao);const token=await AlMoveFirebaseAuth.token();if(!token)throw Error('Volta a iniciar sessão no CRM.');const idCliente=String(args[0]||'');if(nome==='obterLinkPortalCliente'){const dados=await pedido(token,'portal-url',idCliente,'GET');return ok&&ok(dados.link);}if(nome==='getHistoricoAcessosPortal'){const dados=await pedido(token,'history',idCliente,'GET');return ok&&ok(dados.historico||[]);}if(nome==='revogarERegenerarTokenPortal'){const dados=await pedido(token,'revoke-sessions',idCliente);return ok&&ok(dados);}const preparado=await pedido(token,'prepare-invite',idCliente);await AlMoveFirebaseAuth.enviarRecuperacao(preparado.email,preparado.portalUrl);pedido(token,'confirm-invite',idCliente).catch(()=>{});ok&&ok({enviado:true,email:preparado.email});}catch(erro){fail&&fail(erro);}}}})}
+  google.script.run=cadeia(null,null);
+})();
 </script>
 <script>
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(!['getTreinosParaSessaoPT','getUltimaSessaoPTCliente','registarSessaoPT'].includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();if(nome==='getTreinosParaSessaoPT'){const r=await fetch('/api/dev-crm-training-plans?action=pt-session-plans&clientId='+encodeURIComponent(args[0]),{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok)throw Error(d.erro||'Modo PT indisponível.');return ok&&ok(d)}if(nome==='getUltimaSessaoPTCliente'){const r=await fetch('/api/dev-crm-pt-session?clientId='+encodeURIComponent(args[0]),{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok)throw Error(d.erro||'Sessão anterior indisponível.');return ok&&ok(d)}const r=await fetch('/api/dev-crm-pt-session',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify(args[0]||{})}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Não foi possível guardar a sessão PT.');ok&&ok(d)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();

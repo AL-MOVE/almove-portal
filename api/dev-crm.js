@@ -24,13 +24,14 @@ import definicoes from '../server/dev-crm/dev-crm-settings.js';
 import sessao from '../server/dev-crm/dev-crm-session.js';
 import despesas from '../server/dev-crm/dev-crm-expenses.js';
 import operacoes from '../server/dev-crm/dev-crm-ops.js';
+import acessoPortal from '../server/dev-crm/dev-crm-portal-access.js';
 
 const ROTAS = Object.freeze({
   agenda, 'assessment-schedule': avaliacoes, assessments: avaliacoesAvancadas, checkins, 'client-actions': acoesCliente, 'client-create': criarCliente,
   'client-detail': detalheCliente, clients: clientes, command: comando, dashboard, migration: migracao, payments: pagamentos,
   'pt-session': sessaoPt, receipts: recibos, renewals: renovacoes, 'special-package-actions': acoesPacotesEspeciais,
   'special-packages': pacotesEspeciais, 'training-plan-actions': acoesPlanos, 'training-plans': planos, settings: definicoes, session: sessao,
-  expenses: despesas, ops: operacoes
+  expenses: despesas, ops: operacoes, 'portal-access': acessoPortal
 });
 
 function responder(res, estado, corpo) {
