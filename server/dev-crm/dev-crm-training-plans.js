@@ -5,6 +5,7 @@ import { exigirEquipa } from '../../api/_crm-development.js';
 import { mergeExerciseLibrary } from './exercise-library.js';
 import { buildExerciseLibraryOptions, normalizeExerciseLibrarySettings } from './exercise-library-settings.js';
 import { trainingPlanRevision } from './training-plan-revision.js';
+import { obterPlanosOrigem } from './training-plan-source.js';
 
 function responder(res, estado, corpo) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -74,6 +75,14 @@ export default async function handler(req, res) {
     ]);
     const linhas = planosSnap.docs.map(documento => documento.data()); const clientes = new Map(clientesSnap.docs.map(documento => [documento.id, { id: documento.id, ...documento.data() }]));
     if (acao === 'plans') return responder(res, 200, { ok: true, planos: listarPlanos(linhas, clienteId) });
+    if (acao === 'source-status') {
+      if (!clienteId) return responder(res, 400, { ok: false, erro: 'CLIENTE_OBRIGATORIO' });
+      const locais = listarPlanos(linhas, clienteId);
+      if (locais.length) return responder(res, 200, { ok: true, disponivel: false, planos: [], totalPlanos: 0, totalTreinos: 0, motivo: 'PLANOS_FIREBASE_EXISTENTES' });
+      const origem = await obterPlanosOrigem(req, clienteId);
+      const planos = listarPlanos(origem.linhas, clienteId);
+      return responder(res, 200, { ok: true, disponivel: planos.length > 0, planos, totalPlanos: planos.length, totalTreinos: planos.reduce((soma, plano) => soma + plano.numTreinos, 0) });
+    }
     if (acao === 'workouts') return responder(res, 200, { ok: true, treinos: listarTreinos(linhas, clienteId, nomePlano) });
     if (acao === 'detail') return responder(res, 200, { ok: true, ...detalheTreino(linhas, clienteId, nomePlano, nomeTreino) });
     if (acao === 'library') {

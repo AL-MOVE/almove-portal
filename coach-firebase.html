@@ -8143,7 +8143,8 @@ function abrirPlanosTreinoCliente(idCliente, nomeCliente) {
 function renderListaPlanos(planos) {
   const container = document.getElementById('planosTreinoListaConteudo');
   if (planos.length === 0) {
-    container.innerHTML = '<p style="color: #64748b; text-align: center; padding: 20px 0;">Ainda sem planos de treino para este cliente.</p>';
+    container.innerHTML = '<div style="max-width:560px;margin:24px auto;padding:20px;border:1px solid rgba(45,212,191,.2);border-radius:16px;background:rgba(8,21,36,.68);text-align:center;"><p style="color:#94a3b8;margin:0 0 14px;line-height:1.55;">Não existem planos no Firebase. A verificar se o Portal antigo ainda tem treinos deste cliente…</p><div id="estadoRecuperacaoPlanosOrigem" style="color:#7dd3fc;font-size:12px;">A procurar…</div></div>';
+    verificarPlanosOrigemCliente();
     return;
   }
   container.innerHTML = planos.map(p => {
@@ -8173,6 +8174,38 @@ function renderListaPlanos(planos) {
       '<button type="button" class="btn btn-secondary" style="color: #dc2626; padding: 4px 10px; font-size: 11px;" onclick="apagarPlanoUI(\'' + nomeEsc + '\')">Apagar</button>' +
       '</div></div>';
   }).join('');
+}
+
+function verificarPlanosOrigemCliente() {
+  const estado = document.getElementById('estadoRecuperacaoPlanosOrigem');
+  if (!estado || !PLANO_CLIENTE_ATUAL.id) return;
+  google.script.run.withSuccessHandler(resultado => {
+    if (!document.getElementById('estadoRecuperacaoPlanosOrigem')) return;
+    if (!resultado || !resultado.disponivel) {
+      estado.innerHTML = '<span style="color:#64748b;">Também não foram encontrados planos atuais na origem.</span>';
+      return;
+    }
+    const planos = Number(resultado.totalPlanos || 0);
+    const treinos = Number(resultado.totalTreinos || 0);
+    estado.innerHTML = '<strong style="display:block;margin-bottom:10px;color:#2dd4bf;">Encontrámos ' + planos + (planos === 1 ? ' plano' : ' planos') + ' com ' + treinos + (treinos === 1 ? ' treino.' : ' treinos.') + '</strong><button type="button" class="btn btn-primary" onclick="sincronizarPlanosOrigemCliente(this)">Recuperar para o CRM e App Coach</button><small style="display:block;margin-top:10px;color:#64748b;">A recuperação não substitui planos já existentes no Firebase.</small>';
+  }).withFailureHandler(() => {
+    if (estado) estado.innerHTML = '<span style="color:#fca5a5;">Não foi possível verificar a origem agora. Tenta novamente.</span>';
+  }).getResumoPlanosOrigem(PLANO_CLIENTE_ATUAL.id);
+}
+
+function sincronizarPlanosOrigemCliente(botao) {
+  if (!PLANO_CLIENTE_ATUAL.id || !botao) return;
+  botao.disabled = true;
+  botao.textContent = 'A recuperar…';
+  google.script.run.withSuccessHandler(resultado => {
+    showAlert((resultado.totalTreinos || 0) + ' treino(s) recuperado(s) para o CRM e App Coach.', 'success');
+    abrirPlanosTreinoCliente(PLANO_CLIENTE_ATUAL.id, PLANO_CLIENTE_ATUAL.nome);
+  }).withFailureHandler(err => {
+    botao.disabled = false;
+    botao.textContent = 'Tentar novamente';
+    const codigo = String(err && err.message || '');
+    showAlert(codigo.includes('PLANOS_FIREBASE_EXISTENTES') ? 'A recuperação foi interrompida porque já existem planos no Firebase. Atualiza a lista.' : 'Não foi possível recuperar os planos: ' + codigo, 'error');
+  }).sincronizarPlanosOrigem({ idCliente: PLANO_CLIENTE_ATUAL.id });
 }
 
 let MODO_ENTRADA_PLANO = '';
@@ -10530,10 +10563,10 @@ window.addEventListener('load', function () {
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(!['getHistoricoCheckinsCliente','getResumoCheckinsMensal'].includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();let url='/api/dev-crm-checkins?clientId='+encodeURIComponent(args[0]);if(nome==='getResumoCheckinsMensal')url+='&mes='+encodeURIComponent(args[1]);const r=await fetch(url,{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok)throw Error(d.erro||'Check-ins indisponíveis.');ok&&ok(nome==='getHistoricoCheckinsCliente'?d.lista:d.resumo)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
-(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const suportadas=['getListaPlanosCliente','getTreinosDoPlano','getTreinoDetalhe','getBibliotecaExercicios','getPlanosParaReplicar'];if(!suportadas.includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();let url='/api/dev-crm-training-plans';if(nome==='getListaPlanosCliente')url+='?action=plans&clientId='+encodeURIComponent(args[0]);if(nome==='getTreinosDoPlano')url+='?action=workouts&clientId='+encodeURIComponent(args[0])+'&plan='+encodeURIComponent(args[1]);if(nome==='getTreinoDetalhe')url+='?action=detail&clientId='+encodeURIComponent(args[0])+'&plan='+encodeURIComponent(args[1])+'&workout='+encodeURIComponent(args[2]);if(nome==='getBibliotecaExercicios')url+='?action=library';if(nome==='getPlanosParaReplicar')url+='?action=replicable';const r=await fetch(url,{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Planos de treino indisponíveis.');ok&&ok(d)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
+(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const suportadas=['getListaPlanosCliente','getTreinosDoPlano','getTreinoDetalhe','getBibliotecaExercicios','getPlanosParaReplicar','getResumoPlanosOrigem'];if(!suportadas.includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();let url='/api/dev-crm-training-plans';if(nome==='getListaPlanosCliente')url+='?action=plans&clientId='+encodeURIComponent(args[0]);if(nome==='getTreinosDoPlano')url+='?action=workouts&clientId='+encodeURIComponent(args[0])+'&plan='+encodeURIComponent(args[1]);if(nome==='getTreinoDetalhe')url+='?action=detail&clientId='+encodeURIComponent(args[0])+'&plan='+encodeURIComponent(args[1])+'&workout='+encodeURIComponent(args[2]);if(nome==='getBibliotecaExercicios')url+='?action=library';if(nome==='getPlanosParaReplicar')url+='?action=replicable';if(nome==='getResumoPlanosOrigem')url+='?action=source-status&clientId='+encodeURIComponent(args[0]);const r=await fetch(url,{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Planos de treino indisponíveis.');ok&&ok(d)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
-(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const acoes={guardarTreinoCliente:'save-workout',apagarTreinoCliente:'delete-workout',apagarPlanoCompleto:'delete-plan',renovarValidadePlano:'renew-validity',definirVisibilidadePlano:'set-visibility',replicarPlanoParaCliente:'replicate-plan',guardarExercicioBiblioteca:'save-library-exercise',renomearPlano:'rename-plan'};if(!acoes[nome])return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),entrada=args[0]||{},r=await fetch('/api/dev-crm-training-plan-actions',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({...entrada,action:acoes[nome]})}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Não foi possível alterar o plano.');if(nome==='guardarTreinoCliente')return ok&&ok({sucesso:true});if(nome==='guardarExercicioBiblioteca')return ok&&ok(d);const destinoId=nome==='replicarPlanoParaCliente'?entrada.destinoIdCliente:entrada.idCliente;const url='/api/dev-crm-training-plans?action=plans&clientId='+encodeURIComponent(destinoId);if(nome==='apagarTreinoCliente'){const treinoUrl='/api/dev-crm-training-plans?action=workouts&clientId='+encodeURIComponent(entrada.idCliente)+'&plan='+encodeURIComponent(entrada.nomePlano);const lista=await fetch(treinoUrl,{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());return ok&&ok(lista)}const lista=await fetch(url,{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!lista.ok)throw Error(lista.erro||'Alteração guardada, mas a lista não atualizou.');ok&&ok(lista)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
+(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const acoes={guardarTreinoCliente:'save-workout',apagarTreinoCliente:'delete-workout',apagarPlanoCompleto:'delete-plan',renovarValidadePlano:'renew-validity',definirVisibilidadePlano:'set-visibility',replicarPlanoParaCliente:'replicate-plan',guardarExercicioBiblioteca:'save-library-exercise',renomearPlano:'rename-plan',sincronizarPlanosOrigem:'sync-from-source'};if(!acoes[nome])return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),entrada=args[0]||{},r=await fetch('/api/dev-crm-training-plan-actions',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({...entrada,action:acoes[nome]})}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Não foi possível alterar o plano.');if(nome==='guardarTreinoCliente')return ok&&ok({sucesso:true});if(nome==='guardarExercicioBiblioteca'||nome==='sincronizarPlanosOrigem')return ok&&ok(d);const destinoId=nome==='replicarPlanoParaCliente'?entrada.destinoIdCliente:entrada.idCliente;const url='/api/dev-crm-training-plans?action=plans&clientId='+encodeURIComponent(destinoId);if(nome==='apagarTreinoCliente'){const treinoUrl='/api/dev-crm-training-plans?action=workouts&clientId='+encodeURIComponent(entrada.idCliente)+'&plan='+encodeURIComponent(entrada.nomePlano);const lista=await fetch(treinoUrl,{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());return ok&&ok(lista)}const lista=await fetch(url,{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!lista.ok)throw Error(lista.erro||'Alteração guardada, mas a lista não atualizou.');ok&&ok(lista)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
 (function(){

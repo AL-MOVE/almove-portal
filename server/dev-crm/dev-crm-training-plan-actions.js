@@ -5,6 +5,7 @@ import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firest
 import { exigirEquipa } from '../../api/_crm-development.js';
 import { trainingPlanRevision } from './training-plan-revision.js';
 import { normalizeTrainingPlanName } from './training-plan-name.js';
+import { obterPlanosOrigem } from './training-plan-source.js';
 
 function responder(res, estado, corpo) { res.setHeader('Cache-Control', 'no-store, max-age=0'); res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('X-Robots-Tag', 'noindex, nofollow'); return res.status(estado).json(corpo); }
 function texto(valor, maximo = 160) { return String(valor || '').trim().slice(0, maximo); }
@@ -30,6 +31,30 @@ export default async function handler(req, res) {
     const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove(); exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid));
     const entrada = req.body && typeof req.body === 'object' ? req.body : {}; const acao = texto(entrada.action, 40); const colecao = db.collection('crmMigrationTrainingPlans'); const snapshot = await colecao.get(); const agora = new Date();
     const auditar = (lote, nome, extra = {}) => lote.create(db.collection('auditLogs').doc(), { action: nome, actorUid: identidade.uid, createdAt: agora, ...extra });
+    if (acao === 'sync-from-source') {
+      const clienteId = texto(entrada.idCliente, 128);
+      if (!clienteId) return responder(res, 400, { ok: false, erro: 'CLIENTE_OBRIGATORIO' });
+      const cliente = await db.collection('crmMigrationClients').doc(clienteId).get();
+      if (!cliente.exists) return responder(res, 404, { ok: false, erro: 'CLIENTE_NAO_ENCONTRADO' });
+      const existentes = snapshot.docs.filter(documento => documento.data()?.idCliente === clienteId);
+      if (existentes.length) return responder(res, 409, { ok: false, erro: 'PLANOS_FIREBASE_EXISTENTES' });
+      const origem = await obterPlanosOrigem(req, clienteId);
+      if (!origem.linhas.length) return responder(res, 404, { ok: false, erro: 'PLANOS_ORIGEM_NAO_ENCONTRADOS' });
+      const referencias = origem.linhas.map(item => colecao.doc(String(item.fonteLinha)));
+      const conflitos = await Promise.all(referencias.map(referencia => referencia.get()));
+      if (conflitos.some((documento, indice) => documento.exists && documento.data()?.idCliente !== clienteId)) return responder(res, 409, { ok: false, erro: 'ORIGEM_PLANOS_CONFLITO' });
+      const nomesPlanos = [...new Set(origem.linhas.map(item => item.nomePlano))];
+      const treinos = [...new Map(origem.linhas.map(item => [[item.nomePlano, item.nomeTreino].join('\u0000'), item])).values()];
+      const totalOperacoes = origem.linhas.length + nomesPlanos.length + treinos.length + 1;
+      if (totalOperacoes > 490) return responder(res, 409, { ok: false, erro: 'PLANOS_ORIGEM_DEMASIADO_GRANDES' });
+      const lote = db.batch();
+      origem.linhas.forEach((item, indice) => lote.set(referencias[indice], { ...item, origem: 'apps-script-sync', migration: { source: 'apps-script', sourceRow: item.fonteLinha, copiedAt: agora, snapshotAt: origem.snapshotAt } }));
+      nomesPlanos.forEach(nomePlano => lote.set(db.collection('crmTrainingPlanNames').doc(cabecaId(clienteId, nomeNormalizado(nomePlano), 'plano')), { idCliente: clienteId, nomePlano, nomeNormalizado: nomeNormalizado(nomePlano), criadoEm: agora, criadoPor: identidade.uid, origem: 'apps-script-sync' }, { merge: true }));
+      treinos.forEach(item => lote.set(db.collection('crmTrainingPlanHeads').doc(cabecaId(clienteId, item.nomePlano, item.nomeTreino)), { idCliente: clienteId, nomePlano: item.nomePlano, nomeTreino: item.nomeTreino, revision: item.atualizadoEm || origem.snapshotAt, atualizadoEm: agora, atualizadoPor: identidade.uid, atualizadoPorEmail: identidade.email, origem: 'apps-script-sync' }, { merge: true }));
+      auditar(lote, 'development.training-plans.synced-from-apps-script', { clientId: clienteId, rows: origem.linhas.length, plans: nomesPlanos.length, workouts: treinos.length, snapshotAt: origem.snapshotAt });
+      await lote.commit();
+      return responder(res, 201, { ok: true, copiados: origem.linhas.length, totalPlanos: nomesPlanos.length, totalTreinos: treinos.length });
+    }
     if (acao === 'save-library-exercise') {
       const nome = texto(entrada.nome, 200); const grupoMuscular = texto(entrada.grupoMuscular, 100); const padraoMovimento = texto(entrada.padraoMovimento, 100); const equipamento = texto(entrada.equipamento, 100); const classificacao = texto(entrada.classificacao, 100) || 'Principal'; const metricaPrincipal = texto(entrada.metricaPrincipal, 100) || 'Carga e repetições'; const musculosPrincipais = listaMusculos(entrada.musculosPrincipais); const musculosSecundarios = listaMusculos(entrada.musculosSecundarios); const instrucoes = texto(entrada.instrucoes, 2000); const contraindicacoes = texto(entrada.contraindicacoes, 2000); const urlImagemInicial = urlHttp(entrada.urlImagemInicial || entrada.urlImagem); const urlImagemFinal = urlHttp(entrada.urlImagemFinal); const urlVideo = urlHttp(entrada.urlVideo); const substituiNome = texto(entrada.substituiNome, 200); const ativo = entrada.ativo !== false && String(entrada.ativo).toLowerCase() !== 'false';
       if (!nome || !grupoMuscular || !padraoMovimento || !equipamento || !musculosPrincipais.length) return responder(res, 400, { ok: false, erro: 'EXERCICIO_BIBLIOTECA_INVALIDO' });
