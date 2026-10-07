@@ -2896,7 +2896,7 @@
     <section class="comando-card" aria-label="Centro de comando">
       <div class="comando-head">
         <div>
-          <h2 class="comando-title">Centro de comando</h2>
+          <h2 class="comando-title">Centro de comando <span style="display:inline-flex;margin-left:6px;padding:2px 6px;border:1px solid rgba(56,189,248,.22);border-radius:999px;color:#bae6fd;font-size:8px;letter-spacing:.05em;text-transform:uppercase;vertical-align:middle;">Todos os locais</span></h2>
           <p class="comando-subtitle" id="comandoAtualizadoEm">A preparar o briefing de hoje…</p>
         </div>
         <button type="button" class="btn btn-secondary" style="padding:8px 11px;font-size:11px;" onclick="carregarCentroComandoCRM(true)">Atualizar</button>
@@ -6304,7 +6304,7 @@ function renderCentroComandoCRM(centro) {
     '<div class="comando-fila" id="centroComandoFila"></div>';
 
   const atualizado = document.getElementById('comandoAtualizadoEm');
-  if (atualizado) atualizado.textContent = 'Dados operacionais atualizados às ' + (centro.geradoEm || 'agora') + '.';
+  if (atualizado) atualizado.textContent = 'Dados operacionais atualizados às ' + (centro.geradoEm || 'agora') + '.' + (FILTRO_LOCAL_CRM ? ' Esta fila mantém a visão global.' : '');
   const fila = document.getElementById('centroComandoFila');
   if (!fila) return;
   const itens = [];
