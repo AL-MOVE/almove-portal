@@ -53,6 +53,7 @@ export function normalizarClienteLegado(entrada) {
     assinaturaAceiteEm: texto(dados.assinaturaAceiteEm, 32),
     diaPagamento: numero(dados.diaPagamento),
     metodoPagamento: texto(dados.metodoPagamento, 80),
+    localId: texto(dados.localId, 80),
     notas: texto(dados.notas, 5000)
   });
 }

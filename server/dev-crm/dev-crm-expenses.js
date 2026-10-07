@@ -3,6 +3,7 @@ import { obterIdentidadeFirebase } from '../../api/_firebase.js';
 import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
+import { carregarLocais, rendaDoLocalNoMes, validarLocalCliente } from './locations.js';
 
 export const CATEGORIAS_DESPESA = Object.freeze([
   'Renda do ginásio', 'Software e subscrições', 'Equipamento', 'Marketing', 'Transporte', 'Serviços profissionais', 'Outros'
@@ -36,7 +37,7 @@ export function validarDespesa(entrada) {
   if (!['recorrente', 'avulsa'].includes(tipo)) throw falha('DESPESA_TIPO_INVALIDO');
   if (!CATEGORIAS_DESPESA.includes(categoria)) throw falha('DESPESA_CATEGORIA_INVALIDA');
   if (!descricao) throw falha('DESPESA_DESCRICAO_INVALIDA');
-  return Object.freeze({ tipo, categoria, descricao, valor: valorEuro(dados.valor), mesInicio: mesAno(dados.mesAno) });
+  return Object.freeze({ tipo, categoria, descricao, valor: valorEuro(dados.valor), mesInicio: mesAno(dados.mesAno), locationId: texto(dados.locationId, 80) });
 }
 
 function aplicaNoMes(despesa, mes) {
@@ -55,13 +56,33 @@ function exporDespesa(documento) {
     valor: Number(dados.valor || 0),
     mesInicio: String(dados.mesInicio || ''),
     mesFim: String(dados.mesFim || ''),
-    ativo: dados.ativo !== false
+    ativo: dados.ativo !== false,
+    locationId: String(dados.locationId || ''),
+    virtual: false
   });
 }
 
-export async function obterResumoDespesas(db, mes) {
+export async function obterResumoDespesas(db, mes, { locationId = '', catalogoLocais = null } = {}) {
   const resultado = await db.collection('crmExpenses').get();
-  const despesas = resultado.docs.map(exporDespesa).filter(despesa => aplicaNoMes(despesa, mes));
+  let despesas = resultado.docs.map(exporDespesa).filter(despesa => aplicaNoMes(despesa, mes));
+  const catalogo = catalogoLocais || await carregarLocais(db);
+  const legadasUsadas = new Set();
+  const rendasVirtuais = [];
+  for (const local of catalogo.locais || []) {
+    const valor = rendaDoLocalNoMes(local, mes);
+    if (!(valor > 0)) continue;
+    const explicita = despesas.find(despesa => despesa.locationId === local.id && despesa.categoria === 'Renda do ginásio');
+    if (explicita) continue;
+    const legadas = despesas.filter(despesa => !despesa.locationId && despesa.categoria === 'Renda do ginásio' && Number(despesa.valor) === valor && !legadasUsadas.has(despesa.id));
+    if (legadas.length === 1) {
+      const alvo = legadas[0]; legadasUsadas.add(alvo.id);
+      despesas = despesas.map(despesa => despesa.id === alvo.id ? Object.freeze({ ...despesa, locationId: local.id, localInferido: true }) : despesa);
+      continue;
+    }
+    rendasVirtuais.push(Object.freeze({ id: 'location-rent:' + local.id + ':' + mes, tipo: 'recorrente', categoria: 'Renda do ginásio', descricao: 'Renda · ' + local.nome, valor, mesInicio: mes, mesFim: '', ativo: true, locationId: local.id, virtual: true }));
+  }
+  despesas = despesas.concat(rendasVirtuais);
+  if (locationId) despesas = despesas.filter(despesa => despesa.locationId === locationId);
   const total = despesas.reduce((soma, despesa) => soma + despesa.valor, 0);
   const recorrentes = despesas.filter(despesa => despesa.tipo === 'recorrente').reduce((soma, despesa) => soma + despesa.valor, 0);
   return Object.freeze({
@@ -84,7 +105,9 @@ export default async function handler(req, res) {
     const mes = mesAno(req.method === 'GET' ? req.query?.mes : req.body?.mesAno);
 
     if (req.method === 'GET') {
-      const resumo = await obterResumoDespesas(db, mes);
+      const catalogoLocais = await carregarLocais(db);
+      const filtroLocal = validarLocalCliente(catalogoLocais, req.query?.locationId, { permitirVazio: true, permitirInativo: true });
+      const resumo = await obterResumoDespesas(db, mes, { locationId: filtroLocal, catalogoLocais });
       return responder(res, 200, { ok: true, mes, despesas: resumo.despesas, total: resumo.total.toFixed(2), recorrentes: resumo.recorrentes.toFixed(2) });
     }
 
@@ -93,18 +116,25 @@ export default async function handler(req, res) {
     const agora = new Date();
 
     if (acao === 'create') {
-      const despesa = validarDespesa(dados);
+      const base = validarDespesa(dados);
+      const catalogoLocais = await carregarLocais(db);
+      const locationId = validarLocalCliente(catalogoLocais, base.locationId, { permitirVazio: true });
+      if (base.categoria === 'Renda do ginásio' && !locationId) throw falha('DESPESA_LOCAL_OBRIGATORIO');
+      const localDaRenda = base.categoria === 'Renda do ginásio' ? (catalogoLocais.locais || []).find(local => local.id === locationId) : null;
+      if (localDaRenda && rendaDoLocalNoMes(localDaRenda, base.mesInicio) > 0) throw falha('DESPESA_RENDA_GERIDA_NAS_DEFINICOES');
+      const despesa = { ...base, locationId };
       const referencia = db.collection('crmExpenses').doc();
       await db.runTransaction(async transacao => {
         transacao.create(referencia, { ...despesa, mesFim: '', ativo: true, createdAt: FieldValue.serverTimestamp(), createdBy: identidade.uid, origem: 'firebase-development' });
         transacao.create(db.collection('auditLogs').doc(), { action: 'development.expense.created', actorUid: identidade.uid, expenseId: referencia.id, createdAt: agora, tipo: despesa.tipo, categoria: despesa.categoria, valor: despesa.valor });
       });
-      const resumo = await obterResumoDespesas(db, mes);
+      const resumo = await obterResumoDespesas(db, mes, { catalogoLocais });
       return responder(res, 201, { ok: true, despesas: resumo.despesas, total: resumo.total.toFixed(2), recorrentes: resumo.recorrentes.toFixed(2) });
     }
 
     const id = texto(dados.id, 128);
     if (!id) return responder(res, 400, { ok: false, erro: 'DESPESA_ID_INVALIDO' });
+    if (id.startsWith('location-rent:')) return responder(res, 400, { ok: false, erro: 'DESPESA_GERIDA_NAS_DEFINICOES' });
     const referencia = db.collection('crmExpenses').doc(id);
     const existente = await referencia.get();
     if (!existente.exists) return responder(res, 404, { ok: false, erro: 'DESPESA_NAO_ENCONTRADA' });

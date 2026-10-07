@@ -4,6 +4,7 @@ import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firest
 import { exigirEquipa } from '../../api/_crm-development.js';
 import { consolidarPacksMensais } from './payment-status.js';
 import { frequencyFromServiceName, loadServiceCatalog, packShapeForService, priceForService, serviceByCode } from './service-catalog.js';
+import { carregarLocais, validarLocalCliente } from './locations.js';
 
 const MEDIDAS = ['pesoKg', 'alturaCm', 'massaGordaPercent', 'cinturaCm', 'abdomenCm', 'bracoDireitoCm', 'bracoEsquerdoCm', 'pernaDireitaCm', 'pernaEsquerdaCm'];
 const ESTADOS_PAGAMENTO = new Set(['Pago', 'Pendente']);
@@ -117,7 +118,8 @@ export default async function handler(req, res) {
       const email = texto(dados.email, 254).toLowerCase(); const diaPagamento = dados.diaPagamento === '' || dados.diaPagamento == null ? null : Number(dados.diaPagamento);
       if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return responder(res, 400, { ok: false, erro: 'EMAIL_INVALIDO' });
       if (diaPagamento !== null && (!Number.isInteger(diaPagamento) || diaPagamento < 1 || diaPagamento > 31)) return responder(res, 400, { ok: false, erro: 'DIA_PAGAMENTO_INVALIDO' });
-      await db.runTransaction(async transacao => { transacao.update(cliente, { contacto: texto(dados.contacto, 64), servicoAtual: texto(dados.servicoAtual, 120), nif: texto(dados.nif, 32), morada: texto(dados.morada, 500), email, diaPagamento, metodoPagamento: texto(dados.metodoPagamento, 80), updatedAt: agora, updatedBy: identidade.uid }); transacao.create(db.collection('auditLogs').doc(), { ...auditoria, action: 'development.client.edited' }); });
+      const localId = validarLocalCliente(await carregarLocais(db), dados.localId, { permitirVazio: true, permitirInativo: dados.localId === clienteSnap.data()?.localId });
+      await db.runTransaction(async transacao => { transacao.update(cliente, { contacto: texto(dados.contacto, 64), servicoAtual: texto(dados.servicoAtual, 120), nif: texto(dados.nif, 32), morada: texto(dados.morada, 500), email, diaPagamento, metodoPagamento: texto(dados.metodoPagamento, 80), localId, updatedAt: agora, updatedBy: identidade.uid }); transacao.create(db.collection('auditLogs').doc(), { ...auditoria, action: 'development.client.edited', locationId: localId }); });
       return responder(res, 200, { ok: true, idCliente: clienteId });
     }
     if (acao === 'set-price') {
@@ -145,6 +147,6 @@ export default async function handler(req, res) {
     }
     return responder(res, 400, { ok: false, erro: 'ACAO_INVALIDA' });
   } catch (erro) {
-    const codigo = String(erro?.code || erro?.message || 'FALHA'); const pedidoInvalido = /^(SERVICO_|CODIGO_|PRECO_|DURACAO_|SESSOES_)/.test(codigo); return responder(res, /^FIREBASE_/.test(codigo) ? 401 : (pedidoInvalido ? 400 : 500), { ok: false, erro: codigo });
+    const codigo = String(erro?.code || erro?.message || 'FALHA'); const pedidoInvalido = /^(SERVICO_|CODIGO_|PRECO_|DURACAO_|SESSOES_|CLIENTE_LOCAL_)/.test(codigo); return responder(res, /^FIREBASE_/.test(codigo) ? 401 : (pedidoInvalido ? 400 : 500), { ok: false, erro: codigo });
   }
 }

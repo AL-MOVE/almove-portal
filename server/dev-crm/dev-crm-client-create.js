@@ -2,6 +2,7 @@ import { obterIdentidadeFirebase } from '../../api/_firebase.js';
 import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
+import { carregarLocais, validarLocalCliente } from './locations.js';
 
 function responder(res, estado, corpo) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -23,19 +24,20 @@ export default async function handler(req, res) {
     const nome = texto(dados.nome, 120);
     if (!nome) return responder(res, 400, { ok: false, erro: 'CLIENTE_INVALIDO_NOME' });
     const estado = ['Ativo', 'Pausado', 'Cancelado'].includes(String(dados.estado || '')) ? String(dados.estado) : 'Ativo';
+    const localId = validarLocalCliente(await carregarLocais(db), dados.localId, { permitirVazio: false });
     const referencia = db.collection('crmMigrationClients').doc(); const agora = new Date();
     await db.runTransaction(async transacao => {
       transacao.create(referencia, {
         fonteLinha: null, nome, estado, contacto: texto(dados.contacto, 32), nif: texto(dados.nif, 20),
         servicoAtual: texto(dados.servicoAtual, 80), notas: '', precoPersonalizado: null, suspensoMes: '', cancelarMes: '',
-        contratoFileId: '', morada: '', email: '', assinaturaAceiteEm: '', diaPagamento: null, metodoPagamento: '',
+        contratoFileId: '', morada: '', email: '', assinaturaAceiteEm: '', diaPagamento: null, metodoPagamento: '', localId,
         createdAt: agora, createdBy: identidade.uid, origem: 'firebase-development'
       });
-      transacao.create(db.collection('auditLogs').doc(), { action: 'development.client.created', actorUid: identidade.uid, clientId: referencia.id, createdAt: agora });
+      transacao.create(db.collection('auditLogs').doc(), { action: 'development.client.created', actorUid: identidade.uid, clientId: referencia.id, locationId: localId, createdAt: agora });
     });
     return responder(res, 201, { ok: true, idCriado: referencia.id });
   } catch (erro) {
     const codigo = String(erro?.code || erro?.message || 'FALHA');
-    return responder(res, /^FIREBASE_/.test(codigo) ? 401 : 500, { ok: false, erro: codigo });
+    return responder(res, /^FIREBASE_/.test(codigo) ? 401 : (/^(CLIENTE_|LOCAL)/.test(codigo) ? 400 : 500), { ok: false, erro: codigo });
   }
 }

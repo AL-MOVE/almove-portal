@@ -4,8 +4,8 @@ import { CATEGORIAS_DESPESA, validarDespesa } from '../server/dev-crm/dev-crm-ex
 
 assert.ok(CATEGORIAS_DESPESA.includes('Renda do ginásio'));
 assert.deepEqual(validarDespesa({
-  tipo: 'recorrente', categoria: 'Renda do ginásio', descricao: 'Renda da sala', valor: '450.50', mesAno: '2026-09'
-}), { tipo: 'recorrente', categoria: 'Renda do ginásio', descricao: 'Renda da sala', valor: 450.5, mesInicio: '2026-09' });
+  tipo: 'recorrente', categoria: 'Renda do ginásio', descricao: 'Renda da sala', valor: '450.50', mesAno: '2026-09', locationId: 'lfitness'
+}), { tipo: 'recorrente', categoria: 'Renda do ginásio', descricao: 'Renda da sala', valor: 450.5, mesInicio: '2026-09', locationId: 'lfitness' });
 assert.throws(() => validarDespesa({ tipo: 'mensal', categoria: 'Outros', descricao: 'Teste', valor: 1, mesAno: '2026-09' }), /DESPESA_TIPO_INVALIDO/);
 assert.throws(() => validarDespesa({ tipo: 'avulsa', categoria: 'Fora da lista', descricao: 'Teste', valor: 1, mesAno: '2026-09' }), /DESPESA_CATEGORIA_INVALIDA/);
 assert.throws(() => validarDespesa({ tipo: 'avulsa', categoria: 'Outros', descricao: 'Teste', valor: 0, mesAno: '2026-09' }), /DESPESA_VALOR_INVALIDO/);

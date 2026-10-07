@@ -4,6 +4,7 @@ import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firest
 import { exigirEquipa } from '../../api/_crm-development.js';
 import { normalizeExerciseLibrarySettings } from './exercise-library-settings.js';
 import { loadServiceCatalog, normalizeServiceCatalog } from './service-catalog.js';
+import { carregarLocais, mesLisboa, normalizarLocais } from './locations.js';
 
 const PADRAO = Object.freeze({ nome: 'André Martins - Personal Trainer', nif: '', morada: '', contacto: '', horasAvisoCancelamento: 12, diasAvisoDenuncia: 30, fidelizacaoMeses: 3, seguroCompanhia: '', seguroApolice: '', seguroCapital: '', seguroRiscos: '', ralEntidade: '', ralWebsite: '', comarca: '', prazoRespostaReclamacoesDias: 10, assinatura: '', fotoPerfil: '' });
 function responder(res, estado, corpo) { res.setHeader('Cache-Control', 'no-store, max-age=0'); res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('X-Robots-Tag', 'noindex, nofollow'); return res.status(estado).json(corpo); }
@@ -17,8 +18,8 @@ export default async function handler(req, res) {
   if (!['GET', 'POST'].includes(req.method)) return responder(res, 405, { ok: false });
   try {
     if (!crmFirebasePermitido()) return responder(res, 404, { ok: false });
-    const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove(); exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid)); const referencia = db.collection('crmDevelopmentSettings').doc('coach-profile'); const bibliotecaRef = db.collection('crmDevelopmentSettings').doc('exercise-library'); const servicosRef = db.collection('crmDevelopmentSettings').doc('service-catalog');
-    if (req.method === 'GET') { const [atual, bibliotecaSnap, catalogo] = await Promise.all([referencia.get(), bibliotecaRef.get(), loadServiceCatalog(db)]); return responder(res, 200, { ok: true, perfil: normalizar(atual.exists ? atual.data() : PADRAO), biblioteca: normalizeExerciseLibrarySettings(bibliotecaSnap.exists ? bibliotecaSnap.data() : {}), catalogo }); }
+    const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove(); exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid)); const referencia = db.collection('crmDevelopmentSettings').doc('coach-profile'); const bibliotecaRef = db.collection('crmDevelopmentSettings').doc('exercise-library'); const servicosRef = db.collection('crmDevelopmentSettings').doc('service-catalog'); const locaisRef = db.collection('crmDevelopmentSettings').doc('locations');
+    if (req.method === 'GET') { const [atual, bibliotecaSnap, catalogo, locais] = await Promise.all([referencia.get(), bibliotecaRef.get(), loadServiceCatalog(db), carregarLocais(db)]); return responder(res, 200, { ok: true, perfil: normalizar(atual.exists ? atual.data() : PADRAO), biblioteca: normalizeExerciseLibrarySettings(bibliotecaSnap.exists ? bibliotecaSnap.data() : {}), catalogo, locais }); }
     if (req.body?.action === 'save-exercise-library-settings') { const biblioteca = normalizeExerciseLibrarySettings(req.body.biblioteca || {}); const agora = new Date(); await db.runTransaction(async transacao => { transacao.set(bibliotecaRef, { ...biblioteca, updatedAt: agora, updatedBy: identidade.uid }); transacao.create(db.collection('auditLogs').doc(), { action: 'development.settings.exercise-library-updated', actorUid: identidade.uid, createdAt: agora }); }); return responder(res, 200, { ok: true, biblioteca }); }
     if (req.body?.action === 'save-service-catalog') {
       const enviados = normalizeServiceCatalog(req.body.catalogo?.servicos || []);
@@ -41,6 +42,23 @@ export default async function handler(req, res) {
       });
       return responder(res, 200, { ok: true, catalogo: catalogoGuardado });
     }
+    if (req.body?.action === 'save-locations') {
+      const revisaoEsperada = Number(req.body.locais?.revision || 0);
+      const agora = new Date(); let catalogoGuardado;
+      await db.runTransaction(async transacao => {
+        const atual = await transacao.get(locaisRef);
+        const dadosAtuais = atual.exists ? atual.data() : {};
+        const revisaoAtual = Number(dadosAtuais?.revision || 0);
+        if (revisaoEsperada !== revisaoAtual) throw new Error('LOCAIS_CONFLITO');
+        const anteriores = Array.isArray(dadosAtuais?.locais) ? dadosAtuais.locais : [];
+        const locais = normalizarLocais(req.body.locais?.locais || [], { mes: mesLisboa(), anteriores });
+        const revision = revisaoAtual + 1;
+        catalogoGuardado = { locais, revision, configured: true };
+        transacao.set(locaisRef, { locais, revision, updatedAt: agora, updatedBy: identidade.uid });
+        transacao.create(db.collection('auditLogs').doc(), { action: 'development.settings.locations-updated', actorUid: identidade.uid, createdAt: agora, revision, locations: locais.map(item => ({ id: item.id, name: item.nome, type: item.tipo, active: item.ativo, monthlyRent: item.rendaMensal })) });
+      });
+      return responder(res, 200, { ok: true, locais: catalogoGuardado });
+    }
     const perfil = normalizar(req.body && typeof req.body === 'object' ? req.body : {}); const agora = new Date(); await db.runTransaction(async transacao => { transacao.set(referencia, { ...perfil, updatedAt: agora, updatedBy: identidade.uid }); transacao.create(db.collection('auditLogs').doc(), { action: 'development.settings.profile-updated', actorUid: identidade.uid, createdAt: agora }); }); return responder(res, 200, { ok: true, perfil });
-  } catch (erro) { const codigo = String(erro?.code || erro?.message || 'FALHA'); const estado = /^FIREBASE_/.test(codigo) ? 401 : (codigo === 'CATALOGO_SERVICOS_CONFLITO' ? 409 : (/^(CODIGO_|ID_|NOME_|PRECO_|SESSOES_|DURACAO_|VALIDADE_|DEMASIADOS_)/.test(codigo) ? 400 : 500)); return responder(res, estado, { ok: false, erro: codigo }); }
+  } catch (erro) { const codigo = String(erro?.code || erro?.message || 'FALHA'); const estado = /^FIREBASE_/.test(codigo) ? 401 : (['CATALOGO_SERVICOS_CONFLITO', 'LOCAIS_CONFLITO'].includes(codigo) ? 409 : (/^(CODIGO_|ID_|NOME_|PRECO_|SESSOES_|DURACAO_|VALIDADE_|DEMASIADOS_|LOCAL|LOCAIS_)/.test(codigo) ? 400 : 500)); return responder(res, estado, { ok: false, erro: codigo }); }
 }

@@ -2553,6 +2553,20 @@
   @media(max-width:760px){.service-modal{padding:16px}.service-special-note{align-items:flex-start;flex-direction:column}.service-special-note .btn{width:100%}.service-table-head{display:none}.service-editor-row{grid-template-columns:1fr;align-items:start}.service-editor-main,.service-editor-schedule{grid-template-columns:1fr 1fr}.service-editor-main .service-description{grid-column:1/-1}.service-modal-actions .btn{flex:1}.service-modal-actions #estadoCatalogoServicos{flex-basis:100%;order:-1}}
 </style>
 
+<style id="locations-design">
+  .location-scope-actions{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}.location-scope-actions label{display:grid;gap:4px;color:#71869d;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.location-scope-actions select,.location-filter-select{min-width:150px;padding:9px 32px 9px 11px;border:1px solid rgba(45,212,191,.22);border-radius:10px;background:#0a1725;color:#dce8f5;font-size:12px}.location-modal-overlay{position:fixed;inset:0;z-index:10008;display:none;align-items:center;justify-content:center;padding:16px;overflow-y:auto;background:rgba(0,0,0,.74)}.location-modal{width:min(860px,100%);max-height:90vh;overflow:auto;margin:24px 0;padding:20px;border:1px solid rgba(45,212,191,.24);border-radius:16px;background:#0d1723;box-shadow:0 26px 80px rgba(0,0,0,.48)}.location-modal-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:14px}.location-modal-head h3{margin:2px 0 4px;color:#f8fafc;font-size:20px}.location-modal-head p{max-width:650px;margin:0;color:#91a3b8;font-size:11px;line-height:1.5}.location-safety-note{margin-bottom:14px;padding:10px 12px;border:1px solid rgba(250,204,21,.22);border-radius:11px;background:rgba(161,98,7,.1);color:#fde68a;font-size:11px;line-height:1.45}.location-editor-list{display:grid;gap:8px}.location-editor-row{display:grid;grid-template-columns:minmax(180px,1.7fr) minmax(135px,.8fr) minmax(130px,.75fr) minmax(95px,.55fr);gap:9px;align-items:end;padding:12px;border:1px solid rgba(148,163,184,.15);border-radius:13px;background:rgba(255,255,255,.025)}.location-editor-row.inactive{opacity:.6}.location-editor-row label{display:grid;gap:4px;color:#8193a9;font-size:9px;font-weight:750;letter-spacing:.045em;text-transform:uppercase}.location-editor-row input,.location-editor-row select{padding:9px 10px;font-size:12px}.location-editor-active{display:flex!important;grid-auto-flow:column;justify-content:start;align-items:center;gap:7px;min-height:38px;color:#cbd5e1!important;font-size:11px!important;text-transform:none!important;letter-spacing:0!important}.location-editor-active input{width:auto;margin:0}.location-modal-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:15px}.location-modal-actions .btn{width:auto}.location-modal-actions [data-location-state]{flex:1;min-width:180px;color:#91a3b8;font-size:11px}.location-badge{border-color:rgba(56,189,248,.22)!important;background:rgba(14,116,144,.11)!important;color:#bae6fd!important}.location-badge.unassigned{border-color:rgba(250,204,21,.22)!important;background:rgba(161,98,7,.1)!important;color:#fde68a!important}
+  @media(max-width:720px){.location-scope-actions{width:100%}.location-scope-actions label,.location-scope-actions select{flex:1}.location-editor-row{grid-template-columns:1fr 1fr}.location-editor-row>label:first-child{grid-column:1/-1}.location-modal-actions .btn{flex:1}.location-modal-actions [data-location-state]{flex-basis:100%;order:-1}}
+</style>
+
+<div id="modalLocaisOverlay" class="location-modal-overlay" aria-hidden="true">
+  <div class="location-modal" role="dialog" aria-modal="true" aria-labelledby="modalLocaisTitulo">
+    <div class="location-modal-head"><div><div class="eyebrow">Estrutura do negócio</div><h3 id="modalLocaisTitulo">Ginásios e locais</h3><p>Cada cliente fica associado a um local. A renda é aplicada apenas ao respetivo ginásio e mantém um histórico mensal quando o valor muda.</p></div><button type="button" class="btn btn-secondary" style="width:auto" onclick="fecharModalLocais()" aria-label="Fechar">×</button></div>
+    <div class="location-safety-note"><strong>Clientes antigos ficam “Por atribuir”.</strong> A aplicação não adivinha o ginásio. Um local usado deve ser desativado em vez de apagado, para preservar o histórico.</div>
+    <div id="locationEditorList" class="location-editor-list"></div>
+    <div class="location-modal-actions"><button type="button" class="btn btn-secondary" onclick="adicionarLinhaLocal()">+ Adicionar local</button><span data-location-state id="estadoLocais">A renda indicada passa a contar a partir do mês atual.</span><button type="button" class="btn btn-secondary" onclick="fecharModalLocais()">Cancelar</button><button type="button" class="btn btn-primary" id="btnGuardarLocais" onclick="guardarLocaisCRM()">Guardar locais</button></div>
+  </div>
+</div>
+
 <style id="biblioteca-exercicios-design">
   .exercise-library-header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}.exercise-library-header p{max-width:650px;color:#91a3b8;font-size:12px}.exercise-library-actions{display:flex;gap:8px;flex-wrap:wrap}.exercise-library-toolbar{display:grid;grid-template-columns:minmax(240px,2fr) repeat(3,minmax(150px,1fr));gap:10px;padding:14px;border:1px solid rgba(45,212,191,.18);border-radius:14px;background:rgba(8,18,29,.72)}.exercise-library-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}.exercise-library-stat{padding:13px;border:1px solid rgba(148,163,184,.15);border-radius:12px;background:rgba(255,255,255,.035)}.exercise-library-stat strong{display:block;color:#fff;font-size:20px;line-height:1}.exercise-library-stat span{display:block;margin-top:5px;color:#7f91a7;font-size:10px;text-transform:uppercase;letter-spacing:.06em}.exercise-library-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:10px}.exercise-library-card{display:grid;grid-template-columns:84px 1fr;gap:12px;min-width:0;padding:12px;border:1px solid rgba(148,163,184,.16);border-radius:14px;background:linear-gradient(145deg,rgba(14,28,42,.9),rgba(8,16,25,.88))}.exercise-library-card.inactive{opacity:.64}.exercise-library-thumb{position:relative;width:84px;aspect-ratio:1;border:1px solid rgba(148,163,184,.14);border-radius:11px;overflow:hidden;background:#08111c;color:#52657a;display:grid;place-items:center;font-size:10px;text-align:center}.exercise-library-thumb img{width:100%;height:100%;object-fit:cover}.exercise-library-thumb .end-marker{position:absolute;right:4px;bottom:4px;padding:2px 5px;border-radius:999px;background:rgba(5,8,16,.86);color:#5eead4;font-size:8px;font-weight:800}.exercise-library-card-body{min-width:0}.exercise-library-card h3{margin:0;color:#f8fafc;font-size:13px;line-height:1.25}.exercise-library-meta{margin-top:5px;color:#8ea0b5;font-size:10px;line-height:1.45}.exercise-library-tags{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}.exercise-library-tag{padding:2px 6px;border-radius:999px;border:1px solid rgba(45,212,191,.2);background:rgba(13,148,136,.1);color:#99f6e4;font-size:9px}.exercise-library-card-actions{display:flex;gap:6px;margin-top:9px}.exercise-library-empty{grid-column:1/-1;padding:34px;border:1px dashed rgba(148,163,184,.25);border-radius:14px;color:#91a3b8;text-align:center}.exercise-media-preview{display:grid;place-items:center;aspect-ratio:4/3;margin-top:7px;border:1px dashed rgba(148,163,184,.24);border-radius:11px;overflow:hidden;background:#08111c;color:#64748b;font-size:10px}.exercise-media-preview img{width:100%;height:100%;object-fit:cover}.exercise-media-preview.erro{border-color:rgba(248,113,113,.35);color:#fca5a5}.exercise-library-loading{grid-column:1/-1;display:flex;align-items:center;justify-content:center;min-height:160px;color:#91a3b8}
   @media(max-width:980px){.exercise-library-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.exercise-library-toolbar>input{grid-column:1/-1}}
@@ -2808,9 +2822,9 @@
       <div>
         <div class="eyebrow">ANDRÉ MARTINS · PERSONAL TRAINER</div>
         <h1 class="dashboard-title">Hoje no Coach</h1>
-        <p class="dashboard-subtitle">Agenda, alunos e acompanhamento num único espaço de trabalho.</p>
+        <p class="dashboard-subtitle" id="dashboardScopeText">Agenda, alunos e acompanhamento num único espaço de trabalho.</p>
       </div>
-      <button type="button" class="btn btn-primary topbar-quick-action" onclick="switchTab('criar')">+ Novo cliente</button>
+      <div class="location-scope-actions"><label for="dashboardFiltroLocal">Local</label><select id="dashboardFiltroLocal" onchange="alterarFiltroLocalDashboard(this.value)"><option value="">Total</option></select><button type="button" class="btn btn-primary topbar-quick-action" onclick="switchTab('criar')">+ Novo cliente</button></div>
     </div>
 
     <div style="max-width: 640px; margin: 0 0 22px;">
@@ -3001,7 +3015,8 @@
   <section id="clientes" class="view">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
       <h2 class="section-title" id="clientesTituloCount" style="margin-bottom: 0;">Clientes ativos</h2>
-      <div style="display: flex; gap: 8px;">
+      <div style="display: flex; gap: 8px;flex-wrap:wrap;">
+        <select id="clientesFiltroLocal" aria-label="Filtrar clientes por local" onchange="alterarFiltroClientesLocal(this.value)" class="location-filter-select"><option value="">Todos os locais</option></select>
         <button type="button" class="btn btn-primary" style="width: auto; padding: 8px 16px;" onclick="switchTab('criar')">+ Novo cliente</button>
         <button type="button" class="btn btn-secondary" onclick="exportarClientesCSV()">Exportar CSV</button>
       </div>
@@ -3049,6 +3064,10 @@
         <div class="form-group">
           <label>NIF (opcional)</label>
           <input type="text" id="novoClienteNif" inputmode="numeric" maxlength="9" placeholder="123456789">
+        </div>
+        <div class="form-group">
+          <label>Ginásio / local *</label>
+          <select id="novoClienteLocal" required><option value="">Escolhe um local</option></select>
         </div>
         <div class="form-group">
           <label>Serviço atual</label>
@@ -3124,7 +3143,7 @@
   <section id="financas" class="view">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;margin-bottom:16px;">
       <div><div class="eyebrow">ANDRÉ MARTINS · NEGÓCIO</div><h2 class="section-title" style="margin-bottom:3px;">Finanças</h2><p style="color:#8ba0b8;font-size:13px;max-width:680px;">Regista custos como renda do ginásio, software ou equipamento. O lucro estimado desconta estes valores à receita potencial do mês.</p></div>
-      <button type="button" class="btn btn-primary" style="width:auto;padding:9px 14px" onclick="alternarFormDespesaCRM()">+ Adicionar despesa</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;"><select id="financasFiltroLocal" aria-label="Filtrar finanças por local" onchange="alterarFiltroLocalFinancas(this.value)" class="location-filter-select"><option value="">Total</option></select><button type="button" class="btn btn-primary" style="width:auto;padding:9px 14px" onclick="alternarFormDespesaCRM()">+ Adicionar despesa</button></div>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:18px;">
       <article class="card" style="margin:0;padding:15px;"><div class="card-label">Receita potencial</div><div class="card-value" id="financasReceitaPotencial">€0.00</div><div class="card-subtext">Recebido + pendente</div></article>
@@ -3138,6 +3157,7 @@
       <div class="dashboard-section-row" style="margin:0 0 13px;"><h3 class="section-title" style="margin:0;font-size:16px;">Nova despesa</h3><button type="button" class="btn btn-secondary" style="width:auto;padding:6px 10px;font-size:11px" onclick="alternarFormDespesaCRM()">Fechar</button></div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:11px;">
         <div class="form-group" style="margin:0"><label for="despesaCategoria">Categoria</label><select id="despesaCategoria"><option>Renda do ginásio</option><option>Software e subscrições</option><option>Equipamento</option><option>Marketing</option><option>Transporte</option><option>Serviços profissionais</option><option>Outros</option></select></div>
+        <div class="form-group" style="margin:0"><label for="despesaLocal">Local</label><select id="despesaLocal"><option value="">Geral / todos os locais</option></select></div>
         <div class="form-group" style="margin:0"><label for="despesaTipo">Frequência</label><select id="despesaTipo"><option value="recorrente">Mensal recorrente</option><option value="avulsa">Apenas neste mês</option></select></div>
         <div class="form-group" style="margin:0"><label for="despesaMes">Mês</label><input id="despesaMes" type="month"></div>
         <div class="form-group" style="margin:0"><label for="despesaValor">Valor (€)</label><input id="despesaValor" type="number" min="0.01" max="100000" step="0.01" inputmode="decimal" placeholder="0,00"></div>
@@ -3280,6 +3300,11 @@
         <div class="settings-card-icon">€</div>
         <div><h3>Serviços e preços</h3><p>Cria serviços, altera preços padrão e desativa opções antigas sem mexer no histórico.</p></div>
         <button type="button" class="btn btn-primary" onclick="abrirModalServicos()">Gerir tabela</button>
+      </article>
+      <article class="settings-card">
+        <div class="settings-card-icon">⌂</div>
+        <div><h3>Ginásios e locais</h3><p>Adiciona locais, define a renda mensal e desativa espaços antigos sem perder o histórico.</p></div>
+        <button type="button" class="btn btn-primary" onclick="abrirModalLocais()">Gerir locais</button>
       </article>
       <article class="settings-card">
         <div class="settings-card-icon">◐</div>
@@ -5680,6 +5705,147 @@ let CATALOGO_SERVICOS = {
     {id:'3x60',codigo:'3x60',nome:'PT - 3x60 min',categoria:'pt',descricao:'Personal Training',sessoesPorMes:12,duracaoMinutos:60,preco:415,validadeDias:60,ativo:true,ordem:8}
   ]
 };
+let CATALOGO_LOCAIS = {
+  revision: 0,
+  configured: false,
+  locais: [
+    { id: 'lfitness', nome: 'LFitness', tipo: 'presencial', rendaMensal: 375, ativo: true, ordem: 0 },
+    { id: 'pn-gym', nome: 'PN Gym', tipo: 'presencial', rendaMensal: 0, ativo: true, ordem: 1 },
+    { id: 'online', nome: 'Online', tipo: 'online', rendaMensal: 0, ativo: true, ordem: 2 }
+  ]
+};
+let FILTRO_LOCAL_CRM = '';
+let FILTRO_CLIENTES_LOCAL = '';
+
+function locaisCRM(incluirInativos = false) {
+  return (CATALOGO_LOCAIS.locais || []).filter(item => incluirInativos || item.ativo !== false).slice().sort((a, b) => Number(a.ordem || 0) - Number(b.ordem || 0) || String(a.nome).localeCompare(String(b.nome), 'pt-PT'));
+}
+
+function nomeLocalCRM(id) {
+  if (!id) return 'Por atribuir';
+  const local = locaisCRM(true).find(item => item.id === id);
+  return local ? local.nome : 'Local antigo';
+}
+
+function opcoesLocaisCRM(valor, configuracao = {}) {
+  const todos = configuracao.todos === true;
+  const semLocal = configuracao.semLocal === true;
+  const incluirInativos = configuracao.incluirInativos === true;
+  let html = todos ? '<option value="">Total</option>' : (semLocal ? '<option value="">Por atribuir</option>' : '<option value="">Escolhe um local</option>');
+  return html + locaisCRM(incluirInativos).map(item => '<option value="' + escaparHtmlCRM(item.id) + '"' + (item.id === valor ? ' selected' : '') + '>' + escaparHtmlCRM(item.nome) + (item.ativo === false ? ' · inativo' : '') + '</option>').join('');
+}
+
+function adotarLocaisDoCRM(data) {
+  if (data && Array.isArray(data.locations)) CATALOGO_LOCAIS = { ...CATALOGO_LOCAIS, locais: data.locations };
+  if (data && Object.prototype.hasOwnProperty.call(data, 'locationFilter')) FILTRO_LOCAL_CRM = data.locationFilter || '';
+  sincronizarControlesLocaisCRM();
+}
+
+function sincronizarControlesLocaisCRM() {
+  const preencher = (id, valor, todos, semLocal, incluirInativos) => {
+    const campo = document.getElementById(id); if (!campo) return;
+    campo.innerHTML = opcoesLocaisCRM(valor, { todos, semLocal, incluirInativos });
+    if ([...campo.options].some(opcao => opcao.value === valor)) campo.value = valor;
+  };
+  preencher('dashboardFiltroLocal', FILTRO_LOCAL_CRM, true, false, true);
+  preencher('financasFiltroLocal', FILTRO_LOCAL_CRM, true, false, true);
+  const clientes = document.getElementById('clientesFiltroLocal');
+  if (clientes) {
+    clientes.innerHTML = '<option value="">Todos os locais</option><option value="__sem_local__">Por atribuir</option>' + locaisCRM(true).map(item => '<option value="' + escaparHtmlCRM(item.id) + '">' + escaparHtmlCRM(item.nome) + (item.ativo === false ? ' · inativo' : '') + '</option>').join('');
+    clientes.value = [...clientes.options].some(opcao => opcao.value === FILTRO_CLIENTES_LOCAL) ? FILTRO_CLIENTES_LOCAL : '';
+  }
+  preencher('novoClienteLocal', document.getElementById('novoClienteLocal')?.value || '', false, false, false);
+  const despesaLocal = document.getElementById('despesaLocal');
+  if (despesaLocal) {
+    const atual = despesaLocal.value;
+    despesaLocal.innerHTML = '<option value="">Geral / todos os locais</option>' + locaisCRM(false).map(item => '<option value="' + escaparHtmlCRM(item.id) + '">' + escaparHtmlCRM(item.nome) + '</option>').join('');
+    despesaLocal.value = [...despesaLocal.options].some(opcao => opcao.value === atual) ? atual : (FILTRO_LOCAL_CRM || '');
+  }
+}
+
+function alterarFiltroLocalDashboard(valor) {
+  FILTRO_LOCAL_CRM = valor || '';
+  carregarMes(mesVisualizado || mesReal || '');
+}
+
+function alterarFiltroLocalFinancas(valor) { alterarFiltroLocalDashboard(valor); }
+
+function alterarFiltroClientesLocal(valor) {
+  FILTRO_CLIENTES_LOCAL = valor || '';
+  renderClientes();
+  renderClientesInativos();
+}
+
+function clienteNoFiltroLocalCRM(cliente) {
+  if (!FILTRO_CLIENTES_LOCAL) return true;
+  if (FILTRO_CLIENTES_LOCAL === '__sem_local__') return !cliente.localId;
+  return String(cliente.localId || '') === FILTRO_CLIENTES_LOCAL;
+}
+
+function abrirModalLocais() {
+  const overlay = document.getElementById('modalLocaisOverlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex'; overlay.setAttribute('aria-hidden', 'false');
+  const estado = document.getElementById('estadoLocais'); if (estado) estado.textContent = 'A carregar locais…';
+  google.script.run.withSuccessHandler(catalogo => {
+    if (catalogo && Array.isArray(catalogo.locais)) CATALOGO_LOCAIS = catalogo;
+    renderEditorLocais();
+    if (estado) estado.textContent = 'A renda indicada passa a contar a partir do mês atual.';
+  }).withFailureHandler(err => {
+    renderEditorLocais();
+    if (estado) estado.textContent = 'Não foi possível confirmar a versão atual: ' + (err.message || 'erro');
+  }).getLocaisCRM();
+}
+
+function fecharModalLocais() {
+  const overlay = document.getElementById('modalLocaisOverlay');
+  if (overlay) { overlay.style.display = 'none'; overlay.setAttribute('aria-hidden', 'true'); }
+}
+
+function renderEditorLocais() {
+  const lista = document.getElementById('locationEditorList'); if (!lista) return;
+  lista.innerHTML = locaisCRM(true).map((item, indice) => '<div class="location-editor-row' + (item.ativo === false ? ' inactive' : '') + '" data-location-id="' + escaparHtmlCRM(item.id) + '">' +
+    '<label>Nome<input data-location-field="nome" maxlength="120" value="' + escaparHtmlCRM(item.nome) + '"></label>' +
+    '<label>Tipo<select data-location-field="tipo"><option value="presencial"' + (item.tipo === 'presencial' ? ' selected' : '') + '>Presencial</option><option value="online"' + (item.tipo === 'online' ? ' selected' : '') + '>Online</option></select></label>' +
+    '<label>Renda mensal (€)<input data-location-field="rendaMensal" type="number" min="0" max="100000" step="0.01" value="' + Number(item.rendaMensal || 0) + '"' + (item.tipo === 'online' ? ' disabled' : '') + '></label>' +
+    '<label class="location-editor-active"><input data-location-field="ativo" type="checkbox"' + (item.ativo === false ? '' : ' checked') + '> Ativo</label>' +
+    '<input data-location-field="ordem" type="hidden" value="' + indice + '"></div>').join('');
+  lista.querySelectorAll('[data-location-field="tipo"]').forEach(campo => campo.addEventListener('change', () => { const linha = campo.closest('.location-editor-row'); const renda = linha?.querySelector('[data-location-field="rendaMensal"]'); if (renda) { renda.disabled = campo.value === 'online'; if (renda.disabled) renda.value = '0'; } }));
+  lista.querySelectorAll('[data-location-field="ativo"]').forEach(campo => campo.addEventListener('change', () => campo.closest('.location-editor-row')?.classList.toggle('inactive', !campo.checked)));
+}
+
+function adicionarLinhaLocal() {
+  const temporario = { id: '', nome: '', tipo: 'presencial', rendaMensal: 0, ativo: true, ordem: locaisCRM(true).length };
+  const existentes = document.querySelectorAll('#locationEditorList .location-editor-row').length ? lerEditorLocais() : (CATALOGO_LOCAIS.locais || []);
+  CATALOGO_LOCAIS = { ...CATALOGO_LOCAIS, locais: existentes.concat(temporario) };
+  renderEditorLocais();
+  document.querySelector('#locationEditorList .location-editor-row:last-child [data-location-field="nome"]')?.focus();
+}
+
+function lerEditorLocais() {
+  return [...document.querySelectorAll('#locationEditorList .location-editor-row')].map((linha, ordem) => ({
+    id: linha.dataset.locationId || '', nome: linha.querySelector('[data-location-field="nome"]')?.value.trim() || '', tipo: linha.querySelector('[data-location-field="tipo"]')?.value || 'presencial', rendaMensal: Number(linha.querySelector('[data-location-field="rendaMensal"]')?.value || 0), ativo: !!linha.querySelector('[data-location-field="ativo"]')?.checked, ordem
+  }));
+}
+
+function guardarLocaisCRM() {
+  const locais = lerEditorLocais();
+  if (!locais.length || locais.some(item => !item.nome)) { showAlert('Todos os locais precisam de um nome.', 'error'); return; }
+  const botao = document.getElementById('btnGuardarLocais'); const estado = document.getElementById('estadoLocais');
+  if (botao) botao.disabled = true; if (estado) estado.textContent = 'A guardar…';
+  google.script.run.withSuccessHandler(catalogo => {
+    if (botao) botao.disabled = false;
+    CATALOGO_LOCAIS = catalogo;
+    if (DATA) DATA.locations = catalogo.locais;
+    sincronizarControlesLocaisCRM(); fecharModalLocais(); carregarMes(mesVisualizado || mesReal || '');
+    showAlert('Locais e rendas atualizados. Os meses anteriores mantêm os valores guardados.', 'success');
+  }).withFailureHandler(err => {
+    if (botao) botao.disabled = false;
+    const codigo = String(err?.message || '');
+    const mensagens = { LOCAIS_CONFLITO: 'Os locais foram alterados noutra janela. Fecha e abre novamente para rever.', LOCAL_NOME_DUPLICADO: 'Existem dois locais com o mesmo nome.', LOCAL_RENDA_INVALIDA: 'A renda tem de ser um valor válido igual ou superior a zero.' };
+    if (estado) estado.textContent = mensagens[codigo] || ('Erro: ' + codigo);
+  }).guardarLocaisCRM({ locais, revision: Number(CATALOGO_LOCAIS.revision || 0) });
+}
 
 const CODIGOS_PACOTES_ESPECIAIS_CRM = new Set(['basic','standard','plus-1','plus-2','plus-max','plus1','plus2','plusmax']);
 
@@ -5921,6 +6087,7 @@ function loadData() {
   google.script.run.withSuccessHandler(data => {
     if (!data) { showAlert('Erro: dados vazios recebidos do servidor', 'error'); return; }
     DATA = data;
+    adotarLocaisDoCRM(data);
     const contadorNotificacoes = document.getElementById('notificacoesContador');
     if (contadorNotificacoes) delete contadorNotificacoes.dataset.servidor;
     mesReal = data.mesAtual;
@@ -5980,6 +6147,7 @@ function carregarMes(mesAno) {
   google.script.run.withSuccessHandler(data => {
     if (!data || data.error) { showAlert('Erro ao mudar de mês: ' + (data && data.error ? data.error : 'erro desconhecido'), 'error'); return; }
     DATA = data;
+    adotarLocaisDoCRM(data);
     mesVisualizado = data.mesVisualizado || data.mesAtual;
     render();
     atualizarBannerMes();
@@ -6044,6 +6212,9 @@ function setText(id, value) {
 
 function renderDashboard() {
   const d = DATA.dashboard || {};
+  sincronizarControlesLocaisCRM();
+  const scope = document.getElementById('dashboardScopeText');
+  if (scope) scope.textContent = FILTRO_LOCAL_CRM ? 'Resultados de ' + nomeLocalCRM(FILTRO_LOCAL_CRM) + ' neste mês.' : 'Agenda, alunos e acompanhamento em todos os locais.';
   setText('mesAtualTexto', DATA.mesAtualFormatado || DATA.mesAtual || '—');
   const taxa = d.taxaConclusao || 0;
   setText('taxaValor', taxa + '%');
@@ -6189,6 +6360,7 @@ function atualizarResumoFinancasCRM() {
 
 function abrirFinancasCRM(mudarAba = true) {
   if (mudarAba) { switchTab('financas'); return; }
+  sincronizarControlesLocaisCRM();
   const mes = DATA && (DATA.mesVisualizado || DATA.mesAtual) ? (DATA.mesVisualizado || DATA.mesAtual) : '';
   const campoMes = document.getElementById('despesaMes');
   if (campoMes) campoMes.value = mes;
@@ -6229,11 +6401,12 @@ function renderDespesasCRM() {
   lista.innerHTML = despesas.map(item => {
     const id = idParaOnclickCRM(item.id);
     const recorrente = item.tipo === 'recorrente';
+    const local = item.locationId ? '<span class="badge location-badge">' + escaparHtmlCRM(nomeLocalCRM(item.locationId)) + '</span>' : '<span class="badge">Geral</span>';
     return '<article class="cliente-item" style="cursor:default;align-items:center;">' +
       '<div class="cliente-info"><div class="cliente-nome">' + escaparHtmlCRM(item.descricao) + '</div>' +
-      '<div class="cliente-meta"><span class="badge">' + escaparHtmlCRM(item.categoria) + '</span><span class="badge">' + (recorrente ? 'Mensal recorrente' : 'Pontual') + '</span></div></div>' +
+      '<div class="cliente-meta"><span class="badge">' + escaparHtmlCRM(item.categoria) + '</span><span class="badge">' + (recorrente ? 'Mensal recorrente' : 'Pontual') + '</span>' + local + (item.virtual ? '<span class="badge badge-active">Gerido nas Definições</span>' : '') + '</div></div>' +
       '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;"><strong style="font-size:15px;color:#fecaca">' + valorEuroCRM(item.valor) + '</strong>' +
-      (recorrente
+      (item.virtual ? '<button type="button" class="btn btn-secondary" style="width:auto;padding:6px 9px;font-size:11px" onclick="abrirModalLocais()">Alterar renda</button>' : recorrente
         ? '<button type="button" class="btn btn-secondary" style="width:auto;padding:6px 9px;font-size:11px" onclick="terminarDespesaRecorrenteCRM(\'' + id + '\')">Terminar após este mês</button>'
         : '<button type="button" class="btn btn-secondary" style="width:auto;padding:6px 9px;font-size:11px;color:#fecaca" onclick="apagarDespesaCRM(\'' + id + '\')">Apagar</button>') +
       '</div></article>';
@@ -6246,15 +6419,21 @@ function guardarDespesaCRM() {
   const mesAno = document.getElementById('despesaMes').value;
   const valor = document.getElementById('despesaValor').value;
   const descricao = document.getElementById('despesaDescricao').value.trim();
+  const locationId = document.getElementById('despesaLocal').value;
   if (!descricao || !mesAno || !(Number(valor) > 0)) { showAlert('Indica descrição, mês e um valor superior a zero.', 'error'); return; }
+  if (categoria === 'Renda do ginásio' && !locationId) { showAlert('A renda precisa de estar associada a um ginásio. Também podes defini-la em Definições → Ginásios e locais.', 'error'); return; }
   google.script.run.withSuccessHandler(() => {
     document.getElementById('despesaValor').value = '';
     document.getElementById('despesaDescricao').value = '';
     const form = document.getElementById('formDespesaCRM'); if (form) form.hidden = true;
     carregarMes(mesAno);
     showAlert('Despesa guardada. O lucro estimado foi atualizado.', 'success');
-  }).withFailureHandler(err => showAlert('Erro ao guardar despesa: ' + err.message, 'error'))
-    .guardarDespesaCRM({ categoria, tipo, mesAno, valor, descricao });
+  }).withFailureHandler(err => {
+    const codigo = String(err?.message || '');
+    if (codigo === 'DESPESA_RENDA_GERIDA_NAS_DEFINICOES') { showAlert('Esta renda já é gerida em Definições → Ginásios e locais.', 'error'); abrirModalLocais(); return; }
+    showAlert('Erro ao guardar despesa: ' + codigo, 'error');
+  })
+    .guardarDespesaCRM({ categoria, tipo, mesAno, valor, descricao, locationId });
 }
 
 function terminarDespesaRecorrenteCRM(id) {
@@ -6804,7 +6983,8 @@ function renderResumoCheckinsMensal(resumo) {
 }
 
 function montarCardCliente(c) {
-  const pack = DATA.packsResumo ? DATA.packsResumo.find(p => p.idCliente === c.id) : null;
+  const packsLista = DATA.packsResumoTodos || DATA.packsResumo || [];
+  const pack = packsLista.find(p => p.idCliente === c.id) || null;
   const confirmadas = pack ? pack.sessoesConfirmadas : 0;
   const totalSessoesPack = pack ? pack.sessoesTotal : 0;
   const percentual = totalSessoesPack > 0 ? Math.round((confirmadas / totalSessoesPack) * 100) : 0;
@@ -6815,6 +6995,7 @@ function montarCardCliente(c) {
   html += '<div class="cliente-nome">' + escaparHtmlCRM(c.nome) + '</div>';
   html += '<div class="cliente-meta">';
   html += '<span class="badge ' + badgeEstadoClasse + '">' + escaparHtmlCRM(c.estado) + '</span>';
+  html += '<span class="badge location-badge' + (!c.localId ? ' unassigned' : '') + '">' + escaparHtmlCRM(nomeLocalCRM(c.localId)) + '</span>';
   if (c.precoPersonalizado) html += '<span class="desconto-patch">↓ Preço especial</span>';
   if (pack) html += '<span class="badge">' + escaparHtmlCRM(pack.frequencia) + '</span>';
   if (pack) html += '<span class="badge badge-' + (pack.estadoPagamento === 'Pago' ? 'pago' : 'pending') + '">' + escaparHtmlCRM(pack.estadoPagamento) + '</span>';
@@ -6828,13 +7009,14 @@ function montarCardCliente(c) {
 
 function renderClientes() {
   const termo = (document.getElementById('searchTopbar')?.value || '').toLowerCase().trim();
-  const ativos = DATA.clientes ? DATA.clientes.filter(c => c.estado === 'Ativo') : [];
+  sincronizarControlesLocaisCRM();
+  const ativos = DATA.clientes ? DATA.clientes.filter(c => c.estado === 'Ativo' && clienteNoFiltroLocalCRM(c)) : [];
   const html = ativos.length
     ? ativos.filter(c => !termo || c.nome.toLowerCase().includes(termo)).map(montarCardCliente).join('')
     : '<p style="text-align: center; color: #64748b;">Sem clientes ativos</p>';
   document.getElementById('clienteList').innerHTML = html;
   const tituloEl = document.getElementById('clientesTituloCount');
-  if (tituloEl) tituloEl.textContent = ativos.length + (ativos.length === 1 ? ' cliente ativo' : ' clientes ativos');
+  if (tituloEl) tituloEl.textContent = ativos.length + (ativos.length === 1 ? ' cliente ativo' : ' clientes ativos') + (FILTRO_CLIENTES_LOCAL ? ' · ' + (FILTRO_CLIENTES_LOCAL === '__sem_local__' ? 'Por atribuir' : nomeLocalCRM(FILTRO_CLIENTES_LOCAL)) : '');
 }
 
 function renderSearchResults(termo) {
@@ -6848,7 +7030,7 @@ function renderSearchResults(termo) {
   }
   
   const clientes = DATA.clientes || [];
-  const encontrados = clientes.filter(c => c.nome.toLowerCase().includes(termo)).slice(0, 8);
+  const encontrados = clientes.filter(c => clienteNoFiltroLocalCRM(c) && c.nome.toLowerCase().includes(termo)).slice(0, 8);
   
   if (encontrados.length === 0) {
     box.innerHTML = '<div class="cliente-item" style="cursor: default; justify-content: center; color: #64748b;">Sem clientes encontrados</div>';
@@ -6858,7 +7040,7 @@ function renderSearchResults(termo) {
       const badgeEstadoClasse = c.estado === 'Ativo' ? 'badge-active' : (c.estado === 'Pausado' ? 'badge-pending' : 'badge');
       return '<div class="cliente-item" onclick="selecionarResultadoPesquisa(\'' + idEsc + '\')">' +
         '<div class="cliente-info"><div class="cliente-nome">' + escaparHtmlCRM(c.nome) + '</div>' +
-        '<div class="cliente-meta"><span class="badge ' + badgeEstadoClasse + '">' + escaparHtmlCRM(c.estado) + '</span>' + (c.precoPersonalizado ? '<span class="desconto-patch">↓ Preço especial</span>' : '') + '</div></div>' +
+        '<div class="cliente-meta"><span class="badge ' + badgeEstadoClasse + '">' + escaparHtmlCRM(c.estado) + '</span><span class="badge location-badge' + (!c.localId ? ' unassigned' : '') + '">' + escaparHtmlCRM(nomeLocalCRM(c.localId)) + '</span>' + (c.precoPersonalizado ? '<span class="desconto-patch">↓ Preço especial</span>' : '') + '</div></div>' +
         '</div>';
     }).join('');
   }
@@ -6877,8 +7059,8 @@ function selecionarResultadoPesquisa(idCliente) {
 function renderClientesInativos() {
   const termo = (document.getElementById('searchTopbar')?.value || '').toLowerCase().trim();
   const clientes = DATA.clientes || [];
-  const pausados = clientes.filter(c => c.estado === 'Pausado').filter(c => !termo || c.nome.toLowerCase().includes(termo));
-  const cancelados = clientes.filter(c => c.estado === 'Cancelado').filter(c => !termo || c.nome.toLowerCase().includes(termo));
+  const pausados = clientes.filter(c => c.estado === 'Pausado' && clienteNoFiltroLocalCRM(c)).filter(c => !termo || c.nome.toLowerCase().includes(termo));
+  const cancelados = clientes.filter(c => c.estado === 'Cancelado' && clienteNoFiltroLocalCRM(c)).filter(c => !termo || c.nome.toLowerCase().includes(termo));
   document.getElementById('clientePausadoList').innerHTML = pausados.length ? pausados.map(montarCardCliente).join('') : '<p style="text-align: center; color: #64748b;">Sem clientes em pausa</p>';
   document.getElementById('clienteCanceladoList').innerHTML = cancelados.length ? cancelados.map(montarCardCliente).join('') : '<p style="text-align: center; color: #64748b;">Sem clientes cancelados</p>';
 }
@@ -6891,7 +7073,7 @@ let PEDIDO_DETALHE_ATUAL = 0;
 
 function renderizarPreviewDetalheCliente(idCliente) {
   const cliente = (DATA && DATA.clientes ? DATA.clientes : []).find(c => String(c.id) === String(idCliente));
-  const pack = (DATA && DATA.packsResumo ? DATA.packsResumo : []).find(p => String(p.idCliente) === String(idCliente));
+  const pack = (DATA && (DATA.packsResumoTodos || DATA.packsResumo) ? (DATA.packsResumoTodos || DATA.packsResumo) : []).find(p => String(p.idCliente) === String(idCliente));
   const nome = cliente ? cliente.nome : 'Cliente';
   const estado = cliente ? cliente.estado : '—';
   const progresso = pack ? ((pack.sessoesConfirmadas || 0) + ' de ' + (pack.sessoesTotal || 0) + ' sessões') : 'Sem pack neste mês';
@@ -6978,6 +7160,7 @@ function formularioEditarDadosHtmlCRM(cliente, idCliente) {
   const metodos = [['', 'Por definir'], ['Stripe', 'Stripe (cartão)'], ['Transferência', 'Transferência'], ['Mão', 'Em mão']];
   return '<div id="editarDadosForm" hidden class="editar-dados-form" aria-live="polite">' +
     '<div class="form-group"><label>Contacto</label><input type="tel" inputmode="tel" id="inputEditarContacto" value="' + esc(cliente.contacto) + '" placeholder="912345678"><button type="button" class="btn btn-secondary btn-contactos" onclick="procurarContactosGoogleCliente(\'' + idEsc + '\', \'' + idParaOnclickCRM(cliente.nome) + '\')">⌕ Procurar nos Contactos Google</button><div id="resultadoContactosGoogle"></div></div>' +
+    '<div class="form-group"><label>Ginásio / local</label><select id="inputEditarLocal">' + opcoesLocaisCRM(cliente.localId || '', { semLocal: true, incluirInativos: true }) + '</select><small style="display:block;margin-top:5px;color:#70839a">Clientes antigos podem ficar por atribuir até confirmares o local correto.</small></div>' +
     '<div class="form-group"><label>Serviço atual</label><select id="inputEditarServico">' + opcoesNomesServicosCRM(cliente.servicoAtual || '', true) + '</select><small style="display:block;margin-top:5px;color:#70839a">A frequência e o preço do mês são alterados no pack ativo abaixo.</small></div>' +
     '<div class="form-group"><label>NIF</label><input type="text" inputmode="numeric" id="inputEditarNif" value="' + esc(cliente.nif) + '" placeholder="123456789" maxlength="9"></div>' +
     '<div class="form-group"><label>Morada</label><input type="text" id="inputEditarMorada" value="' + esc(cliente.morada) + '" placeholder="Rua Exemplo, 123, Cantanhede"></div>' +
@@ -7018,6 +7201,7 @@ function renderizarDetalheCliente(detalhe) {
     const modoResumo = c.modoEspecial ? c.modoEspecial.modo : 'Normal';
     html += '<div class="cliente-quick-grid">';
     html += '<div class="cliente-quick-item"><span>Estado</span><strong>' + escaparHtmlCRM(c.estado || '—') + '</strong></div>';
+    html += '<div class="cliente-quick-item"><span>Local</span><strong>' + escaparHtmlCRM(nomeLocalCRM(c.localId)) + '</strong></div>';
     html += '<div class="cliente-quick-item"><span>Último check-in</span><strong>' + escaparHtmlCRM(ultimoCheckinResumo) + '</strong></div>';
     html += '<div class="cliente-quick-item"><span>Planos ativos</span><strong>' + (c.numPlanosTreino || 0) + '</strong></div>';
     html += '<div class="cliente-quick-item"><span>Modo atual</span><strong>' + escaparHtmlCRM(modoResumo) + '</strong></div>';
@@ -8832,15 +9016,16 @@ function confirmarContactoGoogle(idCliente, contacto) {
 }
 
 function salvarEdicaoDados(idCliente) {
-  const ids = ['inputEditarContacto', 'inputEditarServico', 'inputEditarNif', 'inputEditarMorada', 'inputEditarEmail', 'inputEditarDiaPagamento', 'inputEditarMetodoPagamento'];
+  const ids = ['inputEditarContacto', 'inputEditarLocal', 'inputEditarServico', 'inputEditarNif', 'inputEditarMorada', 'inputEditarEmail', 'inputEditarDiaPagamento', 'inputEditarMetodoPagamento'];
   const campos = ids.map(id => document.getElementById(id));
   if (campos.some(campo => !campo)) {
     console.error('Edição cancelada: campos do formulário incompletos.');
     showAlert('O formulário não ficou completo. Fecha-o, abre-o novamente e tenta guardar.', 'error');
     return;
   }
-  const [campoContacto, campoServico, campoNif, campoMorada, campoEmail, campoDia, campoMetodo] = campos;
+  const [campoContacto, campoLocal, campoServico, campoNif, campoMorada, campoEmail, campoDia, campoMetodo] = campos;
   const contacto = campoContacto.value.trim();
+  const localId = campoLocal.value;
   const servicoAtual = campoServico.value;
   const nif = campoNif.value.trim();
   const morada = campoMorada.value.trim();
@@ -8860,7 +9045,7 @@ function salvarEdicaoDados(idCliente) {
     renderizarDetalheCliente(resultado.detalhe);
   }).withFailureHandler(err => {
     showAlert('Erro ao guardar dados: ' + err.message, 'error');
-  }).editarDadosCliente({ idCliente: idCliente, contacto: contacto, servicoAtual: servicoAtual, nif: nif, morada: morada, email: email, diaPagamento: diaPagamento, metodoPagamento: metodoPagamento });
+  }).editarDadosCliente({ idCliente: idCliente, contacto: contacto, localId: localId, servicoAtual: servicoAtual, nif: nif, morada: morada, email: email, diaPagamento: diaPagamento, metodoPagamento: metodoPagamento });
 }
 
 function toggleEditarPreco() {
@@ -9639,9 +9824,11 @@ function handleCriarCliente(e) {
   const nome = document.getElementById('novoClienteNome').value.trim();
   const contacto = document.getElementById('novoClienteContacto').value.trim();
   const nif = document.getElementById('novoClienteNif').value.trim();
+  const localId = document.getElementById('novoClienteLocal').value;
   const servicoAtual = document.getElementById('novoClienteServico').value;
   const estado = document.getElementById('novoClienteEstado').value;
   if (!nome) { showAlert('O nome é obrigatório', 'error'); return; }
+  if (!localId) { showAlert('Escolhe o ginásio ou local do cliente.', 'error'); return; }
   const botao = e.submitter || e.target.querySelector('button[type="submit"]');
   const textoOriginal = botao ? botao.textContent : '';
   CRIAR_CLIENTE_EM_CURSO = true;
@@ -9672,7 +9859,7 @@ function handleCriarCliente(e) {
   }).withFailureHandler(err => {
     terminar();
     showAlert('Erro ao adicionar cliente: ' + err.message, 'error');
-  }).criarCliente({ nome: nome, contacto: contacto, nif: nif, servicoAtual: servicoAtual, estado: estado });
+  }).criarCliente({ nome: nome, contacto: contacto, nif: nif, localId: localId, servicoAtual: servicoAtual, estado: estado });
 }
 
 function regenerarLinkPortal(idCliente) {
@@ -9834,15 +10021,16 @@ function marcarReciboEmitido(idCliente) {
 // ==================== EXPORTAR CSV ====================
 
 function exportarClientesCSV() {
-  const clientes = (DATA.clientes || []).filter(c => c.estado === 'Ativo');
+  const clientes = (DATA.clientes || []).filter(c => c.estado === 'Ativo' && clienteNoFiltroLocalCRM(c));
   if (clientes.length === 0) { showAlert('Não há clientes ativos para exportar', 'error'); return; }
   
-  const linhas = [['Nome', 'Estado', 'Contacto', 'Frequência', 'Estado Pagamento', 'Preço (€)']];
+  const linhas = [['Nome', 'Estado', 'Local', 'Contacto', 'Frequência', 'Estado Pagamento', 'Preço (€)']];
   clientes.forEach(c => {
-    const pack = (DATA.packsResumo || []).find(p => p.idCliente === c.id);
+    const pack = (DATA.packsResumoTodos || DATA.packsResumo || []).find(p => p.idCliente === c.id);
     linhas.push([
       c.nome,
       c.estado,
+      nomeLocalCRM(c.localId),
       c.contacto || '',
       pack ? pack.frequencia : '',
       pack ? pack.estadoPagamento : '',
@@ -10241,10 +10429,10 @@ window.addEventListener('load', function () {
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(nome!=='getDadosMes')return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),r=await fetch('/api/dev-crm-dashboard?mes='+encodeURIComponent(args[0]||''),{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok||!d.crm)throw Error(d.erro||'Mês indisponível.');ok&&ok(d.crm)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
-(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(nome!=='criarCliente')return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),r=await fetch('/api/dev-crm-client-create',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify(args[0]||{})}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Não foi possível criar o cliente.');const atualizado=await fetch('/api/dev-crm-dashboard',{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!atualizado.ok||!atualizado.crm)throw Error(atualizado.erro||'Cliente criado, mas a lista não atualizou.');ok&&ok({crm:atualizado.crm,idCriado:d.idCriado})}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
+(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(nome!=='criarCliente')return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),r=await fetch('/api/dev-crm-client-create',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify(args[0]||{})}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Não foi possível criar o cliente.');const atualizado=await fetch('/api/dev-crm-dashboard?locationId='+encodeURIComponent(window.FILTRO_LOCAL_CRM||''),{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!atualizado.ok||!atualizado.crm)throw Error(atualizado.erro||'Cliente criado, mas a lista não atualizou.');ok&&ok({crm:atualizado.crm,idCriado:d.idCriado})}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
-(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const acoes={criarPack:'create-pack',definirEstadoCliente:'set-status',pagarPack:'mark-paid',definirEstadoTodasSessoes:'set-all-sessions-state',confirmarSessao:'toggle-session',atualizarDataSessaoConfirmada:'toggle-session',registarNotaClienteCRM:'add-note',guardarAvaliacaoFisicaCRM:'add-assessment',editarDadosCliente:'edit-client',definirPrecoPersonalizado:'set-price',editarPack:'edit-pack',gerarSessoesEmFalta:'generate-sessions',guardarModoEspecialCliente:'set-special-mode',removerModoEspecialCliente:'remove-special-mode',suspenderProximoMes:'schedule-suspension',cancelarSuspensao:'clear-suspension',cancelarProximoMes:'schedule-cancellation',cancelarAgendamentoCancelamento:'clear-cancellation'};if(!acoes[nome])return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),entrada=args[0]||{},corpo={...entrada,action:acoes[nome]};const r=await fetch('/api/dev-crm-client-actions',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify(corpo)}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Alteração indisponível.');const detalhe=await fetch('/api/dev-crm-client-detail?id='+encodeURIComponent(corpo.idCliente),{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!detalhe.ok)throw Error(detalhe.erro||'Alteração guardada, mas não foi possível atualizar a ficha.');if(nome==='registarNotaClienteCRM')return ok&&ok(detalhe.notas);if(nome==='guardarAvaliacaoFisicaCRM')return ok&&ok({sucesso:true});const crm=await fetch('/api/dev-crm-dashboard',{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!crm.ok||!crm.crm)throw Error(crm.erro||'Alteração guardada, mas não foi possível atualizar o CRM.');ok&&ok(nome==='definirEstadoCliente'?crm.crm:{crm:crm.crm,detalhe:detalhe.detalhe})}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
+(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const acoes={criarPack:'create-pack',definirEstadoCliente:'set-status',pagarPack:'mark-paid',definirEstadoTodasSessoes:'set-all-sessions-state',confirmarSessao:'toggle-session',atualizarDataSessaoConfirmada:'toggle-session',registarNotaClienteCRM:'add-note',guardarAvaliacaoFisicaCRM:'add-assessment',editarDadosCliente:'edit-client',definirPrecoPersonalizado:'set-price',editarPack:'edit-pack',gerarSessoesEmFalta:'generate-sessions',guardarModoEspecialCliente:'set-special-mode',removerModoEspecialCliente:'remove-special-mode',suspenderProximoMes:'schedule-suspension',cancelarSuspensao:'clear-suspension',cancelarProximoMes:'schedule-cancellation',cancelarAgendamentoCancelamento:'clear-cancellation'};if(!acoes[nome])return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),entrada=args[0]||{},corpo={...entrada,action:acoes[nome]};const r=await fetch('/api/dev-crm-client-actions',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify(corpo)}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Alteração indisponível.');const detalhe=await fetch('/api/dev-crm-client-detail?id='+encodeURIComponent(corpo.idCliente),{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!detalhe.ok)throw Error(detalhe.erro||'Alteração guardada, mas não foi possível atualizar a ficha.');if(nome==='registarNotaClienteCRM')return ok&&ok(detalhe.notas);if(nome==='guardarAvaliacaoFisicaCRM')return ok&&ok({sucesso:true});const crm=await fetch('/api/dev-crm-dashboard?locationId='+encodeURIComponent(window.FILTRO_LOCAL_CRM||''),{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!crm.ok||!crm.crm)throw Error(crm.erro||'Alteração guardada, mas não foi possível atualizar o CRM.');ok&&ok(nome==='definirEstadoCliente'?crm.crm:{crm:crm.crm,detalhe:detalhe.detalhe})}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(!['getPerfilPT','guardarPerfilPT','getDefinicoesBibliotecaExercicios','guardarDefinicoesBibliotecaExercicios','getCatalogoServicos','guardarCatalogoServicos'].includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),opcoes={headers:{Authorization:'Bearer '+t}};if(['guardarPerfilPT','guardarDefinicoesBibliotecaExercicios','guardarCatalogoServicos'].includes(nome)){opcoes.method='POST';opcoes.headers['Content-Type']='application/json';opcoes.body=JSON.stringify(nome==='guardarDefinicoesBibliotecaExercicios'?{action:'save-exercise-library-settings',biblioteca:args[0]||{}}:nome==='guardarCatalogoServicos'?{action:'save-service-catalog',catalogo:args[0]||{}}:args[0]||{});}const r=await fetch('/api/dev-crm-settings',opcoes),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Definições indisponíveis.');ok&&ok(nome.includes('DefinicoesBiblioteca')?d.biblioteca:nome.includes('CatalogoServicos')?d.catalogo:d.perfil)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
@@ -10253,7 +10441,7 @@ window.addEventListener('load', function () {
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const acoes={criarPacoteEspecial:'create-package',alterarEstadoPacoteEspecial:'set-package-state',guardarProdutoEspecial:'save-product'};if(!acoes[nome])return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),entrada=args[0]||{},r=await fetch('/api/dev-crm-special-package-actions',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({...entrada,action:acoes[nome]})}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Pacotes especiais indisponíveis.');const atualizado=await fetch('/api/dev-crm-special-packages',{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!atualizado.ok)throw Error(atualizado.erro||'Alteração guardada, mas a lista não atualizou.');ok&&ok(atualizado)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
-(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(!['getClientesParaRenovar','renovarPacksEmBloco'].includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();if(nome==='getClientesParaRenovar'){const r=await fetch('/api/dev-crm-renewals',{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok)throw Error(d.erro||'Renovação indisponível.');return ok&&ok(d)}const r=await fetch('/api/dev-crm-renewals',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify(args[0]||{})}),d=await r.json();if(!r.ok)throw Error(d.erro||'Não foi possível renovar.');const crm=await fetch('/api/dev-crm-dashboard',{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!crm.ok||!crm.crm)throw Error(crm.erro||'Packs criados, mas o CRM não atualizou.');ok&&ok(crm.crm)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
+(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(!['getClientesParaRenovar','renovarPacksEmBloco'].includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();if(nome==='getClientesParaRenovar'){const r=await fetch('/api/dev-crm-renewals',{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok)throw Error(d.erro||'Renovação indisponível.');return ok&&ok(d)}const r=await fetch('/api/dev-crm-renewals',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify(args[0]||{})}),d=await r.json();if(!r.ok)throw Error(d.erro||'Não foi possível renovar.');const crm=await fetch('/api/dev-crm-dashboard?locationId='+encodeURIComponent(window.FILTRO_LOCAL_CRM||''),{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!crm.ok||!crm.crm)throw Error(crm.erro||'Packs criados, mas o CRM não atualizou.');ok&&ok(crm.crm)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(!['getHistoricoCheckinsCliente','getResumoCheckinsMensal'].includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();let url='/api/dev-crm-checkins?clientId='+encodeURIComponent(args[0]);if(nome==='getResumoCheckinsMensal')url+='&mes='+encodeURIComponent(args[1]);const r=await fetch(url,{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok)throw Error(d.erro||'Check-ins indisponíveis.');ok&&ok(nome==='getHistoricoCheckinsCliente'?d.lista:d.resumo)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
@@ -10304,3 +10492,4 @@ window.addEventListener('load', function () {
   google.script.run = cadeia(null, null);
 })();
 </script>
+<script src="/js/locations-bridge.js"></script>
