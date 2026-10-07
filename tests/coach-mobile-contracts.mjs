@@ -168,10 +168,11 @@ assert.match(page, /navigator\.serviceWorker\.register\('\/coach-mobile-sw\.js'/
 assert.match(page, /location\.hostname === 'coach\.almove\.pt'/);
 assert.match(page, /history\.replaceState\(null, '', '\/'/);
 assert.match(page, /scope: '\/'/);
-assert.match(loginPage, /location\.hostname !== 'coach\.almove\.pt'/);
-assert.match(loginPage, /sessionStorage\.setItem\('almove:coach-next'/);
+assert.match(loginPage, /dominioCoach = location\.hostname === 'coach\.almove\.pt'/);
+assert.match(loginPage, /dominioCoach \? 'almove:coach-next' : 'almove:crm-next'/);
+assert.match(loginPage, /sessionStorage\.setItem\(chaveDestino/);
 assert.match(loginPage, /history\.replaceState\(null, '', '\/'/);
-assert.match(loginPage, /sessionStorage\.getItem\('almove:coach-next'/);
+assert.match(loginPage, /sessionStorage\.getItem\(chaveDestino\)/);
 assert.match(loginPage, /function abrirDestino\(\)/);
 assert.match(loginPage, /dev-crm\.html\?next=%2Fcoach-mobile\.html/);
 assert.equal(manifest.id, '/');

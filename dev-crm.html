@@ -6,9 +6,12 @@
   <meta name="robots" content="noindex,nofollow">
   <script>
     (() => {
-      if (location.hostname !== 'coach.almove.pt' || location.pathname !== '/dev-crm.html') return;
+      const dominioCoach = location.hostname === 'coach.almove.pt';
+      const dominioCrm = location.hostname === 'crm.almove.pt';
+      if ((!dominioCoach && !dominioCrm) || location.pathname !== '/dev-crm.html') return;
       const destino = new URLSearchParams(location.search).get('next');
-      if (destino) sessionStorage.setItem('almove:coach-next', destino);
+      const chaveDestino = dominioCoach ? 'almove:coach-next' : 'almove:crm-next';
+      if (destino) sessionStorage.setItem(chaveDestino, destino);
       history.replaceState(null, '', '/');
     })();
   </script>
@@ -54,12 +57,14 @@
   const password = document.querySelector('#password');
   const textoBotaoEntrar = botao.textContent;
   const entradaCoach = location.hostname === 'coach.almove.pt';
-  const destinoPedido = new URLSearchParams(location.search).get('next') || (entradaCoach ? sessionStorage.getItem('almove:coach-next') : '');
+  const entradaCrm = location.hostname === 'crm.almove.pt';
+  const chaveDestino = entradaCoach ? 'almove:coach-next' : 'almove:crm-next';
+  const destinoPedido = new URLSearchParams(location.search).get('next') || ((entradaCoach || entradaCrm) ? sessionStorage.getItem(chaveDestino) : '');
   const destino = AlMoveSessaoCRM.destinoSeguro(destinoPedido);
   const regressoLogin = location.origin + (entradaCoach ? '/dev-crm.html?next=%2Fcoach-mobile.html' : '/dev-crm.html');
 
   function abrirDestino() {
-    if (entradaCoach) sessionStorage.removeItem('almove:coach-next');
+    if (entradaCoach || entradaCrm) sessionStorage.removeItem(chaveDestino);
     location.replace(destino);
   }
 
