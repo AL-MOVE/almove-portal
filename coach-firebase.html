@@ -2409,6 +2409,73 @@
       #appLayout .sidebar, #appLayout .sidebar *, #sidebarOverlay { transition-duration: .01ms !important; animation-duration: .01ms !important; }
     }
   </style>
+  <style id="sidebar-more-menu">
+    .sidebar-more-toggle { display: none; }
+    .sidebar-overflow-items { display: contents; }
+
+    @media (min-width: 1025px) and (max-height: 860px) {
+      #appLayout .sidebar,
+      #appLayout .sidebar.collapsed {
+        padding-bottom: 66px !important;
+        overflow: hidden !important;
+      }
+      #appLayout .sidebar-more-toggle {
+        position: absolute;
+        right: 14px;
+        bottom: 12px;
+        left: 14px;
+        z-index: 8;
+        display: flex;
+        width: auto;
+        margin: 0;
+        border: 1px solid rgba(45,212,191,.20);
+        background: linear-gradient(135deg,rgba(45,212,191,.10),rgba(14,116,144,.08));
+      }
+      #appLayout .sidebar-more-toggle:hover,
+      #appLayout .sidebar-more-toggle[aria-expanded="true"] {
+        border-color: rgba(45,212,191,.42);
+        background: rgba(45,212,191,.15);
+        color: #eafffb;
+      }
+      #appLayout .sidebar-more-toggle .sidebar-more-chevron {
+        margin-left: auto;
+        color: #6ee7d8;
+        transition: transform .2s ease;
+      }
+      #appLayout .sidebar-more-toggle[aria-expanded="true"] .sidebar-more-chevron { transform: rotate(180deg); }
+      #appLayout .sidebar-overflow-items {
+        position: absolute;
+        right: 12px;
+        bottom: 63px;
+        left: 12px;
+        z-index: 9;
+        display: none;
+        padding: 9px;
+        border: 1px solid rgba(45,212,191,.23);
+        border-radius: 15px;
+        background: linear-gradient(150deg,rgba(14,29,43,.99),rgba(6,15,25,.99));
+        box-shadow: 0 18px 46px rgba(0,0,0,.48), inset 0 1px 0 rgba(255,255,255,.05);
+      }
+      #appLayout .sidebar-overflow-items.open { display: block; animation: sidebar-more-in .2s cubic-bezier(.22,1,.36,1) both; }
+      #appLayout .sidebar-overflow-items .nav-section { margin: 8px 9px 4px; }
+      #appLayout .sidebar-overflow-items .nav-section:first-child { margin-top: 2px; }
+      #appLayout .sidebar-overflow-items .nav-item { min-height: 40px; margin-bottom: 1px; padding: 7px 10px; }
+      #appLayout .sidebar.collapsed .sidebar-more-toggle {
+        right: 10px;
+        left: 10px;
+        width: 48px;
+        min-width: 48px;
+        padding: 0;
+        justify-content: center !important;
+      }
+      #appLayout .sidebar.collapsed .sidebar-more-toggle .nav-item-label,
+      #appLayout .sidebar.collapsed .sidebar-more-toggle .sidebar-more-chevron { display: none; }
+      @keyframes sidebar-more-in {
+        from { opacity: 0; transform: translateY(8px) scale(.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -2804,6 +2871,12 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
       <span class="nav-item-label">Pacotes Especiais</span>
     </button>
+    <button type="button" class="nav-item sidebar-more-toggle" id="sidebarMoreToggle" onclick="toggleMenuLateralMais(event)" aria-expanded="false" aria-controls="sidebarOverflowItems" aria-label="Mostrar mais opções">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg>
+      <span class="nav-item-label">Mostrar mais</span>
+      <span class="sidebar-more-chevron" aria-hidden="true">⌃</span>
+    </button>
+    <div class="sidebar-overflow-items" id="sidebarOverflowItems">
     <div class="nav-section">Acompanhamento</div>
     <button class="nav-item" data-tab="checkins" data-label="Check-ins" onclick="abrirCheckins()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
@@ -2824,6 +2897,7 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06-2 2-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V20h-2v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06-2-2 .06-.06A1.65 1.65 0 0 0 8.42 15a1.65 1.65 0 0 0-1.51-1H6.8v-2h.11a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06 2-2 .06.06A1.65 1.65 0 0 0 11.91 7h.09a1.65 1.65 0 0 0 1-1.51V5.4h2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06 2 2-.06.06A1.65 1.65 0 0 0 19.4 11c.24.61.83 1 1.49 1H21v2h-.11c-.66 0-1.25.39-1.49 1z"/></svg>
       <span class="nav-item-label">Definições</span>
     </button>
+    </div>
   </aside>
   <button type="button" id="sidebarOverlay" onclick="fecharSidebarMobile()" aria-label="Fechar menu"></button>
   <nav class="coach-bottom-nav" aria-label="Navegação principal do Coach">
@@ -6006,6 +6080,34 @@ function fecharSidebarMobile() {
   if (launcher) launcher.setAttribute('aria-expanded', 'false');
 }
 
+function menuLateralMaisCompacto() {
+  return window.matchMedia && window.matchMedia('(min-width: 1025px) and (max-height: 860px)').matches;
+}
+
+function fecharMenuLateralMais() {
+  const menu = document.getElementById('sidebarOverflowItems');
+  const botao = document.getElementById('sidebarMoreToggle');
+  if (menu) menu.classList.remove('open');
+  if (botao) botao.setAttribute('aria-expanded', 'false');
+}
+
+function toggleMenuLateralMais(event) {
+  if (event) event.stopPropagation();
+  if (!menuLateralMaisCompacto()) return;
+  const sidebar = document.getElementById('sidebar');
+  const menu = document.getElementById('sidebarOverflowItems');
+  const botao = document.getElementById('sidebarMoreToggle');
+  if (!sidebar || !menu || !botao) return;
+  if (sidebar.classList.contains('collapsed')) {
+    sidebar.classList.remove('collapsed');
+    atualizarEstadoBotaoSidebar(false);
+    try { localStorage.setItem('sidebarCollapsed', 'false'); } catch(e) {}
+  }
+  const abrir = !menu.classList.contains('open');
+  menu.classList.toggle('open', abrir);
+  botao.setAttribute('aria-expanded', String(abrir));
+}
+
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
@@ -6086,13 +6188,22 @@ function init(tabInicial) {
   atualizarNavegacaoInferiorCoach('dashboard');
   document.querySelectorAll('#sidebar .nav-item').forEach(item => {
     item.addEventListener('click', () => {
+      if (!item.classList.contains('sidebar-more-toggle')) fecharMenuLateralMais();
       if (sidebarEmTelemovel()) window.setTimeout(fecharSidebarMobile, 0);
     });
   });
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && sidebarEmTelemovel()) fecharSidebarMobile();
+    if (event.key !== 'Escape') return;
+    fecharMenuLateralMais();
+    if (sidebarEmTelemovel()) fecharSidebarMobile();
+  });
+  document.addEventListener('click', event => {
+    const menu = document.getElementById('sidebarOverflowItems');
+    const botao = document.getElementById('sidebarMoreToggle');
+    if (menu && botao && !menu.contains(event.target) && !botao.contains(event.target)) fecharMenuLateralMais();
   });
   window.addEventListener('resize', () => {
+    fecharMenuLateralMais();
     if (!sidebarEmTelemovel()) fecharSidebarMobile();
   });
   const mesResumoCheckins = document.getElementById('mesResumoCheckins');
@@ -6134,6 +6245,7 @@ function switchTab(tab) {
   atualizarNavegacaoInferiorCoach(tab);
   const viewEl = document.getElementById(tab);
   if (viewEl) viewEl.classList.add('active');
+  fecharMenuLateralMais();
   if (sidebarEmTelemovel()) fecharSidebarMobile();
   renderAbaAtiva(tab);
 }

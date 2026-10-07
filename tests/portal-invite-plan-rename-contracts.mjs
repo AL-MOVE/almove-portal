@@ -25,5 +25,10 @@ assert.match(coach, /renomearPlano:'rename-plan'/);
 assert.match(coach, /sidebar-motion-fix/);
 assert.match(coach, /cubic-bezier\(\.22,1,\.36,1\)/);
 assert.match(coach, /prefers-reduced-motion/);
+assert.match(coach, /id="sidebarMoreToggle"/);
+assert.match(coach, /id="sidebarOverflowItems"/);
+assert.match(coach, /function toggleMenuLateralMais\(event\)/);
+assert.match(coach, /min-width: 1025px\) and \(max-height: 860px/);
+assert.match(coach, /sidebar-overflow-items\.open/);
 
 console.log('Convites, renomeação de planos e movimento da sidebar validados por contrato.');
