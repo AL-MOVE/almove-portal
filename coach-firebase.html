@@ -1813,15 +1813,17 @@
     .planos-cta-principal svg, .sessao-pt-iniciar-icone { flex:0 0 auto; display:block; }
     .sessao-pt-iniciar { display:inline-flex; align-items:center; justify-content:center; gap:8px; }
     .sessao-pt-bem-estar { margin-top:14px; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
-    .sessao-pt-bem-estar-card { padding:13px; border:1px solid rgba(148,163,184,.16); border-radius:13px; background:rgba(255,255,255,.025); }
+    .sessao-pt-bem-estar-card { padding:14px 2px 4px; border:0; border-top:1px solid rgba(148,163,184,.18); border-radius:0; background:transparent; }
     .sessao-pt-bem-estar-titulo { display:flex; align-items:center; gap:7px; margin:0 0 5px; color:#f4f8fc; font-size:13px; font-weight:800; }
     .sessao-pt-bem-estar-titulo svg { width:16px; height:16px; color:#62f1dd; flex:0 0 auto; }
     .sessao-pt-bem-estar-copy { margin:0 0 11px; color:#91a3b8; font-size:11px; line-height:1.35; }
     .sessao-pt-escalas { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
     .sessao-pt-escalas .form-group { min-width:0; margin:0; }
     .sessao-pt-escalas .form-group:last-child { grid-column:1 / -1; }
-    .sessao-pt-escalas select, .sessao-pt-escalas textarea { width:100%; box-sizing:border-box; }
+    .sessao-pt-escalas select, .sessao-pt-escalas input, .sessao-pt-escalas textarea { width:100%; box-sizing:border-box; }
     .sessao-pt-escalas textarea { min-height:60px; resize:vertical; }
+    .treino-editor-exercicio { transition:border-color .2s ease,box-shadow .2s ease; }
+    .treino-editor-exercicio.reorder-confirm { border-color:rgba(45,212,191,.85) !important; box-shadow:0 0 0 3px rgba(45,212,191,.12); }
     .notificacoes-wrap { position:relative; }
     .btn-notificacoes {
       position:relative;
@@ -2656,8 +2658,8 @@
     <div class="sessao-pt-grid-principal"><div class="form-group"><label>Plano</label><select id="sessaoPTPlano" onchange="renderSessaoPTTreinos()"></select></div><div class="form-group"><label>Treino</label><select id="sessaoPTTreino" onchange="renderSessaoPTExercicios()"></select></div><div class="form-group"><label>Data</label><input id="sessaoPTData" type="date"></div><div class="form-group"><label>Estado</label><select id="sessaoPTEstado"><option value="REALIZADA">Realizada</option><option value="PLANEADA">Planeada</option><option value="CANCELADA">Cancelada</option></select></div></div>
     <div class="sessao-pt-grid-tempo"><div class="form-group"><label>Início</label><input id="sessaoPTHoraInicio" type="time"></div><div class="form-group"><label>Fim</label><input id="sessaoPTHoraFim" type="time"></div><div class="form-group"><label>Nota geral da sessão</label><input id="sessaoPTNotaGeral" maxlength="1000" placeholder="Ex.: técnica boa; adaptar ombro direito na próxima"></div></div>
     <div class="sessao-pt-bem-estar">
-      <section class="sessao-pt-bem-estar-card" aria-labelledby="sessaoPTCheckinTitulo"><h4 class="sessao-pt-bem-estar-titulo" id="sessaoPTCheckinTitulo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Check-in</h4><p class="sessao-pt-bem-estar-copy">Registo antes da sessão, com a escala usada pelo cliente no portal.</p><div class="sessao-pt-escalas"><div class="form-group"><label>Sono</label><select id="sessaoPTCheckinSono"><option value="">—</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div><div class="form-group"><label>Stress</label><select id="sessaoPTCheckinStress"><option value="">—</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div><div class="form-group"><label>Energia</label><select id="sessaoPTCheckinEnergia"><option value="">—</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div><div class="form-group"><label>Refeições</label><select id="sessaoPTCheckinRefeicoes"><option value="">—</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div><div class="form-group"><label>DOMS</label><select id="sessaoPTCheckinDoms"><option value="">—</option><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div><div class="form-group"><label>Nota</label><textarea id="sessaoPTCheckinNota" maxlength="500" placeholder="Opcional"></textarea></div></div></section>
-      <section class="sessao-pt-bem-estar-card" aria-labelledby="sessaoPTCheckoutTitulo"><h4 class="sessao-pt-bem-estar-titulo" id="sessaoPTCheckoutTitulo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>Check-out</h4><p class="sessao-pt-bem-estar-copy">Fecho da sessão, com a escala pós-treino do portal.</p><div class="sessao-pt-escalas"><div class="form-group"><label>Energia</label><select id="sessaoPTCheckoutEnergia"><option value="">—</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div><div class="form-group"><label>Esforço</label><select id="sessaoPTCheckoutEsforco"><option value="">—</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div><div class="form-group"><label>Dificuldade</label><select id="sessaoPTCheckoutDificuldade"><option value="">—</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div><div class="form-group"><label>Nota</label><textarea id="sessaoPTCheckoutNota" maxlength="500" placeholder="Opcional"></textarea></div></div></section>
+      <section class="sessao-pt-bem-estar-card" aria-labelledby="sessaoPTCheckinTitulo"><h4 class="sessao-pt-bem-estar-titulo" id="sessaoPTCheckinTitulo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Check-in</h4><p class="sessao-pt-bem-estar-copy">Estado do aluno antes de começar.</p><div class="sessao-pt-escalas"><div class="form-group"><label>Sono (horas)</label><input id="sessaoPTCheckinSono" type="number" min="0" max="24" step="1" inputmode="decimal" placeholder="Ex.: 7"></div><div class="form-group"><label>Stress</label><select id="sessaoPTCheckinStress"><option value="">Não registado</option><option value="0">Sem stress</option><option value="1">Pouco</option><option value="2">Médio</option><option value="3">Muito</option></select></div><div class="form-group"><label>Energia</label><select id="sessaoPTCheckinEnergia"><option value="">Não registado</option><option value="0">Sem energia</option><option value="1">Muito baixa</option><option value="2">Baixa</option><option value="3">Média</option><option value="4">Boa</option><option value="5">Muito boa</option></select></div><div class="form-group"><label>Refeições feitas</label><input id="sessaoPTCheckinRefeicoes" type="number" min="0" max="12" step="1" inputmode="numeric" placeholder="Ex.: 3"></div><div class="form-group"><label>Dores musculares</label><select id="sessaoPTCheckinDoms"><option value="">Não registado</option><option value="0">Sem dores</option><option value="1">Ligeiras</option><option value="2">Moderadas</option><option value="3">Elevadas</option><option value="4">Muito elevadas</option><option value="5">Limitantes</option></select></div><div class="form-group"><label>Nota</label><textarea id="sessaoPTCheckinNota" maxlength="500" placeholder="Opcional"></textarea></div></div></section>
+      <section class="sessao-pt-bem-estar-card" aria-labelledby="sessaoPTCheckoutTitulo"><h4 class="sessao-pt-bem-estar-titulo" id="sessaoPTCheckoutTitulo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>Check-out</h4><p class="sessao-pt-bem-estar-copy">Estado do aluno ao terminar a sessão.</p><div class="sessao-pt-escalas"><div class="form-group"><label>Energia</label><select id="sessaoPTCheckoutEnergia"><option value="">Não registado</option><option value="0">Sem energia</option><option value="1">Muito baixa</option><option value="2">Baixa</option><option value="3">Média</option><option value="4">Boa</option><option value="5">Muito boa</option></select></div><div class="form-group"><label>Esforço</label><select id="sessaoPTCheckoutEsforco"><option value="">Não registado</option><option value="0">Muito leve</option><option value="1">Leve</option><option value="2">Moderado</option><option value="3">Exigente</option><option value="4">Muito exigente</option><option value="5">Máximo</option></select></div><div class="form-group"><label>Dificuldade</label><select id="sessaoPTCheckoutDificuldade"><option value="">Não registado</option><option value="0">Muito fácil</option><option value="1">Fácil</option><option value="2">Acessível</option><option value="3">Difícil</option><option value="4">Muito difícil</option><option value="5">Máxima</option></select></div><div class="form-group"><label>Nota</label><textarea id="sessaoPTCheckoutNota" maxlength="500" placeholder="Opcional"></textarea></div></div></section>
     </div>
     <div id="sessaoPTExercicios" class="sessao-pt-exercicios"></div>
     <div class="sessao-pt-rodape"><button type="button" class="btn btn-secondary" onclick="fecharModalSessaoPT()">Cancelar</button><button type="button" class="btn btn-primary" id="btnGuardarSessaoPT" onclick="guardarSessaoPTUI()">Guardar sessão PT</button></div>
@@ -7460,6 +7462,19 @@ function carregarHistoricoSessoesCMR(idCliente) {
 }
 
 function fecharDetalheSessaoUI() { document.getElementById('modalDetalheSessaoOverlay').style.display = 'none'; }
+function rotuloBemEstarSessaoPT(chave, valor) {
+  const mapas = {
+    stress: ['Sem stress', 'Pouco', 'Médio', 'Muito'],
+    cansaco: ['Sem energia', 'Muito baixa', 'Baixa', 'Média', 'Boa', 'Muito boa'],
+    energia: ['Sem energia', 'Muito baixa', 'Baixa', 'Média', 'Boa', 'Muito boa'],
+    doms: ['Sem dores', 'Ligeiras', 'Moderadas', 'Elevadas', 'Muito elevadas', 'Limitantes'],
+    esforco: ['Muito leve', 'Leve', 'Moderado', 'Exigente', 'Muito exigente', 'Máximo'],
+    dificuldade: ['Muito fácil', 'Fácil', 'Acessível', 'Difícil', 'Muito difícil', 'Máxima']
+  };
+  if (chave === 'sono') return valor + (Number(valor) === 1 ? ' hora' : ' horas');
+  if (chave === 'refeicoes') return valor + (Number(valor) === 1 ? ' refeição' : ' refeições');
+  return mapas[chave] && mapas[chave][Number(valor)] !== undefined ? mapas[chave][Number(valor)] : String(valor);
+}
 function verDetalheSessaoUI(idSessao, idCliente) {
   const overlay = document.getElementById('modalDetalheSessaoOverlay');
   const conteudo = document.getElementById('detalheSessaoConteudo');
@@ -7468,7 +7483,7 @@ function verDetalheSessaoUI(idSessao, idCliente) {
     const exercicios = (resultado && resultado.exercicios) || [];
     const escala = (titulo, dados, campos) => {
       if (!dados) return '';
-      const valores = campos.filter(([chave]) => dados[chave] !== undefined && dados[chave] !== null && dados[chave] !== '').map(([chave, rotulo]) => '<span class="badge">' + escaparHtmlCRM(rotulo) + ' ' + escaparHtmlCRM(dados[chave]) + '</span>').join('');
+      const valores = campos.filter(([chave]) => dados[chave] !== undefined && dados[chave] !== null && dados[chave] !== '').map(([chave, rotulo]) => '<span class="badge">' + escaparHtmlCRM(rotulo) + ': ' + escaparHtmlCRM(rotuloBemEstarSessaoPT(chave, dados[chave])) + '</span>').join('');
       const nota = dados.nota ? '<div style="font-size:12px;color:#cbd5e1;margin-top:6px">' + escaparHtmlCRM(dados.nota) + '</div>' : '';
       return valores || nota ? '<section style="padding:10px 0;border-bottom:1px solid #253449"><strong>' + escaparHtmlCRM(titulo) + '</strong><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">' + valores + '</div>' + nota + '</section>' : '';
     };
@@ -8525,13 +8540,32 @@ function removerExercicioDoTreino(idx) {
   renderExerciciosEscolhidos();
 }
 
+function garantirIdVisualExercicioTreino(exercicio, idx) {
+  if (!exercicio._uiId) Object.defineProperty(exercicio, '_uiId', { value: 'treino-exercicio-' + Date.now() + '-' + idx + '-' + Math.random().toString(36).slice(2), writable: true, configurable: true });
+  return exercicio._uiId;
+}
+
 function moverExercicioNoTreino(idx, direcao) {
   const novoIdx = idx + direcao;
   if (novoIdx < 0 || novoIdx >= TREINO_EDITOR_EXERCICIOS.length) return;
+  const posicoes = {};
+  document.querySelectorAll('.treino-editor-exercicio[data-treino-editor-id]').forEach(node => { posicoes[node.dataset.treinoEditorId] = node.getBoundingClientRect(); });
   const temp = TREINO_EDITOR_EXERCICIOS[idx];
+  const idMovido = garantirIdVisualExercicioTreino(temp, idx);
   TREINO_EDITOR_EXERCICIOS[idx] = TREINO_EDITOR_EXERCICIOS[novoIdx];
   TREINO_EDITOR_EXERCICIOS[novoIdx] = temp;
   renderExerciciosEscolhidos();
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.treino-editor-exercicio[data-treino-editor-id]').forEach(node => {
+      const anterior = posicoes[node.dataset.treinoEditorId];
+      if (!anterior) return;
+      const atual = node.getBoundingClientRect();
+      const delta = anterior.top - atual.top;
+      if (Math.abs(delta) > 1 && node.animate) node.animate([{ transform: 'translateY(' + delta + 'px)' }, { transform: 'translateY(0)' }], { duration: 300, easing: 'cubic-bezier(.2,.8,.2,1)' });
+    });
+    const movido = document.querySelector('.treino-editor-exercicio[data-treino-editor-id="' + idMovido + '"]');
+    if (movido) { movido.classList.add('reorder-confirm'); setTimeout(() => movido.classList.remove('reorder-confirm'), 520); }
+  });
 }
 
 function atualizarCampoExercicio(idx, campo, valor) {
@@ -8548,12 +8582,13 @@ function renderExerciciosEscolhidos() {
   }
   container.innerHTML = TREINO_EDITOR_EXERCICIOS.map((ex, idx) => {
     const porTempo = ex.tipoPrescricao === 'TEMPO';
-    return '<div style="background:#0a0e14;border-radius:8px;padding:12px;margin-bottom:8px;">' +
+    const idVisual = garantirIdVisualExercicioTreino(ex, idx);
+    return '<div class="treino-editor-exercicio" data-treino-editor-id="' + escaparHtmlCRM(idVisual) + '" style="background:#0a0e14;border:1px solid transparent;border-radius:8px;padding:12px;margin-bottom:8px;">' +
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
       '<span style="font-weight:700;font-size:13px;">' + (idx + 1) + '. ' + escaparHtmlCRM(ex.exercicio) + '</span>' +
       '<div style="display:flex;gap:4px;">' +
-      '<button type="button" class="btn btn-secondary" style="padding:2px 8px;font-size:11px;" onclick="moverExercicioNoTreino(' + idx + ', -1)">▲</button>' +
-      '<button type="button" class="btn btn-secondary" style="padding:2px 8px;font-size:11px;" onclick="moverExercicioNoTreino(' + idx + ', 1)">▼</button>' +
+      '<button type="button" class="btn btn-secondary" style="padding:2px 8px;font-size:11px;" onclick="moverExercicioNoTreino(' + idx + ', -1)"' + (idx === 0 ? ' disabled' : '') + '>▲</button>' +
+      '<button type="button" class="btn btn-secondary" style="padding:2px 8px;font-size:11px;" onclick="moverExercicioNoTreino(' + idx + ', 1)"' + (idx === TREINO_EDITOR_EXERCICIOS.length - 1 ? ' disabled' : '') + '>▼</button>' +
       '<button type="button" class="btn btn-secondary" style="padding:2px 8px;font-size:11px;color:#dc2626;" onclick="removerExercicioDoTreino(' + idx + ')">×</button>' +
       '</div></div>' +
       '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">' +

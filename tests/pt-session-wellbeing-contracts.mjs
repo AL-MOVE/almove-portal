@@ -14,11 +14,20 @@ for (const campo of [
 ]) assert.match(coach, new RegExp(campo));
 
 assert.match(coach, /lerBemEstarSessaoPT/);
+assert.match(coach, /Sono \(horas\)/);
+assert.match(coach, /Sem stress/);
+assert.match(coach, /Muito exigente/);
+assert.match(coach, /function rotuloBemEstarSessaoPT\(/);
+assert.match(coach, /function moverExercicioNoTreino\(/);
+assert.match(coach, /treino-editor-exercicio/);
 assert.match(coach, /checkin:sessao\.checkin\|\|null,checkout:sessao\.checkout\|\|null/);
 assert.doesNotMatch(coach, /Como instalar/);
 assert.doesNotMatch(coach, /btnInstalarCoach/);
 assert.match(endpoint, /CHECKIN_PT/);
 assert.match(endpoint, /CHECKOUT_PT/);
+assert.match(endpoint, /sono: \[0, 24\]/);
+assert.match(endpoint, /stress: \[0, 3\]/);
+assert.match(endpoint, /refeicoes: \[0, 12\]/);
 assert.match(endpoint, /checkin, checkout/);
 assert.match(detalhe, /buildTrainingHistory/);
 assert.match(historico, /checkin: session\?\.checkin \|\| null/);
