@@ -54,6 +54,7 @@ assert.match(page, /function bindExerciseDrag\(/);
 assert.match(page, /draggable = true/);
 assert.match(page, /Arrastar para reordenar/);
 assert.match(page, /function animateExerciseMove\(/);
+assert.match(page, /node\.style\.transition = 'transform 300ms/);
 assert.match(page, /data-exercise-id/);
 assert.match(page, /series-enter/);
 assert.match(page, /preserveScroll/);

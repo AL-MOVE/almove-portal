@@ -8561,10 +8561,16 @@ function moverExercicioNoTreino(idx, direcao) {
       if (!anterior) return;
       const atual = node.getBoundingClientRect();
       const delta = anterior.top - atual.top;
-      if (Math.abs(delta) > 1 && node.animate) node.animate([{ transform: 'translateY(' + delta + 'px)' }, { transform: 'translateY(0)' }], { duration: 300, easing: 'cubic-bezier(.2,.8,.2,1)' });
+      if (Math.abs(delta) <= 1) return;
+      if (node.animate) node.animate([{ transform: 'translateY(' + delta + 'px)' }, { transform: 'translateY(0)' }], { duration: 300, easing: 'cubic-bezier(.2,.8,.2,1)' });
+      else {
+        node.style.transition = 'none'; node.style.transform = 'translateY(' + delta + 'px)'; void node.offsetHeight;
+        node.style.transition = 'transform 300ms cubic-bezier(.2,.8,.2,1)'; node.style.transform = 'translateY(0)';
+        setTimeout(() => { node.style.transition = ''; node.style.transform = ''; }, 340);
+      }
     });
     const movido = document.querySelector('.treino-editor-exercicio[data-treino-editor-id="' + idMovido + '"]');
-    if (movido) { movido.classList.add('reorder-confirm'); setTimeout(() => movido.classList.remove('reorder-confirm'), 520); }
+    if (movido) { movido.classList.add('reorder-confirm'); setTimeout(() => movido.classList.remove('reorder-confirm'), 800); }
   });
 }
 
