@@ -2178,25 +2178,6 @@
     }
     return "Não foi possível confirmar o acesso aos teus dados. Tenta novamente dentro de momentos.";
   }
-  async function validarAcessoPortalFirebase(idToken) {
-    const query = new URLSearchParams({ fn: "getBootstrapPortal", data: "{}" });
-    const resposta = await fetch("/api/almove?" + query.toString(), {
-      method: "GET",
-      headers: { Authorization: "Bearer " + idToken },
-      cache: "no-store",
-      credentials: "same-origin"
-    });
-    let corpo = null;
-    try { corpo = await resposta.json(); } catch (erro) {}
-    if (!resposta.ok || !corpo || corpo.ok === false || !corpo.dados) {
-      const falha = new Error((corpo && corpo.erro) || "ACESSO_PORTAL_INDISPONIVEL");
-      falha.status = resposta.status;
-      falha.codigo = corpo && corpo.codigo;
-      falha.portalAcesso = true;
-      throw falha;
-    }
-    return corpo.dados;
-  }
   const modoEntradaFirebase = "entrar";
   function configurarEntradaFirebase() {
     if (!window.AlMoveFirebaseAuth || !window.ALMOVE_FIREBASE_CONFIG || !window.ALMOVE_FIREBASE_CONFIG.obter) return Promise.reject(new Error("FIREBASE_NAO_CONFIGURADO"));
@@ -2242,8 +2223,7 @@
         entradaPortalEstado.textContent = "A conta existe, mas ainda falta confirmá-la. Enviámos um novo email de confirmação.";
         return;
       }
-      const idToken = await window.AlMoveFirebaseAuth.token(true);
-      await validarAcessoPortalFirebase(idToken);
+      entradaPortalEstado.textContent = "A abrir o teu acompanhamento…";
       try {
         localStorage.setItem("ALMOVE_FIREBASE_SESSAO", "1");
         localStorage.setItem("ALMOVE_FIREBASE_EMAIL", String(utilizador.email || email).trim().toLowerCase());
@@ -5935,7 +5915,7 @@
   // ---------- Service worker ----------
   // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
   // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
-  const VERSAO_CLIENTE_PORTAL = "71";
+  const VERSAO_CLIENTE_PORTAL = "72";
   let eventoInstalacaoPortal = null;
   function portalEstaInstalado() {
     return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
