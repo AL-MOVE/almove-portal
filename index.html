@@ -2169,6 +2169,34 @@
     }
     mostrarEntradaPortal("Não foi possível validar o acesso desta conta. Entra com a conta associada ao convite do teu treinador.");
   }
+  function mensagemFalhaAcessoPortal(erro) {
+    if (erro && erro.codigo === "PORTAL_CLIENTE_NAO_ASSOCIADO") {
+      return "A palavra-passe está correta, mas este email ainda não está associado a um único aluno ativo. Pede ao teu treinador para confirmar o email no CRM.";
+    }
+    if (erro && Number(erro.status) >= 500) {
+      return "A conta foi validada, mas o serviço de dados está temporariamente indisponível. A tua sessão não foi terminada; tenta novamente dentro de momentos.";
+    }
+    return "Não foi possível confirmar o acesso aos teus dados. Tenta novamente dentro de momentos.";
+  }
+  async function validarAcessoPortalFirebase(idToken) {
+    const query = new URLSearchParams({ fn: "getBootstrapPortal", data: "{}" });
+    const resposta = await fetch("/api/almove?" + query.toString(), {
+      method: "GET",
+      headers: { Authorization: "Bearer " + idToken },
+      cache: "no-store",
+      credentials: "same-origin"
+    });
+    let corpo = null;
+    try { corpo = await resposta.json(); } catch (erro) {}
+    if (!resposta.ok || !corpo || corpo.ok === false || !corpo.dados) {
+      const falha = new Error((corpo && corpo.erro) || "ACESSO_PORTAL_INDISPONIVEL");
+      falha.status = resposta.status;
+      falha.codigo = corpo && corpo.codigo;
+      falha.portalAcesso = true;
+      throw falha;
+    }
+    return corpo.dados;
+  }
   const modoEntradaFirebase = "entrar";
   function configurarEntradaFirebase() {
     if (!window.AlMoveFirebaseAuth || !window.ALMOVE_FIREBASE_CONFIG || !window.ALMOVE_FIREBASE_CONFIG.obter) return Promise.reject(new Error("FIREBASE_NAO_CONFIGURADO"));
@@ -2214,13 +2242,17 @@
         entradaPortalEstado.textContent = "A conta existe, mas ainda falta confirmá-la. Enviámos um novo email de confirmação.";
         return;
       }
+      const idToken = await window.AlMoveFirebaseAuth.token(true);
+      await validarAcessoPortalFirebase(idToken);
       try {
         localStorage.setItem("ALMOVE_FIREBASE_SESSAO", "1");
         localStorage.setItem("ALMOVE_FIREBASE_EMAIL", String(utilizador.email || email).trim().toLowerCase());
       } catch (erro) {}
       window.location.replace(window.location.pathname);
     } catch (erro) {
-      entradaPortalEstado.textContent = window.AlMoveFirebaseAuth.mensagemErroEntrada(erro);
+      entradaPortalEstado.textContent = erro && erro.portalAcesso
+        ? mensagemFalhaAcessoPortal(erro)
+        : window.AlMoveFirebaseAuth.mensagemErroEntrada(erro);
     } finally { btnEntradaPortal.disabled = false; }
   });
   atualizarModoEntradaFirebase();
@@ -2238,8 +2270,7 @@
       if (!idToken) throw new Error("SESSAO_FIREBASE_AUSENTE");
       return idToken;
     }).catch(function () {
-      try { localStorage.removeItem("ALMOVE_FIREBASE_SESSAO"); localStorage.removeItem("ALMOVE_FIREBASE_EMAIL"); } catch (erro) {}
-      window.location.replace(window.location.pathname);
+      reporAcessoPortalAposFalhaAutenticacao();
       return new Promise(function () {});
     });
   }
@@ -2349,8 +2380,13 @@
       .catch(function (erro) {
         if (avisoDemora) window.clearTimeout(avisoDemora);
         bootstrapPortalPromise = null;
-        if (FIREBASE_ATIVA && Number(erro && erro.status) === 401) {
+        if (FIREBASE_ATIVA && erro && erro.codigo === "FIREBASE_SESSAO_INVALIDA") {
           reporAcessoPortalAposFalhaAutenticacao();
+          erro.acessoPortalReposto = true;
+          throw erro;
+        }
+        if (FIREBASE_ATIVA && erro && erro.codigo === "PORTAL_CLIENTE_NAO_ASSOCIADO") {
+          mostrarEntradaPortal(mensagemFalhaAcessoPortal(erro));
           erro.acessoPortalReposto = true;
           throw erro;
         }
@@ -3818,6 +3854,7 @@
         if (!resposta.ok || !corpo || corpo.ok === false) {
           const erro = new Error((corpo && corpo.erro) || ("O servidor respondeu com erro " + resposta.status + "."));
           erro.status = resposta.status;
+          erro.codigo = corpo && corpo.codigo;
           throw erro;
         }
         return corpo;
@@ -5898,7 +5935,7 @@
   // ---------- Service worker ----------
   // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
   // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
-  const VERSAO_CLIENTE_PORTAL = "70";
+  const VERSAO_CLIENTE_PORTAL = "71";
   let eventoInstalacaoPortal = null;
   function portalEstaInstalado() {
     return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;

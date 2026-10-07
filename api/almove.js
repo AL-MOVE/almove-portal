@@ -87,7 +87,11 @@ export default async function handler(req, res) {
     try {
       token = await obterAssertacaoFirebasePortal(req);
     } catch (erro) {
-      return responder(res, estadoErroAplicacao(erro.code || erro.message), { ok: false, erro: 'Sessão Firebase inválida ou expirada' }, requestId);
+      return responder(res, estadoErroAplicacao(erro.code || erro.message), {
+        ok: false,
+        erro: 'Sessão Firebase inválida ou expirada',
+        codigo: 'FIREBASE_SESSAO_INVALIDA'
+      }, requestId);
     }
   }
 
@@ -113,7 +117,21 @@ export default async function handler(req, res) {
     try { json = JSON.parse(texto); }
     catch { return responder(res, 502, { ok: false, erro: 'Resposta inválida do serviço de dados' }, requestId); }
     if (!resposta.ok) return responder(res, 502, json, requestId);
-    if (json && json.ok === false) return responder(res, estadoErroAplicacao(json.erro), json, requestId);
+    if (json && json.ok === false) {
+      // Uma identidade Firebase já foi validada pela Vercel. Se o Apps Script
+      // não conseguir associar a asserção a um único cliente, isso é um
+      // problema de autorização/associação e não uma sessão Firebase expirada.
+      // Distinguir os dois casos impede o Portal de terminar uma sessão válida
+      // e entrar num ciclo de login.
+      if (token.startsWith('fb1.') && /SESSAO_INVALIDA|Link inválido|Falta o token|Token inválido/i.test(String(json.erro || ''))) {
+        return responder(res, 403, {
+          ok: false,
+          erro: 'Esta conta ainda não está associada a um único aluno ativo.',
+          codigo: 'PORTAL_CLIENTE_NAO_ASSOCIADO'
+        }, requestId);
+      }
+      return responder(res, estadoErroAplicacao(json.erro), json, requestId);
+    }
     return responder(res, 200, await enriquecerRespostaPortal(fn, json), requestId);
   } catch (erro) {
     const mensagem = erro && erro.name === 'AbortError' ? 'O serviço de dados excedeu o tempo limite' : 'Não foi possível contactar o serviço de dados';

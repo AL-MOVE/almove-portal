@@ -34,7 +34,7 @@ assert.match(html, /id="perfilPassaporte"/, 'O Passaporte Técnico deve estar di
 assert.match(html, /<option value="rir" selected>RIR<\/option>/, 'RIR deve ser o método de intensidade predefinido');
 assert.match(html, /localStorage\.getItem\("ALMOVE_SESSAO_PORTAL"\)/, 'A sessão curta deve sobreviver ao fecho da PWA');
 assert.match(html, /bootstrapPortalPromise = SESSAO_PRONTA\.then/, 'O bootstrap deve aguardar pela autenticação antes de mostrar sincronização');
-assert.match(html, /VERSAO_CLIENTE_PORTAL = "70"/, 'O cliente deve identificar a versão da atualização');
+assert.match(html, /VERSAO_CLIENTE_PORTAL = "71"/, 'O cliente deve identificar a versão da atualização');
 assert.match(html, /id="p0-experience-hardening"/, 'A experiência móvel P0 deve ter estilos próprios');
 assert.match(html, /#cardSessaoMinima \{ display:none !important; \}/, 'O Plano B deve sair da interface');
 assert.match(html, /function fecharTodosDetalhesPerfil\(\)/, 'A navegação deve fechar os detalhes de Perfil antes de trocar de destino');
@@ -63,6 +63,9 @@ assert.match(html, /token\(fn === "getBootstrapPortal"\)/, 'O arranque deve reno
 assert.match(html, /erro\.status = resposta\.status/, 'O frontend deve distinguir recusas de autenticação de indisponibilidade');
 assert.match(html, /reporAcessoPortalAposFalhaAutenticacao/, 'Uma sessão Firebase recusada deve regressar ao ecrã de entrada');
 assert.match(html, /acessoPortalReposto/, 'O Portal não deve renderizar um dashboard vazio depois de repor o acesso');
+assert.match(html, /await validarAcessoPortalFirebase\(idToken\)/, 'O login deve validar a associação do aluno antes de navegar');
+assert.match(html, /erro\.codigo === "FIREBASE_SESSAO_INVALIDA"/, 'Apenas uma sessão Firebase inválida deve terminar o acesso local');
+assert.doesNotMatch(html, /FIREBASE_ATIVA && Number\(erro && erro\.status\) === 401/, 'Um 401 genérico não deve expulsar o cliente');
 
 assert.match(backend, /doms < 0 \|\| doms > 4/, 'O backend deve aceitar DOMS de 0 a 4');
 assert.match(backend, /diasSemana\.push\(/, 'O backend deve devolver os sete dias dos passos');
@@ -80,13 +83,15 @@ assert.doesNotMatch(backend, /criarSessaoPortal:/, 'O backend não deve expor a 
 assert.match(backend, /Um token permanente copiado de uma URL deixou de dar acesso/, 'Apenas sessões temporárias devem autenticar pedidos');
 assert.doesNotMatch(backend, /function exigirAcessoSensivelPortal_[\s\S]*?throw new Error\('ACESSO_PROTEGIDO_POR_CODIGO'\)/, 'O código por email não pode bloquear a sessão Firebase diária');
 assert.match(proxy, /json && json\.ok === false/, 'O proxy deve transformar erros da aplicação em erros HTTP');
+assert.match(proxy, /codigo: 'FIREBASE_SESSAO_INVALIDA'/, 'O proxy deve identificar uma sessão Firebase realmente inválida');
+assert.match(proxy, /codigo: 'PORTAL_CLIENTE_NAO_ASSOCIADO'/, 'O proxy deve distinguir a associação do aluno da autenticação Firebase');
 assert.doesNotMatch(proxy, /'criarSessaoPortal'/, 'O proxy não deve encaminhar a criação de sessões por token permanente');
 assert.match(html, /mostrarFalhaBootstrap/, 'A lentidão do serviço não deve ser apresentada como falta de internet');
 assert.match(html, /icone = String\(proximo\.tipo/, 'O próximo compromisso deve escolher o ícone correto');
 assert.match(html, /botao\.disabled = true/, 'O envio de código deve impedir pedidos repetidos');
 assert.match(proxy, /controlador\.abort\(\), 27000/, 'O proxy deve tolerar a latência normal do Apps Script');
 assert.match(proxy, /guardarPedidoAtualizacaoDadosPortal/, 'O proxy deve permitir pedidos de alteração de dados');
-assert.match(sw, /almove-portal-v70/, 'A cache PWA deve avançar para v70');
+assert.match(sw, /almove-portal-v71/, 'A cache PWA deve avançar para v71');
 assert.match(sw, /\/js\/exercise-media\.js/, 'O catálogo visual deve estar disponível offline');
 assert.equal((html.match(/body\.perfil-detalhe-aberto #tabPlanos/g) || []).length, 1, 'O Perfil só pode ter uma regra que escolhe a subpágina visível');
 assert.match(html, /:not\(#perfilMapa\):not\(#perfilPassaporte\)/, 'Mapa e Passaporte não podem ser escondidos ao abrir o detalhe');
@@ -115,4 +120,4 @@ for (const ficheiro of ['chest-press-machine.webp', 'wide-grip-lat-pulldown.webp
   assert.ok(info.size > 10000, 'A imagem ' + ficheiro + ' deve estar incluída no portal');
 }
 
-console.log('Contratos do portal v70 validados.');
+console.log('Contratos do portal v71 validados.');
