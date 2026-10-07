@@ -1,24 +1,22 @@
 const DEFAULT_ROWS = [
-  ['1x30', 'PT - 1x30 min', 'Personal Training', 4, 30, 79, 60],
-  ['2x30', 'PT - 2x30 min', 'Personal Training', 8, 30, 159, 60],
-  ['3x30', 'PT - 3x30 min', 'Personal Training', 12, 30, 215, 60],
-  ['1x45', 'PT - 1x45 min', 'Personal Training', 4, 45, 119, 60],
-  ['2x45', 'PT - 2x45 min', 'Personal Training', 8, 45, 225, 60],
-  ['3x45', 'PT - 3x45 min', 'Personal Training', 12, 45, 315, 60],
-  ['1x60', 'PT - 1x60 min', 'Personal Training', 4, 60, 149, 60],
-  ['2x60', 'PT - 2x60 min', 'Personal Training', 8, 60, 285, 60],
-  ['3x60', 'PT - 3x60 min', 'Personal Training', 12, 60, 415, 60],
-  ['basic', 'BASIC', 'APP + Plano de Treino', 0, 0, 15, 60],
-  ['standard', 'STANDARD', 'APP + Plano de TR+AV', 0, 0, 30, 60],
-  ['plus-1', 'PLUS 1', 'APP + TR + AV + 1PT', 1, 0, 60, 60],
-  ['plus-2', 'PLUS 2', 'APP + TR + AV + 2PT', 2, 0, 90, 60],
-  ['plus-max', 'PLUS MAX', 'APP + TR + AV + 4PT', 4, 0, 149, 60]
+  ['1x30', 'PT - 1x30 min', 'pt', 'Personal Training', 4, 30, 79, 60],
+  ['2x30', 'PT - 2x30 min', 'pt', 'Personal Training', 8, 30, 159, 60],
+  ['3x30', 'PT - 3x30 min', 'pt', 'Personal Training', 12, 30, 215, 60],
+  ['1x45', 'PT - 1x45 min', 'pt', 'Personal Training', 4, 45, 119, 60],
+  ['2x45', 'PT - 2x45 min', 'pt', 'Personal Training', 8, 45, 225, 60],
+  ['3x45', 'PT - 3x45 min', 'pt', 'Personal Training', 12, 45, 315, 60],
+  ['1x60', 'PT - 1x60 min', 'pt', 'Personal Training', 4, 60, 149, 60],
+  ['2x60', 'PT - 2x60 min', 'pt', 'Personal Training', 8, 60, 285, 60],
+  ['3x60', 'PT - 3x60 min', 'pt', 'Personal Training', 12, 60, 415, 60]
 ];
 
-export const DEFAULT_SERVICE_CATALOG = Object.freeze(DEFAULT_ROWS.map(([codigo, nome, descricao, sessoesPorMes, duracaoMinutos, preco, validadeDias], ordem) => Object.freeze({
+const SPECIAL_PACKAGE_CODES = new Set(['basic', 'standard', 'plus-1', 'plus-2', 'plus-max', 'plus1', 'plus2', 'plusmax']);
+
+export const DEFAULT_SERVICE_CATALOG = Object.freeze(DEFAULT_ROWS.map(([codigo, nome, categoria, descricao, sessoesPorMes, duracaoMinutos, preco, validadeDias], ordem) => Object.freeze({
   id: codigo,
   codigo,
   nome,
+  categoria,
   descricao,
   sessoesPorMes,
   duracaoMinutos,
@@ -56,10 +54,15 @@ export function normalizeService(input = {}, ordem = 0) {
   const nome = texto(input.nome, 120);
   if (!codigo || !/^[a-z0-9][a-z0-9._-]{0,31}$/i.test(codigo)) throw new Error('CODIGO_SERVICO_INVALIDO');
   if (!nome) throw new Error('NOME_SERVICO_INVALIDO');
+  const categoriaRecebida = texto(input.categoria, 20).toLowerCase();
+  const categoria = SPECIAL_PACKAGE_CODES.has(codigo.toLowerCase()) || ['digital', 'pacote_especial'].includes(categoriaRecebida)
+    ? 'pacote_especial'
+    : (['pt', 'outro'].includes(categoriaRecebida) ? categoriaRecebida : (/^pt\b/i.test(nome) ? 'pt' : 'outro'));
   return {
     id: idSeguro(input.id, codigo),
     codigo,
     nome,
+    categoria,
     descricao: texto(input.descricao, 250),
     sessoesPorMes: inteiro(input.sessoesPorMes ?? (Number(input.sessoesPorSemana) * 4), 0, 100, 'SESSOES_SERVICO_INVALIDAS'),
     duracaoMinutos: inteiro(input.duracaoMinutos, 0, 300, 'DURACAO_SERVICO_INVALIDA'),
@@ -92,6 +95,7 @@ export function serviceByCode(catalogo, codigo, { permitirInativo = false } = {}
   const chave = texto(codigo, 32).toLowerCase();
   const servico = normalizeServiceCatalog(catalogo).find(item => item.codigo.toLowerCase() === chave);
   if (!servico || (!permitirInativo && !servico.ativo)) throw new Error('SERVICO_INDISPONIVEL');
+  if (servico.categoria === 'pacote_especial' && !permitirInativo) throw new Error('SERVICO_RESERVADO_PACOTE_ESPECIAL');
   return servico;
 }
 

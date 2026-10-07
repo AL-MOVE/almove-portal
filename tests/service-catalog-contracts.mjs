@@ -43,8 +43,12 @@ assert.throws(() => normalizeServiceCatalog([
   { id: 'a', codigo: 'duo', nome: 'Duo A', sessoesPorMes: 4, duracaoMinutos: 45, preco: 100 },
   { id: 'b', codigo: 'duo', nome: 'Duo B', sessoesPorMes: 8, duracaoMinutos: 45, preco: 180 }
 ]), /CODIGO_SERVICO_DUPLICADO/);
-assert.equal(serviceByCode(DEFAULT_SERVICE_CATALOG, 'basic').preco, 15);
-assert.equal(packShapeForService(serviceByCode(DEFAULT_SERVICE_CATALOG, 'plus-2')).sessoesTotal, 2);
+assert.equal(serviceByCode(DEFAULT_SERVICE_CATALOG, '1x45').categoria, 'pt');
+assert.equal(DEFAULT_SERVICE_CATALOG.some(item => item.codigo === 'basic'), false, 'Os pacotes especiais não podem entrar no catálogo de PT.');
+const catalogoMisturado = normalizeServiceCatalog(DEFAULT_SERVICE_CATALOG.concat({ id: 'basic', codigo: 'basic', nome: 'BASIC', categoria: 'digital', descricao: 'APP + Plano de Treino', sessoesPorMes: 0, duracaoMinutos: 0, preco: 15, validadeDias: 60, ativo: true, ordem: 99 }));
+assert.equal(catalogoMisturado.find(item => item.codigo === 'basic').categoria, 'pacote_especial');
+assert.throws(() => serviceByCode(catalogoMisturado, 'basic'), /SERVICO_RESERVADO_PACOTE_ESPECIAL/);
+assert.equal(serviceByCode(catalogoMisturado, 'basic', { permitirInativo: true }).preco, 15, 'Um pack legado continua legível para correção e histórico.');
 
 const actions = fs.readFileSync(new URL('../server/dev-crm/dev-crm-client-actions.js', import.meta.url), 'utf8');
 const renewals = fs.readFileSync(new URL('../server/dev-crm/dev-crm-renewals.js', import.meta.url), 'utf8');
@@ -58,5 +62,6 @@ assert.match(settings, /save-service-catalog/);
 assert.match(crm, /Serviços e preços/);
 assert.match(crm, /guardarCatalogoServicos/);
 assert.match(crm, /atualizarPreviaPrecoPack/);
+assert.match(crm, /Pacotes Especiais não fazem parte desta tabela/);
 
 console.log('Catálogo e cálculo de preços validados.');

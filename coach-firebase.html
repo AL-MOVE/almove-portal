@@ -2526,7 +2526,8 @@
       <div><div class="eyebrow">Definições comerciais</div><h3 id="modalServicosTitulo">Serviços e preços</h3><p>Os preços guardados aqui são aplicados a packs novos ou quando alteras a frequência. Packs e recibos antigos mantêm o valor original.</p></div>
       <button type="button" class="btn btn-secondary" onclick="fecharModalServicos()" aria-label="Fechar">×</button>
     </div>
-    <div class="service-safety-note"><strong>Regra de segurança:</strong> um serviço usado deixa de aceitar novos packs quando é desativado, mas continua visível no histórico. O código é a referência interna e deve ser único.</div>
+    <div class="service-safety-note"><strong>Serviços de PT:</strong> esta tabela controla os packs regulares dos alunos. Um serviço desativado deixa de aceitar packs novos, mas continua no histórico.</div>
+    <div class="service-special-note"><div><strong>Pacotes Especiais não fazem parte desta tabela.</strong><span>BASIC, STANDARD e PLUS são geridos separadamente para não interferirem com packs e sessões de Personal Training.</span></div><button type="button" class="btn btn-secondary" onclick="abrirGestaoPacotesEspeciais()">Gerir Pacotes Especiais</button></div>
     <div class="service-table-head"><span>Serviço</span><span>Agenda</span><span>Preço mensal</span><span>Estado</span></div>
     <div id="listaServicosEditor" class="service-editor-list"></div>
     <div class="service-modal-actions">
@@ -2542,11 +2543,12 @@
   .service-modal-overlay{position:fixed;inset:0;z-index:10008;align-items:center;justify-content:center;padding:16px;overflow:auto;background:rgba(2,6,12,.78);backdrop-filter:blur(8px)}
   .service-modal{width:min(1000px,100%);max-height:92vh;overflow:auto;margin:auto;padding:24px;border:1px solid rgba(45,212,191,.24);border-radius:20px;background:linear-gradient(145deg,#0d1c2a,#08121e);box-shadow:0 30px 90px rgba(0,0,0,.5)}
   .service-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.service-modal-head h3{margin:3px 0 5px;color:#f8fafc;font-size:21px}.service-modal-head p{max-width:720px;margin:0;color:#91a3b8;font-size:12px;line-height:1.55}.service-modal-head>.btn{width:auto;padding:6px 11px}
-  .service-safety-note{margin:16px 0;padding:11px 13px;border:1px solid rgba(56,189,248,.2);border-radius:12px;background:rgba(14,116,144,.1);color:#bae6fd;font-size:11px;line-height:1.5}
+  .service-safety-note{margin:16px 0 8px;padding:11px 13px;border:1px solid rgba(56,189,248,.2);border-radius:12px;background:rgba(14,116,144,.1);color:#bae6fd;font-size:11px;line-height:1.5}
+  .service-special-note{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 0 16px;padding:11px 13px;border:1px solid rgba(250,204,21,.2);border-radius:12px;background:rgba(161,98,7,.09);color:#fde68a;font-size:11px;line-height:1.5}.service-special-note strong,.service-special-note span{display:block}.service-special-note span{margin-top:2px;color:#d6c9a0}.service-special-note .btn{width:auto;flex:0 0 auto;padding:7px 10px}
   .service-table-head,.service-editor-row{display:grid;grid-template-columns:minmax(260px,2fr) minmax(190px,1.2fr) minmax(130px,.75fr) minmax(90px,.55fr);gap:10px;align-items:end}.service-table-head{padding:0 12px 6px;color:#70839a;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
-  .service-editor-list{display:grid;gap:8px}.service-editor-row{padding:12px;border:1px solid rgba(148,163,184,.15);border-radius:14px;background:rgba(255,255,255,.025)}.service-editor-row.inactive{opacity:.62}.service-editor-main{display:grid;grid-template-columns:minmax(140px,1.5fr) minmax(90px,.7fr);gap:8px}.service-editor-main .service-description{grid-column:1/-1}.service-editor-schedule{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.service-editor-row label{display:block;color:#8193a9;font-size:9px;font-weight:750;text-transform:uppercase;letter-spacing:.045em}.service-editor-row input{margin-top:4px;padding:9px 10px;font-size:12px}.service-editor-active{display:flex;align-items:center;gap:7px;min-height:42px;color:#cbd5e1;font-size:11px}.service-editor-active input{width:auto;margin:0}.service-editor-price{position:relative}.service-editor-price:before{content:'€';position:absolute;left:10px;bottom:10px;color:#5eead4;font-size:12px}.service-editor-price input{padding-left:25px}.service-modal-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px}.service-modal-actions .btn{width:auto}.service-modal-actions #estadoCatalogoServicos{flex:1;min-width:160px;color:#91a3b8;font-size:11px}
+  .service-editor-list{display:grid;gap:8px}.service-category-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;padding:8px 2px 3px;color:#5eead4;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}.service-category-heading span{color:#71869d;font-size:9px;font-weight:650;letter-spacing:0;text-transform:none}.service-editor-row{padding:12px;border:1px solid rgba(148,163,184,.15);border-radius:14px;background:rgba(255,255,255,.025)}.service-editor-row.inactive{opacity:.62}.service-editor-main{display:grid;grid-template-columns:minmax(140px,1.5fr) minmax(90px,.7fr) minmax(125px,.75fr);gap:8px}.service-editor-main .service-description{grid-column:1/-1}.service-editor-schedule{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.service-editor-row label{display:block;color:#8193a9;font-size:9px;font-weight:750;text-transform:uppercase;letter-spacing:.045em}.service-editor-row input,.service-editor-row select{margin-top:4px;padding:9px 10px;font-size:12px}.service-editor-active{display:flex;align-items:center;gap:7px;min-height:42px;color:#cbd5e1;font-size:11px}.service-editor-active input{width:auto;margin:0}.service-editor-price{position:relative}.service-editor-price:before{content:'€';position:absolute;left:10px;bottom:10px;color:#5eead4;font-size:12px}.service-editor-price input{padding-left:25px}.service-modal-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:16px}.service-modal-actions .btn{width:auto}.service-modal-actions #estadoCatalogoServicos{flex:1;min-width:160px;color:#91a3b8;font-size:11px}
   .price-preview{margin-top:8px;padding:9px 11px;border:1px solid rgba(45,212,191,.15);border-radius:10px;background:rgba(13,148,136,.07);color:#99f6e4;font-size:11px;line-height:1.45}.price-preview.warning{border-color:rgba(250,204,21,.22);background:rgba(161,98,7,.1);color:#fde68a}
-  @media(max-width:760px){.service-modal{padding:16px}.service-table-head{display:none}.service-editor-row{grid-template-columns:1fr;align-items:start}.service-editor-main,.service-editor-schedule{grid-template-columns:1fr 1fr}.service-modal-actions .btn{flex:1}.service-modal-actions #estadoCatalogoServicos{flex-basis:100%;order:-1}}
+  @media(max-width:760px){.service-modal{padding:16px}.service-special-note{align-items:flex-start;flex-direction:column}.service-special-note .btn{width:100%}.service-table-head{display:none}.service-editor-row{grid-template-columns:1fr;align-items:start}.service-editor-main,.service-editor-schedule{grid-template-columns:1fr 1fr}.service-editor-main .service-description{grid-column:1/-1}.service-modal-actions .btn{flex:1}.service-modal-actions #estadoCatalogoServicos{flex-basis:100%;order:-1}}
 </style>
 
 <style id="biblioteca-exercicios-design">
@@ -5665,25 +5667,30 @@ let CATALOGO_SERVICOS = {
   revision: 0,
   configured: false,
   servicos: [
-    {id:'1x30',codigo:'1x30',nome:'PT - 1x30 min',descricao:'Personal Training',sessoesPorMes:4,duracaoMinutos:30,preco:79,validadeDias:60,ativo:true,ordem:0},
-    {id:'2x30',codigo:'2x30',nome:'PT - 2x30 min',descricao:'Personal Training',sessoesPorMes:8,duracaoMinutos:30,preco:159,validadeDias:60,ativo:true,ordem:1},
-    {id:'3x30',codigo:'3x30',nome:'PT - 3x30 min',descricao:'Personal Training',sessoesPorMes:12,duracaoMinutos:30,preco:215,validadeDias:60,ativo:true,ordem:2},
-    {id:'1x45',codigo:'1x45',nome:'PT - 1x45 min',descricao:'Personal Training',sessoesPorMes:4,duracaoMinutos:45,preco:119,validadeDias:60,ativo:true,ordem:3},
-    {id:'2x45',codigo:'2x45',nome:'PT - 2x45 min',descricao:'Personal Training',sessoesPorMes:8,duracaoMinutos:45,preco:225,validadeDias:60,ativo:true,ordem:4},
-    {id:'3x45',codigo:'3x45',nome:'PT - 3x45 min',descricao:'Personal Training',sessoesPorMes:12,duracaoMinutos:45,preco:315,validadeDias:60,ativo:true,ordem:5},
-    {id:'1x60',codigo:'1x60',nome:'PT - 1x60 min',descricao:'Personal Training',sessoesPorMes:4,duracaoMinutos:60,preco:149,validadeDias:60,ativo:true,ordem:6},
-    {id:'2x60',codigo:'2x60',nome:'PT - 2x60 min',descricao:'Personal Training',sessoesPorMes:8,duracaoMinutos:60,preco:285,validadeDias:60,ativo:true,ordem:7},
-    {id:'3x60',codigo:'3x60',nome:'PT - 3x60 min',descricao:'Personal Training',sessoesPorMes:12,duracaoMinutos:60,preco:415,validadeDias:60,ativo:true,ordem:8},
-    {id:'basic',codigo:'basic',nome:'BASIC',descricao:'APP + Plano de Treino',sessoesPorMes:0,duracaoMinutos:0,preco:15,validadeDias:60,ativo:true,ordem:9},
-    {id:'standard',codigo:'standard',nome:'STANDARD',descricao:'APP + Plano de TR+AV',sessoesPorMes:0,duracaoMinutos:0,preco:30,validadeDias:60,ativo:true,ordem:10},
-    {id:'plus-1',codigo:'plus-1',nome:'PLUS 1',descricao:'APP + TR + AV + 1PT',sessoesPorMes:1,duracaoMinutos:0,preco:60,validadeDias:60,ativo:true,ordem:11},
-    {id:'plus-2',codigo:'plus-2',nome:'PLUS 2',descricao:'APP + TR + AV + 2PT',sessoesPorMes:2,duracaoMinutos:0,preco:90,validadeDias:60,ativo:true,ordem:12},
-    {id:'plus-max',codigo:'plus-max',nome:'PLUS MAX',descricao:'APP + TR + AV + 4PT',sessoesPorMes:4,duracaoMinutos:0,preco:149,validadeDias:60,ativo:true,ordem:13}
+    {id:'1x30',codigo:'1x30',nome:'PT - 1x30 min',categoria:'pt',descricao:'Personal Training',sessoesPorMes:4,duracaoMinutos:30,preco:79,validadeDias:60,ativo:true,ordem:0},
+    {id:'2x30',codigo:'2x30',nome:'PT - 2x30 min',categoria:'pt',descricao:'Personal Training',sessoesPorMes:8,duracaoMinutos:30,preco:159,validadeDias:60,ativo:true,ordem:1},
+    {id:'3x30',codigo:'3x30',nome:'PT - 3x30 min',categoria:'pt',descricao:'Personal Training',sessoesPorMes:12,duracaoMinutos:30,preco:215,validadeDias:60,ativo:true,ordem:2},
+    {id:'1x45',codigo:'1x45',nome:'PT - 1x45 min',categoria:'pt',descricao:'Personal Training',sessoesPorMes:4,duracaoMinutos:45,preco:119,validadeDias:60,ativo:true,ordem:3},
+    {id:'2x45',codigo:'2x45',nome:'PT - 2x45 min',categoria:'pt',descricao:'Personal Training',sessoesPorMes:8,duracaoMinutos:45,preco:225,validadeDias:60,ativo:true,ordem:4},
+    {id:'3x45',codigo:'3x45',nome:'PT - 3x45 min',categoria:'pt',descricao:'Personal Training',sessoesPorMes:12,duracaoMinutos:45,preco:315,validadeDias:60,ativo:true,ordem:5},
+    {id:'1x60',codigo:'1x60',nome:'PT - 1x60 min',categoria:'pt',descricao:'Personal Training',sessoesPorMes:4,duracaoMinutos:60,preco:149,validadeDias:60,ativo:true,ordem:6},
+    {id:'2x60',codigo:'2x60',nome:'PT - 2x60 min',categoria:'pt',descricao:'Personal Training',sessoesPorMes:8,duracaoMinutos:60,preco:285,validadeDias:60,ativo:true,ordem:7},
+    {id:'3x60',codigo:'3x60',nome:'PT - 3x60 min',categoria:'pt',descricao:'Personal Training',sessoesPorMes:12,duracaoMinutos:60,preco:415,validadeDias:60,ativo:true,ordem:8}
   ]
 };
 
+const CODIGOS_PACOTES_ESPECIAIS_CRM = new Set(['basic','standard','plus-1','plus-2','plus-max','plus1','plus2','plusmax']);
+
+function categoriaServicoCRM(item) {
+  const categoria = String(item && item.categoria || '').toLowerCase();
+  if (CODIGOS_PACOTES_ESPECIAIS_CRM.has(String(item && item.codigo || '').toLowerCase()) || categoria === 'digital' || categoria === 'pacote_especial') return 'pacote_especial';
+  return categoria === 'outro' ? 'outro' : 'pt';
+}
+
+function servicoPacoteEspecialCRM(item) { return categoriaServicoCRM(item) === 'pacote_especial'; }
+
 function servicosAtivosCRM() {
-  return (CATALOGO_SERVICOS.servicos || []).filter(item => item.ativo !== false).sort((a,b) => Number(a.ordem||0)-Number(b.ordem||0));
+  return (CATALOGO_SERVICOS.servicos || []).filter(item => item.ativo !== false && !servicoPacoteEspecialCRM(item)).sort((a,b) => Number(a.ordem||0)-Number(b.ordem||0));
 }
 
 function servicoCRM(codigo) {
@@ -5694,17 +5701,24 @@ function opcoesServicosCRM(valor, incluirVazio, incluirInativoAtual) {
   let lista = servicosAtivosCRM();
   const atual = servicoCRM(valor);
   if (incluirInativoAtual && atual && !lista.some(item => item.id === atual.id)) lista = [atual].concat(lista);
-  return (incluirVazio ? '<option value="">Sem serviço</option>' : '') + lista.map(item => {
-    const preco = item.preco === null || item.preco === undefined ? 'preço por definir' : '€' + Number(item.preco).toFixed(2);
-    return '<option value="' + escaparHtmlCRM(item.codigo) + '"' + (item.codigo === valor ? ' selected' : '') + '>' + escaparHtmlCRM(item.nome) + ' · ' + preco + (item.ativo === false ? ' · inativo' : '') + '</option>';
-  }).join('');
+  const porCategoria = categoria => lista.filter(item => categoriaServicoCRM(item) === categoria);
+  const render = (titulo, itens) => itens.length ? '<optgroup label="' + titulo + '">' + itens.map(item => {
+      const preco = item.preco === null || item.preco === undefined ? 'preço por definir' : '€' + Number(item.preco).toFixed(2);
+      const legado = servicoPacoteEspecialCRM(item) ? ' · legado; gerir em Pacotes Especiais' : '';
+      return '<option value="' + escaparHtmlCRM(item.codigo) + '"' + (item.codigo === valor ? ' selected' : '') + '>' + escaparHtmlCRM(item.nome) + ' · ' + preco + (item.ativo === false ? ' · inativo' : '') + legado + '</option>';
+    }).join('') + '</optgroup>' : '';
+  return (incluirVazio ? '<option value="">Sem serviço</option>' : '') + render('Personal Training', porCategoria('pt')) + render('Outros serviços', porCategoria('outro')) + render('Registo legado', porCategoria('pacote_especial'));
 }
 
 function opcoesNomesServicosCRM(valor, incluirVazio) {
   let lista = servicosAtivosCRM();
   const atual = (CATALOGO_SERVICOS.servicos || []).find(item => item.nome === valor);
   if (atual && !lista.some(item => item.id === atual.id)) lista = [atual].concat(lista);
-  return (incluirVazio ? '<option value="">Sem serviço</option>' : '') + lista.map(item => '<option value="' + escaparHtmlCRM(item.nome) + '"' + (item.nome === valor ? ' selected' : '') + '>' + escaparHtmlCRM(item.nome) + (item.ativo === false ? ' · inativo' : '') + '</option>').join('');
+  const render = (titulo, categoria) => {
+    const itens = lista.filter(item => categoriaServicoCRM(item) === categoria);
+    return itens.length ? '<optgroup label="' + titulo + '">' + itens.map(item => '<option value="' + escaparHtmlCRM(item.nome) + '"' + (item.nome === valor ? ' selected' : '') + '>' + escaparHtmlCRM(item.nome) + (item.ativo === false ? ' · inativo' : '') + (servicoPacoteEspecialCRM(item) ? ' · legado' : '') + '</option>').join('') + '</optgroup>' : '';
+  };
+  return (incluirVazio ? '<option value="">Sem serviço</option>' : '') + render('Personal Training', 'pt') + render('Outros serviços', 'outro') + render('Registo legado', 'pacote_especial');
 }
 
 function nomeServicoPorCodigoCRM(codigo) {
@@ -9237,26 +9251,42 @@ function fecharModalServicos() {
   document.getElementById('modalServicosOverlay').style.display = 'none';
 }
 
+function abrirGestaoPacotesEspeciais() {
+  fecharModalServicos();
+  abrirPacotesEspeciais();
+}
+
 function renderCatalogoServicosEditor() {
   const alvo = document.getElementById('listaServicosEditor');
   if (!alvo) return;
-  alvo.innerHTML = CATALOGO_SERVICOS_EDITOR.map((item, indice) => {
-    const existente = !String(item.id || '').startsWith('novo-');
-    return '<div class="service-editor-row' + (item.ativo === false ? ' inactive' : '') + '" data-service-index="' + indice + '" data-service-id="' + escaparHtmlCRM(item.id) + '">' +
-      '<div class="service-editor-main"><label>Nome<input data-service-field="nome" maxlength="120" value="' + escaparHtmlCRM(item.nome || '') + '" placeholder="Ex.: PT Duo 45 min"></label><label>Código<input data-service-field="codigo" maxlength="32" value="' + escaparHtmlCRM(item.codigo || '') + '" placeholder="ex.: duo45"' + (existente ? ' readonly title="Para preservar o histórico, cria um serviço novo se precisares de outro código."' : '') + '></label><label class="service-description">Descrição<input data-service-field="descricao" maxlength="250" value="' + escaparHtmlCRM(item.descricao || '') + '" placeholder="O que está incluído"></label></div>' +
-      '<div class="service-editor-schedule"><label>Sessões/mês<input data-service-field="sessoesPorMes" type="number" min="0" max="100" value="' + Number(item.sessoesPorMes || 0) + '"></label><label>Minutos<input data-service-field="duracaoMinutos" type="number" min="0" max="300" value="' + Number(item.duracaoMinutos || 0) + '"></label><label>Validade/dias<input data-service-field="validadeDias" type="number" min="1" max="730" value="' + Number(item.validadeDias || 60) + '"></label></div>' +
-      '<label class="service-editor-price">Preço mensal<input data-service-field="preco" type="number" min="0" max="100000" step="0.01" value="' + (item.preco === null || item.preco === undefined ? '' : Number(item.preco).toFixed(2)) + '" placeholder="Por definir"></label>' +
-      '<label class="service-editor-active"><input data-service-field="ativo" type="checkbox"' + (item.ativo !== false ? ' checked' : '') + '> Disponível</label>' +
-      '</div>';
+  const editaveis = CATALOGO_SERVICOS_EDITOR.map((item, indice) => ({ item, indice })).filter(registo => !servicoPacoteEspecialCRM(registo.item));
+  const categorias = [
+    { id: 'pt', titulo: 'Personal Training', detalhe: 'Packs regulares com sessões presenciais' },
+    { id: 'outro', titulo: 'Outros serviços', detalhe: 'Serviços adicionais que não são Pacotes Especiais' }
+  ];
+  alvo.innerHTML = categorias.map(grupo => {
+    const linhas = editaveis.filter(registo => categoriaServicoCRM(registo.item) === grupo.id).map(registo => {
+      const item = registo.item;
+      const indice = registo.indice;
+      const existente = !String(item.id || '').startsWith('novo-');
+      return '<div class="service-editor-row' + (item.ativo === false ? ' inactive' : '') + '" data-service-index="' + indice + '" data-service-id="' + escaparHtmlCRM(item.id) + '">' +
+        '<div class="service-editor-main"><label>Nome<input data-service-field="nome" maxlength="120" value="' + escaparHtmlCRM(item.nome || '') + '" placeholder="Ex.: PT Duo 45 min"></label><label>Código<input data-service-field="codigo" maxlength="32" value="' + escaparHtmlCRM(item.codigo || '') + '" placeholder="ex.: duo45"' + (existente ? ' readonly title="Para preservar o histórico, cria um serviço novo se precisares de outro código."' : '') + '></label><label>Tipo<select data-service-field="categoria"><option value="pt"' + (categoriaServicoCRM(item) === 'pt' ? ' selected' : '') + '>Personal Training</option><option value="outro"' + (categoriaServicoCRM(item) === 'outro' ? ' selected' : '') + '>Outro serviço</option></select></label><label class="service-description">Descrição<input data-service-field="descricao" maxlength="250" value="' + escaparHtmlCRM(item.descricao || '') + '" placeholder="O que está incluído"></label></div>' +
+        '<div class="service-editor-schedule"><label>Sessões/mês<input data-service-field="sessoesPorMes" type="number" min="0" max="100" value="' + Number(item.sessoesPorMes || 0) + '"></label><label>Minutos<input data-service-field="duracaoMinutos" type="number" min="0" max="300" value="' + Number(item.duracaoMinutos || 0) + '"></label><label>Validade/dias<input data-service-field="validadeDias" type="number" min="1" max="730" value="' + Number(item.validadeDias || 60) + '"></label></div>' +
+        '<label class="service-editor-price">Preço mensal<input data-service-field="preco" type="number" min="0" max="100000" step="0.01" value="' + (item.preco === null || item.preco === undefined ? '' : Number(item.preco).toFixed(2)) + '" placeholder="Por definir"></label>' +
+        '<label class="service-editor-active"><input data-service-field="ativo" type="checkbox"' + (item.ativo !== false ? ' checked' : '') + '> Disponível</label>' +
+        '</div>';
+    }).join('');
+    return linhas ? '<div class="service-category-heading">' + grupo.titulo + '<span>' + grupo.detalhe + '</span></div>' + linhas : '';
   }).join('');
 }
 
 function adicionarServicoEditor() {
   const ordem = CATALOGO_SERVICOS_EDITOR.length;
-  CATALOGO_SERVICOS_EDITOR.push({ id: 'novo-' + Date.now(), codigo: '', nome: '', descricao: '', sessoesPorMes: 4, duracaoMinutos: 45, preco: null, validadeDias: 60, ativo: true, ordem: ordem });
+  const idNovo = 'novo-' + Date.now();
+  CATALOGO_SERVICOS_EDITOR.push({ id: idNovo, codigo: '', nome: '', categoria: 'pt', descricao: '', sessoesPorMes: 4, duracaoMinutos: 45, preco: null, validadeDias: 60, ativo: true, ordem: ordem });
   renderCatalogoServicosEditor();
-  const ultimo = document.querySelector('#listaServicosEditor .service-editor-row:last-child input[data-service-field="nome"]');
-  if (ultimo) ultimo.focus();
+  const novo = document.querySelector('#listaServicosEditor .service-editor-row[data-service-id="' + idNovo + '"] input[data-service-field="nome"]');
+  if (novo) novo.focus();
 }
 
 function lerCatalogoServicosEditor() {
@@ -9268,6 +9298,7 @@ function lerCatalogoServicosEditor() {
       id: String(idAtual || '').startsWith('novo-') ? codigo : idAtual,
       codigo: codigo,
       nome: campo('nome').value.trim(),
+      categoria: campo('categoria').value,
       descricao: campo('descricao').value.trim(),
       sessoesPorMes: Number(campo('sessoesPorMes').value),
       duracaoMinutos: Number(campo('duracaoMinutos').value),

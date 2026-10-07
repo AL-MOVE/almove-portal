@@ -37,7 +37,7 @@ export default async function handler(req, res) {
         const revision = revisaoAtual + 1;
         catalogoGuardado = { servicos, revision, configured: true };
         transacao.set(servicosRef, { servicos, revision, updatedAt: agora, updatedBy: identidade.uid });
-        transacao.create(db.collection('auditLogs').doc(), { action: 'development.settings.service-catalog-updated', actorUid: identidade.uid, createdAt: agora, revision, services: servicos.map(item => ({ id: item.id, code: item.codigo, active: item.ativo, price: item.preco })) });
+        transacao.create(db.collection('auditLogs').doc(), { action: 'development.settings.service-catalog-updated', actorUid: identidade.uid, createdAt: agora, revision, services: servicos.map(item => ({ id: item.id, code: item.codigo, category: item.categoria, active: item.ativo, price: item.preco })) });
       });
       return responder(res, 200, { ok: true, catalogo: catalogoGuardado });
     }
