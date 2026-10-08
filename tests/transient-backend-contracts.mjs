@@ -9,6 +9,10 @@ assert.equal(erroTemporarioGoogle({ code: 'ACESSO_NEGADO' }), false);
 assert.deepEqual(respostaErroServico({ code: 8 }), { estado: 503, codigo: 'SERVICO_TEMPORARIAMENTE_INDISPONIVEL' });
 
 const source = fs.readFileSync(new URL('../js/firebase-crm-session.js', import.meta.url), 'utf8');
+const login = fs.readFileSync(new URL('../dev-crm.html', import.meta.url), 'utf8');
+const crm = fs.readFileSync(new URL('../coach-firebase.html', import.meta.url), 'utf8');
+const coach = fs.readFileSync(new URL('../coach-mobile.html', import.meta.url), 'utf8');
+for (const pagina of [login, crm, coach]) assert.match(pagina, /firebase-crm-session\.js\?v=20261008-1/);
 let chamadas = 0;
 const contexto = {
   window: null,
