@@ -5,6 +5,7 @@ import { exigirEquipa } from '../../api/_crm-development.js';
 import { consolidarPacksMensais } from './payment-status.js';
 import { frequencyFromServiceName, loadServiceCatalog, packShapeForService, priceForService, serviceByCode } from './service-catalog.js';
 import { carregarLocais, validarLocalCliente } from './locations.js';
+import { normalizeQuickPaymentMethod, normalizeQuickPaymentStatus } from './quick-payment.js';
 
 const MEDIDAS = ['pesoKg', 'alturaCm', 'massaGordaPercent', 'cinturaCm', 'abdomenCm', 'bracoDireitoCm', 'bracoEsquerdoCm', 'pernaDireitaCm', 'pernaEsquerdaCm'];
 const ESTADOS_PAGAMENTO = new Set(['Pago', 'Pendente']);
@@ -84,6 +85,26 @@ export default async function handler(req, res) {
       await db.runTransaction(async transacao => { transacao.update(pack.ref, { estadoPagamento: 'Pago', pagoEm: agora, updatedAt: agora }); transacao.create(db.collection('auditLogs').doc(), { ...auditoria, action: 'development.pack.marked-paid', packId: pack.id }); });
       return responder(res, 200, { ok: true, idCliente: clienteId });
     }
+    if (acao === 'set-payment-status') {
+      const estadoPagamento = normalizeQuickPaymentStatus(dados.estadoPagamento);
+      const mes = mesAtual(); const packs = await db.collection('crmMigrationPacks').where('clientId', '==', clienteId).get(); const pack = documentoPackDoMes(packs.docs, mes);
+      if (!pack) return responder(res, 404, { ok: false, erro: 'PACK_NAO_ENCONTRADO' });
+      await db.runTransaction(async transacao => {
+        transacao.update(pack.ref, { estadoPagamento, pagoEm: estadoPagamento === 'Pago' ? agora : null, updatedAt: agora, updatedBy: identidade.uid });
+        transacao.create(db.collection('auditLogs').doc(), { ...auditoria, action: 'development.pack.payment-status-changed', packId: pack.id, paymentStatus: estadoPagamento });
+      });
+      return responder(res, 200, { ok: true, idCliente: clienteId, estadoPagamento });
+    }
+    if (acao === 'set-payment-method') {
+      const metodoPagamento = normalizeQuickPaymentMethod(dados.metodoPagamento);
+      const mes = mesAtual(); const packs = await db.collection('crmMigrationPacks').where('clientId', '==', clienteId).get(); const pack = documentoPackDoMes(packs.docs, mes);
+      await db.runTransaction(async transacao => {
+        transacao.update(cliente, { metodoPagamento, updatedAt: agora, updatedBy: identidade.uid });
+        if (pack) transacao.update(pack.ref, { metodoPagamento, updatedAt: agora, updatedBy: identidade.uid });
+        transacao.create(db.collection('auditLogs').doc(), { ...auditoria, action: 'development.client.payment-method-changed', ...(pack ? { packId: pack.id } : {}), paymentMethod: metodoPagamento });
+      });
+      return responder(res, 200, { ok: true, idCliente: clienteId, metodoPagamento });
+    }
     if (acao === 'toggle-session') {
       const numero = Number(dados.numSessao); if (!Number.isInteger(numero) || numero < 1) return responder(res, 400, { ok: false, erro: 'SESSAO_INVALIDA' });
       const mes = mesAtual(); const sessoes = await db.collection('crmMigrationSessions').where('clientId', '==', clienteId).get(); const sessao = sessoes.docs.find(documento => { const item = documento.data(); return item.mesAno === mes && Number(item.numSessao) === numero; });
@@ -147,6 +168,6 @@ export default async function handler(req, res) {
     }
     return responder(res, 400, { ok: false, erro: 'ACAO_INVALIDA' });
   } catch (erro) {
-    const codigo = String(erro?.code || erro?.message || 'FALHA'); const pedidoInvalido = /^(SERVICO_|CODIGO_|PRECO_|DURACAO_|SESSOES_|CLIENTE_LOCAL_)/.test(codigo); return responder(res, /^FIREBASE_/.test(codigo) ? 401 : (pedidoInvalido ? 400 : 500), { ok: false, erro: codigo });
+    const codigo = String(erro?.code || erro?.message || 'FALHA'); const pedidoInvalido = /^(SERVICO_|CODIGO_|PRECO_|DURACAO_|SESSOES_|CLIENTE_LOCAL_|ESTADO_PAGAMENTO_|METODO_PAGAMENTO_)/.test(codigo); return responder(res, /^FIREBASE_/.test(codigo) ? 401 : (pedidoInvalido ? 400 : 500), { ok: false, erro: codigo });
   }
 }

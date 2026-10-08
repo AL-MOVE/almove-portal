@@ -1336,6 +1336,118 @@
       transform: translateY(-2px);
     }
 
+    .carteira-tabela {
+      container: carteira / inline-size;
+      overflow: clip;
+      border: 1px solid var(--al-border);
+      border-radius: 18px;
+      background: rgba(5, 12, 22, 0.72);
+      box-shadow: 0 14px 38px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+
+    .carteira-grid {
+      display: grid;
+      grid-template-columns: minmax(175px, 1.55fr) 88px minmax(100px, .9fr) 105px minmax(80px, .75fr) minmax(122px, 1fr) minmax(140px, 1.05fr) 80px;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .carteira-head {
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--al-border);
+      background: rgba(255,255,255,0.035);
+      color: #75879b;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .carteira-body { gap: 0; }
+
+    .carteira-row {
+      min-height: 68px;
+      padding: 11px 16px;
+      border-bottom: 1px solid rgba(148,163,184,.12);
+      cursor: pointer;
+      transition: background-color .18s ease, box-shadow .18s ease;
+    }
+
+    .carteira-row:last-child { border-bottom: 0; }
+    .carteira-row:hover,
+    .carteira-row:focus-visible {
+      outline: 0;
+      background: rgba(45,212,191,.055);
+      box-shadow: inset 3px 0 0 rgba(45,212,191,.72);
+    }
+
+    .carteira-cell { min-width: 0; color: #cbd5e1; font-size: 12px; }
+    .carteira-cliente strong {
+      display: block;
+      overflow: hidden;
+      color: #f3f7fb;
+      font-size: 13px;
+      font-weight: 780;
+      line-height: 1.35;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .carteira-preco strong { display: block; color: #f3f7fb; font-size: 13px; }
+    .carteira-preco small { display: block; margin-top: 3px; color: #fbbf24; font-size: 9px; font-weight: 800; text-transform: uppercase; }
+    .carteira-sem-pack { color: #687b91; font-size: 11px; }
+    .carteira-sessoes { font-variant-numeric: tabular-nums; }
+    .carteira-sessoes strong { color: #e5edf6; }
+
+    .carteira-select {
+      width: 100%;
+      min-width: 0;
+      min-height: 40px;
+      padding: 7px 28px 7px 10px;
+      border-radius: 10px;
+      color: #dce8f5;
+      font-size: 11px;
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    .carteira-select[data-payment-state="Pago"] { border-color: rgba(45,212,191,.4); color: #5eead4; }
+    .carteira-select[data-payment-state="Pendente"] { border-color: rgba(251,191,36,.4); color: #fcd34d; }
+    .carteira-select.is-saving { opacity: .58; cursor: wait; }
+
+    @container carteira (max-width: 980px) {
+      .carteira-head { display: none; }
+      .carteira-body { padding: 8px; gap: 8px; }
+      .carteira-row {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 13px 14px;
+        padding: 14px;
+        border: 1px solid rgba(148,163,184,.16);
+        border-radius: 14px;
+        background: rgba(255,255,255,.018);
+      }
+      .carteira-row:hover,
+      .carteira-row:focus-visible { box-shadow: inset 3px 0 0 rgba(45,212,191,.72); }
+      .carteira-cliente { grid-column: 1 / -1; }
+      .carteira-cell::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 5px;
+        color: #66798f;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+      }
+      .carteira-cliente::before { display: none; }
+      .carteira-select { min-height: 44px; }
+    }
+
+    @container carteira (max-width: 420px) {
+      .carteira-row { grid-template-columns: minmax(0, 1fr); }
+      .carteira-cliente { grid-column: auto; }
+    }
+
     .dashboard-primary-panel {
       border-color: rgba(45,212,191,0.22);
       border-radius: 22px;
@@ -3157,7 +3269,12 @@
         <button type="button" class="btn btn-secondary" onclick="exportarClientesCSV()">Exportar CSV</button>
       </div>
     </div>
-    <div class="cliente-list" id="clienteList"></div>
+    <div class="carteira-tabela" role="table" aria-label="Carteira de clientes ativos">
+      <div class="carteira-head carteira-grid" role="row">
+        <span role="columnheader">Cliente</span><span role="columnheader">Atividade</span><span role="columnheader">Ginásio</span><span role="columnheader">Preço</span><span role="columnheader">Pack</span><span role="columnheader">Pagamento</span><span role="columnheader">Método</span><span role="columnheader">Sessões</span>
+      </div>
+      <div class="cliente-list carteira-body" id="clienteList" role="rowgroup"></div>
+    </div>
   </section>
   
   <!-- ========== CLIENTES INATIVOS ========== -->
@@ -6641,7 +6758,7 @@ function renderPagamentosPendentesLista(lista) {
     container.innerHTML = '<p style="color: #64748b; text-align: center; padding: 20px 0;">Todos os packs deste mês estão pagos.</p>';
     return;
   }
-  const metodoLabel = { 'Stripe': 'Stripe', 'Transferência': 'Transferência', 'Mão': 'Em mão', '': 'Por definir' };
+  const metodoLabel = { 'Stripe': 'Stripe / cartão', 'Transferência': 'Transferência', 'Mão': 'Em mão', 'MB Way': 'MB Way', 'Débito direto': 'Débito direto', 'Multibanco': 'Multibanco', 'Numerário': 'Numerário', '': 'Por definir' };
   container.innerHTML = lista.map(item => {
     const idEsc = idParaOnclickCRM(item.idCliente);
     const diaPagamento = Number(item.diaPagamento);
@@ -6671,7 +6788,7 @@ function renderPagamentosLista(lista) {
     container.innerHTML = '<p style="color: #64748b; text-align: center; padding: 20px 0;">Ninguém em atraso neste momento.</p>';
     return;
   }
-  const metodoLabel = { 'Stripe': 'Stripe', 'Transferência': 'Transferência', 'Mão': 'Em mão', '': 'Por definir' };
+  const metodoLabel = { 'Stripe': 'Stripe / cartão', 'Transferência': 'Transferência', 'Mão': 'Em mão', 'MB Way': 'MB Way', 'Débito direto': 'Débito direto', 'Multibanco': 'Multibanco', 'Numerário': 'Numerário', '': 'Por definir' };
   container.innerHTML = lista.map(item => {
     const idEsc = idParaOnclickCRM(item.idCliente);
     const estiloUrgente = item.mesesEmAtraso >= 2 ? ' style="background:#7f1d1d;color:#fecaca;"' : '';
@@ -7157,6 +7274,112 @@ function renderResumoCheckinsMensal(resumo) {
       ).join('') + '</div></details>';
 }
 
+const METODOS_PAGAMENTO_CARTEIRA = [
+  ['', 'Por definir'],
+  ['MB Way', 'MB Way'],
+  ['Transferência', 'Transferência'],
+  ['Mão', 'Em mão'],
+  ['Stripe', 'Stripe / cartão'],
+  ['Débito direto', 'Débito direto'],
+  ['Multibanco', 'Multibanco'],
+  ['Numerário', 'Numerário']
+];
+
+function opcoesMetodoPagamentoCarteira(valorAtual) {
+  const atual = String(valorAtual || '');
+  const metodos = METODOS_PAGAMENTO_CARTEIRA.slice();
+  if (atual && !metodos.some(item => item[0] === atual)) metodos.unshift([atual, atual]);
+  return metodos.map(item => '<option value="' + escaparHtmlCRM(item[0]) + '"' + (item[0] === atual ? ' selected' : '') + '>' + escaparHtmlCRM(item[1]) + '</option>').join('');
+}
+
+function formatarPrecoCarteira(valor) {
+  const numero = Number(valor);
+  return Number.isFinite(numero) ? numero.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' }) : '—';
+}
+
+async function executarAcaoRapidaCarteira(corpo, aplicarLocal) {
+  const configuracao = await ALMOVE_FIREBASE_CONFIG.obter();
+  await AlMoveFirebaseAuth.configurar(configuracao);
+  const token = await AlMoveFirebaseAuth.token();
+  if (!token) throw new Error('Volta a iniciar sessão no CRM.');
+  const resposta = await fetch('/api/dev-crm-client-actions', {
+    method: 'POST',
+    headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify(corpo)
+  });
+  const resultado = await resposta.json();
+  if (!resposta.ok || !resultado.ok) throw new Error(resultado.erro || 'Não foi possível guardar a alteração.');
+  if (typeof aplicarLocal === 'function') aplicarLocal();
+  try {
+    const url = '/api/dev-crm-dashboard?locationId=' + encodeURIComponent(FILTRO_LOCAL_CRM || '');
+    const atualizacaoResposta = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+    const atualizacao = await atualizacaoResposta.json();
+    if (!atualizacaoResposta.ok || !atualizacao.ok || !atualizacao.crm) throw new Error(atualizacao.erro || 'ATUALIZACAO_INDISPONIVEL');
+    DATA = atualizacao.crm;
+    adotarLocaisDoCRM(DATA);
+  } catch (erroAtualizacao) {
+    console.warn('Alteração guardada; a carteira ficou em modo otimista.', erroAtualizacao);
+  }
+  renderClientes();
+}
+
+async function alterarEstadoPagamentoCarteira(evento, idCliente, campo) {
+  if (evento) evento.stopPropagation();
+  const anterior = campo.dataset.previous || '';
+  const novoEstado = campo.value;
+  campo.disabled = true; campo.classList.add('is-saving');
+  try {
+    await executarAcaoRapidaCarteira({ action: 'set-payment-status', idCliente, estadoPagamento: novoEstado }, () => {
+      const pack = (DATA.packsResumoTodos || DATA.packsResumo || []).find(item => item.idCliente === idCliente);
+      if (pack) pack.estadoPagamento = novoEstado;
+    });
+    showAlert('Estado do pagamento atualizado.', 'success');
+  } catch (erro) {
+    campo.value = anterior;
+    campo.disabled = false; campo.classList.remove('is-saving');
+    showAlert('Não foi possível alterar o pagamento: ' + String(erro.message || erro), 'error');
+  }
+}
+
+async function alterarMetodoPagamentoCarteira(evento, idCliente, campo) {
+  if (evento) evento.stopPropagation();
+  const anterior = campo.dataset.previous || '';
+  const novoMetodo = campo.value;
+  campo.disabled = true; campo.classList.add('is-saving');
+  try {
+    await executarAcaoRapidaCarteira({ action: 'set-payment-method', idCliente, metodoPagamento: novoMetodo }, () => {
+      const cliente = (DATA.clientes || []).find(item => item.id === idCliente);
+      const pack = (DATA.packsResumoTodos || DATA.packsResumo || []).find(item => item.idCliente === idCliente);
+      if (cliente) cliente.metodoPagamento = novoMetodo;
+      if (pack) pack.metodoPagamento = novoMetodo;
+    });
+    showAlert('Método de pagamento atualizado.', 'success');
+  } catch (erro) {
+    campo.value = anterior;
+    campo.disabled = false; campo.classList.remove('is-saving');
+    showAlert('Não foi possível alterar o método: ' + String(erro.message || erro), 'error');
+  }
+}
+
+function montarLinhaCliente(c) {
+  const packsLista = DATA.packsResumoTodos || DATA.packsResumo || [];
+  const pack = packsLista.find(item => item.idCliente === c.id) || null;
+  const idEscapado = idParaOnclickCRM(c.id);
+  const metodo = String(pack?.metodoPagamento || c.metodoPagamento || '');
+  const estadoPagamento = pack ? String(pack.estadoPagamento || 'Pendente') : '';
+  const personalizado = !!pack && (pack.precoOrigem === 'personalizado' || (c.precoPersonalizado != null && c.precoPersonalizado !== ''));
+  let html = '<div class="carteira-row carteira-grid" role="row" tabindex="0" onclick="verDetalheCliente(\'' + idEscapado + '\')" onkeydown="if(event.key===\'Enter\'){verDetalheCliente(\'' + idEscapado + '\')}">';
+  html += '<div class="carteira-cell carteira-cliente" data-label="Cliente" role="cell"><strong title="' + escaparHtmlCRM(c.nome) + '">' + escaparHtmlCRM(c.nome) + '</strong></div>';
+  html += '<div class="carteira-cell" data-label="Atividade" role="cell"><span class="badge badge-active">' + escaparHtmlCRM(c.estado || 'Ativo') + '</span></div>';
+  html += '<div class="carteira-cell" data-label="Ginásio" role="cell"><span class="badge location-badge' + (!c.localId ? ' unassigned' : '') + '">' + escaparHtmlCRM(nomeLocalCRM(c.localId)) + '</span></div>';
+  html += '<div class="carteira-cell carteira-preco" data-label="Preço" role="cell">' + (pack ? '<strong>' + formatarPrecoCarteira(pack.preco) + '</strong>' + (personalizado ? '<small>Personalizado</small>' : '') : '<span class="carteira-sem-pack">Sem pack</span>') + '</div>';
+  html += '<div class="carteira-cell" data-label="Pack" role="cell">' + (pack ? '<span class="badge">' + escaparHtmlCRM(pack.frequencia || '—') + '</span>' : '<span class="carteira-sem-pack">Sem pack</span>') + '</div>';
+  html += '<div class="carteira-cell" data-label="Pagamento" role="cell">' + (pack ? '<select class="carteira-select" aria-label="Estado do pagamento de ' + escaparHtmlCRM(c.nome) + '" data-previous="' + escaparHtmlCRM(estadoPagamento) + '" data-payment-state="' + escaparHtmlCRM(estadoPagamento) + '" onclick="event.stopPropagation()" onchange="alterarEstadoPagamentoCarteira(event,\'' + idEscapado + '\',this)"><option value="Pendente"' + (estadoPagamento === 'Pendente' ? ' selected' : '') + '>Pendente</option><option value="Pago"' + (estadoPagamento === 'Pago' ? ' selected' : '') + '>Pago</option></select>' : '<span class="carteira-sem-pack">Sem pack</span>') + '</div>';
+  html += '<div class="carteira-cell" data-label="Método" role="cell"><select class="carteira-select" aria-label="Método de pagamento de ' + escaparHtmlCRM(c.nome) + '" data-previous="' + escaparHtmlCRM(metodo) + '" onclick="event.stopPropagation()" onchange="alterarMetodoPagamentoCarteira(event,\'' + idEscapado + '\',this)">' + opcoesMetodoPagamentoCarteira(metodo) + '</select></div>';
+  html += '<div class="carteira-cell carteira-sessoes" data-label="Sessões" role="cell">' + (pack ? '<strong>' + Number(pack.sessoesConfirmadas || 0) + '/' + Number(pack.sessoesTotal || 0) + '</strong>' : '<span class="carteira-sem-pack">—</span>') + '</div>';
+  return html + '</div>';
+}
+
 function montarCardCliente(c) {
   const packsLista = DATA.packsResumoTodos || DATA.packsResumo || [];
   const pack = packsLista.find(p => p.idCliente === c.id) || null;
@@ -7186,9 +7409,10 @@ function renderClientes() {
   const termo = (document.getElementById('searchTopbar')?.value || '').toLowerCase().trim();
   sincronizarControlesLocaisCRM();
   const ativos = DATA.clientes ? DATA.clientes.filter(c => c.estado === 'Ativo' && clienteNoFiltroLocalCRM(c)) : [];
-  const html = ativos.length
-    ? ativos.filter(c => !termo || c.nome.toLowerCase().includes(termo)).map(montarCardCliente).join('')
-    : '<p style="text-align: center; color: #64748b;">Sem clientes ativos</p>';
+  const filtrados = ativos.filter(c => !termo || c.nome.toLowerCase().includes(termo));
+  const html = filtrados.length
+    ? filtrados.map(montarLinhaCliente).join('')
+    : '<p style="padding:32px 16px;text-align:center;color:#64748b;">Sem clientes ativos</p>';
   document.getElementById('clienteList').innerHTML = html;
   const tituloEl = document.getElementById('clientesTituloCount');
   if (tituloEl) tituloEl.textContent = ativos.length + (ativos.length === 1 ? ' cliente ativo' : ' clientes ativos') + (FILTRO_CLIENTES_LOCAL ? ' · ' + (FILTRO_CLIENTES_LOCAL === '__sem_local__' ? 'Por atribuir' : nomeLocalCRM(FILTRO_CLIENTES_LOCAL)) : '');
@@ -7332,7 +7556,7 @@ function atualizarDetalheCliente() {
 function formularioEditarDadosHtmlCRM(cliente, idCliente) {
   const esc = valor => escaparHtmlCRM(valor == null ? '' : valor);
   const idEsc = idParaOnclickCRM(idCliente);
-  const metodos = [['', 'Por definir'], ['Stripe', 'Stripe (cartão)'], ['Transferência', 'Transferência'], ['Mão', 'Em mão']];
+  const metodos = METODOS_PAGAMENTO_CARTEIRA;
   return '<div id="editarDadosForm" hidden class="editar-dados-form" aria-live="polite">' +
     '<div class="form-group"><label>Contacto</label><input type="tel" inputmode="tel" id="inputEditarContacto" value="' + esc(cliente.contacto) + '" placeholder="912345678"><button type="button" class="btn btn-secondary btn-contactos" onclick="procurarContactosGoogleCliente(\'' + idEsc + '\', \'' + idParaOnclickCRM(cliente.nome) + '\')">⌕ Procurar nos Contactos Google</button><div id="resultadoContactosGoogle"></div></div>' +
     '<div class="form-group"><label>Ginásio / local</label><select id="inputEditarLocal">' + opcoesLocaisCRM(cliente.localId || '', { semLocal: true, incluirInativos: true }) + '</select><small style="display:block;margin-top:5px;color:#70839a">Clientes antigos podem ficar por atribuir até confirmares o local correto.</small></div>' +
