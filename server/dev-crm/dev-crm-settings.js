@@ -5,6 +5,7 @@ import { exigirEquipa } from '../../api/_crm-development.js';
 import { normalizeExerciseLibrarySettings } from './exercise-library-settings.js';
 import { loadServiceCatalog, normalizeServiceCatalog } from './service-catalog.js';
 import { carregarLocais, mesLisboa, normalizarLocais } from './locations.js';
+import { carregarOpcoesOperacionais, normalizarOpcoesOperacionais } from './operational-options.js';
 import { erroTemporarioGoogle, registarErroTemporario } from '../../api/_transient-errors.js';
 
 const PADRAO = Object.freeze({ nome: 'André Martins - Personal Trainer', nif: '', morada: '', contacto: '', horasAvisoCancelamento: 12, diasAvisoDenuncia: 30, fidelizacaoMeses: 3, seguroCompanhia: '', seguroApolice: '', seguroCapital: '', seguroRiscos: '', ralEntidade: '', ralWebsite: '', comarca: '', prazoRespostaReclamacoesDias: 10, assinatura: '', fotoPerfil: '' });
@@ -19,8 +20,8 @@ export default async function handler(req, res) {
   if (!['GET', 'POST'].includes(req.method)) return responder(res, 405, { ok: false });
   try {
     if (!crmFirebasePermitido()) return responder(res, 404, { ok: false });
-    const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove(); exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid)); const referencia = db.collection('crmDevelopmentSettings').doc('coach-profile'); const bibliotecaRef = db.collection('crmDevelopmentSettings').doc('exercise-library'); const servicosRef = db.collection('crmDevelopmentSettings').doc('service-catalog'); const locaisRef = db.collection('crmDevelopmentSettings').doc('locations');
-    if (req.method === 'GET') { const [atual, bibliotecaSnap, catalogo, locais] = await Promise.all([referencia.get(), bibliotecaRef.get(), loadServiceCatalog(db), carregarLocais(db)]); return responder(res, 200, { ok: true, perfil: normalizar(atual.exists ? atual.data() : PADRAO), biblioteca: normalizeExerciseLibrarySettings(bibliotecaSnap.exists ? bibliotecaSnap.data() : {}), catalogo, locais }); }
+    const identidade = await obterIdentidadeFirebase(req); const { db } = obterFirestoreAlmove(); exigirEquipa(await criarAdaptadorFirestore({ db }).getClientContext(identidade.uid)); const referencia = db.collection('crmDevelopmentSettings').doc('coach-profile'); const bibliotecaRef = db.collection('crmDevelopmentSettings').doc('exercise-library'); const servicosRef = db.collection('crmDevelopmentSettings').doc('service-catalog'); const locaisRef = db.collection('crmDevelopmentSettings').doc('locations'); const opcoesRef = db.collection('crmDevelopmentSettings').doc('operational-options');
+    if (req.method === 'GET') { const [atual, bibliotecaSnap, catalogo, locais, operationalOptions] = await Promise.all([referencia.get(), bibliotecaRef.get(), loadServiceCatalog(db), carregarLocais(db), carregarOpcoesOperacionais(db)]); return responder(res, 200, { ok: true, perfil: normalizar(atual.exists ? atual.data() : PADRAO), biblioteca: normalizeExerciseLibrarySettings(bibliotecaSnap.exists ? bibliotecaSnap.data() : {}), catalogo, locais, operationalOptions }); }
     if (req.body?.action === 'save-exercise-library-settings') { const biblioteca = normalizeExerciseLibrarySettings(req.body.biblioteca || {}); const agora = new Date(); await db.runTransaction(async transacao => { transacao.set(bibliotecaRef, { ...biblioteca, updatedAt: agora, updatedBy: identidade.uid }); transacao.create(db.collection('auditLogs').doc(), { action: 'development.settings.exercise-library-updated', actorUid: identidade.uid, createdAt: agora }); }); return responder(res, 200, { ok: true, biblioteca }); }
     if (req.body?.action === 'save-service-catalog') {
       const enviados = normalizeServiceCatalog(req.body.catalogo?.servicos || []);
@@ -56,10 +57,25 @@ export default async function handler(req, res) {
         const revision = revisaoAtual + 1;
         catalogoGuardado = { locais, revision, configured: true };
         transacao.set(locaisRef, { locais, revision, updatedAt: agora, updatedBy: identidade.uid });
-        transacao.create(db.collection('auditLogs').doc(), { action: 'development.settings.locations-updated', actorUid: identidade.uid, createdAt: agora, revision, locations: locais.map(item => ({ id: item.id, name: item.nome, type: item.tipo, active: item.ativo, monthlyRent: item.rendaMensal })) });
+        transacao.create(db.collection('auditLogs').doc(), { action: 'development.settings.locations-updated', actorUid: identidade.uid, createdAt: agora, revision, locations: locais.map(item => ({ id: item.id, name: item.nome, type: item.tipo, color: item.cor, active: item.ativo, monthlyRent: item.rendaMensal })) });
       });
       return responder(res, 200, { ok: true, locais: catalogoGuardado });
     }
+    if (req.body?.action === 'save-operational-options') {
+      const enviadas = normalizarOpcoesOperacionais(req.body.operationalOptions || {});
+      const revisaoEsperada = Number(req.body.operationalOptions?.revision || 0);
+      const agora = new Date(); let guardadas;
+      await db.runTransaction(async transacao => {
+        const atual = await transacao.get(opcoesRef);
+        const revisaoAtual = Number((atual.exists ? atual.data() : {})?.revision || 0);
+        if (revisaoEsperada !== revisaoAtual) throw new Error('OPCOES_OPERACIONAIS_CONFLITO');
+        const revision = revisaoAtual + 1;
+        guardadas = { ...enviadas, revision, configured: true };
+        transacao.set(opcoesRef, { ...enviadas, revision, updatedAt: agora, updatedBy: identidade.uid });
+        transacao.create(db.collection('auditLogs').doc(), { action: 'development.settings.operational-options-updated', actorUid: identidade.uid, createdAt: agora, revision, paymentMethods: enviadas.metodosPagamento, expenseCategories: enviadas.categoriasDespesa, noteTypes: enviadas.tiposNota, specialModes: enviadas.modosEspeciais, contractPaymentModes: enviadas.modalidadesContrato, assessmentReviewDays: enviadas.prazosRevisaoAvaliacao });
+      });
+      return responder(res, 200, { ok: true, operationalOptions: guardadas });
+    }
     const perfil = normalizar(req.body && typeof req.body === 'object' ? req.body : {}); const agora = new Date(); await db.runTransaction(async transacao => { transacao.set(referencia, { ...perfil, updatedAt: agora, updatedBy: identidade.uid }); transacao.create(db.collection('auditLogs').doc(), { action: 'development.settings.profile-updated', actorUid: identidade.uid, createdAt: agora }); }); return responder(res, 200, { ok: true, perfil });
-  } catch (erro) { const codigo = String(erro?.code || erro?.message || 'FALHA'); if (erroTemporarioGoogle(erro)) { registarErroTemporario('dev-crm-settings', erro); return responder(res, 503, { ok: false, erro: 'SERVICO_TEMPORARIAMENTE_INDISPONIVEL' }); } const estado = /^FIREBASE_/.test(codigo) ? 401 : (['CATALOGO_SERVICOS_CONFLITO', 'LOCAIS_CONFLITO'].includes(codigo) ? 409 : (/^(CODIGO_|ID_|NOME_|PRECO_|SESSOES_|DURACAO_|VALIDADE_|DEMASIADOS_|LOCAL|LOCAIS_)/.test(codigo) ? 400 : 500)); return responder(res, estado, { ok: false, erro: codigo }); }
+  } catch (erro) { const codigo = String(erro?.code || erro?.message || 'FALHA'); if (erroTemporarioGoogle(erro)) { registarErroTemporario('dev-crm-settings', erro); return responder(res, 503, { ok: false, erro: 'SERVICO_TEMPORARIAMENTE_INDISPONIVEL' }); } const estado = /^FIREBASE_/.test(codigo) ? 401 : (['CATALOGO_SERVICOS_CONFLITO', 'LOCAIS_CONFLITO', 'OPCOES_OPERACIONAIS_CONFLITO'].includes(codigo) ? 409 : (/^(CODIGO_|ID_|NOME_|PRECO_|SESSOES_|DURACAO_|VALIDADE_|DEMASIADOS_|LOCAL|LOCAIS_|METODOS_PAGAMENTO_|CATEGORIAS_DESPESA_|TIPOS_NOTA_|MODOS_ESPECIAIS_|MODALIDADES_CONTRATO_|PRAZOS_REVISAO_)/.test(codigo) ? 400 : 500)); return responder(res, estado, { ok: false, erro: codigo }); }
 }

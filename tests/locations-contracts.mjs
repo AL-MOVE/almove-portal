@@ -7,6 +7,8 @@ assert.deepEqual(padrao.map(local => local.nome), ['LFitness', 'PN Gym', 'Online
 assert.equal(rendaDoLocalNoMes(padrao[0], '2026-10'), 375);
 assert.equal(rendaDoLocalNoMes(padrao[0], '2026-09'), 0);
 assert.equal(padrao[2].rendaMensal, 0);
+assert.equal(padrao[0].cor, '#ef4444');
+assert.equal(padrao[1].cor, '#fbbf24');
 
 const alterados = normalizarLocais([
   { ...padrao[0], rendaMensal: 425 },
@@ -30,6 +32,7 @@ assert.equal(validarLocalCliente({ locais: semPnGym }, 'lfitness', { permitirVaz
 assert.throws(() => validarLocalCliente({ locais: semPnGym }, 'pn-gym', { permitirVazio: false }), /CLIENTE_LOCAL_INVALIDO/);
 assert.equal(validarLocalCliente({ locais: semPnGym }, 'pn-gym', { permitirVazio: false, permitirInativo: true }), 'pn-gym');
 assert.throws(() => normalizarLocais([{ id: 'a', nome: 'Mesmo' }, { id: 'b', nome: 'mesmo' }], { mes: '2026-10' }), /LOCAL_NOME_DUPLICADO/);
+assert.throws(() => normalizarLocais([{ id: 'a', nome: 'Local', cor: 'vermelho' }], { mes: '2026-10' }), /LOCAL_COR_INVALIDA/);
 
 const [dashboard, settings, clients, coach, bridge] = await Promise.all([
   readFile(new URL('../server/dev-crm/dev-crm-dashboard.js', import.meta.url), 'utf8'),
@@ -41,7 +44,7 @@ const [dashboard, settings, clients, coach, bridge] = await Promise.all([
 for (const fragmento of ['locationFilter', 'clientesMetricas', 'catalogoLocais']) assert.ok(dashboard.includes(fragmento), 'Dashboard sem integração: ' + fragmento);
 assert.match(settings, /save-locations/);
 assert.match(clients, /permitirVazio: false/);
-for (const fragmento of ['dashboardFiltroLocal', 'clientesFiltroLocal', 'novoClienteLocal', 'financasFiltroLocal', 'modalLocaisOverlay', 'guardarLocaisCRM']) assert.ok(coach.includes(fragmento), 'Frontend sem integração: ' + fragmento);
+for (const fragmento of ['dashboardFiltroLocal', 'clientesFiltroLocal', 'novoClienteLocal', 'financasFiltroLocal', 'modalLocaisOverlay', 'guardarLocaisCRM', 'data-location-field="cor"', 'estiloBadgeLocalCRM']) assert.ok(coach.includes(fragmento), 'Frontend sem integração: ' + fragmento);
 assert.match(bridge, /locationId=/);
 
 console.log('Contratos de ginásios, filtros e rendas validados.');

@@ -6,6 +6,7 @@ import { consolidarPacksMensais } from './payment-status.js';
 import { frequencyFromServiceName, loadServiceCatalog, packShapeForService, priceForService, serviceByCode } from './service-catalog.js';
 import { carregarLocais, validarLocalCliente } from './locations.js';
 import { normalizeQuickPaymentMethod, normalizeQuickPaymentStatus } from './quick-payment.js';
+import { carregarOpcoesOperacionais } from './operational-options.js';
 
 const MEDIDAS = ['pesoKg', 'alturaCm', 'massaGordaPercent', 'cinturaCm', 'abdomenCm', 'bracoDireitoCm', 'bracoEsquerdoCm', 'pernaDireitaCm', 'pernaEsquerdaCm'];
 const ESTADOS_PAGAMENTO = new Set(['Pago', 'Pendente']);
@@ -96,7 +97,8 @@ export default async function handler(req, res) {
       return responder(res, 200, { ok: true, idCliente: clienteId, estadoPagamento });
     }
     if (acao === 'set-payment-method') {
-      const metodoPagamento = normalizeQuickPaymentMethod(dados.metodoPagamento);
+      const opcoesOperacionais = await carregarOpcoesOperacionais(db);
+      const metodoPagamento = normalizeQuickPaymentMethod(dados.metodoPagamento, opcoesOperacionais.metodosPagamento);
       const mes = mesAtual(); const packs = await db.collection('crmMigrationPacks').where('clientId', '==', clienteId).get(); const pack = documentoPackDoMes(packs.docs, mes);
       await db.runTransaction(async transacao => {
         transacao.update(cliente, { metodoPagamento, updatedAt: agora, updatedBy: identidade.uid });
@@ -126,7 +128,7 @@ export default async function handler(req, res) {
       return responder(res, 200, { ok: true, idCliente: clienteId, total: sessoesDoMes.length });
     }
     if (acao === 'add-note') {
-      const nota = texto(dados.nota, 1500); const tipo = ['Nota', 'Contacto', 'Saúde', 'Decisão'].includes(texto(dados.tipo, 16)) ? texto(dados.tipo, 16) : 'Nota'; if (!nota) return responder(res, 400, { ok: false, erro: 'NOTA_INVALIDA' });
+      const opcoesOperacionais = await carregarOpcoesOperacionais(db); const nota = texto(dados.nota, 1500); const tipoPedido = texto(dados.tipo, 80); const tipo = opcoesOperacionais.tiposNota.includes(tipoPedido) ? tipoPedido : opcoesOperacionais.tiposNota[0]; if (!nota) return responder(res, 400, { ok: false, erro: 'NOTA_INVALIDA' });
       const referencia = db.collection('crmMigrationNotes').doc(); await db.runTransaction(async transacao => { transacao.create(referencia, { idCliente: clienteId, dataHora: agora.toISOString(), tipo, nota, origem: 'firebase-development' }); transacao.create(db.collection('auditLogs').doc(), { ...auditoria, action: 'development.client.note-created', noteId: referencia.id }); });
       return responder(res, 201, { ok: true, idCliente: clienteId });
     }
@@ -158,7 +160,7 @@ export default async function handler(req, res) {
       lote.create(db.collection('auditLogs').doc(), { ...auditoria, action: acao === 'edit-pack' ? 'development.pack.edited' : 'development.sessions.generated', frequency: frequencia, total, ...(acao === 'edit-pack' ? { price: precoAudit, priceSource: precoOrigemAudit } : {}) }); await lote.commit(); return responder(res, 200, { ok: true, idCliente: clienteId });
     }
     if (acao === 'set-special-mode') {
-      const modo = texto(dados.modo, 16); const dataInicio = texto(dados.dataInicio, 10); const dataFim = texto(dados.dataFim, 10); if (!['Férias', 'Deload'].includes(modo) || !/^\d{4}-\d{2}-\d{2}$/.test(dataInicio) || !/^\d{4}-\d{2}-\d{2}$/.test(dataFim) || dataFim < dataInicio) return responder(res, 400, { ok: false, erro: 'MODO_INVALIDO' }); await db.runTransaction(async transacao => { transacao.update(cliente, { modoEspecial: { modo, dataInicio, dataFim, ativo: true }, updatedAt: agora, updatedBy: identidade.uid }); transacao.create(db.collection('auditLogs').doc(), { ...auditoria, action: 'development.client.special-mode-set', modo, dataInicio, dataFim }); }); return responder(res, 200, { ok: true, idCliente: clienteId });
+      const opcoesOperacionais = await carregarOpcoesOperacionais(db); const modo = texto(dados.modo, 80); const dataInicio = texto(dados.dataInicio, 10); const dataFim = texto(dados.dataFim, 10); if (!opcoesOperacionais.modosEspeciais.includes(modo) || !/^\d{4}-\d{2}-\d{2}$/.test(dataInicio) || !/^\d{4}-\d{2}-\d{2}$/.test(dataFim) || dataFim < dataInicio) return responder(res, 400, { ok: false, erro: 'MODO_INVALIDO' }); await db.runTransaction(async transacao => { transacao.update(cliente, { modoEspecial: { modo, dataInicio, dataFim, ativo: true }, updatedAt: agora, updatedBy: identidade.uid }); transacao.create(db.collection('auditLogs').doc(), { ...auditoria, action: 'development.client.special-mode-set', modo, dataInicio, dataFim }); }); return responder(res, 200, { ok: true, idCliente: clienteId });
     }
     if (acao === 'remove-special-mode') {
       await db.runTransaction(async transacao => { transacao.update(cliente, { modoEspecial: null, updatedAt: agora, updatedBy: identidade.uid }); transacao.create(db.collection('auditLogs').doc(), { ...auditoria, action: 'development.client.special-mode-removed' }); }); return responder(res, 200, { ok: true, idCliente: clienteId });

@@ -1,4 +1,6 @@
 const TIPOS_LOCAL = new Set(['presencial', 'online']);
+const CORES_LOCAL_PADRAO = Object.freeze({ lfitness: '#ef4444', 'pn-gym': '#fbbf24', online: '#38bdf8' });
+const PALETA_LOCAL = Object.freeze(['#38bdf8', '#a78bfa', '#34d399', '#fb7185', '#f97316', '#22d3ee']);
 
 function mesLisboa() {
   const partes = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit' }).formatToParts(new Date());
@@ -22,6 +24,11 @@ function valorEuro(valor) {
   if (!Number.isFinite(numero) || numero < 0 || numero > 100000) throw falha('LOCAL_RENDA_INVALIDA');
   return Math.round(numero * 100) / 100;
 }
+function corLocal(valor, id, ordem = 0) {
+  const cor = texto(valor, 7);
+  if (cor && !/^#[0-9a-f]{6}$/i.test(cor)) throw falha('LOCAL_COR_INVALIDA');
+  return (cor || CORES_LOCAL_PADRAO[id] || PALETA_LOCAL[ordem % PALETA_LOCAL.length]).toLowerCase();
+}
 function periodoRenda(entrada = {}) {
   const inicio = texto(entrada.inicio, 7);
   const fim = texto(entrada.fim, 7);
@@ -32,9 +39,9 @@ function periodoRenda(entrada = {}) {
 
 export function locaisPadrao(mes = mesLisboa()) {
   return [
-    { id: 'lfitness', nome: 'LFitness', tipo: 'presencial', rendaMensal: 375, rendaHistorico: [{ valor: 375, inicio: mes, fim: '' }], ativo: true, ordem: 0 },
-    { id: 'pn-gym', nome: 'PN Gym', tipo: 'presencial', rendaMensal: 0, rendaHistorico: [], ativo: true, ordem: 1 },
-    { id: 'online', nome: 'Online', tipo: 'online', rendaMensal: 0, rendaHistorico: [], ativo: true, ordem: 2 }
+    { id: 'lfitness', nome: 'LFitness', tipo: 'presencial', cor: '#ef4444', rendaMensal: 375, rendaHistorico: [{ valor: 375, inicio: mes, fim: '' }], ativo: true, ordem: 0 },
+    { id: 'pn-gym', nome: 'PN Gym', tipo: 'presencial', cor: '#fbbf24', rendaMensal: 0, rendaHistorico: [], ativo: true, ordem: 1 },
+    { id: 'online', nome: 'Online', tipo: 'online', cor: '#38bdf8', rendaMensal: 0, rendaHistorico: [], ativo: true, ordem: 2 }
   ];
 }
 
@@ -70,7 +77,8 @@ export function normalizarLocais(entrada, { mes = mesLisboa(), anteriores = [] }
       else rendaHistorico.push({ valor: rendaMensal, inicio: mes, fim: '' });
     }
     rendaHistorico.sort((a, b) => a.inicio.localeCompare(b.inicio));
-    return { id, nome, tipo, rendaMensal, rendaHistorico, ativo, ordem };
+    const cor = corLocal(item?.cor || anterior.cor, id, ordem);
+    return { id, nome, tipo, cor, rendaMensal, rendaHistorico, ativo, ordem };
   });
 
   // Locais já usados permanecem arquivados para que clientes e histórico financeiro
@@ -90,7 +98,7 @@ export async function carregarLocais(db) {
   const dados = snap.data() || {};
   const base = Array.isArray(dados.locais) ? dados.locais : locaisPadrao();
   const locais = base.map((item, ordem) => ({
-    id: texto(item.id, 80), nome: texto(item.nome, 120), tipo: TIPOS_LOCAL.has(item.tipo) ? item.tipo : 'presencial',
+    id: texto(item.id, 80), nome: texto(item.nome, 120), tipo: TIPOS_LOCAL.has(item.tipo) ? item.tipo : 'presencial', cor: corLocal(item.cor, texto(item.id, 80), ordem),
     rendaMensal: Number(item.rendaMensal || 0), rendaHistorico: Array.isArray(item.rendaHistorico) ? item.rendaHistorico.map(periodoRenda) : [],
     ativo: item.ativo !== false, ordem: Number.isFinite(Number(item.ordem)) ? Number(item.ordem) : ordem
   })).sort((a, b) => a.ordem - b.ordem || a.nome.localeCompare(b.nome, 'pt-PT'));

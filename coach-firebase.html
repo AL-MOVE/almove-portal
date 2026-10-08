@@ -1411,8 +1411,8 @@
       cursor: pointer;
     }
 
-    .carteira-select[data-payment-state="Pago"] { border-color: rgba(45,212,191,.4); color: #5eead4; }
-    .carteira-select[data-payment-state="Pendente"] { border-color: rgba(251,191,36,.4); color: #fcd34d; }
+    .carteira-select[data-payment-state="Pago"] { border-color: rgba(16,185,129,.68); background-color: rgba(16,185,129,.15); color: #6ee7b7; box-shadow: inset 0 0 0 1px rgba(16,185,129,.08); }
+    .carteira-select[data-payment-state="Pendente"] { border-color: rgba(245,158,11,.72); background-color: rgba(245,158,11,.16); color: #fde68a; box-shadow: inset 0 0 0 1px rgba(245,158,11,.09); }
     .carteira-select.is-saving { opacity: .58; cursor: wait; }
 
     @container carteira (max-width: 980px) {
@@ -2795,7 +2795,7 @@
 </style>
 
 <style id="locations-design">
-  .location-scope-actions{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}.location-scope-actions label{display:grid;gap:4px;color:#71869d;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.location-scope-actions select,.location-filter-select{min-width:150px;padding:9px 32px 9px 11px;border:1px solid rgba(45,212,191,.22);border-radius:10px;background:#0a1725;color:#dce8f5;font-size:12px}.location-modal-overlay{position:fixed;inset:0;z-index:10008;display:none;align-items:center;justify-content:center;padding:16px;overflow-y:auto;background:rgba(0,0,0,.74)}.location-modal{width:min(860px,100%);max-height:90vh;overflow:auto;margin:24px 0;padding:20px;border:1px solid rgba(45,212,191,.24);border-radius:16px;background:#0d1723;box-shadow:0 26px 80px rgba(0,0,0,.48)}.location-modal-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:14px}.location-modal-head h3{margin:2px 0 4px;color:#f8fafc;font-size:20px}.location-modal-head p{max-width:650px;margin:0;color:#91a3b8;font-size:11px;line-height:1.5}.location-safety-note{margin-bottom:14px;padding:10px 12px;border:1px solid rgba(250,204,21,.22);border-radius:11px;background:rgba(161,98,7,.1);color:#fde68a;font-size:11px;line-height:1.45}.location-editor-list{display:grid;gap:8px}.location-editor-row{display:grid;grid-template-columns:minmax(180px,1.7fr) minmax(135px,.8fr) minmax(130px,.75fr) minmax(95px,.55fr);gap:9px;align-items:end;padding:12px;border:1px solid rgba(148,163,184,.15);border-radius:13px;background:rgba(255,255,255,.025)}.location-editor-row.inactive{opacity:.6}.location-editor-row label{display:grid;gap:4px;color:#8193a9;font-size:9px;font-weight:750;letter-spacing:.045em;text-transform:uppercase}.location-editor-row input,.location-editor-row select{padding:9px 10px;font-size:12px}.location-editor-active{display:flex!important;grid-auto-flow:column;justify-content:start;align-items:center;gap:7px;min-height:38px;color:#cbd5e1!important;font-size:11px!important;text-transform:none!important;letter-spacing:0!important}.location-editor-active input{width:auto;margin:0}.location-modal-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:15px}.location-modal-actions .btn{width:auto}.location-modal-actions [data-location-state]{flex:1;min-width:180px;color:#91a3b8;font-size:11px}.location-badge{border-color:rgba(56,189,248,.22)!important;background:rgba(14,116,144,.11)!important;color:#bae6fd!important}.location-badge.unassigned{border-color:rgba(250,204,21,.22)!important;background:rgba(161,98,7,.1)!important;color:#fde68a!important}
+  .location-scope-actions{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}.location-scope-actions label{display:grid;gap:4px;color:#71869d;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.location-scope-actions select,.location-filter-select{min-width:150px;padding:9px 32px 9px 11px;border:1px solid rgba(45,212,191,.22);border-radius:10px;background:#0a1725;color:#dce8f5;font-size:12px}.location-modal-overlay{position:fixed;inset:0;z-index:10008;display:none;align-items:center;justify-content:center;padding:16px;overflow-y:auto;background:rgba(0,0,0,.74)}.location-modal{width:min(860px,100%);max-height:90vh;overflow:auto;margin:24px 0;padding:20px;border:1px solid rgba(45,212,191,.24);border-radius:16px;background:#0d1723;box-shadow:0 26px 80px rgba(0,0,0,.48)}.location-modal-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:14px}.location-modal-head h3{margin:2px 0 4px;color:#f8fafc;font-size:20px}.location-modal-head p{max-width:650px;margin:0;color:#91a3b8;font-size:11px;line-height:1.5}.location-safety-note{margin-bottom:14px;padding:10px 12px;border:1px solid rgba(250,204,21,.22);border-radius:11px;background:rgba(161,98,7,.1);color:#fde68a;font-size:11px;line-height:1.45}.location-editor-list{display:grid;gap:8px}.location-editor-row{display:grid;grid-template-columns:minmax(180px,1.55fr) minmax(125px,.75fr) minmax(112px,.65fr) minmax(130px,.75fr) minmax(90px,.5fr);gap:9px;align-items:end;padding:12px;border:1px solid rgba(148,163,184,.15);border-radius:13px;background:rgba(255,255,255,.025)}.location-editor-row.inactive{opacity:.6}.location-editor-row label{display:grid;gap:4px;color:#8193a9;font-size:9px;font-weight:750;letter-spacing:.045em;text-transform:uppercase}.location-editor-row input,.location-editor-row select{padding:9px 10px;font-size:12px}.location-editor-active{display:flex!important;grid-auto-flow:column;justify-content:start;align-items:center;gap:7px;min-height:38px;color:#cbd5e1!important;font-size:11px!important;text-transform:none!important;letter-spacing:0!important}.location-editor-active input{width:auto;margin:0}.location-modal-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:15px}.location-modal-actions .btn{width:auto}.location-modal-actions [data-location-state]{flex:1;min-width:180px;color:#91a3b8;font-size:11px}.location-badge{border-color:color-mix(in srgb,var(--location-color,#38bdf8) 46%,transparent)!important;background:color-mix(in srgb,var(--location-color,#38bdf8) 14%,transparent)!important;color:var(--location-color,#bae6fd)!important}.location-badge.unassigned{border-color:rgba(250,204,21,.22)!important;background:rgba(161,98,7,.1)!important;color:#fde68a!important}
   @media(max-width:720px){.location-scope-actions{width:100%}.location-scope-actions label,.location-scope-actions select{flex:1}.location-editor-row{grid-template-columns:1fr 1fr}.location-editor-row>label:first-child{grid-column:1/-1}.location-modal-actions .btn{flex:1}.location-modal-actions [data-location-state]{flex-basis:100%;order:-1}}
 </style>
 
@@ -2805,6 +2805,28 @@
     <div class="location-safety-note"><strong>Clientes antigos ficam “Por atribuir”.</strong> A aplicação não adivinha o ginásio. Um local usado deve ser desativado em vez de apagado, para preservar o histórico.</div>
     <div id="locationEditorList" class="location-editor-list"></div>
     <div class="location-modal-actions"><button type="button" class="btn btn-secondary" onclick="adicionarLinhaLocal()">+ Adicionar local</button><span data-location-state id="estadoLocais">A renda indicada passa a contar a partir do mês atual.</span><button type="button" class="btn btn-secondary" onclick="fecharModalLocais()">Cancelar</button><button type="button" class="btn btn-primary" id="btnGuardarLocais" onclick="guardarLocaisCRM()">Guardar locais</button></div>
+  </div>
+</div>
+
+<style id="crm-customization-design">
+  .coach-app-link{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:7px 11px;border:1px solid rgba(45,212,191,.35);border-radius:10px;background:linear-gradient(135deg,rgba(13,148,136,.2),rgba(14,116,144,.15));color:#99f6e4;font-size:11px;font-weight:850;cursor:pointer;transition:transform .18s ease,border-color .18s ease,background .18s ease}.coach-app-link:hover,.coach-app-link:focus-visible{outline:0;transform:translateY(-1px);border-color:rgba(45,212,191,.68);background:rgba(13,148,136,.28)}
+  .payment-method-panel{margin:0 0 20px;padding:16px;border:1px solid rgba(56,189,248,.17);border-radius:16px;background:linear-gradient(145deg,rgba(8,22,36,.92),rgba(7,17,29,.82))}.payment-method-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:12px}.payment-method-head h2{margin:0 0 3px;color:#f4f8fc;font-size:16px}.payment-method-head p{margin:0;color:#8295aa;font-size:11px}.payment-method-head label{display:grid;gap:4px;color:#71869d;font-size:9px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}.payment-method-head select{min-width:190px;padding:9px 32px 9px 11px;border:1px solid rgba(56,189,248,.22);border-radius:10px;background:#0a1725;color:#e2edf8}.payment-method-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px}.payment-method-card{display:grid;gap:4px;min-height:106px;padding:12px;border:1px solid rgba(148,163,184,.14);border-radius:13px;background:rgba(255,255,255,.025);color:#e5edf6;text-align:left;cursor:pointer;transition:border-color .18s ease,transform .18s ease,background .18s ease}.payment-method-card:hover,.payment-method-card:focus-visible,.payment-method-card.is-active{outline:0;border-color:rgba(45,212,191,.48);background:rgba(13,148,136,.1);transform:translateY(-1px)}.payment-method-card span{color:#91a3b8;font-size:10px}.payment-method-card strong{font-size:23px;line-height:1}.payment-method-card b{color:#dce8f5;font-size:11px}.payment-method-card small{color:#7f93aa;font-size:9px;line-height:1.35}.operational-options-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.operational-options-grid label{display:grid;gap:6px;color:#dce8f5;font-size:11px;font-weight:800}.operational-options-grid textarea{min-height:210px;resize:vertical;font-size:12px;line-height:1.55}.operational-options-help{color:#7f93aa;font-size:10px;font-weight:500;line-height:1.45}.location-editor-row input[type="color"]{min-height:38px;padding:4px;cursor:pointer}.location-editor-row input[type="color"]::-webkit-color-swatch{border:0;border-radius:7px}.settings-card .settings-card-icon{font-variant-emoji:text}
+  @media(max-width:720px){.coach-app-link{width:34px;padding:7px;justify-content:center}.coach-app-link span{display:none}.payment-method-head{align-items:stretch;flex-direction:column}.payment-method-head label,.payment-method-head select{width:100%}.payment-method-grid{grid-template-columns:1fr 1fr}.operational-options-grid{grid-template-columns:1fr}.operational-options-grid textarea{min-height:150px}}
+</style>
+
+<div id="modalOpcoesOperacionaisOverlay" class="location-modal-overlay" aria-hidden="true">
+  <div class="location-modal" role="dialog" aria-modal="true" aria-labelledby="modalOpcoesOperacionaisTitulo">
+    <div class="location-modal-head"><div><div class="eyebrow">Personalização segura</div><h3 id="modalOpcoesOperacionaisTitulo">Opções do CRM</h3><p>Define as opções que aparecem nos formulários. Escreve uma opção por linha e ordena-as como queres vê-las.</p></div><button type="button" class="btn btn-secondary" style="width:auto" onclick="fecharOpcoesOperacionaisCRM()" aria-label="Fechar">×</button></div>
+    <div class="operational-options-grid">
+      <label>Métodos de pagamento<textarea id="opcoesMetodosPagamento" maxlength="2400" spellcheck="false"></textarea><span class="operational-options-help">Os métodos já usados continuam visíveis no histórico, mesmo que os retires desta lista.</span></label>
+      <label>Categorias de despesas<textarea id="opcoesCategoriasDespesa" maxlength="2400" spellcheck="false"></textarea><span class="operational-options-help">A categoria “Renda do ginásio” gere a ligação às rendas definidas em Ginásios e locais.</span></label>
+      <label>Tipos de notas do aluno<textarea id="opcoesTiposNota" maxlength="2400" spellcheck="false"></textarea><span class="operational-options-help">Organiza os registos privados da ficha do aluno.</span></label>
+      <label>Modos especiais<textarea id="opcoesModosEspeciais" maxlength="2400" spellcheck="false"></textarea><span class="operational-options-help">Ex.: Férias, Deload ou Recuperação. Mantém nomes curtos.</span></label>
+      <label>Modalidades de pagamento no contrato<textarea id="opcoesModalidadesContrato" maxlength="2400" spellcheck="false"></textarea><span class="operational-options-help">A primeira opção fica selecionada por defeito ao gerar um contrato.</span></label>
+      <label>Prazos de revisão da avaliação (dias)<textarea id="opcoesPrazosRevisao" maxlength="400" inputmode="numeric" spellcheck="false"></textarea><span class="operational-options-help">Um prazo por linha, entre 7 e 365 dias.</span></label>
+    </div>
+    <div class="location-safety-note" style="margin-top:14px"><strong>Estados protegidos:</strong> Pago/Pendente, Ativo/Pausado/Cancelado, PT/Autónomo e visibilidade dos planos não aceitam opções livres, porque controlam relatórios, permissões e automações.</div>
+    <div class="location-modal-actions"><span data-location-state id="estadoOpcoesOperacionais">As alterações passam a estar disponíveis em todo o CRM.</span><button type="button" class="btn btn-secondary" onclick="fecharOpcoesOperacionaisCRM()">Cancelar</button><button type="button" class="btn btn-primary" id="btnGuardarOpcoesOperacionais" onclick="guardarOpcoesOperacionaisCRM()">Guardar opções</button></div>
   </div>
 </div>
 
@@ -2948,10 +2970,6 @@
       <span class="nav-item-label">Agenda</span>
       <span class="nav-alert" id="navBadgeAgenda"></span>
     </button>
-    <button type="button" class="nav-item" data-label="Abrir app Coach (mobile)" onclick="abrirAppCoachMobile()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/><path d="m9 8 3 3 3-3"/></svg>
-      <span class="nav-item-label">App Coach (mobile)</span>
-    </button>
     <div class="nav-section">Alunos</div>
     <button class="nav-item" data-tab="clientes" data-label="Carteira de alunos" onclick="switchTab('clientes')">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -3039,6 +3057,7 @@
       </div>
       <div class="topbar-right">
         <span class="coach-mode-chip" title="Aplicação de trabalho do coach">COACH</span>
+        <button type="button" class="coach-app-link" onclick="abrirAppCoachMobile()" title="Abrir a App Coach"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="11" y1="18" x2="13" y2="18"/></svg><span>App Coach</span></button>
         <div class="topbar-date" id="dataAtual"></div>
         <button type="button" class="btn btn-primary topbar-quick-action" onclick="switchTab('criar')">+ Novo cliente</button>
         <button type="button" class="btn btn-secondary topbar-quick-action" id="btnSairSessaoCRM" onclick="terminarSessaoCRM()" style="padding:9px 12px;font-size:12px" title="Terminar sessão">Sair</button>
@@ -3140,6 +3159,11 @@
         </div>
       </div>
     </div>
+
+    <section class="payment-method-panel" aria-labelledby="paymentMethodTitle">
+      <div class="payment-method-head"><div><h2 id="paymentMethodTitle">Pagamentos por método</h2><p id="dashboardMetodosPagamentoTexto">Distribuição dos clientes com pack neste mês.</p></div><label for="dashboardFiltroMetodo">Método<select id="dashboardFiltroMetodo" onchange="renderResumoMetodosPagamentoCRM(this.value)"><option value="">Todos os métodos</option></select></label></div>
+      <div id="dashboardMetodosPagamentoResumo" class="payment-method-grid"><div class="carteira-sem-pack">A preparar resumo…</div></div>
+    </section>
 
     <section class="comando-card" aria-label="Centro de comando">
       <div class="comando-head">
@@ -3541,7 +3565,7 @@
   <!-- ========== DEFINIÇÕES ========== -->
   <section id="definicoes" class="view">
     <div class="settings-header">
-      <div><div class="eyebrow">Sistema</div><h2 class="section-title">Definições</h2><p>Perfil, interface e ações operacionais num único sítio.</p></div>
+      <div><div class="eyebrow">Sistema</div><h2 class="section-title">Definições</h2><p>Perfil, negócio e opções operacionais num único sítio.</p></div>
     </div>
     <div class="settings-grid">
       <article class="settings-card">
@@ -3560,9 +3584,9 @@
         <button type="button" class="btn btn-primary" onclick="abrirModalLocais()">Gerir locais</button>
       </article>
       <article class="settings-card">
-        <div class="settings-card-icon">◐</div>
-        <div><h3>Interface</h3><p>O CMR guarda a tua preferência de menu. Podes recolhê-lo para trabalhar com mais espaço.</p></div>
-        <button type="button" class="btn btn-secondary" onclick="toggleSidebar()">Alternar menu</button>
+        <div class="settings-card-icon">☷</div>
+        <div><h3>Opções do CRM</h3><p>Personaliza métodos de pagamento e categorias de despesas usados nos formulários e relatórios.</p></div>
+        <button type="button" class="btn btn-secondary" onclick="abrirOpcoesOperacionaisCRM()">Gerir opções</button>
       </article>
       <article class="settings-card settings-card-wide">
         <div class="settings-card-icon">↻</div>
@@ -5962,13 +5986,24 @@ let CATALOGO_LOCAIS = {
   revision: 0,
   configured: false,
   locais: [
-    { id: 'lfitness', nome: 'LFitness', tipo: 'presencial', rendaMensal: 375, ativo: true, ordem: 0 },
-    { id: 'pn-gym', nome: 'PN Gym', tipo: 'presencial', rendaMensal: 0, ativo: true, ordem: 1 },
-    { id: 'online', nome: 'Online', tipo: 'online', rendaMensal: 0, ativo: true, ordem: 2 }
+    { id: 'lfitness', nome: 'LFitness', tipo: 'presencial', cor: '#ef4444', rendaMensal: 375, ativo: true, ordem: 0 },
+    { id: 'pn-gym', nome: 'PN Gym', tipo: 'presencial', cor: '#fbbf24', rendaMensal: 0, ativo: true, ordem: 1 },
+    { id: 'online', nome: 'Online', tipo: 'online', cor: '#38bdf8', rendaMensal: 0, ativo: true, ordem: 2 }
   ]
+};
+let OPCOES_OPERACIONAIS_CRM = {
+  revision: 0,
+  configured: false,
+  metodosPagamento: ['MB Way', 'Transferência', 'Mão', 'Stripe', 'Débito direto', 'Multibanco', 'Numerário'],
+  categoriasDespesa: ['Renda do ginásio', 'Software e subscrições', 'Equipamento', 'Marketing', 'Transporte', 'Serviços profissionais', 'Outros'],
+  tiposNota: ['Nota', 'Contacto', 'Saúde', 'Decisão'],
+  modosEspeciais: ['Férias', 'Deload'],
+  modalidadesContrato: ['Mensal', 'Total antecipado', 'Por sessão', 'Outra'],
+  prazosRevisaoAvaliacao: [28, 42, 56, 84, 112]
 };
 let FILTRO_LOCAL_CRM = '';
 let FILTRO_CLIENTES_LOCAL = '';
+let FILTRO_METODO_PAGAMENTO_DASHBOARD = '';
 
 function locaisCRM(incluirInativos = false) {
   return (CATALOGO_LOCAIS.locais || []).filter(item => incluirInativos || item.ativo !== false).slice().sort((a, b) => Number(a.ordem || 0) - Number(b.ordem || 0) || String(a.nome).localeCompare(String(b.nome), 'pt-PT'));
@@ -5978,6 +6013,52 @@ function nomeLocalCRM(id) {
   if (!id) return 'Por atribuir';
   const local = locaisCRM(true).find(item => item.id === id);
   return local ? local.nome : 'Local antigo';
+}
+
+function corLocalCRM(id) {
+  const local = locaisCRM(true).find(item => item.id === id);
+  return /^#[0-9a-f]{6}$/i.test(String(local?.cor || '')) ? local.cor : '#38bdf8';
+}
+
+function estiloBadgeLocalCRM(id) {
+  return id ? ' style="--location-color:' + escaparHtmlCRM(corLocalCRM(id)) + '"' : '';
+}
+
+function metodosPagamentoCRM() {
+  const rotulos = { 'Mão': 'Em mão', Stripe: 'Stripe / cartão' };
+  return [['', 'Por definir']].concat((OPCOES_OPERACIONAIS_CRM.metodosPagamento || []).map(valor => [valor, rotulos[valor] || valor]));
+}
+
+function adotarOpcoesOperacionaisCRM(data) {
+  const recebidas = data?.operationalOptions;
+  if (recebidas && Array.isArray(recebidas.metodosPagamento) && Array.isArray(recebidas.categoriasDespesa)) OPCOES_OPERACIONAIS_CRM = recebidas;
+  const campo = document.getElementById('despesaCategoria');
+  if (campo) {
+    const atual = campo.value;
+    campo.innerHTML = (OPCOES_OPERACIONAIS_CRM.categoriasDespesa || []).map(valor => '<option value="' + escaparHtmlCRM(valor) + '">' + escaparHtmlCRM(valor) + '</option>').join('');
+    if ([...campo.options].some(opcao => opcao.value === atual)) campo.value = atual;
+  }
+  const contrato = document.getElementById('inputContratoModalidadePagamento');
+  if (contrato) {
+    const atual = contrato.value;
+    contrato.innerHTML = (OPCOES_OPERACIONAIS_CRM.modalidadesContrato || []).map((valor, indice) => '<option value="' + escaparHtmlCRM(valor.toLocaleLowerCase('pt-PT')) + '">' + escaparHtmlCRM(valor) + '</option>').join('');
+    if ([...contrato.options].some(opcao => opcao.value === atual)) contrato.value = atual;
+  }
+  atualizarPrazosRevisaoAvaliacaoCRM();
+}
+
+function opcoesListaCRM(valores, atual, rotulos = {}) {
+  const lista = Array.isArray(valores) ? valores : [];
+  const completa = atual && !lista.includes(atual) ? [atual].concat(lista) : lista;
+  return completa.map(valor => '<option value="' + escaparHtmlCRM(valor) + '"' + (valor === atual ? ' selected' : '') + '>' + escaparHtmlCRM(rotulos[valor] || valor) + '</option>').join('');
+}
+
+function atualizarPrazosRevisaoAvaliacaoCRM() {
+  const campo = document.getElementById('avaliacaoAvancadaRevisao'); if (!campo) return;
+  const atual = Number(campo.value || 56);
+  const prazos = OPCOES_OPERACIONAIS_CRM.prazosRevisaoAvaliacao || [56];
+  campo.innerHTML = prazos.map(valor => '<option value="' + Number(valor) + '"' + (Number(valor) === atual ? ' selected' : '') + '>' + Number(valor) + ' dias</option>').join('');
+  if (![...campo.options].some(opcao => Number(opcao.value) === atual)) campo.value = String(prazos[0]);
 }
 
 function opcoesLocaisCRM(valor, configuracao = {}) {
@@ -5990,6 +6071,7 @@ function opcoesLocaisCRM(valor, configuracao = {}) {
 
 function adotarLocaisDoCRM(data) {
   if (data && Array.isArray(data.locations)) CATALOGO_LOCAIS = { ...CATALOGO_LOCAIS, locais: data.locations };
+  adotarOpcoesOperacionaisCRM(data);
   if (data && Object.prototype.hasOwnProperty.call(data, 'locationFilter')) FILTRO_LOCAL_CRM = data.locationFilter || '';
   sincronizarControlesLocaisCRM();
 }
@@ -6060,6 +6142,7 @@ function renderEditorLocais() {
   lista.innerHTML = locaisCRM(true).map((item, indice) => '<div class="location-editor-row' + (item.ativo === false ? ' inactive' : '') + '" data-location-id="' + escaparHtmlCRM(item.id) + '">' +
     '<label>Nome<input data-location-field="nome" maxlength="120" value="' + escaparHtmlCRM(item.nome) + '"></label>' +
     '<label>Tipo<select data-location-field="tipo"><option value="presencial"' + (item.tipo === 'presencial' ? ' selected' : '') + '>Presencial</option><option value="online"' + (item.tipo === 'online' ? ' selected' : '') + '>Online</option></select></label>' +
+    '<label>Cor da etiqueta<input data-location-field="cor" type="color" value="' + escaparHtmlCRM(item.cor || '#38bdf8') + '"></label>' +
     '<label>Renda mensal (€)<input data-location-field="rendaMensal" type="number" min="0" max="100000" step="0.01" value="' + Number(item.rendaMensal || 0) + '"' + (item.tipo === 'online' ? ' disabled' : '') + '></label>' +
     '<label class="location-editor-active"><input data-location-field="ativo" type="checkbox"' + (item.ativo === false ? '' : ' checked') + '> Ativo</label>' +
     '<input data-location-field="ordem" type="hidden" value="' + indice + '"></div>').join('');
@@ -6068,7 +6151,7 @@ function renderEditorLocais() {
 }
 
 function adicionarLinhaLocal() {
-  const temporario = { id: '', nome: '', tipo: 'presencial', rendaMensal: 0, ativo: true, ordem: locaisCRM(true).length };
+  const temporario = { id: '', nome: '', tipo: 'presencial', cor: '#38bdf8', rendaMensal: 0, ativo: true, ordem: locaisCRM(true).length };
   const existentes = document.querySelectorAll('#locationEditorList .location-editor-row').length ? lerEditorLocais() : (CATALOGO_LOCAIS.locais || []);
   CATALOGO_LOCAIS = { ...CATALOGO_LOCAIS, locais: existentes.concat(temporario) };
   renderEditorLocais();
@@ -6077,7 +6160,7 @@ function adicionarLinhaLocal() {
 
 function lerEditorLocais() {
   return [...document.querySelectorAll('#locationEditorList .location-editor-row')].map((linha, ordem) => ({
-    id: linha.dataset.locationId || '', nome: linha.querySelector('[data-location-field="nome"]')?.value.trim() || '', tipo: linha.querySelector('[data-location-field="tipo"]')?.value || 'presencial', rendaMensal: Number(linha.querySelector('[data-location-field="rendaMensal"]')?.value || 0), ativo: !!linha.querySelector('[data-location-field="ativo"]')?.checked, ordem
+    id: linha.dataset.locationId || '', nome: linha.querySelector('[data-location-field="nome"]')?.value.trim() || '', tipo: linha.querySelector('[data-location-field="tipo"]')?.value || 'presencial', cor: linha.querySelector('[data-location-field="cor"]')?.value || '#38bdf8', rendaMensal: Number(linha.querySelector('[data-location-field="rendaMensal"]')?.value || 0), ativo: !!linha.querySelector('[data-location-field="ativo"]')?.checked, ordem
   }));
 }
 
@@ -6091,13 +6174,66 @@ function guardarLocaisCRM() {
     CATALOGO_LOCAIS = catalogo;
     if (DATA) DATA.locations = catalogo.locais;
     sincronizarControlesLocaisCRM(); fecharModalLocais(); carregarMes(mesVisualizado || mesReal || '');
-    showAlert('Locais e rendas atualizados. Os meses anteriores mantêm os valores guardados.', 'success');
+    showAlert('Locais, cores e rendas atualizados. Os meses anteriores mantêm os valores guardados.', 'success');
   }).withFailureHandler(err => {
     if (botao) botao.disabled = false;
     const codigo = String(err?.message || '');
-    const mensagens = { LOCAIS_CONFLITO: 'Os locais foram alterados noutra janela. Fecha e abre novamente para rever.', LOCAL_NOME_DUPLICADO: 'Existem dois locais com o mesmo nome.', LOCAL_RENDA_INVALIDA: 'A renda tem de ser um valor válido igual ou superior a zero.' };
+    const mensagens = { LOCAIS_CONFLITO: 'Os locais foram alterados noutra janela. Fecha e abre novamente para rever.', LOCAL_NOME_DUPLICADO: 'Existem dois locais com o mesmo nome.', LOCAL_RENDA_INVALIDA: 'A renda tem de ser um valor válido igual ou superior a zero.', LOCAL_COR_INVALIDA: 'Escolhe uma cor válida para cada local.' };
     if (estado) estado.textContent = mensagens[codigo] || ('Erro: ' + codigo);
   }).guardarLocaisCRM({ locais, revision: Number(CATALOGO_LOCAIS.revision || 0) });
+}
+
+function linhasOpcoesCRM(id) {
+  return String(document.getElementById(id)?.value || '').split(/\r?\n/).map(valor => valor.trim()).filter(Boolean);
+}
+
+function preencherOpcoesOperacionaisCRM() {
+  const campos = { opcoesMetodosPagamento: 'metodosPagamento', opcoesCategoriasDespesa: 'categoriasDespesa', opcoesTiposNota: 'tiposNota', opcoesModosEspeciais: 'modosEspeciais', opcoesModalidadesContrato: 'modalidadesContrato', opcoesPrazosRevisao: 'prazosRevisaoAvaliacao' };
+  Object.entries(campos).forEach(([id, chave]) => { const campo = document.getElementById(id); if (campo) campo.value = (OPCOES_OPERACIONAIS_CRM[chave] || []).join('\n'); });
+}
+
+function abrirOpcoesOperacionaisCRM() {
+  const overlay = document.getElementById('modalOpcoesOperacionaisOverlay');
+  if (!overlay) return;
+  overlay.style.display = 'flex'; overlay.setAttribute('aria-hidden', 'false'); preencherOpcoesOperacionaisCRM();
+  const estado = document.getElementById('estadoOpcoesOperacionais'); if (estado) estado.textContent = 'A confirmar a versão atual…';
+  google.script.run.withSuccessHandler(opcoes => {
+    if (opcoes) OPCOES_OPERACIONAIS_CRM = opcoes;
+    preencherOpcoesOperacionaisCRM();
+    if (estado) estado.textContent = 'As alterações passam a estar disponíveis em todo o CRM.';
+  }).withFailureHandler(err => {
+    if (estado) estado.textContent = 'Não foi possível confirmar a versão atual: ' + (err.message || 'erro');
+  }).getOpcoesOperacionaisCRM();
+}
+
+function fecharOpcoesOperacionaisCRM() {
+  const overlay = document.getElementById('modalOpcoesOperacionaisOverlay');
+  if (overlay) { overlay.style.display = 'none'; overlay.setAttribute('aria-hidden', 'true'); }
+}
+
+function guardarOpcoesOperacionaisCRM() {
+  const metodosPagamento = linhasOpcoesCRM('opcoesMetodosPagamento');
+  const categoriasDespesa = linhasOpcoesCRM('opcoesCategoriasDespesa');
+  const tiposNota = linhasOpcoesCRM('opcoesTiposNota');
+  const modosEspeciais = linhasOpcoesCRM('opcoesModosEspeciais');
+  const modalidadesContrato = linhasOpcoesCRM('opcoesModalidadesContrato');
+  const prazosRevisaoAvaliacao = linhasOpcoesCRM('opcoesPrazosRevisao').map(Number);
+  if (![metodosPagamento, categoriasDespesa, tiposNota, modosEspeciais, modalidadesContrato, prazosRevisaoAvaliacao].every(lista => lista.length)) { showAlert('Mantém pelo menos uma opção em cada lista.', 'error'); return; }
+  if (prazosRevisaoAvaliacao.some(valor => !Number.isInteger(valor) || valor < 7 || valor > 365)) { showAlert('Os prazos de revisão têm de ser dias inteiros entre 7 e 365.', 'error'); return; }
+  const botao = document.getElementById('btnGuardarOpcoesOperacionais'); const estado = document.getElementById('estadoOpcoesOperacionais');
+  if (botao) botao.disabled = true; if (estado) estado.textContent = 'A guardar…';
+  google.script.run.withSuccessHandler(opcoes => {
+    if (botao) botao.disabled = false;
+    OPCOES_OPERACIONAIS_CRM = opcoes;
+    if (DATA) DATA.operationalOptions = opcoes;
+    adotarOpcoesOperacionaisCRM(DATA); renderResumoMetodosPagamentoCRM(); renderClientes(); fecharOpcoesOperacionaisCRM();
+    showAlert('Opções do CRM atualizadas.', 'success');
+  }).withFailureHandler(err => {
+    if (botao) botao.disabled = false;
+    const codigo = String(err?.message || '');
+    const mensagens = { OPCOES_OPERACIONAIS_CONFLITO: 'As opções foram alteradas noutra janela. Fecha e abre novamente para rever.', METODOS_PAGAMENTO_DUPLICADOS: 'Existem métodos de pagamento repetidos.', CATEGORIAS_DESPESA_DUPLICADOS: 'Existem categorias de despesa repetidas.' };
+    if (estado) estado.textContent = mensagens[codigo] || ('Erro: ' + codigo);
+  }).guardarOpcoesOperacionaisCRM({ metodosPagamento, categoriasDespesa, tiposNota, modosEspeciais, modalidadesContrato, prazosRevisaoAvaliacao, revision: Number(OPCOES_OPERACIONAIS_CRM.revision || 0) });
 }
 
 const CODIGOS_PACOTES_ESPECIAIS_CRM = new Set(['basic','standard','plus-1','plus-2','plus-max','plus1','plus2','plusmax']);
@@ -6504,6 +6640,7 @@ function setText(id, value) {
 
 function renderDashboard() {
   const d = DATA.dashboard || {};
+  adotarOpcoesOperacionaisCRM(DATA);
   sincronizarControlesLocaisCRM();
   const scope = document.getElementById('dashboardScopeText');
   if (scope) scope.textContent = FILTRO_LOCAL_CRM ? 'Resultados de ' + nomeLocalCRM(FILTRO_LOCAL_CRM) + ' neste mês.' : 'Agenda, alunos e acompanhamento em todos os locais.';
@@ -6541,7 +6678,41 @@ function renderDashboard() {
     contadorNotificacoes.textContent = emAtraso > 9 ? '9+' : emAtraso;
     contadorNotificacoes.style.display = emAtraso > 0 ? 'block' : 'none';
   }
+  renderResumoMetodosPagamentoCRM();
   carregarCentroComandoCRM(false);
+}
+
+function rotuloMetodoPagamentoCRM(valor) {
+  return Object.fromEntries(metodosPagamentoCRM()).hasOwnProperty(valor) ? Object.fromEntries(metodosPagamentoCRM())[valor] : (valor || 'Por definir');
+}
+
+function renderResumoMetodosPagamentoCRM(novoFiltro) {
+  if (typeof novoFiltro === 'string') FILTRO_METODO_PAGAMENTO_DASHBOARD = novoFiltro;
+  const packs = Array.isArray(DATA?.packsResumo) ? DATA.packsResumo : [];
+  const configurados = metodosPagamentoCRM().map(item => item[0]);
+  const presentes = packs.map(pack => String(pack.metodoPagamento || ''));
+  const metodos = [...new Set(configurados.concat(presentes))];
+  const seletor = document.getElementById('dashboardFiltroMetodo');
+  if (seletor) {
+    seletor.innerHTML = '<option value="">Todos os métodos</option>' + metodos.map(valor => '<option value="' + escaparHtmlCRM(valor || '__por_definir__') + '">' + escaparHtmlCRM(rotuloMetodoPagamentoCRM(valor)) + '</option>').join('');
+    const valorSeletor = FILTRO_METODO_PAGAMENTO_DASHBOARD || '';
+    seletor.value = [...seletor.options].some(opcao => opcao.value === valorSeletor) ? valorSeletor : '';
+  }
+  const filtroReal = FILTRO_METODO_PAGAMENTO_DASHBOARD === '__por_definir__' ? '' : FILTRO_METODO_PAGAMENTO_DASHBOARD;
+  const grupos = metodos.map(metodo => {
+    const itens = packs.filter(pack => String(pack.metodoPagamento || '') === metodo);
+    return { metodo, quantidade: itens.length, pagos: itens.filter(item => item.estadoPagamento === 'Pago').length, pendentes: itens.filter(item => item.estadoPagamento !== 'Pago').length, total: itens.reduce((soma, item) => soma + Number(item.preco || 0), 0) };
+  }).filter(grupo => grupo.quantidade > 0 && (!FILTRO_METODO_PAGAMENTO_DASHBOARD || grupo.metodo === filtroReal));
+  const alvo = document.getElementById('dashboardMetodosPagamentoResumo');
+  const texto = document.getElementById('dashboardMetodosPagamentoTexto');
+  if (texto) texto.textContent = packs.length ? packs.length + ' cliente' + (packs.length === 1 ? '' : 's') + ' com pack neste mês' + (FILTRO_LOCAL_CRM ? ' em ' + nomeLocalCRM(FILTRO_LOCAL_CRM) : '') + '.' : 'Sem packs ativos neste mês.';
+  if (!alvo) return;
+  if (!grupos.length) { alvo.innerHTML = '<div class="carteira-sem-pack">Não existem clientes neste método de pagamento.</div>'; return; }
+  alvo.innerHTML = grupos.map(grupo => {
+    const chave = grupo.metodo || '__por_definir__';
+    const ativo = FILTRO_METODO_PAGAMENTO_DASHBOARD === chave;
+    return '<button type="button" class="payment-method-card' + (ativo ? ' is-active' : '') + '" onclick="renderResumoMetodosPagamentoCRM(\'' + idParaOnclickCRM(ativo ? '' : chave) + '\')"><b>' + escaparHtmlCRM(rotuloMetodoPagamentoCRM(grupo.metodo)) + '</b><strong>' + grupo.quantidade + '</strong><span>cliente' + (grupo.quantidade === 1 ? '' : 's') + '</span><small>' + grupo.pagos + ' pago' + (grupo.pagos === 1 ? '' : 's') + ' · ' + grupo.pendentes + ' pendente' + (grupo.pendentes === 1 ? '' : 's') + ' · ' + grupo.total.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' }) + '</small></button>';
+  }).join('');
 }
 
 let CENTRO_COMANDO = null;
@@ -6693,7 +6864,7 @@ function renderDespesasCRM() {
   lista.innerHTML = despesas.map(item => {
     const id = idParaOnclickCRM(item.id);
     const recorrente = item.tipo === 'recorrente';
-    const local = item.locationId ? '<span class="badge location-badge">' + escaparHtmlCRM(nomeLocalCRM(item.locationId)) + '</span>' : '<span class="badge">Geral</span>';
+    const local = item.locationId ? '<span class="badge location-badge"' + estiloBadgeLocalCRM(item.locationId) + '>' + escaparHtmlCRM(nomeLocalCRM(item.locationId)) + '</span>' : '<span class="badge">Geral</span>';
     return '<article class="cliente-item" style="cursor:default;align-items:center;">' +
       '<div class="cliente-info"><div class="cliente-nome">' + escaparHtmlCRM(item.descricao) + '</div>' +
       '<div class="cliente-meta"><span class="badge">' + escaparHtmlCRM(item.categoria) + '</span><span class="badge">' + (recorrente ? 'Mensal recorrente' : 'Pontual') + '</span>' + local + (item.virtual ? '<span class="badge badge-active">Gerido nas Definições</span>' : '') + '</div></div>' +
@@ -7274,20 +7445,9 @@ function renderResumoCheckinsMensal(resumo) {
       ).join('') + '</div></details>';
 }
 
-const METODOS_PAGAMENTO_CARTEIRA = [
-  ['', 'Por definir'],
-  ['MB Way', 'MB Way'],
-  ['Transferência', 'Transferência'],
-  ['Mão', 'Em mão'],
-  ['Stripe', 'Stripe / cartão'],
-  ['Débito direto', 'Débito direto'],
-  ['Multibanco', 'Multibanco'],
-  ['Numerário', 'Numerário']
-];
-
 function opcoesMetodoPagamentoCarteira(valorAtual) {
   const atual = String(valorAtual || '');
-  const metodos = METODOS_PAGAMENTO_CARTEIRA.slice();
+  const metodos = metodosPagamentoCRM().slice();
   if (atual && !metodos.some(item => item[0] === atual)) metodos.unshift([atual, atual]);
   return metodos.map(item => '<option value="' + escaparHtmlCRM(item[0]) + '"' + (item[0] === atual ? ' selected' : '') + '>' + escaparHtmlCRM(item[1]) + '</option>').join('');
 }
@@ -7371,7 +7531,7 @@ function montarLinhaCliente(c) {
   let html = '<div class="carteira-row carteira-grid" role="row" tabindex="0" onclick="verDetalheCliente(\'' + idEscapado + '\')" onkeydown="if(event.key===\'Enter\'){verDetalheCliente(\'' + idEscapado + '\')}">';
   html += '<div class="carteira-cell carteira-cliente" data-label="Cliente" role="cell"><strong title="' + escaparHtmlCRM(c.nome) + '">' + escaparHtmlCRM(c.nome) + '</strong></div>';
   html += '<div class="carteira-cell" data-label="Atividade" role="cell"><span class="badge badge-active">' + escaparHtmlCRM(c.estado || 'Ativo') + '</span></div>';
-  html += '<div class="carteira-cell" data-label="Ginásio" role="cell"><span class="badge location-badge' + (!c.localId ? ' unassigned' : '') + '">' + escaparHtmlCRM(nomeLocalCRM(c.localId)) + '</span></div>';
+  html += '<div class="carteira-cell" data-label="Ginásio" role="cell"><span class="badge location-badge' + (!c.localId ? ' unassigned' : '') + '"' + estiloBadgeLocalCRM(c.localId) + '>' + escaparHtmlCRM(nomeLocalCRM(c.localId)) + '</span></div>';
   html += '<div class="carteira-cell carteira-preco" data-label="Preço" role="cell">' + (pack ? '<strong>' + formatarPrecoCarteira(pack.preco) + '</strong>' + (personalizado ? '<small>Personalizado</small>' : '') : '<span class="carteira-sem-pack">Sem pack</span>') + '</div>';
   html += '<div class="carteira-cell" data-label="Pack" role="cell">' + (pack ? '<span class="badge">' + escaparHtmlCRM(pack.frequencia || '—') + '</span>' : '<span class="carteira-sem-pack">Sem pack</span>') + '</div>';
   html += '<div class="carteira-cell" data-label="Pagamento" role="cell">' + (pack ? '<select class="carteira-select" aria-label="Estado do pagamento de ' + escaparHtmlCRM(c.nome) + '" data-previous="' + escaparHtmlCRM(estadoPagamento) + '" data-payment-state="' + escaparHtmlCRM(estadoPagamento) + '" onclick="event.stopPropagation()" onchange="alterarEstadoPagamentoCarteira(event,\'' + idEscapado + '\',this)"><option value="Pendente"' + (estadoPagamento === 'Pendente' ? ' selected' : '') + '>Pendente</option><option value="Pago"' + (estadoPagamento === 'Pago' ? ' selected' : '') + '>Pago</option></select>' : '<span class="carteira-sem-pack">Sem pack</span>') + '</div>';
@@ -7393,7 +7553,7 @@ function montarCardCliente(c) {
   html += '<div class="cliente-nome">' + escaparHtmlCRM(c.nome) + '</div>';
   html += '<div class="cliente-meta">';
   html += '<span class="badge ' + badgeEstadoClasse + '">' + escaparHtmlCRM(c.estado) + '</span>';
-  html += '<span class="badge location-badge' + (!c.localId ? ' unassigned' : '') + '">' + escaparHtmlCRM(nomeLocalCRM(c.localId)) + '</span>';
+  html += '<span class="badge location-badge' + (!c.localId ? ' unassigned' : '') + '"' + estiloBadgeLocalCRM(c.localId) + '>' + escaparHtmlCRM(nomeLocalCRM(c.localId)) + '</span>';
   if (c.precoPersonalizado) html += '<span class="desconto-patch">↓ Preço especial</span>';
   if (pack) html += '<span class="badge">' + escaparHtmlCRM(pack.frequencia) + '</span>';
   if (pack) html += '<span class="badge badge-' + (pack.estadoPagamento === 'Pago' ? 'pago' : 'pending') + '">' + escaparHtmlCRM(pack.estadoPagamento) + '</span>';
@@ -7439,7 +7599,7 @@ function renderSearchResults(termo) {
       const badgeEstadoClasse = c.estado === 'Ativo' ? 'badge-active' : (c.estado === 'Pausado' ? 'badge-pending' : 'badge');
       return '<div class="cliente-item" onclick="selecionarResultadoPesquisa(\'' + idEsc + '\')">' +
         '<div class="cliente-info"><div class="cliente-nome">' + escaparHtmlCRM(c.nome) + '</div>' +
-        '<div class="cliente-meta"><span class="badge ' + badgeEstadoClasse + '">' + escaparHtmlCRM(c.estado) + '</span><span class="badge location-badge' + (!c.localId ? ' unassigned' : '') + '">' + escaparHtmlCRM(nomeLocalCRM(c.localId)) + '</span>' + (c.precoPersonalizado ? '<span class="desconto-patch">↓ Preço especial</span>' : '') + '</div></div>' +
+        '<div class="cliente-meta"><span class="badge ' + badgeEstadoClasse + '">' + escaparHtmlCRM(c.estado) + '</span><span class="badge location-badge' + (!c.localId ? ' unassigned' : '') + '"' + estiloBadgeLocalCRM(c.localId) + '>' + escaparHtmlCRM(nomeLocalCRM(c.localId)) + '</span>' + (c.precoPersonalizado ? '<span class="desconto-patch">↓ Preço especial</span>' : '') + '</div></div>' +
         '</div>';
     }).join('');
   }
@@ -7556,7 +7716,6 @@ function atualizarDetalheCliente() {
 function formularioEditarDadosHtmlCRM(cliente, idCliente) {
   const esc = valor => escaparHtmlCRM(valor == null ? '' : valor);
   const idEsc = idParaOnclickCRM(idCliente);
-  const metodos = METODOS_PAGAMENTO_CARTEIRA;
   return '<div id="editarDadosForm" hidden class="editar-dados-form" aria-live="polite">' +
     '<div class="form-group"><label>Contacto</label><input type="tel" inputmode="tel" id="inputEditarContacto" value="' + esc(cliente.contacto) + '" placeholder="912345678"><button type="button" class="btn btn-secondary btn-contactos" onclick="procurarContactosGoogleCliente(\'' + idEsc + '\', \'' + idParaOnclickCRM(cliente.nome) + '\')">⌕ Procurar nos Contactos Google</button><div id="resultadoContactosGoogle"></div></div>' +
     '<div class="form-group"><label>Ginásio / local</label><select id="inputEditarLocal">' + opcoesLocaisCRM(cliente.localId || '', { semLocal: true, incluirInativos: true }) + '</select><small style="display:block;margin-top:5px;color:#70839a">Clientes antigos podem ficar por atribuir até confirmares o local correto.</small></div>' +
@@ -7565,7 +7724,7 @@ function formularioEditarDadosHtmlCRM(cliente, idCliente) {
     '<div class="form-group"><label>Morada</label><input type="text" id="inputEditarMorada" value="' + esc(cliente.morada) + '" placeholder="Rua Exemplo, 123, Cantanhede"></div>' +
     '<div class="form-group"><label>Email</label><input type="email" inputmode="email" id="inputEditarEmail" value="' + esc(cliente.email) + '" placeholder="email@exemplo.com"></div>' +
     '<div class="form-group"><label>Dia de pagamento (1–31)</label><input type="number" inputmode="numeric" id="inputEditarDiaPagamento" value="' + esc(cliente.diaPagamento) + '" placeholder="ex.: 5" min="1" max="31"></div>' +
-    '<div class="form-group"><label>Método de pagamento</label><select id="inputEditarMetodoPagamento">' + metodos.map(metodo => '<option value="' + esc(metodo[0]) + '"' + (cliente.metodoPagamento === metodo[0] ? ' selected' : '') + '>' + esc(metodo[1]) + '</option>').join('') + '</select></div>' +
+    '<div class="form-group"><label>Método de pagamento</label><select id="inputEditarMetodoPagamento">' + opcoesMetodoPagamentoCarteira(cliente.metodoPagamento) + '</select></div>' +
     '<div class="editar-dados-acoes"><button type="button" class="btn btn-primary" onclick="salvarEdicaoDados(\'' + idEsc + '\')">Guardar alterações</button><button type="button" class="btn btn-secondary" onclick="toggleEditarDados()">Cancelar</button></div>' +
   '</div>';
 }
@@ -7662,7 +7821,7 @@ function renderizarDetalheCliente(detalhe) {
       htmlModoEspecial += '<p style="margin:0 0 12px;color:#94a3b8;font-size:12px;">' + (c.modoEspecial.ativoAgora ? 'Ativo agora.' : 'Agendado.') + '</p>';
       htmlModoEspecial += '<button type="button" class="btn btn-secondary" style="color:#f87171" onclick="removerModoEspecialClienteUI(\'' + idEsc + '\')">Terminar modo</button>';
     } else {
-      htmlModoEspecial += '<div class="form-group" style="margin-bottom:10px"><label>Modo</label><select id="modoEspecialTipo"><option value="Férias">Férias</option><option value="Deload">Semana de recuperação</option></select></div>';
+      htmlModoEspecial += '<div class="form-group" style="margin-bottom:10px"><label>Modo</label><select id="modoEspecialTipo">' + opcoesListaCRM(OPCOES_OPERACIONAIS_CRM.modosEspeciais, '', { Deload: 'Semana de recuperação' }) + '</select></div>';
       htmlModoEspecial += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><div class="form-group" style="flex:1;min-width:130px"><label>Início</label><input type="date" id="modoEspecialInicio"></div><div class="form-group" style="flex:1;min-width:130px"><label>Fim</label><input type="date" id="modoEspecialFim"></div></div>';
       htmlModoEspecial += '<p style="margin:0 0 12px;color:#94a3b8;font-size:12px">Férias pausa a sequência; Deload mantém o plano com foco em recuperação.</p>';
       htmlModoEspecial += '<button type="button" class="btn btn-secondary" style="color:#2dd4bf" onclick="guardarModoEspecialClienteUI(\'' + idEsc + '\')">Ativar modo</button>';
@@ -7846,7 +8005,7 @@ function renderizarDetalheCliente(detalhe) {
     html += '<section class="card timeline-card">';
     html += '<div class="dashboard-section-row" style="margin:0;"><h2 class="section-title" style="margin:0;">Histórico de acompanhamento</h2><span style="color:#94a3b8;font-size:11px;">Privado · só para gestão</span></div>';
     html += '<div class="timeline-form">';
-    html += '<select id="notaClienteTipo" aria-label="Tipo de registo"><option value="Nota">Nota</option><option value="Contacto">Contacto</option><option value="Saúde">Saúde</option><option value="Decisão">Decisão</option></select>';
+    html += '<select id="notaClienteTipo" aria-label="Tipo de registo">' + opcoesListaCRM(OPCOES_OPERACIONAIS_CRM.tiposNota, '') + '</select>';
     html += '<input type="text" id="notaClienteTexto" maxlength="1500" placeholder="Ex.: referiu desconforto no joelho; adaptar treino de sexta">';
     html += '<button type="button" class="btn btn-primary" style="width:auto;padding:10px 14px;" onclick="guardarNotaClienteCRM(\'' + idEsc + '\')">Registar</button>';
     html += '</div>';
@@ -9729,7 +9888,7 @@ function abrirModalContrato(idCliente) {
   document.getElementById('inputContratoDataInicio').value = isoHoje();
   document.getElementById('inputContratoDuracao').value = 3;
   document.getElementById('inputContratoDiaPagamento').value = '';
-  document.getElementById('inputContratoModalidadePagamento').value = 'mensal';
+  document.getElementById('inputContratoModalidadePagamento').selectedIndex = 0;
   document.getElementById('inputContratoLocal').value = '';
   document.getElementById('inputContratoOutrosServicos').value = '';
   document.getElementById('inputContratoPeriodoSuspensao').value = '';
@@ -10667,6 +10826,7 @@ function montarPainelRegistoAvaliacao() {
   painel.innerHTML = '<div class="avaliacao-crm-topo"><div><div class="avaliacao-crm-nome">Nova avaliação física</div><div class="avaliacao-crm-meta">Registo estruturado como na app do Coach: início, composição corporal e cardio.</div></div><button type="button" class="btn btn-secondary" style="width:auto" onclick="fecharNovaAvaliacaoCRM()">Fechar</button></div>' +
     '<div class="avaliacao-editor-tabs" role="tablist" aria-label="Secções da avaliação"><button type="button" data-passo="inicio" onclick="abrirPassoAvaliacaoCRM(\'inicio\')">Início</button><button type="button" data-passo="composicao" onclick="abrirPassoAvaliacaoCRM(\'composicao\')">Comp. corporal</button><button type="button" data-passo="cardio" onclick="abrirPassoAvaliacaoCRM(\'cardio\')">Cardio</button></div><section class="avaliacao-editor-passo" data-passo="inicio"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:15px"><div class="form-group" style="margin:0"><label>Cliente</label><select id="avaliacaoAvancadaCliente" onchange="selecionarClienteAvaliacaoCRM(this.value)"><option value="">Escolher cliente…</option>' + opcoes + '</select></div><div class="form-group" style="margin:0"><label>Data da avaliação</label><input id="avaliacaoAvancadaData" type="date" value="' + dataHojeAvaliacaoCRM() + '"></div><div class="form-group" style="margin:0"><label>Revisão recomendada</label><select id="avaliacaoAvancadaRevisao"><option value="28">28 dias</option><option value="42">42 dias</option><option value="56" selected>56 dias</option><option value="84">84 dias</option><option value="112">112 dias</option></select></div><div class="form-group" style="margin:0"><label>Protocolo / balança</label><input id="avaliacaoAvancadaProtocolo" maxlength="80" placeholder="Ex.: Bioimpedância"></div></div><div class="avaliacao-editor-resumo"><div><span>Estado</span><strong>Em edição</strong></div><div><span>Revisão</span><strong>56 dias</strong></div><div><span>Partilha</span><strong>Controlada</strong></div></div></section>' + secoes +
     '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-top:16px"><div class="form-group" style="margin:0"><label>Notas privadas</label><textarea id="avaliacaoAvancadaNotasPrivadas" maxlength="3000" placeholder="Só para gestão"></textarea></div><div class="form-group" style="margin:0"><label>Nota visível no portal</label><textarea id="avaliacaoAvancadaNotasCliente" maxlength="1500" placeholder="Opcional"></textarea></div></div><div class="avaliacao-editor-rodape"><span class="avaliacao-crm-meta">A pressão é guardada como leitura, sem classificação clínica automática.</span><button type="button" class="btn btn-primary" style="width:auto" onclick="guardarNovaAvaliacaoCRM()">Guardar avaliação</button></div>';
+  atualizarPrazosRevisaoAvaliacaoCRM();
   abrirPassoAvaliacaoCRM(PASSO_AVALIACAO_ATUAL);
 }
 function abrirPassoAvaliacaoCRM(passo) {
@@ -10895,7 +11055,7 @@ window.addEventListener('load', function () {
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const acoes={criarPack:'create-pack',definirEstadoCliente:'set-status',pagarPack:'mark-paid',definirEstadoTodasSessoes:'set-all-sessions-state',confirmarSessao:'toggle-session',atualizarDataSessaoConfirmada:'toggle-session',registarNotaClienteCRM:'add-note',guardarAvaliacaoFisicaCRM:'add-assessment',editarDadosCliente:'edit-client',definirPrecoPersonalizado:'set-price',editarPack:'edit-pack',gerarSessoesEmFalta:'generate-sessions',guardarModoEspecialCliente:'set-special-mode',removerModoEspecialCliente:'remove-special-mode',suspenderProximoMes:'schedule-suspension',cancelarSuspensao:'clear-suspension',cancelarProximoMes:'schedule-cancellation',cancelarAgendamentoCancelamento:'clear-cancellation'};if(!acoes[nome])return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),entrada=args[0]||{},corpo={...entrada,action:acoes[nome]};const r=await fetch('/api/dev-crm-client-actions',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify(corpo)}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Alteração indisponível.');const detalhe=await fetch('/api/dev-crm-client-detail?id='+encodeURIComponent(corpo.idCliente),{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!detalhe.ok)throw Error(detalhe.erro||'Alteração guardada, mas não foi possível atualizar a ficha.');if(nome==='registarNotaClienteCRM')return ok&&ok(detalhe.notas);if(nome==='guardarAvaliacaoFisicaCRM')return ok&&ok({sucesso:true});const crm=await fetch('/api/dev-crm-dashboard?locationId='+encodeURIComponent(window.FILTRO_LOCAL_CRM||''),{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!crm.ok||!crm.crm)throw Error(crm.erro||'Alteração guardada, mas não foi possível atualizar o CRM.');ok&&ok(nome==='definirEstadoCliente'?crm.crm:{crm:crm.crm,detalhe:detalhe.detalhe})}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
-(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(!['getPerfilPT','guardarPerfilPT','getDefinicoesBibliotecaExercicios','guardarDefinicoesBibliotecaExercicios','getCatalogoServicos','guardarCatalogoServicos'].includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),opcoes={headers:{Authorization:'Bearer '+t}};if(['guardarPerfilPT','guardarDefinicoesBibliotecaExercicios','guardarCatalogoServicos'].includes(nome)){opcoes.method='POST';opcoes.headers['Content-Type']='application/json';opcoes.body=JSON.stringify(nome==='guardarDefinicoesBibliotecaExercicios'?{action:'save-exercise-library-settings',biblioteca:args[0]||{}}:nome==='guardarCatalogoServicos'?{action:'save-service-catalog',catalogo:args[0]||{}}:args[0]||{});}const r=await fetch('/api/dev-crm-settings',opcoes),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Definições indisponíveis.');ok&&ok(nome.includes('DefinicoesBiblioteca')?d.biblioteca:nome.includes('CatalogoServicos')?d.catalogo:d.perfil)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
+(function(){const anterior=google.script.run;const suportadas=['getPerfilPT','guardarPerfilPT','getDefinicoesBibliotecaExercicios','guardarDefinicoesBibliotecaExercicios','getCatalogoServicos','guardarCatalogoServicos','getLocaisCRM','guardarLocaisCRM','getOpcoesOperacionaisCRM','guardarOpcoesOperacionaisCRM'];const escritas=['guardarPerfilPT','guardarDefinicoesBibliotecaExercicios','guardarCatalogoServicos','guardarLocaisCRM','guardarOpcoesOperacionaisCRM'];function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(!suportadas.includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),opcoes={headers:{Authorization:'Bearer '+t}};if(escritas.includes(nome)){opcoes.method='POST';opcoes.headers['Content-Type']='application/json';let corpo=args[0]||{};if(nome==='guardarDefinicoesBibliotecaExercicios')corpo={action:'save-exercise-library-settings',biblioteca:corpo};else if(nome==='guardarCatalogoServicos')corpo={action:'save-service-catalog',catalogo:corpo};else if(nome==='guardarLocaisCRM')corpo={action:'save-locations',locais:corpo};else if(nome==='guardarOpcoesOperacionaisCRM')corpo={action:'save-operational-options',operationalOptions:corpo};opcoes.body=JSON.stringify(corpo);}const r=await fetch('/api/dev-crm-settings',opcoes),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Definições indisponíveis.');let resultado=d.perfil;if(nome.includes('DefinicoesBiblioteca'))resultado=d.biblioteca;else if(nome.includes('CatalogoServicos'))resultado=d.catalogo;else if(nome.includes('Locais'))resultado=d.locais;else if(nome.includes('OpcoesOperacionais'))resultado=d.operationalOptions;ok&&ok(resultado)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{const acoes={criarPacoteEspecial:'create-package',alterarEstadoPacoteEspecial:'set-package-state',guardarProdutoEspecial:'save-product'};if(!acoes[nome])return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),entrada=args[0]||{},r=await fetch('/api/dev-crm-special-package-actions',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({...entrada,action:acoes[nome]})}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Pacotes especiais indisponíveis.');const atualizado=await fetch('/api/dev-crm-special-packages',{headers:{Authorization:'Bearer '+t}}).then(resposta=>resposta.json());if(!atualizado.ok)throw Error(atualizado.erro||'Alteração guardada, mas a lista não atualizou.');ok&&ok(atualizado)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();

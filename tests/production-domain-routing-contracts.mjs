@@ -17,6 +17,6 @@ assert.match(loginCrm, /'almove:crm-next'/, 'O login deve preservar internamente
 assert.match(loginCrm, /history\.replaceState\(null, '', '\/'\)/, 'O login deve esconder a rota técnica no domínio CRM.');
 assert.match(coachCrm, /location\.hostname === 'crm\.almove\.pt' && location\.pathname === '\/coach-firebase\.html'/, 'A interface deve reconhecer a rota técnica do CRM em Produção.');
 assert.match(coachCrm, /history\.replaceState\(null, '', '\/'\)/, 'A interface autenticada deve manter apenas o endereço curto do CRM.');
-assert.match(coachCrm, /App Coach \(mobile\)/, 'O CRM deve ter um atalho para a app Coach móvel.');
+assert.match(coachCrm, /class="coach-app-link"[^>]*>[\s\S]*?>App Coach<\/span>/, 'O CRM deve ter o atalho da App Coach junto ao topo.');
 assert.match(coachCrm, /https:\/\/coach\.almove\.pt\//, 'Em produção, o atalho deve usar o domínio Coach.');
 console.log('Rotas de produção por domínio validadas.');

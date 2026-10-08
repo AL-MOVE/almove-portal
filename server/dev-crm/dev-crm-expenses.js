@@ -4,10 +4,9 @@ import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
 import { carregarLocais, rendaDoLocalNoMes, validarLocalCliente } from './locations.js';
+import { CATEGORIAS_DESPESA_PADRAO, carregarOpcoesOperacionais } from './operational-options.js';
 
-export const CATEGORIAS_DESPESA = Object.freeze([
-  'Renda do ginásio', 'Software e subscrições', 'Equipamento', 'Marketing', 'Transporte', 'Serviços profissionais', 'Outros'
-]);
+export const CATEGORIAS_DESPESA = CATEGORIAS_DESPESA_PADRAO;
 
 function responder(res, estado, corpo) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -29,13 +28,13 @@ function valorEuro(valor) {
   return Math.round(numero * 100) / 100;
 }
 
-export function validarDespesa(entrada) {
+export function validarDespesa(entrada, categoriasPermitidas = CATEGORIAS_DESPESA) {
   const dados = entrada && typeof entrada === 'object' ? entrada : {};
   const tipo = texto(dados.tipo, 20);
   const categoria = texto(dados.categoria, 80);
   const descricao = texto(dados.descricao, 160);
   if (!['recorrente', 'avulsa'].includes(tipo)) throw falha('DESPESA_TIPO_INVALIDO');
-  if (!CATEGORIAS_DESPESA.includes(categoria)) throw falha('DESPESA_CATEGORIA_INVALIDA');
+  if (!categoriasPermitidas.includes(categoria)) throw falha('DESPESA_CATEGORIA_INVALIDA');
   if (!descricao) throw falha('DESPESA_DESCRICAO_INVALIDA');
   return Object.freeze({ tipo, categoria, descricao, valor: valorEuro(dados.valor), mesInicio: mesAno(dados.mesAno), locationId: texto(dados.locationId, 80) });
 }
@@ -116,8 +115,8 @@ export default async function handler(req, res) {
     const agora = new Date();
 
     if (acao === 'create') {
-      const base = validarDespesa(dados);
-      const catalogoLocais = await carregarLocais(db);
+      const [catalogoLocais, opcoesOperacionais] = await Promise.all([carregarLocais(db), carregarOpcoesOperacionais(db)]);
+      const base = validarDespesa(dados, opcoesOperacionais.categoriasDespesa);
       const locationId = validarLocalCliente(catalogoLocais, base.locationId, { permitirVazio: true });
       if (base.categoria === 'Renda do ginásio' && !locationId) throw falha('DESPESA_LOCAL_OBRIGATORIO');
       const localDaRenda = base.categoria === 'Renda do ginásio' ? (catalogoLocais.locais || []).find(local => local.id === locationId) : null;

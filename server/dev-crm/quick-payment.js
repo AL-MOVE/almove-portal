@@ -17,8 +17,8 @@ export function normalizeQuickPaymentStatus(value) {
   return normalized;
 }
 
-export function normalizeQuickPaymentMethod(value) {
+export function normalizeQuickPaymentMethod(value, allowedMethods = QUICK_PAYMENT_METHODS) {
   const normalized = String(value || '').trim();
-  if (!QUICK_PAYMENT_METHODS.includes(normalized)) throw new Error('METODO_PAGAMENTO_INVALIDO');
+  if (!['', ...(allowedMethods || [])].includes(normalized)) throw new Error('METODO_PAGAMENTO_INVALIDO');
   return normalized;
 }
