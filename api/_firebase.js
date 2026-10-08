@@ -91,12 +91,12 @@ function assinarAssertacao(assertacao, segredo) {
  * A verificação inclui revogação, logo terminar sessões no Firebase invalida
  * o acesso ao portal mesmo antes de o token expirar.
  */
-export async function obterAssertacaoFirebasePortal(req) {
+export async function obterAssertacaoFirebasePortal(req, identidadeConfirmada = null) {
   if (!String(req.headers.authorization || '')) return '';
 
   const segredo = String(process.env.PORTAL_APPS_SCRIPT_HMAC_SECRET || '');
   if (segredo.length < 32) throw erroFirebase('FIREBASE_NAO_CONFIGURADO');
-  const identidade = await obterIdentidadeFirebase(req);
+  const identidade = identidadeConfirmada || await obterIdentidadeFirebase(req);
   const agora = Math.floor(Date.now() / 1000);
   return assinarAssertacao({
     v: 1,

@@ -1,6 +1,7 @@
-import { obterAssertacaoFirebasePortal } from './_firebase.js';
+import { obterAssertacaoFirebasePortal, obterIdentidadeFirebase } from './_firebase.js';
 import { obterFirestoreAlmove } from './_firestore.js';
 import { enrichPortalPlans } from '../server/portal-exercise-enrichment.js';
+import { aplicarPlanosPortal, clienteAtivoComEmail, construirPlanosPortalFirestore, emailNormalizado } from '../server/portal-training-plans.js';
 
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyiOl7KkXMYSFv9lKKVb2sMspvwER2P5IMlpNQcr9csLyEDnzJqvVqisE-XVuAHgeUV/exec';
 
@@ -40,18 +41,38 @@ function estadoErroAplicacao(erro) {
   return 502;
 }
 
-async function enriquecerRespostaPortal(fn, json) {
+async function obterPlanosFirestorePortal(db, identidade) {
+  if (!identidade?.email) return [];
+  const clientesSnapshot = await db.collection('crmMigrationClients').get();
+  const associados = clientesSnapshot.docs.filter(documento => {
+    const dados = documento.data() || {};
+    return clienteAtivoComEmail(dados) && emailNormalizado(dados.email) === identidade.email;
+  });
+  // A associação tem de ser inequívoca. Em caso de duplicado, o Apps Script
+  // mantém a resposta atual e nunca misturamos dados de dois clientes.
+  if (associados.length !== 1) return [];
+  const clienteId = associados[0].id;
+  const planosSnapshot = await db.collection('crmMigrationTrainingPlans').where('idCliente', '==', clienteId).get();
+  return construirPlanosPortalFirestore(planosSnapshot.docs.map(documento => documento.data() || {}), clienteId);
+}
+
+async function enriquecerRespostaPortal(fn, json, identidade) {
   if (fn !== 'getPlanoAtivoPortal' || !json?.ok) return json;
   let personalizados = [];
+  let planosFirestore = [];
   try {
     const { db } = obterFirestoreAlmove();
-    const snapshot = await db.collection('crmExerciseLibrary').get();
-    personalizados = snapshot.docs.map(documento => ({ id: documento.id, ...documento.data() }));
+    const [bibliotecaSnapshot, planos] = await Promise.all([
+      db.collection('crmExerciseLibrary').get(),
+      obterPlanosFirestorePortal(db, identidade)
+    ]);
+    personalizados = bibliotecaSnapshot.docs.map(documento => ({ id: documento.id, ...documento.data() }));
+    planosFirestore = planos;
   } catch {
-    // O catálogo base continua disponível mesmo se a biblioteca personalizada
+    // A folha antiga e o catálogo base continuam disponíveis se o Firestore
     // estiver temporariamente indisponível.
   }
-  return enrichPortalPlans(json, personalizados);
+  return enrichPortalPlans(aplicarPlanosPortal(json, planosFirestore), personalizados);
 }
 
 export default async function handler(req, res) {
@@ -64,6 +85,7 @@ export default async function handler(req, res) {
   let fn = '';
   let token = '';
   let dados = {};
+  let identidadePortal = null;
   if (req.method === 'GET') {
     fn = String(req.query.fn || '');
     token = String(req.headers['x-almove-session'] || '');
@@ -85,7 +107,8 @@ export default async function handler(req, res) {
   // troca-o por uma autorização HMAC curta, assinada apenas no servidor.
   if (!PUBLICAS.has(fn) && req.headers.authorization) {
     try {
-      token = await obterAssertacaoFirebasePortal(req);
+      identidadePortal = await obterIdentidadeFirebase(req);
+      token = await obterAssertacaoFirebasePortal(req, identidadePortal);
     } catch (erro) {
       return responder(res, estadoErroAplicacao(erro.code || erro.message), {
         ok: false,
@@ -132,7 +155,7 @@ export default async function handler(req, res) {
       }
       return responder(res, estadoErroAplicacao(json.erro), json, requestId);
     }
-    return responder(res, 200, await enriquecerRespostaPortal(fn, json), requestId);
+    return responder(res, 200, await enriquecerRespostaPortal(fn, json, identidadePortal), requestId);
   } catch (erro) {
     const mensagem = erro && erro.name === 'AbortError' ? 'O serviço de dados excedeu o tempo limite' : 'Não foi possível contactar o serviço de dados';
     return responder(res, 504, { ok: false, erro: mensagem }, requestId);
