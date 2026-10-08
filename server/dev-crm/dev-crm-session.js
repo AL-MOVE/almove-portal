@@ -3,6 +3,7 @@ import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
 import { obterIdentidadeFirebase } from '../../api/_firebase.js';
+import { erroTemporarioGoogle, registarErroTemporario } from '../../api/_transient-errors.js';
 
 function responder(res, estado, corpo) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -32,6 +33,11 @@ export default async function handler(req, res) {
     res.setHeader('Set-Cookie', cookieSessaoCrmDevelopment(sessao));
     return responder(res, 200, { ok: true });
   } catch (erro) {
-    return responder(res, /^ACESSO_/.test(String(erro.code || erro.message || '')) ? 403 : 401, { ok: false, erro: String(erro.code || erro.message || 'ACESSO_RECUSADO') });
+    const codigo = String(erro.code || erro.message || 'ACESSO_RECUSADO');
+    if (erroTemporarioGoogle(erro)) {
+      registarErroTemporario('dev-crm-session', erro);
+      return responder(res, 503, { ok: false, erro: 'SERVICO_TEMPORARIAMENTE_INDISPONIVEL' });
+    }
+    return responder(res, /^ACESSO_/.test(codigo) ? 403 : 401, { ok: false, erro: codigo });
   }
 }

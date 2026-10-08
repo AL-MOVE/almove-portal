@@ -3,6 +3,7 @@ import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
 import { consolidarPacksMensais } from './payment-status.js';
+import { erroTemporarioGoogle, registarErroTemporario } from '../../api/_transient-errors.js';
 
 function responder(res, estado, corpo) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -97,6 +98,10 @@ export default async function handler(req, res) {
       } });
   } catch (erro) {
     const codigo = String(erro?.code || erro?.message || 'FALHA');
+    if (erroTemporarioGoogle(erro)) {
+      registarErroTemporario('dev-crm-agenda', erro);
+      return responder(res, 503, { ok: false, erro: 'SERVICO_TEMPORARIAMENTE_INDISPONIVEL' });
+    }
     return responder(res, /^FIREBASE_/.test(codigo) ? 401 : 500, { ok: false, erro: codigo });
   }
 }

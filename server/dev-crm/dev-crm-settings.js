@@ -5,6 +5,7 @@ import { exigirEquipa } from '../../api/_crm-development.js';
 import { normalizeExerciseLibrarySettings } from './exercise-library-settings.js';
 import { loadServiceCatalog, normalizeServiceCatalog } from './service-catalog.js';
 import { carregarLocais, mesLisboa, normalizarLocais } from './locations.js';
+import { erroTemporarioGoogle, registarErroTemporario } from '../../api/_transient-errors.js';
 
 const PADRAO = Object.freeze({ nome: 'André Martins - Personal Trainer', nif: '', morada: '', contacto: '', horasAvisoCancelamento: 12, diasAvisoDenuncia: 30, fidelizacaoMeses: 3, seguroCompanhia: '', seguroApolice: '', seguroCapital: '', seguroRiscos: '', ralEntidade: '', ralWebsite: '', comarca: '', prazoRespostaReclamacoesDias: 10, assinatura: '', fotoPerfil: '' });
 function responder(res, estado, corpo) { res.setHeader('Cache-Control', 'no-store, max-age=0'); res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('X-Robots-Tag', 'noindex, nofollow'); return res.status(estado).json(corpo); }
@@ -60,5 +61,5 @@ export default async function handler(req, res) {
       return responder(res, 200, { ok: true, locais: catalogoGuardado });
     }
     const perfil = normalizar(req.body && typeof req.body === 'object' ? req.body : {}); const agora = new Date(); await db.runTransaction(async transacao => { transacao.set(referencia, { ...perfil, updatedAt: agora, updatedBy: identidade.uid }); transacao.create(db.collection('auditLogs').doc(), { action: 'development.settings.profile-updated', actorUid: identidade.uid, createdAt: agora }); }); return responder(res, 200, { ok: true, perfil });
-  } catch (erro) { const codigo = String(erro?.code || erro?.message || 'FALHA'); const estado = /^FIREBASE_/.test(codigo) ? 401 : (['CATALOGO_SERVICOS_CONFLITO', 'LOCAIS_CONFLITO'].includes(codigo) ? 409 : (/^(CODIGO_|ID_|NOME_|PRECO_|SESSOES_|DURACAO_|VALIDADE_|DEMASIADOS_|LOCAL|LOCAIS_)/.test(codigo) ? 400 : 500)); return responder(res, estado, { ok: false, erro: codigo }); }
+  } catch (erro) { const codigo = String(erro?.code || erro?.message || 'FALHA'); if (erroTemporarioGoogle(erro)) { registarErroTemporario('dev-crm-settings', erro); return responder(res, 503, { ok: false, erro: 'SERVICO_TEMPORARIAMENTE_INDISPONIVEL' }); } const estado = /^FIREBASE_/.test(codigo) ? 401 : (['CATALOGO_SERVICOS_CONFLITO', 'LOCAIS_CONFLITO'].includes(codigo) ? 409 : (/^(CODIGO_|ID_|NOME_|PRECO_|SESSOES_|DURACAO_|VALIDADE_|DEMASIADOS_|LOCAL|LOCAIS_)/.test(codigo) ? 400 : 500)); return responder(res, estado, { ok: false, erro: codigo }); }
 }

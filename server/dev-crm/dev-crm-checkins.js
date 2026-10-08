@@ -2,6 +2,7 @@ import { obterIdentidadeFirebase } from '../../api/_firebase.js';
 import { crmFirebasePermitido } from '../../api/_crm-environment.js';
 import { criarAdaptadorFirestore, obterFirestoreAlmove } from '../../api/_firestore.js';
 import { exigirEquipa } from '../../api/_crm-development.js';
+import { erroTemporarioGoogle, registarErroTemporario } from '../../api/_transient-errors.js';
 
 function responder(res, estado, corpo) { res.setHeader('Cache-Control', 'no-store, max-age=0'); return res.status(estado).json(corpo); }
 function dataLisboa() { const partes = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Lisbon', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date()); const parte = tipo => partes.find(item => item.type === tipo).value; return parte('year') + '-' + parte('month') + '-' + parte('day'); }
@@ -26,5 +27,5 @@ export default async function handler(req, res) {
     checkins.filter(item => String(item.dataHora || '').slice(0, 10) === hoje).forEach(item => { if (!ultimo.has(item.clientId) || String(item.dataHora) > String(ultimo.get(item.clientId).dataHora)) ultimo.set(item.clientId, item); });
     const ativos = clientesSnap.docs.map(documento => ({ id: documento.id, ...documento.data() })).filter(cliente => cliente.estado === 'Ativo'); const comCheckin = ativos.filter(cliente => ultimo.has(cliente.id)).map(cliente => ({ nome: cliente.nome, ...ultimo.get(cliente.id) }));
     return responder(res, 200, { ok: true, totalAtivos: ativos.length, totalComCheckin: comCheckin.length, comCheckin, semCheckin: ativos.filter(cliente => !ultimo.has(cliente.id)).map(cliente => cliente.nome) });
-  } catch (erro) { return responder(res, 500, { ok: false, erro: String(erro.code || erro.message) }); }
+  } catch (erro) { if (erroTemporarioGoogle(erro)) { registarErroTemporario('dev-crm-checkins', erro); return responder(res, 503, { ok: false, erro: 'SERVICO_TEMPORARIAMENTE_INDISPONIVEL' }); } return responder(res, 500, { ok: false, erro: String(erro.code || erro.message) }); }
 }

@@ -25,6 +25,7 @@ import sessao from '../server/dev-crm/dev-crm-session.js';
 import despesas from '../server/dev-crm/dev-crm-expenses.js';
 import operacoes from '../server/dev-crm/dev-crm-ops.js';
 import acessoPortal from '../server/dev-crm/dev-crm-portal-access.js';
+import { erroTemporarioGoogle, registarErroTemporario } from './_transient-errors.js';
 
 const ROTAS = Object.freeze({
   agenda, 'assessment-schedule': avaliacoes, assessments: avaliacoesAvancadas, checkins, 'client-actions': acoesCliente, 'client-create': criarCliente,
@@ -62,6 +63,10 @@ export default async function handler(req, res) {
     const codigo = String(erro?.code || erro?.message || 'FALHA');
     if (/^FIREBASE_/.test(codigo)) return responder(res, 401, { ok: false, erro: codigo });
     if (/^ACESSO_/.test(codigo)) return responder(res, 403, { ok: false, erro: codigo });
+    if (erroTemporarioGoogle(erro)) {
+      registarErroTemporario('dev-crm', erro);
+      return responder(res, 503, { ok: false, erro: 'SERVICO_TEMPORARIAMENTE_INDISPONIVEL' });
+    }
     return responder(res, 500, { ok: false, erro: 'FIRESTORE_INDISPONIVEL' });
   }
 }

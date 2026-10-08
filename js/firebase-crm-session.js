@@ -14,6 +14,34 @@
     return resultado;
   }
 
+  function esperar(milisegundos) {
+    return new Promise(function (resolver) { global.setTimeout(resolver, milisegundos); });
+  }
+
+  function podeRepetir(resposta) {
+    return resposta && [429, 500, 502, 503, 504].includes(Number(resposta.status));
+  }
+
+  async function pedidoComRetentativa(url, opcoes, configuracao) {
+    const definicoes = configuracao || {};
+    const pedido = opcoes || {};
+    const metodo = String(pedido.method || 'GET').toUpperCase();
+    const idempotente = metodo === 'GET' || metodo === 'HEAD' || Boolean(definicoes.permitirEscrita);
+    const total = idempotente ? 3 : 1;
+    let ultimoErro = null;
+    for (let tentativa = 0; tentativa < total; tentativa += 1) {
+      try {
+        const resposta = await global.fetch(url, pedido);
+        if (!podeRepetir(resposta) || tentativa === total - 1) return resposta;
+      } catch (erroPedido) {
+        ultimoErro = erroPedido;
+        if (tentativa === total - 1) throw erroPedido;
+      }
+      await esperar(tentativa === 0 ? 350 : 900);
+    }
+    throw ultimoErro || erro('SERVICO_TEMPORARIAMENTE_INDISPONIVEL');
+  }
+
   async function obterContexto() {
     const configuracao = await global.ALMOVE_FIREBASE_CONFIG.obter();
     const utilizador = await global.AlMoveFirebaseAuth.configurar(configuracao);
@@ -23,7 +51,7 @@
     }
 
     const token = await global.AlMoveFirebaseAuth.token(true);
-    const resposta = await fetch('/api/dev-crm', {
+    const resposta = await pedidoComRetentativa('/api/dev-crm', {
       headers: token ? { Authorization: 'Bearer ' + token } : {},
       cache: 'no-store',
       credentials: 'same-origin'
@@ -47,9 +75,9 @@
   async function criarSessaoServidor() {
     const token = await global.AlMoveFirebaseAuth.token(true);
     if (!token) throw erro('FIREBASE_TOKEN_INVALIDO');
-    const resposta = await fetch('/api/dev-crm-session', {
+    const resposta = await pedidoComRetentativa('/api/dev-crm-session', {
       method: 'POST', headers: { Authorization: 'Bearer ' + token }, credentials: 'same-origin', cache: 'no-store'
-    });
+    }, { permitirEscrita: true });
     if (!resposta.ok) {
       let dados = null; try { dados = await resposta.json(); } catch { /* resposta inválida */ }
       throw erro((dados && dados.erro) || 'SESSAO_NAO_CRIADA');
@@ -66,6 +94,7 @@
     obterContexto: obterContexto,
     exigirCoach: exigirCoach,
     criarSessaoServidor: criarSessaoServidor,
+    pedido: pedidoComRetentativa,
     sair: sair
   });
 })(window);
