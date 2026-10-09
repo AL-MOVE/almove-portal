@@ -4085,6 +4085,217 @@
   </div>
 </div>
 
+<style id="crm-light-theme-polish">
+  /* Correções finais do tema claro. Este bloco fica depois dos estilos dos
+     módulos para garantir contraste consistente em todas as vistas do CRM. */
+  html[data-theme="light"] {
+    --light-ink: #10283f;
+    --light-text: #294158;
+    --light-muted: #526a80;
+    --light-border: rgba(45,72,99,.18);
+    --light-panel: #ffffff;
+    --light-soft: #f3f7fa;
+    --light-tint: #e8f4f6;
+  }
+
+  html[data-theme="light"] :is(.topbar-date,.dashboard-subtitle,.coach-dashboard-note,.card-subtext,
+    .action-card-meta,.comando-subtitle,.comando-item-info,.payment-method-head p,
+    .payment-method-card span,.payment-method-card small,.agenda-cliente-meta,.agenda-evento-sub,
+    .agenda-bloco-cliente,.avaliacao-crm-meta,.avaliacao-crm-nota,.timeline-entry-head,
+    .exercise-library-header p,.exercise-library-meta,.exercise-library-stat span,
+    .operational-options-help,.location-modal-head p,.service-modal-head p,
+    .location-modal-actions [data-location-state],.service-modal-actions #estadoCatalogoServicos) {
+    color: var(--light-muted) !important;
+  }
+
+  html[data-theme="light"] :is(.section-title,.comando-title,.action-card-value,.action-card-label,
+    .metric-value,.metric-label,.payment-method-head h2,.payment-method-card strong,
+    .payment-method-card b,.comando-item-nome,.exercise-library-card h3,.exercise-library-stat strong,
+    .location-modal-head h3,.service-modal-head h3,.avaliacao-editor-secao h3,
+    .avaliacao-editor-resumo strong,.avaliacao-crm-nome) {
+    color: var(--light-ink) !important;
+  }
+
+  html[data-theme="light"] :is(.eyebrow,.mes-atual-badge,.coach-workbench-action b,
+    .settings-card-icon,.service-category-heading,.timeline-entry-type) {
+    color: #08756d !important;
+  }
+
+  html[data-theme="light"] .coach-mode-chip {
+    border-color: rgba(8,127,117,.28) !important;
+    background: #daf3ef !important;
+    color: #05665f !important;
+  }
+  html[data-theme="light"] .coach-app-link {
+    border-color: rgba(7,85,180,.24) !important;
+    background: #e7f1fb !important;
+    color: #0755a5 !important;
+    box-shadow: none !important;
+  }
+  html[data-theme="light"] .coach-app-link:hover,
+  html[data-theme="light"] .coach-app-link:focus-visible {
+    border-color: rgba(7,85,180,.42) !important;
+    background: #dcecf9 !important;
+  }
+  html[data-theme="light"] :is(.sidebar-toggle,.sidebar-launcher,.btn-notificacoes,.btn-secondary) svg {
+    color: currentColor;
+    stroke: currentColor;
+  }
+
+  html[data-theme="light"] .dashboard-primary-panel {
+    border-color: var(--light-border) !important;
+    background:
+      radial-gradient(circle at 88% 8%,rgba(8,127,117,.10),transparent 34%),
+      linear-gradient(145deg,#ffffff,#eef6f8) !important;
+    box-shadow: 0 14px 34px rgba(31,55,78,.10), inset 0 1px #fff !important;
+  }
+  html[data-theme="light"] .dashboard-primary-panel .metric-circle circle:first-child {
+    stroke: #cedce7 !important;
+  }
+  html[data-theme="light"] .painel-resumo-item {
+    border-color: var(--light-border) !important;
+    background: rgba(255,255,255,.88) !important;
+    box-shadow: 0 5px 16px rgba(31,55,78,.06) !important;
+  }
+  html[data-theme="light"] .painel-resumo-item span { color:#526a80 !important; }
+  html[data-theme="light"] .painel-resumo-item strong { color:#10283f !important; }
+  html[data-theme="light"] #receitaPacotesEspeciais { color:#08756d !important; }
+  html[data-theme="light"] #pendenteDescricao { color:#855000 !important; }
+
+  html[data-theme="light"] :is(.payment-method-panel,.comando-card,.action-card,.editar-dados-form,
+    .service-modal,.location-modal,.exercise-library-toolbar,.exercise-library-card,
+    .exercise-library-stat,.avaliacao-crm-card,.avaliacao-editor-secao) {
+    border-color: var(--light-border) !important;
+    background: var(--light-panel) !important;
+    color: var(--light-text) !important;
+    box-shadow: 0 10px 28px rgba(31,55,78,.08), inset 0 1px #fff !important;
+  }
+  html[data-theme="light"] :is(.comando-metrica,.comando-item,.service-editor-row,.location-editor-row,
+    .avaliacao-crm-detalhe,.avaliacao-editor-resumo div) {
+    border-color: rgba(45,72,99,.14) !important;
+    background: var(--light-soft) !important;
+    color: var(--light-text) !important;
+  }
+  html[data-theme="light"] .comando-item:hover {
+    border-color: rgba(8,127,117,.32) !important;
+    background: #eaf6f3 !important;
+  }
+  html[data-theme="light"] .comando-metrica span { color:#526a80 !important; }
+  html[data-theme="light"] .comando-metrica strong { color:#10283f !important; }
+  html[data-theme="light"] .comando-tipo {
+    background:#dff4ef !important;
+    color:#08715f !important;
+  }
+  html[data-theme="light"] .comando-tipo.urgente {
+    background:#fde7e9 !important;
+    color:#a92938 !important;
+  }
+
+  html[data-theme="light"] .action-card:hover {
+    border-color: rgba(8,127,117,.32) !important;
+    background: #f0f8f7 !important;
+  }
+  html[data-theme="light"] .coach-workbench-action.is-primary {
+    border-color: rgba(8,127,117,.26) !important;
+    background: linear-gradient(145deg,#e7f6f3,#f8fbfd) !important;
+  }
+  html[data-theme="light"] .coach-workbench-action span { color:#526a80 !important; }
+
+  html[data-theme="light"] :is(.service-editor-row label,.location-editor-row label,
+    .location-scope-actions label,.payment-method-head label,.operational-options-grid label,
+    .avaliacao-crm-acoes label,.avaliacao-editor-resumo span,.avaliacao-crm-detalhe span) {
+    color:#425d75 !important;
+  }
+  html[data-theme="light"] :is(.service-editor-active,.location-editor-active) {
+    color:#294158 !important;
+  }
+  html[data-theme="light"] :is(.location-safety-note,.service-special-note,.price-preview.warning) {
+    border-color:rgba(154,91,0,.24) !important;
+    background:#fff6df !important;
+    color:#704400 !important;
+  }
+  html[data-theme="light"] .service-special-note span { color:#765f38 !important; }
+  html[data-theme="light"] .price-preview {
+    border-color:rgba(8,127,117,.20) !important;
+    background:#eaf7f4 !important;
+    color:#087067 !important;
+  }
+
+  html[data-theme="light"] :is(.exercise-library-tag,.avaliacao-crm-pill,.agenda-pill) {
+    border-color:rgba(8,127,117,.20) !important;
+    background:#e3f4f1 !important;
+    color:#086c64 !important;
+  }
+  html[data-theme="light"] :is(.exercise-library-thumb,.exercise-media-preview) {
+    border-color:rgba(45,72,99,.18) !important;
+    background:#e8eef3 !important;
+    color:#526a80 !important;
+  }
+  html[data-theme="light"] .exercise-library-thumb .end-marker {
+    background:rgba(255,255,255,.94) !important;
+    color:#087067 !important;
+  }
+
+  html[data-theme="light"] :is(.avaliacao-editor-tabs,.avaliacao-editor-rodape) {
+    border-color:rgba(45,72,99,.14) !important;
+  }
+  html[data-theme="light"] .avaliacao-editor-tabs button { color:#526a80 !important; }
+  html[data-theme="light"] .avaliacao-editor-tabs button.ativo { color:#08756d !important; }
+  html[data-theme="light"] .avaliacao-crm-recusar {
+    border-color:rgba(199,55,69,.26) !important;
+    background:#fdecee !important;
+    color:#a92938 !important;
+  }
+
+  html[data-theme="light"] .notificacoes-popover { background:#fff !important; }
+  html[data-theme="light"] .notificacao-linha {
+    border-color:rgba(45,72,99,.12) !important;
+    color:#20364d !important;
+  }
+  html[data-theme="light"] .notificacao-linha:hover { background:#f1f7f8 !important; }
+  html[data-theme="light"] .notificacao-detalhe { color:#526a80 !important; }
+  html[data-theme="light"] .coach-bottom-nav {
+    border-color:rgba(45,72,99,.16) !important;
+    background:rgba(255,255,255,.97) !important;
+    box-shadow:0 -10px 28px rgba(31,55,78,.10) !important;
+  }
+  html[data-theme="light"] .coach-bottom-nav button { color:#536b82 !important; }
+  html[data-theme="light"] .coach-bottom-nav button.active {
+    background:#e4f4f1 !important;
+    color:#08756d !important;
+  }
+  html[data-theme="light"] .coach-bottom-nav button.active svg { stroke:#08756d !important; }
+
+  /* Conteúdo antigo ainda gerado com estilos inline escuros. */
+  html[data-theme="light"] :is([style*="color:#fff"],[style*="color: #fff"],
+    [style*="color:#f8fafc"],[style*="color: #f8fafc"],
+    [style*="color:#f1f5f9"],[style*="color:#eef6ff"],
+    [style*="color:#e7eff8"],[style*="color:#e2e8f0"],
+    [style*="color:#dce8f5"],[style*="color:#cbd5e1"],
+    [style*="color:#b8c6d6"]) { color:#173047 !important; }
+  html[data-theme="light"] :is([style*="color:#94a3b8"],[style*="color: #94a3b8"],
+    [style*="color:#91a3b8"],[style*="color:#9fb0c6"],
+    [style*="color:#8294aa"],[style*="color:#7f93aa"]) { color:#526a80 !important; }
+  html[data-theme="light"] :is([style*="color:#5eead4"],[style*="color:#7dd3fc"],
+    [style*="color:#99f6e4"],[style*="color:#bae6fd"]) { color:#08756d !important; }
+  html[data-theme="light"] :is([style*="color:#fca5a5"],[style*="color:#f87171"]) { color:#ad2f3d !important; }
+  html[data-theme="light"] :is([style*="color:#fde68a"],[style*="color:#fcd34d"],
+    [style*="color:#fbbf24"]) { color:#855000 !important; }
+  html[data-theme="light"] :is([style*="background:#0f1419"],[style*="background: #0f1419"],
+    [style*="background:#111b27"],[style*="background:#0a0e14"],
+    [style*="background:rgba(8,21,36"],[style*="background:rgba(255,255,255,.025)"]) {
+    background:#ffffff !important;
+    color:#294158 !important;
+  }
+  html[data-theme="light"] :is([style*="border-bottom:1px solid #253449"],
+    [style*="border-bottom:1px solid #223044"],[style*="border:1px solid #2d3748"]) {
+    border-color:rgba(45,72,99,.18) !important;
+  }
+
+  html[data-theme="light"] .btn-primary { color:#fff !important; }
+  html[data-theme="light"] :disabled { opacity:.62; }
+</style>
+
 <script>
 // ==================== QRCODE-GENERATOR (Kazuhiko Arase, MIT license) ====================
 //---------------------------------------------------------------------
