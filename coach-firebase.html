@@ -4104,7 +4104,8 @@
     .agenda-bloco-cliente,.avaliacao-crm-meta,.avaliacao-crm-nota,.timeline-entry-head,
     .exercise-library-header p,.exercise-library-meta,.exercise-library-stat span,
     .operational-options-help,.location-modal-head p,.service-modal-head p,
-    .location-modal-actions [data-location-state],.service-modal-actions #estadoCatalogoServicos) {
+    .location-modal-actions [data-location-state],.service-modal-actions #estadoCatalogoServicos,
+    .cliente-meta,.card-label) {
     color: var(--light-muted) !important;
   }
 
@@ -4226,6 +4227,10 @@
     background:#e3f4f1 !important;
     color:#086c64 !important;
   }
+  html[data-theme="light"] .agenda-bloco-hora {
+    color:#075f73 !important;
+    font-weight:850 !important;
+  }
   html[data-theme="light"] :is(.exercise-library-thumb,.exercise-media-preview) {
     border-color:rgba(45,72,99,.18) !important;
     background:#e8eef3 !important;
@@ -4282,7 +4287,8 @@
   html[data-theme="light"] :is([style*="color:#fde68a"],[style*="color:#fcd34d"],
     [style*="color:#fbbf24"]) { color:#855000 !important; }
   html[data-theme="light"] :is([style*="background:#0f1419"],[style*="background: #0f1419"],
-    [style*="background:#111b27"],[style*="background:#0a0e14"],
+    [style*="background:#111b27"],[style*="background: #111b27"],
+    [style*="background:#0a0e14"],[style*="background: #0a0e14"],
     [style*="background:rgba(8,21,36"],[style*="background:rgba(255,255,255,.025)"]) {
     background:#ffffff !important;
     color:#294158 !important;

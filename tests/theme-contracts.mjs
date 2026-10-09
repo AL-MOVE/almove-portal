@@ -18,6 +18,7 @@ assert.match(coach, /html\[data-theme="light"\]/);
 assert.match(coach, /html\[data-theme="light"\] \.coach-app-link/);
 assert.match(coach, /html\[data-theme="light"\] \.dashboard-primary-panel/);
 assert.match(coach, /html\[data-theme="light"\] :is\(\.payment-method-panel,\.comando-card/);
+assert.match(coach, /html\[data-theme="light"\] \.agenda-bloco-hora/);
 assert.match(coach, /function definirTemaCRM\(tema\)/);
 assert.match(coach, /id="temaOpcaoEscuro"[^>]+aria-pressed="true"/);
 assert.match(coach, /id="temaOpcaoClaro"[^>]+aria-pressed="false"/);
