@@ -81,7 +81,7 @@ export default async function handler(req, res) {
     if (erroTemporarioGoogle(erro)) { registarErroTemporario('dev-crm-agenda', erro); return responder(res, 503, { ok: false, erro: 'SERVICO_TEMPORARIAMENTE_INDISPONIVEL' }); }
     if (/^FIREBASE_/.test(codigo)) return responder(res, 401, { ok: false, erro: codigo });
     if (/^ACESSO_/.test(codigo)) return responder(res, 403, { ok: false, erro: codigo });
-    if (/^CALENDARIO_GOOGLE_/.test(codigo)) return responder(res, 503, { ok: false, erro: codigo, contaServico: googleServiceAccountEmail() });
+    if (/^CALENDARIO_GOOGLE_/.test(codigo)) return responder(res, 503, { ok: false, erro: codigo, diagnostico: texto(erro?.diagnostic, 80), contaServico: googleServiceAccountEmail() });
     return responder(res, 500, { ok: false, erro: 'AGENDA_INDISPONIVEL' });
   }
 }

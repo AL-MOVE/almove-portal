@@ -59,7 +59,12 @@ async function pedirPagina(calendarId, token, timeMin, timeMax, pageToken = '') 
       headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }, signal: controller.signal
     });
     const body = await response.json().catch(() => ({}));
-    if (!response.ok) { const error = new Error(response.status === 403 || response.status === 404 ? 'CALENDARIO_GOOGLE_SEM_ACESSO' : `CALENDARIO_GOOGLE_HTTP_${response.status}`); error.status = response.status; throw error; }
+    if (!response.ok) {
+      const error = new Error(response.status === 403 || response.status === 404 ? 'CALENDARIO_GOOGLE_SEM_ACESSO' : `CALENDARIO_GOOGLE_HTTP_${response.status}`);
+      error.status = response.status;
+      error.diagnostic = String(body?.error?.errors?.[0]?.reason || body?.error?.status || `HTTP_${response.status}`).slice(0, 80);
+      throw error;
+    }
     return body;
   } finally { clearTimeout(timeout); }
 }
