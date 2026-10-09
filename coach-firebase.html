@@ -2460,18 +2460,23 @@
     }
   </style>
   <style id="sidebar-motion-fix">
-    /* O cabeçalho e os ícones mantêm a posição durante a contração. Evita o
-       salto causado pela mudança de linha/coluna e mantém os badges longe do
-       controlo de expandir. */
+    /* Movimento da navegação: a geometria interior permanece estável enquanto
+       a coluna abre ou fecha. Só a largura da coluna, opacidade e transforms
+       são animados; os textos deixam de ser comprimidos frame a frame. */
     @media (min-width: 1025px) {
       #appLayout .sidebar {
-        transition: width .38s cubic-bezier(.22,1,.36,1), padding .38s cubic-bezier(.22,1,.36,1) !important;
-        will-change: width, padding;
+        --sidebar-motion-duration: 260ms;
+        --sidebar-motion-ease: cubic-bezier(.2,.8,.2,1);
+        padding-right: 10px !important;
+        padding-left: 10px !important;
+        contain: paint;
+        transition: width var(--sidebar-motion-duration) var(--sidebar-motion-ease) !important;
       }
       #appLayout .sidebar-header,
       #appLayout .sidebar.collapsed .sidebar-header {
         position: relative !important;
         display: block !important;
+        width: 232px !important;
         min-height: 40px !important;
         margin-bottom: 20px !important;
         padding: 0 4px !important;
@@ -2479,7 +2484,8 @@
       #appLayout .sidebar-logo {
         position: absolute;
         inset: 3px 38px auto 4px;
-        transition: opacity .18s ease, transform .34s cubic-bezier(.22,1,.36,1) !important;
+        width: 184px;
+        transition: opacity 140ms ease, transform 220ms var(--sidebar-motion-ease), visibility 0s linear 0s !important;
       }
       #appLayout .sidebar-toggle,
       #appLayout .sidebar.collapsed .sidebar-toggle {
@@ -2489,31 +2495,84 @@
         right: 0;
         margin: 0 !important;
         transform: translateY(-50%);
-        transition: right .38s cubic-bezier(.22,1,.36,1), transform .38s cubic-bezier(.22,1,.36,1), background-color .18s ease, color .18s ease !important;
+        transition: transform var(--sidebar-motion-duration) var(--sidebar-motion-ease), background-color 140ms ease, border-color 140ms ease, color 140ms ease !important;
+      }
+      #appLayout #sidebarToggleIcon {
+        display: inline-block;
+        transform: rotate(0deg);
+        transition: transform 220ms var(--sidebar-motion-ease);
       }
       #appLayout .sidebar.collapsed .sidebar-logo {
         opacity: 0;
-        transform: translateX(-10px);
+        visibility: hidden;
+        transform: translateX(-6px);
         pointer-events: none;
+        transition-delay: 0s, 0s, 140ms !important;
       }
       #appLayout .sidebar.collapsed .sidebar-toggle {
-        right: 50%;
-        transform: translate(50%,-50%);
+        transform: translate(-190px,-50%);
+      }
+      #appLayout .sidebar.collapsed #sidebarToggleIcon {
+        transform: rotate(180deg);
       }
       #appLayout .nav-item {
-        transition: background-color .18s ease, color .18s ease, width .38s cubic-bezier(.22,1,.36,1), padding .38s cubic-bezier(.22,1,.36,1), gap .28s ease !important;
+        width: 224px !important;
+        min-width: 224px !important;
+        justify-content: flex-start !important;
+        gap: 10px !important;
+        padding-right: 11px !important;
+        padding-left: 11px !important;
+        transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease !important;
       }
       #appLayout .sidebar.collapsed .nav-item {
         justify-content: flex-start !important;
-        gap: 0 !important;
-        padding-right: 13px !important;
-        padding-left: 13px !important;
+        gap: 10px !important;
+        padding-right: 11px !important;
+        padding-left: 11px !important;
       }
       #appLayout .sidebar-text,
       #appLayout .nav-item-label {
-        transition: opacity .16s ease, max-width .34s cubic-bezier(.22,1,.36,1), transform .34s cubic-bezier(.22,1,.36,1) !important;
+        max-width: 170px !important;
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(0);
+        transition: opacity 120ms ease, transform 220ms var(--sidebar-motion-ease), visibility 0s linear 0s !important;
       }
-      #appLayout .nav-alert { z-index: 1; transition: opacity .12s ease, transform .18s ease !important; }
+      #appLayout .sidebar.collapsed .sidebar-text,
+      #appLayout .sidebar.collapsed .nav-item-label {
+        max-width: 170px !important;
+        opacity: 0 !important;
+        visibility: hidden;
+        transform: translateX(-5px);
+        transition-delay: 0s, 0s, 120ms !important;
+      }
+      #appLayout .nav-section,
+      #appLayout .sidebar.collapsed .nav-section {
+        position: relative;
+        width: 204px;
+        height: 12px;
+        max-height: 12px;
+        margin: 15px 10px 6px;
+        font-size: 9px;
+        opacity: 1;
+      }
+      #appLayout .nav-section {
+        transition: color 140ms ease;
+      }
+      #appLayout .sidebar.collapsed .nav-section {
+        color: transparent;
+      }
+      #appLayout .sidebar.collapsed .nav-section::after {
+        position: absolute;
+        top: 50%;
+        left: 1px;
+        width: 24px;
+        height: 1px;
+        margin: 0;
+        background: rgba(255,255,255,.12);
+        transform: translateY(-50%);
+      }
+      #appLayout .nav-alert { z-index: 1; transition: opacity 100ms ease, transform 160ms ease !important; }
       #appLayout .sidebar.collapsed .nav-alert:not(:empty) { display: inline-flex !important; opacity: 0; visibility: hidden; transform: scale(.75); }
       #appLayout .nav-alert:empty { display: none !important; }
     }
@@ -6305,7 +6364,7 @@ function sidebarEmTelemovel() {
 function atualizarEstadoBotaoSidebar(isCollapsed) {
   const icon = document.getElementById('sidebarToggleIcon');
   const toggle = document.getElementById('sidebarToggle');
-  if (icon) icon.innerHTML = isCollapsed ? '&#8594;' : '&#8592;';
+  if (icon) icon.innerHTML = '&#8592;';
   if (toggle) {
     const texto = isCollapsed ? 'Expandir menu' : 'Recolher menu';
     toggle.title = texto;
