@@ -3303,7 +3303,7 @@
       <div>
         <div class="eyebrow">ANDRÉ MARTINS · AGENDA</div>
         <h1 class="section-title" style="margin-bottom:3px;">Agenda semanal</h1>
-        <p style="color:#8ba0b8; font-size:13px;">Controlo de marcações PT e avaliações — só leitura.</p>
+        <p style="color:#8ba0b8; font-size:13px;">Marcações do Google Calendar. Só passam a sessões dadas quando as confirmas.</p>
       </div>
       <div style="display:flex; gap:8px; flex-wrap:wrap;">
         <button type="button" class="btn btn-secondary" onclick="navegarSemanaAgenda(-1)">← Semana</button>
@@ -8198,8 +8198,8 @@ function renderAgendaSemanal(dados) {
     const eventosDia = eventos.filter(evento => evento.dia === chave);
     const nomeDia = cursorDia.toLocaleDateString('pt-PT', { weekday: 'short' }).replace('.', '');
     const blocos = eventosDia.length ? eventosDia.map(evento => {
-      const sub = evento.tipo === 'AVALIACAO' ? 'Avaliação física' : (evento.ignorado ? 'Fora do controlo de PT' : (evento.reconhecido ? evento.clienteNome : 'Por confirmar'));
-      const classes = (evento.tipo === 'AVALIACAO' ? ' avaliacao' : '') + (evento.ignorado ? ' ignorado' : '') + (!evento.reconhecido && evento.tipo === 'PT' && !evento.ignorado ? ' por-confirmar' : '');
+      const sub = evento.tipo === 'AVALIAÇÃO' || evento.tipo === 'AVALIACAO' ? 'Avaliação física' : (evento.ignorado ? 'Fora do controlo de PT' : (evento.reconhecido ? evento.clienteNome : 'Por confirmar'));
+      const classes = (evento.tipo === 'AVALIAÇÃO' || evento.tipo === 'AVALIACAO' ? ' avaliacao' : '') + (evento.ignorado ? ' ignorado' : '') + (!evento.reconhecido && evento.tipo === 'PT' && !evento.ignorado ? ' por-confirmar' : '');
       return '<div class="agenda-bloco-evento' + classes + '"><div class="agenda-bloco-hora">' + escaparHtmlCRM(evento.horaInicio + (evento.horaFim ? '–' + evento.horaFim : '')) + '</div><div class="agenda-bloco-titulo">' + escaparHtmlCRM(evento.titulo) + '</div><div class="agenda-bloco-cliente">' + escaparHtmlCRM(sub) + '</div></div>';
     }).join('') : '<div class="agenda-dia-vazio">Sem marcações</div>';
     diasAgenda.push('<article class="agenda-dia"><div class="agenda-dia-cabecalho">' + escaparHtmlCRM(nomeDia) + '<strong>' + cursorDia.getDate() + '</strong></div><div class="agenda-dia-eventos">' + blocos + '</div></article>');
@@ -8212,14 +8212,14 @@ function renderAgendaSemanal(dados) {
 
   conteudo.innerHTML =
     '<div class="agenda-resumo-grid">' +
-      '<div class="agenda-metrica pt"><strong>' + (resumo.marcadas || 0) + '/' + (resumo.esperadas || 0) + '</strong><span>PT marcadas</span></div>' +
+      '<div class="agenda-metrica pt"><strong>' + (resumo.futuras == null ? (resumo.marcadas || 0) : resumo.futuras) + '/' + (resumo.esperadas || 0) + '</strong><span>PT por dar</span></div>' +
       '<button type="button" class="agenda-metrica alerta" onclick="mostrarPendentesAgenda()" title="Ver clientes que ainda precisam de marcação"><strong>' + (resumo.emFalta || 0) + '</strong><span>PT em falta · ver lista</span></button>' +
       '<div class="agenda-metrica avaliacao"><strong>' + (resumo.avaliacoes || 0) + '</strong><span>Avaliações</span></div>' +
       '<div class="agenda-metrica alerta"><strong>' + (resumo.porConfirmar || 0) + '</strong><span>Por confirmar</span></div>' +
       '<div class="agenda-metrica"><strong>' + (resumo.semFrequencia || 0) + '</strong><span>Sem frequência</span></div>' +
     '</div>' +
     '<div class="agenda-card"><h3>Semana visual</h3><div class="agenda-semana-visual">' + diasAgenda.join('') + '</div></div>' +
-    '<div class="agenda-card" id="agendaClientesPendentes"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:13px;flex-wrap:wrap"><h3 style="margin:0">' + (agendaMostrarSoFaltam ? 'Clientes com PT em falta' : 'Clientes ativos · sessões desta semana') + '</h3>' + (agendaMostrarSoFaltam ? '<button type="button" class="btn btn-secondary" style="width:auto;padding:6px 10px;font-size:11px" onclick="mostrarTodosClientesAgenda()">Ver todos</button>' : '') + '</div>' + linhasClientes + '</div>' +
+    '<div class="agenda-card" id="agendaClientesPendentes"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:13px;flex-wrap:wrap"><h3 style="margin:0">' + (agendaMostrarSoFaltam ? 'Clientes com PT por marcar' : 'Clientes ativos · marcações desta semana') + '</h3>' + (agendaMostrarSoFaltam ? '<button type="button" class="btn btn-secondary" style="width:auto;padding:6px 10px;font-size:11px" onclick="mostrarTodosClientesAgenda()">Ver todos</button>' : '') + '</div>' + linhasClientes + '</div>' +
     '<div class="agenda-card"><h3>Eventos por confirmar</h3><p style="color:#8294aa;font-size:12px;margin:-6px 0 8px">Estes eventos não entram nos totais até o nome poder ser associado com segurança.</p>' + linhasConfirmar + '</div>';
 }
 
@@ -11099,7 +11099,7 @@ window.addEventListener('load', function () {
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(!['getRecibosPendentes','marcarReciboEmitido'].includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();const opcoes={headers:{Authorization:'Bearer '+t}};if(nome==='marcarReciboEmitido'){opcoes.method='POST';opcoes.headers['Content-Type']='application/json';opcoes.body=JSON.stringify({action:'mark-issued',idCliente:args[0]&&args[0].idCliente});}const r=await fetch('/api/dev-crm-receipts',opcoes),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Recibos indisponíveis.');ok&&ok(d)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
-(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(nome!=='getAgendaSemanalCMR')return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),r=await fetch('/api/dev-crm-agenda?offset='+encodeURIComponent(args[0]||0),{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Agenda indisponível.');ok&&ok(d)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
+(function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(!['getAgendaSemanalCMR','guardarAliasAgenda','ignorarEventoAgenda'].includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token();let url='/api/dev-crm-agenda?offset='+encodeURIComponent(args[0]||0),opcoes={headers:{Authorization:'Bearer '+t}};if(nome!=='getAgendaSemanalCMR'){url='/api/dev-crm-agenda';opcoes.method='POST';opcoes.headers['Content-Type']='application/json';const entrada=args[0]||{};opcoes.body=JSON.stringify(nome==='guardarAliasAgenda'?{action:'associate-calendar-title',titulo:entrada.titulo,clientId:entrada.idCliente}:{action:'ignore-calendar-title',titulo:entrada.titulo,motivo:entrada.motivo});}const r=await fetch(url,opcoes),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro==='CALENDARIO_GOOGLE_SEM_ACESSO'?'Partilha os calendários com '+String(d.contaServico||'a conta técnica da AL MOVE')+'.':d.erro||'Agenda indisponível.');ok&&ok(d)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();
 </script>
 <script>
 (function(){const anterior=google.script.run;function cadeia(ok,fail){return new Proxy({}, {get(_,nome){if(nome==='withSuccessHandler')return f=>cadeia(f,fail);if(nome==='withFailureHandler')return f=>cadeia(ok,f);return async(...args)=>{if(!['getCentroComandoCRM','getNotificacoesCMR'].includes(nome))return anterior.withSuccessHandler(ok).withFailureHandler(fail)[nome](...args);try{const c=await ALMOVE_FIREBASE_CONFIG.obter();await AlMoveFirebaseAuth.configurar(c);const t=await AlMoveFirebaseAuth.token(),r=await fetch('/api/dev-crm-command',{headers:{Authorization:'Bearer '+t}}),d=await r.json();if(!r.ok||!d.ok)throw Error(d.erro||'Centro de comando indisponível.');ok&&ok(nome==='getCentroComandoCRM'?d.centro:d.notificacoes)}catch(e){fail&&fail(e)}}}})}google.script.run=cadeia(null,null)})();

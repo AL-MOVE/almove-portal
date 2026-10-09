@@ -14,6 +14,9 @@ function serviceAccount() {
   return value;
 }
 
+/** Identificador público usado para partilhar recursos Google com a conta técnica. */
+export function googleServiceAccountEmail() { return serviceAccount().client_email; }
+
 export async function googleAccessToken(scopes = ['https://www.googleapis.com/auth/cloud-platform']) {
   const account = serviceAccount(); const now = Math.floor(Date.now() / 1000);
   const unsigned = `${base64url({ alg: 'RS256', typ: 'JWT' })}.${base64url({ iss: account.client_email, scope: scopes.join(' '), aud: 'https://oauth2.googleapis.com/token', iat: now, exp: now + 3600 })}`;
