@@ -8,6 +8,7 @@ assert.match(coach, /--crm-motion-standard: 240ms/);
 assert.match(coach, /--crm-ease-out: cubic-bezier\(\.2,\.8,\.2,1\)/);
 assert.match(coach, /sidebar-more-toggle[\s\S]*?min-width: 44px !important/);
 assert.match(coach, /sidebar-overflow-items\.open[\s\S]*?visibility: visible/);
+assert.match(coach, /sidebar\.collapsed \.nav-section \{\s*color: #8195aa;/);
 assert.match(coach, /aria-label="Abrir mais opções"/);
 assert.match(coach, /function atualizarAcessibilidadeMenuLateralMais\(\)/);
 assert.match(coach, /aria-hidden="false"/);
