@@ -83,8 +83,16 @@ export default async function handler(req, res) {
 
     if (action === 'prepare-invite') {
       const limiteRef = db.collection('crmPortalInviteRateLimits').doc(createHash('sha256').update(email).digest('hex'));
-      const limite = await limiteRef.get();
-      if (limite.exists && Date.now() - instante(limite.data()?.lastRequestedAt) < INTERVALO_CONVITE_MS) throw new Error('AGUARDA_UM_MINUTO_PARA_REENVIAR');
+      const agora = new Date();
+      // Reserva a janela numa transação. Assim, dois cliques/pedidos em paralelo
+      // não conseguem ambos ultrapassar o limite antes de a gravação acontecer.
+      await db.runTransaction(async transacao => {
+        const limite = await transacao.get(limiteRef);
+        if (limite.exists && agora.getTime() - instante(limite.data()?.lastRequestedAt) < INTERVALO_CONVITE_MS) {
+          throw new Error('AGUARDA_UM_MINUTO_PARA_REENVIAR');
+        }
+        transacao.set(limiteRef, { clientId, email, lastRequestedAt: agora, requestedBy: identidade.uid }, { merge: true });
+      });
       let utilizador;
       try { utilizador = await auth.getUserByEmail(email); }
       catch (erro) { if (erro.code !== 'auth/user-not-found') throw erro; }
@@ -95,9 +103,8 @@ export default async function handler(req, res) {
         utilizador = await auth.updateUser(utilizador.uid, { emailVerified: true });
       }
       const lote = db.batch();
-      lote.set(limiteRef, { clientId, email, lastRequestedAt: new Date(), requestedBy: identidade.uid }, { merge: true });
-      lote.create(db.collection('crmPortalAccessLogs').doc(), { clientId, email, event: 'CONVITE_FIREBASE_PREPARADO', detail: 'Convite preparado para envio pelo Firebase Authentication.', createdAt: new Date(), actorUid: identidade.uid });
-      lote.create(db.collection('auditLogs').doc(), { action: 'development.portal-invite.prepared', actorUid: identidade.uid, clientId, targetUid: utilizador.uid, createdAt: new Date() });
+      lote.create(db.collection('crmPortalAccessLogs').doc(), { clientId, email, event: 'CONVITE_FIREBASE_PREPARADO', detail: 'Convite preparado para envio pelo Firebase Authentication.', createdAt: agora, actorUid: identidade.uid });
+      lote.create(db.collection('auditLogs').doc(), { action: 'development.portal-invite.prepared', actorUid: identidade.uid, clientId, targetUid: utilizador.uid, createdAt: agora });
       await lote.commit();
       return responder(res, 200, { ok: true, email, portalUrl: PORTAL_URL });
     }

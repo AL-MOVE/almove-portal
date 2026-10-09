@@ -33,6 +33,8 @@ assert.match(firebase, /HttpOnly; Secure; SameSite=Lax/, 'A sessão CRM deve usa
 assert.match(firebase, /token\.email_verified/, 'O email Firebase tem de ser confirmado.');
 assert.match(firebase, /PORTAL_APPS_SCRIPT_HMAC_SECRET/, 'A identidade enviada ao Apps Script tem de ser assinada.');
 assert.match(invite, /timingSafeEqual/, 'O convite CRM deve validar a assinatura em tempo constante.');
+assert.match(invite, /inviteHmacNonces/, 'O convite CRM deve consumir cada assinatura HMAC uma única vez.');
+assert.match(invite, /PEDIDO_JA_PROCESSADO/, 'O convite CRM deve rejeitar a repetição da mesma assinatura HMAC.');
 assert.match(invite, /generatePasswordResetLink/, 'O convite deve gerar um link único para definir palavra-passe.');
 assert.match(invite, /auth\.listUsers\(1\)/, 'O diagnóstico assinado deve confirmar a credencial Firebase sem criar contas.');
 assert.match(appsScript, /obterClientePorAssertacaoFirebasePortal_/);

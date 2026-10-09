@@ -140,7 +140,12 @@ export default async function handler(req, res) {
     catch { return responder(res, 400, { ok: false, erro: 'JSON inválido' }, requestId); }
     fn = String(dados.fn || '');
     token = String(dados.token || '');
-    if (comprimento > 50000) return responder(res, 413, { ok: false, erro: 'Pedido demasiado grande' }, requestId);
+    // Content-Length pode não existir (por exemplo, em pedidos transferidos por
+    // chunks). Mede também o corpo já interpretado para o limite não depender de
+    // um cabeçalho controlado pelo cliente ou removido pelo proxy.
+    if (Buffer.byteLength(JSON.stringify(dados), 'utf8') > 50000) {
+      return responder(res, 413, { ok: false, erro: 'Pedido demasiado grande' }, requestId);
+    }
     if (!ESCRITAS.has(fn)) return responder(res, 405, { ok: false, erro: 'POST permite apenas gravações' }, requestId);
   }
 

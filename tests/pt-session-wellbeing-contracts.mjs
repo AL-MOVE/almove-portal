@@ -11,7 +11,10 @@ const [coach, endpoint, detalhe, historico] = await Promise.all([
 for (const campo of [
   'sessaoPTCheckinSono', 'sessaoPTCheckinStress', 'sessaoPTCheckinEnergia', 'sessaoPTCheckinRefeicoes', 'sessaoPTCheckinDoms',
   'sessaoPTCheckoutEnergia', 'sessaoPTCheckoutEsforco', 'sessaoPTCheckoutDificuldade'
-]) assert.match(coach, new RegExp(campo));
+]) {
+  assert.match(coach, new RegExp(campo));
+  assert.match(coach, new RegExp(`<label for="${campo}">`), `${campo} deve ter um rótulo associado`);
+}
 
 assert.match(coach, /lerBemEstarSessaoPT/);
 assert.match(coach, /Sono \(horas\)/);

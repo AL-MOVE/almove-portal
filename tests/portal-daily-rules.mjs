@@ -68,6 +68,8 @@ assert.equal((await registarExecucaoTreinoFirestore(db, 'cliente-1', { nomePlano
 await assert.rejects(() => registarExecucaoTreinoFirestore(db, 'cliente-1', { nomePlano: 'PPL', nomeTreino: 'Push', eventId: 'workout-2', startedAt: now.toISOString(), exercicios: [{ exercicio: 'Exercício alheio', series: [{ reps: '10', carga: '40' }] }] }, now), /EXERCICIO_NAO_PRESCRITO/);
 
 assert.equal((await registarPosTreinoFirestore(db, 'cliente-1', { nomePlano: 'PPL', nomeTreino: 'Push', energia: 4, esforco: 3, dificuldade: 2, eventId: 'post-1' }, now)).sucesso, true);
+assert.equal((await registarPosTreinoFirestore(db, 'cliente-1', { nomePlano: 'PPL', nomeTreino: 'Push', energia: 4, esforco: 3, dificuldade: 2, eventId: 'post-1' }, now)).repetido, true, 'O pós-treino repetido deve ser idempotente.');
 assert.equal((await registarSessaoMinimaFirestore(db, 'cliente-1', { minutos: 12, rpe: 4, eventId: 'minimum-1' }, now)).sucesso, true);
+assert.equal((await registarSessaoMinimaFirestore(db, 'cliente-1', { minutos: 12, rpe: 4, eventId: 'minimum-1' }, now)).repetido, true, 'A sessão mínima repetida deve ser idempotente.');
 
 console.log('Regras diárias e registos autónomos diretos no Firestore validados.');

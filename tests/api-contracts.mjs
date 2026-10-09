@@ -12,4 +12,9 @@ for (const fn of chamadas) {
   assert.ok(permitidas.has(fn), `A interface chama ${fn}, mas o proxy não o permite`);
 }
 assert.ok(!html.includes('guardarAvaliacaoFisicaPortal'), 'O cliente não pode gravar avaliações físicas diretamente');
+assert.match(
+  proxy,
+  /Buffer\.byteLength\(JSON\.stringify\(dados\), 'utf8'\)/,
+  'O proxy deve validar o tamanho real do corpo, mesmo sem Content-Length'
+);
 console.log(`Contratos da API validados para ${chamadas.size} operações.`);

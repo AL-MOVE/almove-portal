@@ -1,5 +1,6 @@
-import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
+import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { obterAdminFirebase } from './_firebase.js';
+import { obterFirestoreAlmove } from './_firestore.js';
 
 const PORTAL_URL = 'https://portal.almove.pt/';
 
@@ -21,12 +22,37 @@ function assinaturaValida(corpo) {
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
+async function consumirAssinatura(corpo) {
+  // A própria assinatura é um nonce imprevisível e único para
+  // cliente/email/timestamp. create() é atómico: uma repetição do mesmo pedido
+  // dentro da janela válida falha mesmo quando chega em paralelo.
+  const id = createHash('sha256').update(String(corpo.assinatura || '')).digest('hex');
+  const { db } = obterFirestoreAlmove();
+  await db.collection('inviteHmacNonces').doc(id).create({
+    clientId: String(corpo.clientId || '').trim().slice(0, 128),
+    createdAt: new Date(),
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+  });
+}
+
+function assinaturaRepetida(erro) {
+  const codigo = String(erro?.code || '').toLowerCase();
+  const mensagem = String(erro?.message || '').toLowerCase();
+  return codigo === '6' || codigo === 'already-exists' || codigo === 'already_exists' || mensagem.includes('already exists');
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return responder(res, 405, { ok: false });
-  const corpo = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+  let corpo;
+  try { corpo = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {}); }
+  catch { return responder(res, 400, { ok: false }); }
+  if (!corpo || typeof corpo !== 'object' || Buffer.byteLength(JSON.stringify(corpo), 'utf8') > 4096) {
+    return responder(res, 413, { ok: false });
+  }
   if (!assinaturaValida(corpo)) return responder(res, 401, { ok: false });
 
   try {
+    await consumirAssinatura(corpo);
     // Diagnóstico assinado, usado apenas pelo Apps Script. Confirma que as
     // credenciais de produção conseguem falar com o Firebase sem criar uma
     // conta nem enviar um email.
@@ -59,7 +85,8 @@ export default async function handler(req, res) {
     }
     const link = await auth.generatePasswordResetLink(email, { url: PORTAL_URL, handleCodeInApp: false });
     return responder(res, 200, { ok: true, link });
-  } catch {
+  } catch (erro) {
+    if (assinaturaRepetida(erro)) return responder(res, 409, { ok: false, erro: 'PEDIDO_JA_PROCESSADO' });
     return responder(res, 502, { ok: false });
   }
 }

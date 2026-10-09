@@ -11,6 +11,7 @@ const [api, portalAccess, plans, coach] = await Promise.all([
 assert.match(api, /'portal-access': acessoPortal/);
 assert.match(portalAccess, /EMAIL_ASSOCIADO_A_VARIOS_CLIENTES/);
 assert.match(portalAccess, /AGUARDA_UM_MINUTO_PARA_REENVIAR/);
+assert.match(portalAccess, /runTransaction/, 'O limite de convites deve ser reservado de forma atómica.');
 assert.match(portalAccess, /auth\.createUser\(/);
 assert.doesNotMatch(portalAccess, /deleteUser\(/);
 assert.match(coach, /AlMoveFirebaseAuth\.enviarRecuperacao\(preparado\.email,preparado\.portalUrl\)/);

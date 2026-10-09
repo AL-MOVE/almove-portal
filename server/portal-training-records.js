@@ -49,20 +49,28 @@ export async function registarExecucaoTreinoFirestore(db, clienteId, entrada, ag
       linhas.push({ exercicio: nome, numeroSerie: indice + 1, reps, carga, velocidade, notas: texto(exercicio?.notas, 1000) });
     });
   });
-  if (!linhas.length || linhas.length > 500) throw new Error('TREINO_SEM_SERIES');
+  // Uma transação Firestore aceita no máximo 500 escritas. Reservamos uma para
+  // o documento da operação e no máximo 499 para as séries.
+  if (!linhas.length || linhas.length > 499) throw new Error('TREINO_SEM_SERIES');
 
   const operacaoRef = db.collection('crmPortalTrainingOperations').doc(idDocumento(clienteId, idSessao, 'execucao'));
-  const existente = await operacaoRef.get();
-  if (existente.exists) return { sucesso: true, repetido: true, idSessao, seriesRegistadas: Number(existente.data()?.seriesRegistadas || linhas.length) };
-  const lote = db.batch();
-  linhas.forEach((linha, indice) => lote.create(db.collection('crmMigrationTrainingExecutions').doc(idDocumento(clienteId, idSessao, String(indice + 1))), {
-    fonteLinha: null, idCliente: clienteId, clientId: clienteId, nomePlano, nomeTreino, data,
-    ...linha, timestamp: agora.toISOString(), requestId: idSessao + '-' + (indice + 1), tipoSessao: 'AUTONOMO',
-    registadoPor: clienteId, idSessao, origem: 'portal-firebase'
-  }));
-  lote.create(operacaoRef, { idCliente: clienteId, idSessao, tipo: 'execucao', seriesRegistadas: linhas.length, criadoEm: agora.toISOString() });
-  await lote.commit();
-  return { sucesso: true, repetido: false, idSessao, seriesRegistadas: linhas.length };
+  let repetido = false;
+  let seriesRegistadas = linhas.length;
+  await db.runTransaction(async transacao => {
+    const existente = await transacao.get(operacaoRef);
+    if (existente.exists) {
+      repetido = true;
+      seriesRegistadas = Number(existente.data()?.seriesRegistadas || linhas.length);
+      return;
+    }
+    linhas.forEach((linha, indice) => transacao.set(db.collection('crmMigrationTrainingExecutions').doc(idDocumento(clienteId, idSessao, String(indice + 1))), {
+      fonteLinha: null, idCliente: clienteId, clientId: clienteId, nomePlano, nomeTreino, data,
+      ...linha, timestamp: agora.toISOString(), requestId: idSessao + '-' + (indice + 1), tipoSessao: 'AUTONOMO',
+      registadoPor: clienteId, idSessao, origem: 'portal-firebase'
+    }));
+    transacao.set(operacaoRef, { idCliente: clienteId, idSessao, tipo: 'execucao', seriesRegistadas: linhas.length, criadoEm: agora.toISOString() });
+  });
+  return { sucesso: true, repetido, idSessao, seriesRegistadas };
 }
 
 export async function registarPosTreinoFirestore(db, clienteId, entrada, agora = new Date()) {
@@ -70,10 +78,13 @@ export async function registarPosTreinoFirestore(db, clienteId, entrada, agora =
   if (!requestId) throw new Error('REQUEST_ID_OBRIGATORIO');
   await exigirCheckinHoje(db, clienteId, agora);
   const ref = db.collection('crmMigrationPostTraining').doc(idDocumento(clienteId, requestId, 'pos'));
-  const existente = await ref.get();
-  if (existente.exists) return { sucesso: true, repetido: true };
-  await ref.create({ fonteLinha: null, idCliente: clienteId, clientId: clienteId, nomePlano: texto(entrada?.nomePlano, 200), nomeTreino: texto(entrada?.nomeTreino, 200), energia: numeroEscala(entrada?.energia, 1, 5), esforco: numeroEscala(entrada?.esforco, 1, 5), dificuldade: numeroEscala(entrada?.dificuldade, 1, 5), nota: texto(entrada?.nota, 500), requestId, dataHora: agora.toISOString(), origem: 'portal-firebase' });
-  return { sucesso: true, repetido: false };
+  let repetido = false;
+  await db.runTransaction(async transacao => {
+    const existente = await transacao.get(ref);
+    if (existente.exists) { repetido = true; return; }
+    transacao.set(ref, { fonteLinha: null, idCliente: clienteId, clientId: clienteId, nomePlano: texto(entrada?.nomePlano, 200), nomeTreino: texto(entrada?.nomeTreino, 200), energia: numeroEscala(entrada?.energia, 1, 5), esforco: numeroEscala(entrada?.esforco, 1, 5), dificuldade: numeroEscala(entrada?.dificuldade, 1, 5), nota: texto(entrada?.nota, 500), requestId, dataHora: agora.toISOString(), origem: 'portal-firebase' });
+  });
+  return { sucesso: true, repetido };
 }
 
 export async function registarSessaoMinimaFirestore(db, clienteId, entrada, agora = new Date()) {
@@ -82,10 +93,13 @@ export async function registarSessaoMinimaFirestore(db, clienteId, entrada, agor
   if (!requestId || ![12, 20].includes(minutos)) throw new Error('SESSAO_MINIMA_INVALIDA');
   const data = await exigirCheckinHoje(db, clienteId, agora);
   const ref = db.collection('crmMigrationTrainingExecutions').doc(idDocumento(clienteId, requestId, 'minima'));
-  const existente = await ref.get();
-  if (existente.exists) return { sucesso: true, repetido: true, idSessao: requestId };
-  await ref.create({ fonteLinha: null, idCliente: clienteId, clientId: clienteId, nomePlano: 'Sessão mínima', nomeTreino: minutos + ' minutos', data, exercicio: 'Sessão mínima', numeroSerie: 1, reps: String(minutos), carga: '', rir: '', velocidade: 'rpe:' + numeroEscala(entrada?.rpe, 1, 10), notas: '', timestamp: agora.toISOString(), duracaoMin: minutos, requestId, tipoSessao: 'AUTONOMO', registadoPor: clienteId, idSessao: requestId, origem: 'portal-firebase' });
-  return { sucesso: true, repetido: false, idSessao: requestId };
+  let repetido = false;
+  await db.runTransaction(async transacao => {
+    const existente = await transacao.get(ref);
+    if (existente.exists) { repetido = true; return; }
+    transacao.set(ref, { fonteLinha: null, idCliente: clienteId, clientId: clienteId, nomePlano: 'Sessão mínima', nomeTreino: minutos + ' minutos', data, exercicio: 'Sessão mínima', numeroSerie: 1, reps: String(minutos), carga: '', rir: '', velocidade: 'rpe:' + numeroEscala(entrada?.rpe, 1, 10), notas: '', timestamp: agora.toISOString(), duracaoMin: minutos, requestId, tipoSessao: 'AUTONOMO', registadoPor: clienteId, idSessao: requestId, origem: 'portal-firebase' });
+  });
+  return { sucesso: true, repetido, idSessao: requestId };
 }
 
 export async function obterHistoricoExercicioFirestore(db, clienteId, entrada) {

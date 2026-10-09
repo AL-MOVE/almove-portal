@@ -18,6 +18,9 @@
     "firebase-admin": "^14.4.0"
   },
   "overrides": {
-    "jwks-rsa": "3.2.2"
+    "jwks-rsa": "3.2.2",
+    "@firebase/firestore": {
+      "@grpc/grpc-js": "1.13.6"
+    }
   }
 }
