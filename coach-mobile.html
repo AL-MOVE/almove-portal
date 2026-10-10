@@ -15,6 +15,12 @@
     if (location.hostname === 'coach.almove.pt' && location.pathname === '/coach-mobile.html') {
       history.replaceState(null, '', '/' + location.search + location.hash);
     }
+    (function () {
+      var tema = 'dark';
+      try { tema = localStorage.getItem('almove:coach-theme') === 'light' ? 'light' : 'dark'; } catch (_) {}
+      document.documentElement.dataset.theme = tema;
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', tema === 'light' ? '#eef5f8' : '#07121d');
+    })();
   </script>
   <style>
     :root { color-scheme:dark; --bg:#07121d; --panel:#0d1b2b; --panel-strong:#10253a; --line:#26415a; --text:#eef7ff; --muted:#91a3b8; --teal:#22d3c5; --blue:#1677e8; --warn:#fbbf24; --danger:#fb7185; --safe:#55d98c; --radius:18px; font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
@@ -239,6 +245,72 @@
     @media (max-width:460px) { main { padding-inline:12px; } .topbar { padding-inline:14px; } .summary { gap:8px; } .metric { padding:12px; } .metric strong { font-size:22px; } .fields.two,.fields.three { grid-template-columns:1fr; } .series { grid-template-columns:25px minmax(0,1fr) minmax(0,1fr); } .series-intensity { grid-column:2 / -1; } .exercise-tools { grid-template-columns:repeat(2,minmax(0,1fr)); } .add-exercise { grid-template-columns:1fr; } .session-live-summary { top:70px; } .session-live-summary div { padding-inline:5px; } .session-live-summary strong { font-size:11px; } }
     @media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; transition:none !important; animation:none !important; } }
   </style>
+  <style id="coach-theme-system">
+    .theme-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-top:14px; }
+    .theme-option { display:grid; grid-template-columns:42px minmax(0,1fr); align-items:center; gap:10px; min-height:64px; padding:9px 10px; border:1px solid var(--line); border-radius:13px; color:var(--text); background:rgba(255,255,255,.04); text-align:left; }
+    .theme-option[aria-pressed="true"] { border-color:rgba(34,211,197,.62); background:rgba(34,211,197,.10); box-shadow:0 0 0 3px rgba(34,211,197,.08); }
+    .theme-option-preview { display:block; width:42px; height:42px; border:1px solid rgba(148,163,184,.25); border-radius:10px; box-shadow:inset 0 1px rgba(255,255,255,.16); }
+    .theme-option-preview.dark { background:linear-gradient(145deg,#07121d 0 48%,#10253a 48% 70%,#1685ea 70%); }
+    .theme-option-preview.light { background:linear-gradient(145deg,#f8fbfd 0 48%,#dce9f1 48% 70%,#087f75 70%); }
+    .theme-option strong,.theme-option small { display:block; }
+    .theme-option strong { font-size:12px; }
+    .theme-option small { margin-top:3px; color:var(--muted); font-size:9px; line-height:1.35; }
+
+    html[data-theme="light"] {
+      color-scheme:light;
+      --bg:#eef5f8;
+      --panel:#ffffff;
+      --panel-strong:#eaf2f7;
+      --line:#c7d7e2;
+      --text:#10283f;
+      --muted:#526a80;
+      --teal:#087f75;
+      --blue:#0b70c9;
+      --warn:#8a5700;
+      --danger:#b42343;
+      --safe:#087451;
+    }
+    html[data-theme="light"] body { background:radial-gradient(90% 48% at 10% -5%,rgba(44,166,185,.17),transparent 66%),radial-gradient(74% 44% at 100% 33%,rgba(45,212,191,.12),transparent 70%),var(--bg); }
+    html[data-theme="light"] .app { background:linear-gradient(145deg,rgba(255,255,255,.92),rgba(238,245,248,.84)); border-color:rgba(45,72,99,.16); box-shadow:0 24px 70px rgba(31,55,78,.12); }
+    html[data-theme="light"] :is(.topbar,.bottom-nav) { border-color:rgba(45,72,99,.16); background:rgba(248,251,253,.94); box-shadow:0 10px 32px rgba(31,55,78,.11); }
+    html[data-theme="light"] .brand small,
+    html[data-theme="light"] :is(.eyebrow,.amount,.back,.session-timer,.series b,.exercise-order,.exercise-search-result em,.session-set span:first-child) { color:#087f75; }
+    html[data-theme="light"] :is(.icon-button,.button.secondary,.text-button) { border-color:rgba(45,72,99,.20); color:#294158; background:#f1f6f9; }
+    html[data-theme="light"] :is(.card,.exercise,.confirm-sheet) { border-color:rgba(45,72,99,.18); color:var(--text); background:#fff; box-shadow:inset 0 1px rgba(255,255,255,.8),0 14px 34px rgba(31,55,78,.09); }
+    html[data-theme="light"] :is(.metric,.fact,.series,.version-row,.delta-card,.session-exercise,.change-summary-row,.new-plan-choice,.plan-tabs,.history-tabs) { border-color:rgba(45,72,99,.15); background:#f3f7fa; color:#20364d; }
+    html[data-theme="light"] :is(.metric-accent,.quick-action,.session-edit-bar,.plan-save-option) { border-color:rgba(8,127,117,.24); background:linear-gradient(135deg,rgba(8,127,117,.12),rgba(232,244,246,.92)); color:#17324b; }
+    html[data-theme="light"] .quick-action span { color:#3f6570; }
+    html[data-theme="light"] :is(.list-row,.history-table th,.history-table td,.session-section,.session-volume-strip,.history-summary,.history-table-wrap) { border-color:rgba(45,72,99,.13); }
+    html[data-theme="light"] .list-row { color:#173047; }
+    html[data-theme="light"] .list-row:active { background:rgba(8,127,117,.07); }
+    html[data-theme="light"] :is(.field input,.field select,.field textarea,.add-exercise input) { border-color:#b9cbd8; color:#142d45; background:#fff; }
+    html[data-theme="light"] :is(input,select,textarea)::placeholder { color:#71869a; }
+    html[data-theme="light"] select { color-scheme:light; }
+    html[data-theme="light"] .field label { color:#3a536b; }
+    html[data-theme="light"] :is(.exercise-search-result,.session-live-summary) { border-color:rgba(45,72,99,.16); color:#173047; background:rgba(255,255,255,.96); box-shadow:0 14px 32px rgba(31,55,78,.12); }
+    html[data-theme="light"] .session-live-summary strong { color:#173047; }
+    html[data-theme="light"] :is(.version-column,.session-set) { background:#e8f0f5; color:#294158; }
+    html[data-theme="light"] :is(.plan-tab.active,.history-tab.active) { color:#075e58; background:#dff3ef; box-shadow:inset 0 0 0 1px rgba(8,127,117,.24); }
+    html[data-theme="light"] .badge { border-color:rgba(45,72,99,.18); color:#40566c; background:#edf3f7; }
+    html[data-theme="light"] .badge.safe { border-color:rgba(5,133,98,.34); color:#087451; background:#dcf7ee; }
+    html[data-theme="light"] :is(.badge.warn,.pr-badge) { border-color:rgba(180,107,0,.34); color:#855000; background:#fff2cf; }
+    html[data-theme="light"] .notice { border-color:rgba(180,107,0,.32); color:#765000; background:#fff4d8; }
+    html[data-theme="light"] .status { border-color:rgba(45,72,99,.18); color:#294158; background:#f1f6f9; }
+    html[data-theme="light"] .status.error { border-color:rgba(180,35,67,.30); color:#96233c; background:#fff0f2; }
+    html[data-theme="light"] .status.ok { border-color:rgba(5,133,98,.30); color:#087451; background:#e5f8f1; }
+    html[data-theme="light"] :is(.change-badge,.new-plan-warning,.finish-note,.scale-help,.session-note,.history-row-meta span,.session-exercise-total) { color:#536b80; }
+    html[data-theme="light"] :is(.metric em,.history-table td,.delta-card strong,.session-set,.exercise-suggestion,.session-edit-bar span) { color:#385168; }
+    html[data-theme="light"] .change-badge.changed { border-color:rgba(180,107,0,.34); color:#855000; background:#fff2cf; }
+    html[data-theme="light"] .change-badge.added { border-color:rgba(5,133,98,.30); color:#087451; background:#e5f8f1; }
+    html[data-theme="light"] .text-button.danger { border-color:rgba(180,35,67,.28); color:#96233c; background:#fff0f2; }
+    html[data-theme="light"] .exercise-suggestion { border-color:rgba(8,127,117,.22); background:#e8f6f3; color:#075e58; }
+    html[data-theme="light"] .confirm-layer { background:rgba(35,54,75,.34); }
+    html[data-theme="light"] .theme-option { border-color:rgba(45,72,99,.18); color:#294158; background:#f7fafc; }
+    html[data-theme="light"] .theme-option[aria-pressed="true"] { border-color:rgba(8,127,117,.52); background:#e8f6f3; box-shadow:0 0 0 3px rgba(8,127,117,.08); }
+    html[data-theme="light"] .nav-button { color:#5b7187; }
+    html[data-theme="light"] .nav-button.active { color:#087f75; background:rgba(8,127,117,.10); }
+    @media (max-width:380px) { .theme-options { grid-template-columns:1fr; } }
+  </style>
 </head>
 <body>
   <div class="app">
@@ -265,6 +337,10 @@
     'use strict';
     const main = document.getElementById('main');
     const state = { view: 'home', context: null, crm: null, agenda: null, checkins: null, ptMonth: null, weekOffset: 0, selected: null, session: null, loading: false };
+    function currentCoachTheme() { return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark'; }
+    function updateCoachThemeControls() { document.querySelectorAll('[data-coach-theme]').forEach(function (control) { control.setAttribute('aria-pressed', String(control.dataset.coachTheme === currentCoachTheme())); }); }
+    function applyCoachTheme(theme) { const selected = theme === 'light' ? 'light' : 'dark'; document.documentElement.dataset.theme = selected; const meta = document.querySelector('meta[name="theme-color"]'); if (meta) meta.setAttribute('content', selected === 'light' ? '#eef5f8' : '#07121d'); try { localStorage.setItem('almove:coach-theme', selected); } catch (_) {} updateCoachThemeControls(); }
+    function coachThemeCard() { const choices = el('div', { className: 'theme-options', role: 'group', 'aria-label': 'Tema visual da App Coach' }); [['dark','Escuro','Tema atual da App Coach'],['light','Claro','Fundo claro e contraste suave']].forEach(function (item) { const control = el('button', { className: 'theme-option', type: 'button', 'data-coach-theme': item[0], 'aria-pressed': String(currentCoachTheme() === item[0]) }, [el('span', { className: 'theme-option-preview ' + item[0], 'aria-hidden': 'true' }), el('span', {}, [el('strong', { text: item[1] }), el('small', { text: item[2] })])]); control.addEventListener('click', function () { applyCoachTheme(item[0]); }); choices.append(control); }); return card([el('p', { className: 'eyebrow', text: 'APARÊNCIA' }), el('h2', { text: 'Tema da aplicação' }), el('p', { className: 'subtitle', text: 'Escolhe o aspeto deste dispositivo. A preferência fica guardada neste navegador.' }), choices]); }
     const svg = {
       arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>',
       play: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>',
@@ -544,7 +620,7 @@
     }
     function renderAlerts() { const root = [title('ALERTAS', 'Acompanhar pendências', 'Pagamentos por receber, atrasos e check-ins do dia.'), buildStatus()]; const pending = state.crm.pagamentosPendentes || []; const late = state.crm.clientesEmAtraso || []; root.push(el('div', { className: 'summary stack' }, [metric('Por receber', euro(state.crm.dashboard.pendente), pending.length + ' pack(s) pendente(s)', true), metric('Em atraso', String(late.length), late.length ? 'Requer acompanhamento' : 'Sem atrasos')])); root.push(el('div', { className: 'section-heading' }, [el('h2', { text: 'Pagamentos pendentes' })])); const pendingList = card([], 'list').firstChild; if (pending.length) pending.forEach(function (item) { const side = el('div', { className: 'list-side' }, [el('span', { className: 'amount', text: euro(item.valorPendente) }), el('span', { className: 'badge warn', text: item.diaPagamento ? 'Dia ' + item.diaPagamento : 'Dia por definir' })]); pendingList.append(listRow(item.nome, 'Pack do mês atual', side, function () { openClient(item.idCliente); })); }); else pendingList.append(el('p', { className: 'empty', text: 'Não existem pagamentos pendentes este mês.' })); root.push(el('section', { className: 'card list' }, [pendingList])); root.push(el('div', { className: 'section-heading' }, [el('h2', { text: 'Check-ins de hoje' })])); const checkinList = card([], 'list').firstChild; const checked = state.checkins && state.checkins.comCheckin || []; if (checked.length) checked.slice(0, 8).forEach(function (item) { checkinList.append(listRow(item.nome, 'Check-in preenchido', el('div', { className: 'list-side' }, [el('span', { className: 'badge safe', text: 'Recebido' })]))); }); else checkinList.append(el('p', { className: 'empty', text: 'Ainda não há check-ins de clientes hoje.' })); root.push(el('section', { className: 'card list' }, [checkinList])); setContent(root); }
     async function runSystemCheck(control) { const input = document.getElementById('systemCheckEmail'); const email = String(input && input.value || '').trim().toLowerCase(); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { status('Indica o email da conta de aluno usada para o teste.', 'error'); if (input) input.focus(); return; } control.disabled = true; control.textContent = 'A verificar…'; status('A verificar HMAC, isolamento e backups…'); try { const token = await window.AlMoveFirebaseAuth.token(true); const response = await fetch('/api/dev-crm-ops?clientEmail=' + encodeURIComponent(email), { headers: { Authorization: 'Bearer ' + token }, cache: 'no-store', credentials: 'same-origin' }); const data = await response.json(); if (!response.ok || !data || !data.checks) throw new Error(data && (data.erro || data.error) || 'DIAGNOSTICO_INDISPONIVEL'); const checks = data.checks; const backups = data.backups || {}; const results = [checks.hmacVerified ? 'HMAC validado' : 'HMAC por corrigir', checks.clientMappingVerified ? 'Aluno associado' : 'Email sem associação única no Apps Script', checks.isolationVerified ? 'Isolamento validado' : 'Isolamento por corrigir', backups.dailyConfigured ? 'Backup diário ativo' : backups.reachable ? 'Backup diário por configurar' : 'Backups sem acesso']; status(results.join(' · '), data.ok && backups.dailyConfigured ? 'ok' : 'error'); } catch (error) { status(error.message === 'FIREBASE_TOKEN_INVALIDO' ? 'A sessão expirou. Termina e volta a entrar na App Coach.' : 'Não foi possível executar o diagnóstico.', 'error'); } finally { control.disabled = false; control.textContent = 'Verificar sistema'; } }
-    function renderProfile() { const root = [title('PERFIL', 'Área do Coach', 'Acesso seguro da equipa.'), buildStatus()]; const identity = card([el('div', { className: 'profile-hero' }, [el('div', { className: 'avatar', text: initials(state.context.email) }), el('div', {}, [el('strong', { text: 'André Martins' }), el('span', { text: state.context.email || '' })])])]); root.push(identity); const checkEmail = el('input', { id: 'systemCheckEmail', type: 'email', placeholder: 'Email do aluno de teste', autocomplete: 'off', maxlength: '200' }); const checkButton = button('Verificar sistema', { full: true, kind: 'secondary' }); checkButton.addEventListener('click', function () { runSystemCheck(checkButton); }); root.push(card([el('p', { className: 'eyebrow', text: 'ESTABILIDADE' }), el('h2', { text: 'Diagnóstico protegido' }), el('p', { className: 'subtitle', text: 'Valida a ligação ao Portal, o isolamento entre alunos e o estado dos backups sem alterar dados.' }), field('Email do aluno de teste', checkEmail), checkButton])); const actions = card([button('Abrir CRM completo', { full: true, kind: 'secondary', action: function () { location.href = '/coach-firebase.html'; } }), button('Terminar sessão', { full: true, kind: 'danger', action: async function () { await window.AlMoveSessaoCRM.sair(); location.replace('/dev-crm.html'); } })]); actions.firstChild.style.display = 'grid'; actions.firstChild.style.gap = '10px'; root.push(actions); root.push(el('p', { className: 'subtitle', text: 'A App Coach não guarda dados de clientes no dispositivo. Os dados operacionais são pedidos ao Firebase quando precisas deles.' })); setContent(root); }
+    function renderProfile() { const root = [title('PERFIL', 'Área do Coach', 'Acesso seguro da equipa.'), buildStatus()]; const identity = card([el('div', { className: 'profile-hero' }, [el('div', { className: 'avatar', text: initials(state.context.email) }), el('div', {}, [el('strong', { text: 'André Martins' }), el('span', { text: state.context.email || '' })])])]); root.push(identity, coachThemeCard()); const checkEmail = el('input', { id: 'systemCheckEmail', type: 'email', placeholder: 'Email do aluno de teste', autocomplete: 'off', maxlength: '200' }); const checkButton = button('Verificar sistema', { full: true, kind: 'secondary' }); checkButton.addEventListener('click', function () { runSystemCheck(checkButton); }); root.push(card([el('p', { className: 'eyebrow', text: 'ESTABILIDADE' }), el('h2', { text: 'Diagnóstico protegido' }), el('p', { className: 'subtitle', text: 'Valida a ligação ao Portal, o isolamento entre alunos e o estado dos backups sem alterar dados.' }), field('Email do aluno de teste', checkEmail), checkButton])); const actions = card([button('Abrir CRM completo', { full: true, kind: 'secondary', action: function () { location.href = '/coach-firebase.html'; } }), button('Terminar sessão', { full: true, kind: 'danger', action: async function () { await window.AlMoveSessaoCRM.sair(); location.replace('/dev-crm.html'); } })]); actions.firstChild.style.display = 'grid'; actions.firstChild.style.gap = '10px'; root.push(actions); root.push(el('p', { className: 'subtitle', text: 'A App Coach não guarda dados de clientes no dispositivo. Os dados operacionais são pedidos ao Firebase quando precisas deles.' })); setContent(root); }
     async function refreshAgenda() { try { await loadAgenda(); if (state.view === 'agenda') renderAgenda(); } catch (error) { status(error.message, 'error'); } }
     async function refreshAll() { if (state.loading) return; state.loading = true; const control = document.getElementById('refreshButton'); if (control) control.disabled = true; try { await Promise.all([loadDashboard(), loadAgenda(), loadCheckins()]); renderCurrent(); if (document.getElementById('status')) status('Dados atualizados.', 'ok'); } catch (error) { renderCurrent(); if (document.getElementById('status')) status(error.message || 'Não foi possível atualizar os dados.', 'error'); } finally { state.loading = false; if (control) control.disabled = false; } }
     function renderCurrent() { if (state.view === 'home') return renderHome(); if (state.view === 'agenda') return renderAgenda(); if (state.view === 'pt-month') return renderPTMonth(); if (state.view === 'clients') return renderClients(); if (state.view === 'alerts') return renderAlerts(); if (state.view === 'profile') return renderProfile(); if (state.view === 'client') return renderClient(); if (state.view === 'plan-version') return renderPlanVersion(); if (state.view === 'session') return renderSession(); renderHome(); }

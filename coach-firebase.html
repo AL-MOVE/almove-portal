@@ -64,7 +64,7 @@
     }
 
     .sidebar.collapsed {
-      width: 76px;
+      width: 84px;
       padding: 20px 12px;
     }
 
@@ -1172,7 +1172,7 @@
     }
 
     .sidebar.collapsed {
-      width: 76px;
+      width: 84px;
       padding: 18px 10px;
     }
 
@@ -2066,7 +2066,7 @@
       transition: width .22s ease, padding .22s ease;
     }
     .sidebar::-webkit-scrollbar { display: none; width: 0; height: 0; }
-    .sidebar.collapsed { width: 68px; padding: 20px 10px; }
+    .sidebar.collapsed { width: 84px; padding: 20px 10px; }
     .sidebar-header { min-height: 40px; margin-bottom: 20px; padding: 0 4px; }
     .sidebar.collapsed .sidebar-header { margin-bottom: 14px; gap: 10px; }
     .sidebar.collapsed .sidebar-logo { cursor: pointer; }
@@ -2228,7 +2228,7 @@
         box-shadow: inset -1px 0 rgba(255,255,255,.025);
       }
       .sidebar { width: 252px; padding: 20px 14px; }
-      .sidebar.collapsed { width: 68px; padding: 20px 10px; }
+      .sidebar.collapsed { width: 84px; padding: 20px 10px; }
       #sidebarOverlay { display: none !important; }
       .sidebar-launcher { display: none; }
       .sidebar-header { min-height: 40px; margin-bottom: 20px; padding: 0 4px; }
@@ -2524,7 +2524,7 @@
         transition-delay: 0s, 0s, 140ms !important;
       }
       #appLayout .sidebar.collapsed .sidebar-toggle {
-        transform: translate(-190px,-50%);
+        transform: translate(-184px,-50%);
       }
       #appLayout .sidebar.collapsed #sidebarToggleIcon {
         transform: rotate(180deg);
@@ -2542,7 +2542,7 @@
         justify-content: flex-start !important;
         gap: 10px !important;
         padding-right: 11px !important;
-        padding-left: 11px !important;
+        padding-left: 23px !important;
       }
       #appLayout .sidebar-text,
       #appLayout .nav-item-label {
@@ -2694,6 +2694,9 @@
           color var(--crm-motion-fast) ease,
           box-shadow var(--crm-motion-fast) ease,
           transform var(--crm-motion-standard) var(--crm-ease-out) !important;
+      }
+      #appLayout .sidebar.collapsed .sidebar-more-toggle {
+        right: 20px !important;
       }
       #appLayout .sidebar-more-toggle:hover,
       #appLayout .sidebar-more-toggle:focus-visible,

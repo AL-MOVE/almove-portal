@@ -9,6 +9,8 @@ assert.match(coach, /--crm-ease-out: cubic-bezier\(\.2,\.8,\.2,1\)/);
 assert.match(coach, /sidebar-more-toggle[\s\S]*?min-width: 44px !important/);
 assert.match(coach, /sidebar-overflow-items\.open[\s\S]*?visibility: visible/);
 assert.match(coach, /sidebar\.collapsed \.nav-section \{\s*color: #8195aa;/);
+assert.match(coach, /sidebar\.collapsed \{ width: 84px;/, 'A sidebar recolhida deve manter espaço para ícones e títulos de secção.');
+assert.match(coach, /sidebar\.collapsed \.nav-item \{[\s\S]*?padding-left: 23px !important;/, 'Os ícones devem ficar centrados na sidebar recolhida.');
 assert.match(coach, /aria-label="Abrir mais opções"/);
 assert.match(coach, /function atualizarAcessibilidadeMenuLateralMais\(\)/);
 assert.match(coach, /aria-hidden="false"/);

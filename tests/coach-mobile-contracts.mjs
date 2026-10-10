@@ -189,7 +189,7 @@ assert.equal(manifest.start_url, '/?source=pwa');
 assert.equal(manifest.display, 'standalone');
 assert.equal(manifest.orientation, 'portrait-primary');
 assert.ok(manifest.icons.some(icon => icon.sizes === '192x192') && manifest.icons.some(icon => icon.sizes === '512x512'));
-assert.match(worker, /almove-coach-mobile-shell-v6/);
+assert.match(worker, /almove-coach-mobile-shell-v7/);
 assert.match(worker, /\/js\/coach-exercise-tools\.js/);
 assert.match(worker, /url\.pathname\.startsWith\('\/api\/'\)/);
 assert.doesNotMatch(worker, /cache\.put\([^\n]*\/api\//);

@@ -11,6 +11,14 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="André Martins - Personal Trainer">
+  <script>
+    (function () {
+      var tema = 'dark';
+      try { tema = localStorage.getItem('almove:portal-theme') === 'light' ? 'light' : 'dark'; } catch (_) {}
+      document.documentElement.dataset.theme = tema;
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', tema === 'light' ? '#eef5f8' : '#050810');
+    })();
+  </script>
 
   <style>
     :root{
@@ -1263,7 +1271,115 @@
     .execucao-detalhe.exec-completo .exec-nota { display:block; margin-top:14px; }
     @keyframes serie-entrar { from { opacity:0; transform:translateY(14px) scale(.985); } to { opacity:1; transform:translateY(0) scale(1); } }
     @media (prefers-reduced-motion:reduce) { .exec-serie,.exec-descanso-focado { animation:none; } }
-  </style></head>
+  </style>
+  <style id="portal-theme-system">
+    .portal-theme-setting { margin:15px 0 18px; padding:15px; border:1px solid var(--border); border-radius:16px; background:rgba(255,255,255,.035); }
+    .portal-theme-setting > strong,.portal-theme-setting > span { display:block; }
+    .portal-theme-setting > strong { color:var(--text); font-size:14px; }
+    .portal-theme-setting > span { margin-top:5px; color:var(--text-muted); font-size:11px; line-height:1.45; }
+    .portal-theme-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:13px; }
+    .portal-theme-option { display:grid; grid-template-columns:40px minmax(0,1fr); align-items:center; gap:9px; min-height:62px; padding:9px; border:1px solid var(--border); border-radius:13px; color:var(--text); background:rgba(255,255,255,.035); font:inherit; text-align:left; cursor:pointer; }
+    .portal-theme-option[aria-pressed="true"] { border-color:rgba(45,212,191,.62); background:rgba(45,212,191,.11); box-shadow:0 0 0 3px rgba(45,212,191,.08); }
+    .portal-theme-preview { display:block; width:40px; height:40px; border:1px solid rgba(148,163,184,.25); border-radius:10px; box-shadow:inset 0 1px rgba(255,255,255,.16); }
+    .portal-theme-preview.dark { background:linear-gradient(145deg,#050810 0 48%,#101c33 48% 70%,#0b5cc2 70%); }
+    .portal-theme-preview.light { background:linear-gradient(145deg,#f8fbfd 0 48%,#dce9f1 48% 70%,#087f75 70%); }
+    .portal-theme-option strong,.portal-theme-option small { display:block; }
+    .portal-theme-option strong { font-size:12px; }
+    .portal-theme-option small { margin-top:3px; color:var(--text-muted); font-size:9px; line-height:1.35; }
+    .definicoes-subtitulo { margin:18px 0 5px; color:var(--text); font-size:13px; }
+
+    html[data-theme="light"] {
+      color-scheme:light;
+      --bg:#eef5f8;
+      --bg-card:#ffffff;
+      --bg-soft:#edf3f7;
+      --bg-input:#ffffff;
+      --text:#10283f;
+      --text-soft:#385168;
+      --text-muted:#5b7187;
+      --text-dim:#71869a;
+      --accent:#087f75;
+      --accent-old:#087f75;
+      --blue:#0b70c9;
+      --blue-dark:#075ca8;
+      --green:#087451;
+      --yellow:#8a5700;
+      --red:#b42343;
+      --border:rgba(45,72,99,.18);
+      --border-soft:rgba(45,72,99,.12);
+      --portal-line:rgba(45,72,99,.15);
+      --card:#ffffff;
+      --card-border:rgba(45,72,99,.18);
+      --texto:#10283f;
+      --texto-suave:#5b7187;
+    }
+    html[data-theme="light"],html[data-theme="light"] body { background:#eef5f8; }
+    html[data-theme="light"] body { color:var(--text); background-image:radial-gradient(ellipse 88% 52% at 3% 0%,rgba(52,167,190,.17),transparent 64%),radial-gradient(ellipse 80% 62% at 8% 100%,rgba(45,212,191,.11),transparent 68%),linear-gradient(155deg,#f8fbfd 0%,#eef5f8 50%,#e8f1f5 100%); }
+    html[data-theme="light"] .topo { border-color:rgba(45,72,99,.13); background:rgba(248,251,253,.92); box-shadow:0 8px 24px rgba(31,55,78,.08); }
+    html[data-theme="light"] :is(.card,.fluxo-hoje,.agenda-inicio-card,.conquistas-atividade,.conquistas-sequencia-card,.passos-semana-card,.conquistas-trofeus-card,.avaliacao-pedido,.avaliacao-grafico,.meus-treinos-plano,.meus-treinos-treino,.passaporte-item,.passaporte-resumo div,.portal-theme-setting) { border-color:rgba(45,72,99,.16); color:#20364d; background:#fff; box-shadow:0 12px 32px rgba(31,55,78,.08); }
+    html[data-theme="light"] #tabPlanos [data-perfil-raiz] { background:transparent; box-shadow:none; }
+    html[data-theme="light"] :is(.card-title,.topo-titulo,.inicio-saudacao,.inicio-saudacao strong,.perfil-nome,.opcoes-item-titulo,.perfil-acesso strong,.plano-servico-nome,.plano-anel-centro strong,.plano-metrica strong,.passaporte-resumo strong,.passaporte-item h3,.passaporte-criterios b,.meus-treinos-plano>summary strong,.meus-treinos-treino>summary strong,.meus-treinos-exercicio strong,.avaliacao-pedido h3,.avaliacao-historico h3,.avaliacao-grafico-topo strong,.exec-conclusao-titulo,.exec-descanso-tempo-grande) { color:#10283f; }
+    html[data-theme="light"] :is(.card-sub,.topo-sub,.topo-estado,.opcoes-item-sub,.perfil-acesso small,.plano-validade,.plano-anel-centro span,.plano-metrica span,.plano-origem,.mapa-vazio,.passaporte-resumo span,.passaporte-nota,.meus-treinos-plano>summary span,.meus-treinos-treino>summary span,.meus-treinos-exercicio small,.avaliacao-pedido p,.avaliacao-grafico-topo span,.versao-app,.versao-portal) { color:#5b7187; }
+    html[data-theme="light"] :is(input,select,textarea,.intensidade-avancada select,.intensidade-avancada input,.avaliacao-pedido input,.avaliacao-pedido select,.avaliacao-pedido textarea,.avatar-personalizar input,.avatar-personalizar select,.sessao-minima-rpe input) { border-color:#b9cbd8; color:#142d45; background:#fff; }
+    html[data-theme="light"] :is(input,textarea)::placeholder { color:#71869a; }
+    html[data-theme="light"] select { color-scheme:light; }
+    html[data-theme="light"] :is(.tabs-nav,.painel-notificacoes,.pedido-gaveta,.evolucao-gaveta,.acesso-sensivel-card) { border-color:rgba(45,72,99,.18); color:#20364d; background:rgba(255,255,255,.97); box-shadow:0 18px 44px rgba(31,55,78,.16); }
+    html[data-theme="light"] .tab-btn { color:#5b7187; }
+    html[data-theme="light"] .tab-btn.ativo { color:#087f75; background:rgba(8,127,117,.10); }
+    html[data-theme="light"] :is(.perfil-acesso,.opcoes-item) { border-color:rgba(45,72,99,.13); color:#20364d; }
+    html[data-theme="light"] :is(.perfil-acesso:hover,.opcoes-item:hover) { background:rgba(8,127,117,.055); }
+    html[data-theme="light"] :is(.perfil-acesso-icone,.opcoes-item-icone,.metricas-icone,.btn-contacto-pt-icone) { border-color:rgba(8,127,117,.24); background:rgba(8,127,117,.09); color:#087f75; }
+    html[data-theme="light"] :is(.perfil-nivel-treino,.plano-metrica,.mapa-dia,.sessao-minima-opcao,.sessao-minima-exercicio,.meus-treinos-exercicio) { border-color:rgba(45,72,99,.13); background:#f3f7fa; color:#20364d; }
+    html[data-theme="light"] .perfil-nivel-opcoes button { border-color:rgba(45,72,99,.15); color:#526a80; background:#edf3f7; }
+    html[data-theme="light"] .perfil-nivel-opcoes button.ativo { border-color:rgba(8,127,117,.42); color:#075e58; background:#dff3ef; }
+    html[data-theme="light"] .plano-visual { border-color:rgba(8,127,117,.22); background:radial-gradient(circle at 92% 5%,rgba(8,127,117,.12),transparent 37%),linear-gradient(135deg,#edf7f7,#fff); }
+    html[data-theme="light"] .plano-anel { background:conic-gradient(#087f75 calc(var(--plano-progresso)*1%),#dbe6ed 0); box-shadow:0 0 24px rgba(8,127,117,.12); }
+    html[data-theme="light"] .plano-anel::before { background:#fff; }
+    html[data-theme="light"] :is(.mapa-controlos button,.avaliacao-grafico-opcoes button,.pedido-gaveta button,.evolucao-gaveta button,.exec-descanso-saltar,.exec-conclusao-seguir) { border-color:rgba(45,72,99,.14); color:#526a80; background:#f3f7fa; }
+    html[data-theme="light"] :is(.mapa-controlos button.ativo,.avaliacao-grafico-opcoes button.ativo,.pedido-gaveta button.ativo,.evolucao-gaveta button.ativo) { border-color:rgba(8,127,117,.36); color:#075e58; background:#dff3ef; }
+    html[data-theme="light"] .mapa-dia { color:#294158; }
+    html[data-theme="light"] .mapa-dia.nivel-4 { color:#fff; background:#087f75; }
+    html[data-theme="light"] .mapa-legenda b { color:#20364d; }
+    html[data-theme="light"] .meus-treinos-prescricao { color:#087f75; }
+    html[data-theme="light"] .meus-treinos-aviso { border-color:rgba(8,127,117,.20); color:#385168; background:#e8f6f3; }
+    html[data-theme="light"] .exec-serie { border-color:rgba(8,127,117,.22); background:#fff; box-shadow:0 14px 30px rgba(31,55,78,.10); }
+    html[data-theme="light"] .exec-descanso-focado { border-color:rgba(8,127,117,.22); background:radial-gradient(circle at 50% 0,rgba(8,127,117,.12),transparent 56%),#fff; }
+    html[data-theme="light"] :is(.estado-ligacao-portal,.acesso-sensivel-card) { border-color:rgba(45,72,99,.18); background:#fff; }
+    html[data-theme="light"] .estado-ligacao-texto { color:#294158; }
+    html[data-theme="light"] .acesso-sensivel { background:rgba(35,54,75,.34); }
+    html[data-theme="light"] .acesso-sensivel-card h2 { color:#10283f; }
+    html[data-theme="light"] .acesso-sensivel-card p { color:#526a80; }
+    html[data-theme="light"] .acesso-sensivel-card input { border-color:#b9cbd8; color:#10283f; background:#fff; }
+    html[data-theme="light"] .acesso-secundario { border-color:#b9cbd8; color:#385168; }
+    html[data-theme="light"] .ecra-boas-vindas { background:radial-gradient(ellipse 65% 34% at 50% 0%,rgba(8,127,117,.10),transparent 74%),linear-gradient(155deg,#f8fbfd,#eaf2f7); }
+    html[data-theme="light"] .boas-vindas-saudacao { color:#10283f; }
+    html[data-theme="light"] .boas-vindas-saudacao strong { color:transparent; }
+    html[data-theme="light"] :is(.pergunta-label,.metrica-valor,.coach-nome,.gauge-valor,.marco-resumo-valor,.marco-titulo,.plano-linha-valor,.prontidao-ms,.treino-card .nome,.workout-timer,.exec-player-current strong,.exec-exercicio-titulo,.success-stat strong,.passos-historico-topo strong,.passos-dia strong,.perfil-nivel-treino>strong,.execucao-exercicio-nome,.exec-detalhe-media strong,.conquistas-metrica strong,.conquistas-sequencia-numero,.conquistas-sequencia-info strong,.exec-info-titulo h2,.exec-info-link strong,.exec-info-bloco h3,.exec-info-vazio strong,.inicio-passos-valor strong,.passos-semana-valor strong,.passos-hoje-contador strong,.metricas-resultado-item strong,.inicio-passos-hoje strong,.notificacao-item strong,.agenda-inicio-item strong,.peso-guia h3,.evolucao-grafico-item h3,.evolucao-resumo strong,.sessao-minima-opcao strong,.sessao-minima-exercicio strong) { color:#10283f; }
+    html[data-theme="light"] .opcao:not(.selecionada) { border-color:rgba(45,72,99,.18); color:#294158; background:#edf3f7; }
+    html[data-theme="light"] :is(.metrica-card,.coach-msg,.treino-card,.exec-player-choice,.exec-player-current,.execucao-exercicio-card,.exec-info-bloco,.success-stat,.passos-dia,.metricas-resultado-item,.evolucao-grafico-item,.evolucao-resumo div,.agenda-inicio-item,.peso-guia) { border-color:rgba(45,72,99,.14); background:#f3f7fa; color:#20364d; }
+    html[data-theme="light"] :is(.metricas-campos input,.metricas-campos select,.dados-pessoais-form input,.dados-pessoais-form select,.dados-pessoais-form textarea,.metricas-corrida-campos input,.avaliacao-campos input,.pos-treino-nota-label textarea,.peso-diario-form input,.evolucao-filtros input,.evolucao-filtros select) { border-color:#b9cbd8; color:#142d45; background:#fff; }
+    html[data-theme="light"] .confirmar-treino { background:rgba(35,54,75,.34); }
+    html[data-theme="light"] .confirmar-treino-painel { border-color:rgba(8,127,117,.22); background:#fff; box-shadow:0 -12px 42px rgba(31,55,78,.16); }
+    html[data-theme="light"] .confirmar-treino-titulo { color:#10283f; }
+    html[data-theme="light"] .btn-voltar-treino { border-color:rgba(45,72,99,.18); color:#294158; background:#f3f7fa; }
+    html[data-theme="light"] .btn-fechar-notificacoes { color:#294158; background:#edf3f7; }
+    html[data-theme="light"] .entrada-portal { color:#10283f; background:radial-gradient(circle at 88% 4%,rgba(8,127,117,.12),transparent 30%),radial-gradient(circle at 6% 92%,rgba(11,112,201,.14),transparent 34%),#eef5f8; }
+    html[data-theme="light"] :is(.entrada-portal-marca,.entrada-portal-titulo) { color:#10283f; }
+    html[data-theme="light"] .entrada-portal-sub { color:#526a80; }
+    html[data-theme="light"] .entrada-portal-form { border-color:rgba(8,127,117,.22); background:#fff; box-shadow:0 20px 50px rgba(31,55,78,.12); }
+    html[data-theme="light"] .entrada-portal-form label { color:#294158; }
+    html[data-theme="light"] .entrada-portal-form input { border-color:#b9cbd8; color:#10283f; background:#fff; }
+    html[data-theme="light"] :is(.entrada-portal-estado,.entrada-portal-nota) { color:#5b7187; }
+    html[data-theme="light"] .entrada-portal-nota strong { color:#294158; }
+    html[data-theme="light"] #portalInstallOverlay > [role="dialog"] { border-color:rgba(8,127,117,.24) !important; color:#10283f !important; background:#fff !important; box-shadow:0 24px 70px rgba(31,55,78,.18) !important; }
+    html[data-theme="light"] #portalInstallOverlay [style*="color:#bdd0df"] { color:#526a80 !important; }
+    html[data-theme="light"] #portalInstallOverlay [style*="background:rgba(15,30,46"] { border-color:rgba(45,72,99,.16) !important; color:#294158 !important; background:#f3f7fa !important; }
+    html[data-theme="light"] .portal-theme-option { border-color:rgba(45,72,99,.18); color:#294158; background:#f7fafc; }
+    html[data-theme="light"] .portal-theme-option[aria-pressed="true"] { border-color:rgba(8,127,117,.52); background:#e8f6f3; box-shadow:0 0 0 3px rgba(8,127,117,.08); }
+    html[data-theme="light"] .conquistas-metrica-icone { background:#f3f7fa !important; }
+    @media (max-width:380px) { .portal-theme-options { grid-template-columns:1fr; } }
+  </style>
+</head>
 <body>
 
   <style id="entrada-portal-estilo">
@@ -1983,7 +2099,16 @@
 
     <section class="card oculto" id="painelPrivacidade" aria-labelledby="privacidadeTitulo">
       <button type="button" class="perfil-voltar" id="btnVoltarPrivacidade"><span aria-hidden="true"></span> Perfil</button>
-      <div class="card-title" id="privacidadeTitulo">Privacidade e dados</div>
+      <div class="card-title" id="privacidadeTitulo">Definições</div>
+      <div class="portal-theme-setting">
+        <strong>Aparência</strong>
+        <span>Escolhe o tema deste dispositivo. A preferência fica guardada neste navegador.</span>
+        <div class="portal-theme-options" role="group" aria-label="Tema visual do Portal do Cliente">
+          <button type="button" class="portal-theme-option" id="portalTemaEscuro" data-portal-theme="dark" aria-pressed="true"><span class="portal-theme-preview dark" aria-hidden="true"></span><span><strong>Escuro</strong><small>Tema atual do Portal</small></span></button>
+          <button type="button" class="portal-theme-option" id="portalTemaClaro" data-portal-theme="light" aria-pressed="false"><span class="portal-theme-preview light" aria-hidden="true"></span><span><strong>Claro</strong><small>Fundo claro e contraste suave</small></span></button>
+        </div>
+      </div>
+      <div class="definicoes-subtitulo">Privacidade e dados</div>
       <p class="card-sub">A informação física fica protegida por código e só permanece neste browser durante a sessão. O resumo offline expira ao fim de 24 horas.</p>
       <div class="opcoes-lista">
         <button type="button" class="opcoes-item" id="btnPedirExportacao"><div class="opcoes-item-corpo"><div class="opcoes-item-titulo">Pedir exportação dos meus dados</div><div class="opcoes-item-sub">O pedido fica registado no CRM.</div></div><div class="opcoes-item-seta" aria-hidden="true"></div></button>
@@ -2026,6 +2151,27 @@
 <script>
 (function () {
   "use strict";
+
+  function temaAtualPortal() {
+    return document.documentElement.dataset.theme === "light" ? "light" : "dark";
+  }
+  function atualizarControlosTemaPortal() {
+    document.querySelectorAll("[data-portal-theme]").forEach(function (controlo) {
+      controlo.setAttribute("aria-pressed", String(controlo.dataset.portalTheme === temaAtualPortal()));
+    });
+  }
+  function definirTemaPortal(tema) {
+    const escolhido = tema === "light" ? "light" : "dark";
+    document.documentElement.dataset.theme = escolhido;
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", escolhido === "light" ? "#eef5f8" : "#050810");
+    try { localStorage.setItem("almove:portal-theme", escolhido); } catch (erro) {}
+    atualizarControlosTemaPortal();
+  }
+  document.querySelectorAll("[data-portal-theme]").forEach(function (controlo) {
+    controlo.addEventListener("click", function () { definirTemaPortal(controlo.dataset.portalTheme); });
+  });
+  atualizarControlosTemaPortal();
 
   // Sistema único de ícones André Martins - Personal Trainer: todos usam o mesmo viewBox, traço e cantos.
   const CAMINHOS_ICONES_ALMOVE = {
@@ -2566,7 +2712,7 @@
   normalizarIconesFixos();
   const versaoPortalEl = document.createElement("div");
   versaoPortalEl.className = "versao-portal";
-  versaoPortalEl.textContent = "André Martins - Personal Trainer · versão 68";
+  versaoPortalEl.textContent = "André Martins - Personal Trainer · versão 73";
   document.getElementById("tabPlanos").appendChild(versaoPortalEl);
 
   const painelPrivacidadeEl = document.getElementById("painelPrivacidade");
@@ -5948,7 +6094,7 @@
   // ---------- Service worker ----------
   // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
   // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
-  const VERSAO_CLIENTE_PORTAL = "72";
+  const VERSAO_CLIENTE_PORTAL = "73";
   let eventoInstalacaoPortal = null;
   function portalEstaInstalado() {
     return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;

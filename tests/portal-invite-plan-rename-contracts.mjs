@@ -27,7 +27,7 @@ assert.match(coach, /sidebar-motion-fix/);
 assert.match(coach, /--sidebar-motion-duration: 260ms/);
 assert.match(coach, /--sidebar-motion-ease: cubic-bezier\(\.2,\.8,\.2,1\)/);
 assert.match(coach, /width: 224px !important/);
-assert.match(coach, /transform: translate\(-190px,-50%\)/);
+assert.match(coach, /transform: translate\(-184px,-50%\)/);
 assert.doesNotMatch(coach, /transition: opacity \.16s ease, max-width/);
 assert.match(coach, /prefers-reduced-motion/);
 assert.match(coach, /id="sidebarMoreToggle"/);
