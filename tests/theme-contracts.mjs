@@ -42,5 +42,6 @@ assert.match(portal, /almove:portal-theme/);
 assert.match(portal, /function definirTemaPortal\(tema\)/);
 assert.match(portal, /data-portal-theme/);
 assert.match(portal, /Tema visual do Portal do Cliente/);
+assert.match(portal, /class="entrada-portal-tema" role="group" aria-label="Tema visual do Portal"/);
 
 console.log('Temas claro e escuro do CRM, App Coach e Portal validados por contrato.');
