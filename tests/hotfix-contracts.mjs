@@ -34,7 +34,7 @@ assert.match(html, /id="perfilPassaporte"/, 'O Passaporte Técnico deve estar di
 assert.match(html, /<option value="rir" selected>RIR<\/option>/, 'RIR deve ser o método de intensidade predefinido');
 assert.match(html, /localStorage\.getItem\("ALMOVE_SESSAO_PORTAL"\)/, 'A sessão curta deve sobreviver ao fecho da PWA');
 assert.match(html, /bootstrapPortalPromise = SESSAO_PRONTA\.then/, 'O bootstrap deve aguardar pela autenticação antes de mostrar sincronização');
-assert.match(html, /VERSAO_CLIENTE_PORTAL = "73"/, 'O cliente deve identificar a versão da atualização');
+assert.match(html, /VERSAO_CLIENTE_PORTAL = "74"/, 'O cliente deve identificar a versão da atualização');
 assert.match(html, /id="p0-experience-hardening"/, 'A experiência móvel P0 deve ter estilos próprios');
 assert.match(html, /#cardSessaoMinima \{ display:none !important; \}/, 'O Plano B deve sair da interface');
 assert.match(html, /function fecharTodosDetalhesPerfil\(\)/, 'A navegação deve fechar os detalhes de Perfil antes de trocar de destino');
@@ -42,6 +42,10 @@ assert.match(html, /body\.treino-em-execucao \.tabs-nav \{ display:none; \}/, 'A
 assert.match(html, /data-exec-serie/, 'O leitor deve identificar cada série individualmente');
 assert.match(html, /data-registar-serie/, 'Cada série deve ter uma ação explícita de registo');
 assert.match(html, /function registarSerieFocada/, 'O treino deve avançar série a série');
+assert.match(html, /data-selecionar-serie/, 'Séries já registadas devem continuar acessíveis para correção');
+assert.match(html, /function abrirSerieParaEdicao/, 'O cliente deve conseguir reabrir uma série sem perder o progresso');
+assert.match(html, /Guardar correção/, 'A edição deve distinguir uma correção de um novo registo');
+assert.match(html, /if \(serieIdx < concluidasAntes\)/, 'Corrigir uma série não pode criar progresso ou séries duplicadas');
 assert.match(html, /Saltar descanso/, 'O cliente deve conseguir saltar o descanso');
 assert.match(html, /String\(ex\.grupoSuperserie \|\| ""\)\.trim\(\) \? 0/, 'Superséries não devem impor descanso');
 assert.match(html, /rascunho\.leitorSeries/, 'O estado do leitor deve sobreviver localmente à app');
@@ -92,7 +96,7 @@ assert.match(html, /icone = String\(proximo\.tipo/, 'O próximo compromisso deve
 assert.match(html, /botao\.disabled = true/, 'O envio de código deve impedir pedidos repetidos');
 assert.match(proxy, /controlador\.abort\(\), 27000/, 'O proxy deve tolerar a latência normal do Apps Script');
 assert.match(proxy, /guardarPedidoAtualizacaoDadosPortal/, 'O proxy deve permitir pedidos de alteração de dados');
-assert.match(sw, /almove-portal-v73/, 'A cache PWA deve avançar para v73');
+assert.match(sw, /almove-portal-v74/, 'A cache PWA deve avançar para v74');
 assert.match(sw, /\/js\/exercise-media\.js/, 'O catálogo visual deve estar disponível offline');
 assert.equal((html.match(/body\.perfil-detalhe-aberto #tabPlanos/g) || []).length, 1, 'O Perfil só pode ter uma regra que escolhe a subpágina visível');
 assert.match(html, /:not\(#perfilMapa\):not\(#perfilPassaporte\)/, 'Mapa e Passaporte não podem ser escondidos ao abrir o detalhe');
@@ -121,4 +125,4 @@ for (const ficheiro of ['chest-press-machine.webp', 'wide-grip-lat-pulldown.webp
   assert.ok(info.size > 10000, 'A imagem ' + ficheiro + ' deve estar incluída no portal');
 }
 
-console.log('Contratos do portal v73 validados.');
+console.log('Contratos do portal v74 validados.');

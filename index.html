@@ -1255,6 +1255,12 @@
     .exec-serie.serie-ativa { display:block; }
     .exec-serie-numero { width:34px; height:34px; display:grid; place-items:center; margin-bottom:12px; border-radius:11px; color:#03201d; background:var(--accent); font-size:12px; font-weight:900; }
     .exec-serie .exec-serie-linha { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    .exec-series-nav { display:grid; grid-template-columns:repeat(auto-fit,minmax(44px,1fr)); gap:7px; margin:0 0 11px; }
+    .exec-series-nav button { min-height:44px; padding:0 8px; border:1px solid var(--portal-line); border-radius:12px; background:rgba(255,255,255,.035); color:var(--text-muted); font:inherit; font-size:11px; font-weight:900; cursor:pointer; transition:border-color .18s ease,background .18s ease,color .18s ease,transform .18s ease; }
+    .exec-series-nav button.concluida { border-color:rgba(45,212,191,.28); color:var(--accent); background:rgba(45,212,191,.08); }
+    .exec-series-nav button.ativa { border-color:var(--accent); color:#03201d; background:var(--accent); box-shadow:0 7px 18px rgba(45,212,191,.18); }
+    .exec-series-nav button:disabled { cursor:not-allowed; opacity:.36; }
+    .exec-series-nav button:not(:disabled):active { transform:scale(.96); }
     .exec-registar-serie { width:100%; min-height:48px; margin-top:13px; border:0; border-radius:13px; background:linear-gradient(135deg,var(--blue),var(--accent-old),var(--accent)); color:#03201d; font:inherit; font-size:13px; font-weight:900; cursor:pointer; }
     .exec-registar-serie:active,.exec-descanso-saltar:active,.exec-conclusao-seguir:active { transform:scale(.98); }
     .exec-descanso-focado { display:none; padding:22px 16px; border:1px solid rgba(45,212,191,.35); border-radius:20px; background:radial-gradient(circle at 50% 0,rgba(45,212,191,.18),transparent 56%),rgba(7,21,35,.94); text-align:center; animation:serie-entrar .24s cubic-bezier(.22,1,.36,1) both; }
@@ -1343,6 +1349,9 @@
     html[data-theme="light"] .meus-treinos-prescricao { color:#087f75; }
     html[data-theme="light"] .meus-treinos-aviso { border-color:rgba(8,127,117,.20); color:#385168; background:#e8f6f3; }
     html[data-theme="light"] .exec-serie { border-color:rgba(8,127,117,.22); background:#fff; box-shadow:0 14px 30px rgba(31,55,78,.10); }
+    html[data-theme="light"] .exec-series-nav button { background:#fff; }
+    html[data-theme="light"] .exec-series-nav button.concluida { background:rgba(8,127,117,.08); }
+    html[data-theme="light"] .exec-series-nav button.ativa { color:#fff; background:#087f75; }
     html[data-theme="light"] .exec-descanso-focado { border-color:rgba(8,127,117,.22); background:radial-gradient(circle at 50% 0,rgba(8,127,117,.12),transparent 56%),#fff; }
     html[data-theme="light"] :is(.estado-ligacao-portal,.acesso-sensivel-card) { border-color:rgba(45,72,99,.18); background:#fff; }
     html[data-theme="light"] .estado-ligacao-texto { color:#294158; }
@@ -5081,6 +5090,12 @@
         '<div class="exec-descanso">Descanso: <button type="button" data-descanso-idx="' + exIdx + '" data-descanso-seg="' + descansoSegundos + '">' + iconeNativoSvg("relogio") + ' ' + descansoSegundos + ' s</button> <span class="exec-descanso-tempo" id="exec-descanso-' + exIdx + '"></span></div>' +
         '<div class="exec-historico-lista" id="exec-historico-' + exIdx + '"></div>';
 
+      html += '<div class="exec-series-nav" role="group" aria-label="Escolher série">';
+      for (let serieNav = 0; serieNav < numSeries; serieNav++) {
+        html += '<button type="button" data-selecionar-serie="' + exIdx + '" data-serie-nav="' + serieNav + '" aria-label="Abrir série ' + (serieNav + 1) + '">S' + (serieNav + 1) + '</button>';
+      }
+      html += '</div>';
+
       for (let s = 0; s < numSeries; s++) {
         html += '<div class="exec-serie" data-exec-serie="' + exIdx + '-' + s + '"><div class="exec-serie-linha">' +
           '<span class="exec-serie-numero">S' + (s + 1) + '</span>' +
@@ -5145,6 +5160,9 @@
     execucaoExerciciosLista.querySelectorAll('[data-registar-serie]').forEach(function (btn) {
       btn.addEventListener("click", function () { registarSerieFocada(Number(btn.getAttribute("data-registar-serie")), Number(btn.getAttribute("data-serie"))); });
     });
+    execucaoExerciciosLista.querySelectorAll('[data-selecionar-serie]').forEach(function (btn) {
+      btn.addEventListener("click", function () { abrirSerieParaEdicao(Number(btn.getAttribute("data-selecionar-serie")), Number(btn.getAttribute("data-serie-nav"))); });
+    });
     execucaoExerciciosLista.querySelectorAll('[data-editar-exercicio]').forEach(function (btn) {
       btn.addEventListener("click", function () { editarSerieAnterior(Number(btn.getAttribute("data-editar-exercicio"))); });
     });
@@ -5200,7 +5218,9 @@
     execucaoAcoesFinaisEl.classList.add("oculto");
     fluxoHojeEl.classList.add("oculto");
     const descansoPendente = leitorSeriesFocado.descansos && leitorSeriesFocado.descansos[indice];
+    const exercicioConcluido = (Number(leitorSeriesFocado.concluidas[indice]) || 0) >= numeroSeriesExercicio(indice);
     if (descansoPendente && Number(descansoPendente.fim) > Date.now()) mostrarDescansoSerie(indice, Number(descansoPendente.seguinte), Number(descansoPendente.fim));
+    else if (exercicioConcluido) mostrarConclusaoExercicio(indice);
     else definirSerieAtiva(indice, Number(leitorSeriesFocado.ativas[indice]) || 0, true);
     atualizarNavegacaoExercicio();
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -5251,23 +5271,50 @@
     });
     guardarEstadoLeitorSeries();
   }
-  function definirSerieAtiva(exIdx, serieIdx, semScroll) {
+  function atualizarNavegacaoSeries(exIdx, serieAtiva, mostrarSerie) {
+    const total = numeroSeriesExercicio(exIdx);
+    const concluidas = Math.min(total, Number(leitorSeriesFocado.concluidas[exIdx]) || 0);
+    document.querySelectorAll('[data-selecionar-serie="' + exIdx + '"]').forEach(function (botao) {
+      const indice = Number(botao.getAttribute("data-serie-nav"));
+      const concluida = indice < concluidas;
+      const ativa = !!mostrarSerie && indice === serieAtiva;
+      botao.disabled = indice > concluidas;
+      botao.classList.toggle("concluida", concluida);
+      botao.classList.toggle("ativa", ativa);
+      botao.setAttribute("aria-pressed", ativa ? "true" : "false");
+      botao.title = concluida ? "Editar série " + (indice + 1) : (indice === concluidas ? "Registar série " + (indice + 1) : "Disponível depois da série anterior");
+    });
+  }
+  function definirSerieAtiva(exIdx, serieIdx, semScroll, forcarEdicao) {
     const total = numeroSeriesExercicio(exIdx);
     const concluido = (Number(leitorSeriesFocado.concluidas[exIdx]) || 0) >= total;
     const ativa = Math.max(0, Math.min(total - 1, Number(serieIdx) || 0));
+    const mostrarSerie = !concluido || !!forcarEdicao;
     leitorSeriesFocado.ativas[exIdx] = ativa;
     document.querySelectorAll('[data-exec-serie^="' + exIdx + '-"]').forEach(function (el) {
-      el.classList.toggle("serie-ativa", !concluido && Number(el.getAttribute("data-exec-serie").split("-")[1]) === ativa);
+      el.classList.toggle("serie-ativa", mostrarSerie && Number(el.getAttribute("data-exec-serie").split("-")[1]) === ativa);
     });
     const descanso = document.getElementById("exec-descanso-focado-" + exIdx);
     if (descanso) { descanso.classList.remove("ativo"); descanso.innerHTML = ""; }
     const editar = document.getElementById("exec-editar-anterior-" + exIdx);
     if (editar) editar.classList.toggle("visivel", !concluido && ativa > 0);
     const progresso = document.getElementById("exec-progress-" + exIdx);
-    if (progresso) progresso.textContent = concluido ? "Exercício concluído" : "Série " + (ativa + 1) + " de " + total;
+    if (progresso) progresso.textContent = concluido && forcarEdicao ? "A corrigir série " + (ativa + 1) + " de " + total : (concluido ? "Exercício concluído" : "Série " + (ativa + 1) + " de " + total);
+    const botaoRegistar = document.querySelector('[data-registar-serie="' + exIdx + '"][data-serie="' + ativa + '"]');
+    if (botaoRegistar) botaoRegistar.textContent = ativa < (Number(leitorSeriesFocado.concluidas[exIdx]) || 0) ? "Guardar correção" : "Registar série";
+    atualizarNavegacaoSeries(exIdx, ativa, mostrarSerie);
     atualizarEstadoExercicio(exIdx, true);
     guardarEstadoLeitorSeries();
     if (!semScroll) window.scrollTo({ top:0, behavior:"smooth" });
+  }
+  function abrirSerieParaEdicao(exIdx, serieIdx) {
+    const total = numeroSeriesExercicio(exIdx);
+    const concluidas = Math.min(total, Number(leitorSeriesFocado.concluidas[exIdx]) || 0);
+    if (serieIdx < 0 || serieIdx >= total || serieIdx > concluidas) return;
+    if (descansoIntervalos[exIdx]) clearInterval(descansoIntervalos[exIdx]);
+    delete descansoIntervalos[exIdx];
+    delete leitorSeriesFocado.descansos[exIdx];
+    definirSerieAtiva(exIdx, serieIdx, false, serieIdx < concluidas);
   }
   function registarSerieFocada(exIdx, serieIdx) {
     const reps = document.getElementById("exec-" + exIdx + "-" + serieIdx + "-reps");
@@ -5280,6 +5327,13 @@
     execucaoErro.style.display = "none";
     guardarTreinoAtual();
     const total = numeroSeriesExercicio(exIdx);
+    const concluidasAntes = Math.min(total, Number(leitorSeriesFocado.concluidas[exIdx]) || 0);
+    if (serieIdx < concluidasAntes) {
+      showToastTreino("Série " + (serieIdx + 1) + " atualizada.");
+      if (concluidasAntes >= total) mostrarConclusaoExercicio(exIdx);
+      else definirSerieAtiva(exIdx, concluidasAntes);
+      return;
+    }
     const seguinte = serieIdx + 1;
     leitorSeriesFocado.concluidas[exIdx] = Math.max(Number(leitorSeriesFocado.concluidas[exIdx]) || 0, seguinte);
     if (seguinte >= total) { mostrarConclusaoExercicio(exIdx); return; }
@@ -5295,6 +5349,7 @@
     Object.keys(descansoIntervalos).forEach(function (key) { clearInterval(descansoIntervalos[key]); });
     descansoIntervalos = {};
     document.querySelectorAll('[data-exec-serie^="' + exIdx + '-"]').forEach(function (el) { el.classList.remove("serie-ativa"); });
+    atualizarNavegacaoSeries(exIdx, seguinte, false);
     const editar = document.getElementById("exec-editar-anterior-" + exIdx);
     if (editar) editar.classList.remove("visivel");
     const card = document.getElementById("exec-descanso-focado-" + exIdx);
@@ -5320,8 +5375,7 @@
   function editarSerieAnterior(exIdx) {
     const atual = Number(leitorSeriesFocado.ativas[exIdx]) || 0;
     if (atual < 1) return;
-    leitorSeriesFocado.concluidas[exIdx] = Math.min(Number(leitorSeriesFocado.concluidas[exIdx]) || 0, atual);
-    definirSerieAtiva(exIdx, atual - 1);
+    abrirSerieParaEdicao(exIdx, atual - 1);
   }
   function mostrarConclusaoExercicio(exIdx) {
     const card = document.getElementById("exec-descanso-focado-" + exIdx);
@@ -6103,7 +6157,7 @@
   // ---------- Service worker ----------
   // A mesma atualização só mostra um aviso uma vez por sessão. Sem isto,
   // uma PWA com outra aba antiga aberta pode entrar num ciclo de avisos.
-  const VERSAO_CLIENTE_PORTAL = "73";
+  const VERSAO_CLIENTE_PORTAL = "74";
   let eventoInstalacaoPortal = null;
   function portalEstaInstalado() {
     return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
